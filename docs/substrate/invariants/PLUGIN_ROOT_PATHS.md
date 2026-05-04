@@ -51,7 +51,7 @@ The grep-style semantic linter is the load-bearing enforcement. Without it, the 
 ## Known bypass risks
 
 - **Anti-example blocks.** An "Anti-patterns" table that shows a hardcoded path as the wrong way to do it could be flagged by a naive grep. The linter must scope the check to *non-anti-pattern* contexts (e.g., skip lines inside fenced "Don't do this" blocks).
-- **User-repo paths in skill output schemas.** A skill describing where to write *its* output (e.g., `docs/cohesive/reviews/...`) is referencing a user-repo path, not a plugin-internal one. The linter must distinguish.
+- **User-repo paths in skill output schemas.** A skill describing where to write *its* output (e.g., `docs/history/reviews/...`) is referencing a user-repo path, not a plugin-internal one. The linter must distinguish.
 - **`${CLAUDE_PLUGIN_ROOT}` interpolated into a string then concatenated.** A skill body that builds a path through string concatenation could obscure the rule. Discourage in code review; in v0.1 skills are pure Markdown so this is theoretical.
 
 ## Review checklist
@@ -66,7 +66,7 @@ When reviewing a change to any Cohesive-internal file:
 ## Related
 
 - **Plan §3** locked this rule first ("All internal paths: `${CLAUDE_PLUGIN_ROOT}`. No hardcoded paths.")
-- **Self-review finding 1** (`docs/cohesive/reviews/2026-05-04-cohesive-self-review.md`) named the gap: rule existed in prose, not in a check.
+- **Self-review finding 1** (`docs/history/reviews/2026-05-04-self-review.md`) named the gap: rule existed in prose, not in a check.
 - **Convention reference** `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` enforces this for new skills.
 
 ## History

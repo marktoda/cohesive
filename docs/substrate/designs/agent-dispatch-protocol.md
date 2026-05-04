@@ -1,0 +1,152 @@
+# Agent dispatch protocol
+
+> Every Cohesive reviewer agent runs in a fresh subprocess with no inherited conversation context. The dispatching skill passes inputs as explicit file paths in the Task-tool prompt; the agent system prompt forbids reading prior conversation. This is the load-bearing safety property of every Cohesive review.
+
+## What
+
+Cohesive skills dispatch reviewer agents via the Task tool. The dispatch protocol has four required elements:
+
+1. **Inputs as explicit file paths.** The dispatching skill passes the claimed-system-shape summary, the list of normative doc paths, the scope, and the substrate discovery report — all as text or paths in the Task prompt. The agent reads from those paths; it does not infer.
+
+2. **No conversation-context inheritance.** The agent's system prompt explicitly forbids reading prior conversation. The dispatching skill's prompt explicitly forbids pre-summarizing or pre-judging the substrate.
+
+3. **Bounded reading.** The agent reads only the paths passed to it (plus the references its system prompt names). It does not glob the repo.
+
+4. **Structured output.** The agent returns findings in the canonical shape (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) so the dispatching skill can synthesize.
+
+The protocol applies to every reviewer agent dispatched from any Cohesive skill: today, the four reviewers in `cohesive-review` Phase 3 and the spec-cohesion-reviewer in `review-spec-cohesion`.
+
+## Why fresh-eyes matters
+
+The whole point of dispatching a reviewer is that it should reach an *independent* verdict. If the dispatch prompt pre-summarizes the design ("here's what we decided and why"), pre-ranks the findings ("the main issue is X"), or smuggles the calling skill's mental model into the reviewer's context, the review becomes performance — Claude reviewing its own work with cosmetic distance. The output of `cohesive-review` and `review-spec-cohesion` only carries weight if the reviewers actually read what's there with no leading.
+
+The fresh-eyes property is **structural**, not aspirational:
+
+- Calling Task tool with `subagent_type` creates an isolated subprocess with no inherited conversation.
+- The dispatch prompt is the *entire* context the agent has, plus whatever the agent's system prompt adds.
+- The agent system prompt is fixed at dispatch time; it cannot be modified by the calling skill.
+
+If the calling skill writes a "summary of the design" into the dispatch prompt, that summary is in the agent's context — fresh-eyes is broken not by the harness but by the prompt content. The protocol exists to prevent this.
+
+## The dispatch contract (what the calling skill must do)
+
+A correct dispatch prompt has this shape:
+
+```
+You are reviewing <repo path>. <One-sentence framing.>
+
+## Claimed system shape (from Phase 1)
+<Phase 1 summary as text or path reference. Verbatim from the rubric template; not editorialized.>
+
+## Normative docs (read these in order)
+1. <path>
+2. <path>
+...
+
+## Implementation paths to review
+<list of paths anchored to claims, not arbitrary globs>
+
+## Discovery already established (re-use; do not re-derive)
+<the substrate discovery report's findings>
+
+## What to focus on
+<the agent-specific lens: substrate-alignment, structure, library-native, or agent-readiness>
+
+## Output format
+<reference the canonical finding shape; agent's system prompt expands>
+
+## Token discipline
+<bound the output length>
+```
+
+What the dispatch prompt **must not** contain:
+
+- A summary of the calling skill's mental model ("I think the main issues are X and Y; please verify")
+- A pre-ranking of findings ("the most important thing to check is...")
+- A list of conclusions the agent should reach ("the verdict should be...")
+- Implicit references to prior conversation ("as we discussed...", "given what we found earlier...")
+- Files to "consider" or "skim" without explicit paths
+
+The structure-reviewer rubric explicitly checks for these prompt-content failures during a self-review.
+
+## The agent contract (what the agent file must do)
+
+Every reviewer agent file under `agents/` must include the canonical "What you must not do" section with this load-bearing bullet:
+
+```
+- Inherit conversation context from the calling skill. Treat your input prompt as the entire context.
+```
+
+Plus complementary bullets:
+
+```
+- Read prior conversation context. You won't have it; don't pretend.
+- Glob the whole repo. Read only paths in your input.
+- Pre-summarize the design's intent. Read the docs as the source of truth.
+```
+
+The exact phrasing is the canonical preamble defined in [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md). New reviewer agents copy it verbatim.
+
+## Both halves are required
+
+The protocol's safety depends on **both** the dispatching skill and the agent enforcing it:
+
+- If only the agent forbids context inheritance, but the dispatch prompt embeds a design summary, the agent reads the summary as input and is contaminated.
+- If only the dispatch prompt is clean, but the agent system prompt allows arbitrary glob, the agent may pull in implementation files that bias the review.
+
+Both sides of the protocol exist as independent fences. This is the textual half of [`FRESH_EYES_DISPATCH`](../invariants/FRESH_EYES_DISPATCH.md).
+
+## What this protocol forbids
+
+- **Pre-summarizing the design.** The agent must read the docs themselves; summaries by the calling skill bias the review.
+- **Pre-ranking findings.** The agent ranks; the calling skill synthesizes after the agent returns.
+- **Reading conversation history.** The Task subprocess has no conversation history; the protocol just enforces that no skill body or agent prompt assumes one exists.
+- **Globbing.** The agent reads paths the dispatching skill passes, plus the references the agent's system prompt names. Nothing else.
+- **Cross-agent communication.** Reviewer agents do not read each other's outputs during Phase 3 dispatch — they run in parallel and the synthesizing skill merges them in Phase 4.
+
+## What this protocol does not forbid
+
+- **A reviewer agent referencing rubrics.** The agent's system prompt names `references/cohesion-rubric.md`, `references/substrate-model.md`, etc. The agent reads those because the agent file says to. This is not context inheritance; it is the agent's defined working set.
+- **A reviewer agent producing detailed findings.** Bounded reading does not mean shallow output. An agent can produce 20 detailed findings as long as each is anchored to a path in its working set.
+- **A skill body explaining the dispatch shape.** The skill's "Phase 3" or "Process" section can describe what it dispatches and why. The constraint is on the *prompt content* sent to the agent, not on the skill body explaining the protocol to a human reader.
+
+## Failure modes this protocol prevents
+
+- **Performance-as-review.** Without fresh-eyes, the reviewer agrees with the calling skill's mental model because the calling skill put that model in the prompt. The review then has no independent value.
+- **Hallucinated agreement.** Without bounded reading, the agent can pull in implementation files that happen to support the calling skill's narrative; reviews become biased.
+- **Cross-pollination across reviewer agents.** Phase 3 dispatches four reviewers in parallel. If they could read each other's in-progress outputs, the late-running ones would converge on the early-running ones' findings — losing diversity.
+
+## Concrete dispatch sites in v0.1
+
+- **`skills/cohesive-review/SKILL.md` Phase 3** — dispatches four reviewer agents in a single message via Task tool: `substrate-alignment-reviewer`, `structure-reviewer`, `library-native-reviewer`, `agent-readiness-reviewer`.
+- **`skills/review-spec-cohesion/SKILL.md`** — dispatches `spec-cohesion-reviewer` once, with the design delta ledger and rewritten spec paths as inputs.
+
+Both sites honor the protocol. The self-review on 2026-05-04 confirmed the agent-side preamble is present in all five agent files; the dispatch-site prose was confirmed compliant.
+
+## Enforcement
+
+- **Agent-side:** every `agents/<name>.md` is grepped by `validate_plugin.sh` for the canonical "Inherit conversation context" bullet. Failure is hard-fail.
+- **Skill-side:** every Task-tool dispatch in `skills/*/SKILL.md` is grepped for nearby fresh-eyes prose. v0.1 enforcement is partial; reviewer judgment is the floor.
+
+The agent-side check is the primary fence. The skill-side check is V1 work.
+
+## Alternatives considered
+
+**No protocol; let Claude figure it out.** Rejected: the failure modes (performance-as-review, hallucinated agreement) are subtle and would degrade reviews silently. The protocol makes the safety property structural.
+
+**Single-side enforcement (agent-only OR skill-only).** Rejected: belt-and-suspenders is cheap and the failure modes attack each side differently. Both sides must hold.
+
+**Conversation-style review (agent has access to dispatching skill's context).** Rejected: defeats the entire purpose. The reviewer's value is its independence.
+
+## When to revisit
+
+- If a future Cohesive skill needs a non-reviewer agent (e.g., a long-running indexer agent that must inherit context for state-keeping). At that point, the protocol must clearly distinguish reviewer agents from non-reviewer agents and only apply to the former.
+- If the harness gains a structural mechanism for fresh-context dispatch (e.g., a Task-tool flag), the prose enforcement can be replaced with that mechanism.
+- If a sixth reviewer agent ships that genuinely cannot work with bounded reading (e.g., a "deep architecture archaeologist" that must glob), the protocol may need to grant explicit globbing permissions per-agent. v0.1 has no such case.
+
+## Related substrate
+
+- [`docs/substrate/invariants/FRESH_EYES_DISPATCH.md`](../invariants/FRESH_EYES_DISPATCH.md) — the named invariant whose enforcement this protocol describes.
+- [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) — the canonical reviewer-agent shape, including the verbatim preamble.
+- [`references/skill-conventions.md`](../../../references/skill-conventions.md) §"Dispatch discipline" — the canonical skill-side rules.
+- [`three-layer-architecture.md`](three-layer-architecture.md) — the three-tier separation that justifies fresh-eyes review as a load-bearing property.

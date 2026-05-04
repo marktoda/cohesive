@@ -1,5 +1,7 @@
 # Design Delta Ledger — Phase 1 Substrate
 
+> **Note (preserved historical artifact):** This ledger records the rewrite-specs pass that produced Cohesive's named invariants, gotchas, conventions, and router matrix. **It is not authoritative for current paths.** Shortly after this rewrite shipped, a layout migration moved artifacts (`docs/invariants/` → `docs/substrate/invariants/`, `docs/cohesive/` substantially restructured, `ARCHITECTURE.md` introduced as binding). Paths in this ledger reflect the layout at the time of writing; current locations are described in `/ARCHITECTURE.md`. The migration's own ledger is at `docs/history/design-changes/2026-05-04-layout-migration.md`.
+
 **Date:** 2026-05-04
 **Worktree / branch:** main (no prior commits; rewrite happens in main tree)
 **Approved direction:** Implement Phase 1 of the self-review's phased roadmap — name the five locked-in invariants, add an AGENTS.md + plan §0 source-of-truth hierarchy, add convention references for skills and reviewer agents, document two known-risk gotchas, encode the router behavior matrix, drop a stale "until V1" template hedge.

@@ -4,18 +4,22 @@ Cohesive is a Claude Code plugin for substrate-first agentic engineering. If you
 
 ## Source-of-truth hierarchy
 
-Four documents describe what Cohesive ships. They have an order:
+Three sources describe what Cohesive currently is. They have an order:
 
-1. **`docs/implementation_plan.md`** — **binding** for what ships in v0.1. If you are adding, removing, or modifying skills/agents/references/templates/scripts, this is the doc you update. §1 carries the delta ledger vs the original spec; §2 carries the canonical file structure.
-2. **`docs/initial_design.md`** — the v0.1 design vision. Preserved as historical artifact and high-level reference. **Not updated for plan deltas.** It describes a more ambitious surface (17 skills, 8 agents) than what ships; the plan §1 reconciliation table is authoritative for what's actually in the box.
-3. **`README.md`** §"What's in the box" — derived from plan §2; keep them in sync.
-4. **The `skills/`, `agents/`, `references/`, `scripts/` directories on disk** — the implementation. Must match plan §2.
+1. **`/ARCHITECTURE.md`** — **binding** for current architecture. Top-level map; hook lines point at design docs in `docs/substrate/designs/` and substrate artifacts in `docs/substrate/`. If a structural decision changes, update this file (or the design doc it hooks).
+2. **`README.md`** §"What's in the box" — derived from `ARCHITECTURE.md` and on-disk reality; keep them in sync.
+3. **The `skills/`, `agents/`, `references/`, `scripts/` directories on disk** — the implementation. Must match what `ARCHITECTURE.md` claims.
 
-When these disagree, the plan wins. If your change creates a disagreement, update the plan in the same pass.
+When these disagree, `ARCHITECTURE.md` wins. If your change creates a disagreement, update `ARCHITECTURE.md` in the same pass.
+
+Historical context lives separately under `docs/history/`:
+- `docs/history/initial-design.md` — the v0.1 design vision (preserved; not authoritative for current state).
+- `docs/history/plans/2026-05-04-mvp-implementation.md` — the dated milestone plan that drove v0.1 (preserved; not authoritative).
+- `docs/history/reviews/` and `docs/history/design-changes/` — workflow products from prior `cohesive-review` and `rewrite-specs` runs.
 
 ## Named invariants (read these before changing anything)
 
-Every Cohesive-internal rule that matters is named, scoped, and lives under `docs/invariants/`. As of v0.1 there are five:
+Every Cohesive-internal rule that matters is named, scoped, and lives under `docs/substrate/invariants/`. As of v0.1 there are five:
 
 - **`PLUGIN_ROOT_PATHS`** — every internal path reference uses `${CLAUDE_PLUGIN_ROOT}`. Never a hardcoded `/home/...` or other absolute path.
 - **`FRESH_EYES_DISPATCH`** — every Task-tool dispatch from a Cohesive skill passes explicit input paths, forbids inheriting prior conversation context, and includes the canonical fresh-eyes preamble.
@@ -36,21 +40,25 @@ Before writing or modifying components, read the relevant convention doc:
 
 ## When you are about to...
 
-- **Add a new skill** → read `references/skill-conventions.md` and the closest existing skill in `skills/`. Update plan §2 in the same pass. Add the skill to README's "What's in the box."
+- **Add a new skill** → read `references/skill-conventions.md` and the closest existing skill in `skills/`. Update `ARCHITECTURE.md` only if the new skill changes the broad shape (rare for a subskill); update README's "What's in the box."
 - **Add a new reviewer agent** → read `references/reviewer-agent-template.md` and at least one existing agent in `agents/`. Confirm the dispatch site in the calling skill includes the `FRESH_EYES_DISPATCH` preamble.
 - **Update a skill body** → confirm `PLUGIN_ROOT_PATHS` for any new path references. Confirm `SUBSKILL_RECOMMENDS_NEXT` is honored in the output schema.
-- **Update the router (`cohesively`)** → confirm `ROUTER_ANNOUNCES_BEFORE_DISPATCH` and `ONE_PRECISE_QUESTION`. If you add a route, add a row to `docs/cohesive/router-matrix.md`.
-- **Run cohesive against the cohesive repo itself** → save the transcript to `docs/transcripts/`. v0.1 release is gated on having two such transcripts.
+- **Update the router (`cohesively`)** → confirm `ROUTER_ANNOUNCES_BEFORE_DISPATCH` and `ONE_PRECISE_QUESTION`. If you add a route, add a row to `docs/substrate/matrices/router.md`.
+- **Make a cross-cutting design decision** → write or extend a doc in `docs/substrate/designs/`. Add a hook line to `ARCHITECTURE.md` if the decision is broad enough to belong on the map.
+- **Run cohesive against the cohesive repo itself** → save the transcript to `docs/history/transcripts/`. v0.1 release is gated on having two such transcripts.
 - **Change `validate_plugin.sh`** → it should enforce a *named invariant*, not generic shape checks. Reference the invariant by name in the failure message.
 
-## Default substrate locations
+## Default substrate locations (in this repo)
 
-- Invariants: `docs/invariants/<INVARIANT_NAME>.md`
-- Gotchas: `docs/cohesive/gotchas/<slug>.md`
-- Behavior matrices: `docs/cohesive/<topic>/matrix.md` (or `<repo-convention>/matrix.md` if a convention exists)
-- Reviews produced by Cohesive itself: `docs/cohesive/reviews/YYYY-MM-DD-<slug>.md`
-- Design delta ledgers: `docs/cohesive/<topic>/design-delta.md`
-- Transcripts (dogfood, manual scenario): `docs/transcripts/<date>-<slug>.md`
+- Invariants: `docs/substrate/invariants/<INVARIANT_NAME>.md`
+- Gotchas: `docs/substrate/gotchas/<slug>.md`
+- Behavior matrices: `docs/substrate/matrices/<name>.md`
+- Cross-cutting design docs: `docs/substrate/designs/<name>.md`
+- Reviews produced by Cohesive: `docs/history/reviews/YYYY-MM-DD-<slug>.md`
+- Design delta ledgers: `docs/history/design-changes/YYYY-MM-DD-<slug>.md`
+- Transcripts (dogfood, manual scenario): `docs/history/transcripts/<date>-<slug>.md`
+
+When Cohesive runs against an *external* repo, the default-artifact directory is `docs/cohesive/<x>/` with detection of existing repo conventions (`docs/design/`, `docs/specs/`, `docs/adr/`, `docs/invariants/`, `docs/gotchas/`, `docs/substrate/`, `docs/history/`) preferring existing if present.
 
 ## When in doubt
 

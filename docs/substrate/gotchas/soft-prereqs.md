@@ -62,7 +62,7 @@ If this checks list is empty, the gotcha is enforced by reviewer memory only. Th
 ## When this was discovered
 
 - Date: 2026-05-04
-- Source: self-review of the Cohesive plugin (`docs/cohesive/reviews/2026-05-04-cohesive-self-review.md` finding 8, agent-readiness #5).
+- Source: self-review of the Cohesive plugin (`docs/history/reviews/2026-05-04-self-review.md` finding 8, agent-readiness #5).
 - One-line summary: plan §7 named the risk, three subskill bodies left detection to Claude's heuristic, no canonical detection rule shipped in v0.1.
 
 ## Notes for future contributors

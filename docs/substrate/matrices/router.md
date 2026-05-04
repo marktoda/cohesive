@@ -64,8 +64,8 @@ The matrix is normative. When a user request matches a row, the router must sele
 
 ## Related substrate
 
-- **`docs/invariants/ROUTER_ANNOUNCES_BEFORE_DISPATCH.md`** — every cell's selection produces an announcement.
-- **`docs/invariants/ONE_PRECISE_QUESTION.md`** — cells that ask a clarifying question (R009, R900) must comply.
+- **`docs/substrate/invariants/ROUTER_ANNOUNCES_BEFORE_DISPATCH.md`** — every cell's selection produces an announcement.
+- **`docs/substrate/invariants/ONE_PRECISE_QUESTION.md`** — cells that ask a clarifying question (R009, R900) must comply.
 - **`skills/cohesively/SKILL.md`** — the router skill body. This matrix is the test artifact for that skill.
 
 ## History

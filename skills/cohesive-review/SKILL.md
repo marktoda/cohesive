@@ -42,9 +42,9 @@ Implements the four-phase architecture review from `${CLAUDE_PLUGIN_ROOT}/refere
 
 Use `discover-substrate` (or its output) to get the list. Read in priority order:
 1. `CLAUDE.md`, `AGENTS.md`
-2. `architecture.md`
+2. `ARCHITECTURE.md`, `architecture.md`
 3. `README.md`
-4. `docs/design/**`, `docs/specs/**`, `docs/adr/**`
+4. `docs/design/**`, `docs/specs/**`, `docs/adr/**`, `docs/substrate/**`
 5. `docs/invariants/**`, `docs/gotchas/**`, `docs/testing/**`
 
 Produce the **claimed system shape** summary (sections from the rubric: Product goal / Architectural priors / Intended seams / Named invariants / Testing philosophy / Future direction implied by docs).

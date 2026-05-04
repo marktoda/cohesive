@@ -73,7 +73,7 @@ For each new doc, use the appropriate template:
 - Substrate map: `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-map.md`
 - Claimed system shape (Phase 1 of `cohesive-review --scope codebase`): `${CLAUDE_PLUGIN_ROOT}/references/templates/claimed-system-shape.md`
 
-Place new docs under the existing repo convention if one exists (e.g. `docs/design/`, `docs/specs/`, `docs/invariants/`). Otherwise default to `docs/cohesive/<topic>/`.
+Place new docs under the existing repo convention if one exists (e.g. `docs/design/`, `docs/specs/`, `docs/invariants/`, `docs/substrate/`). Otherwise default to `docs/cohesive/<topic>/`.
 
 ### 4. Update the substrate map
 

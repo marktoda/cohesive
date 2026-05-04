@@ -1,6 +1,6 @@
 # Architecture review rubric
 
-The rubric `cohesive-review --scope codebase` follows. It implements the four-phase architecture review described in `docs/initial_design.md` §15 with the agent set agreed in `docs/implementation_plan.md`.
+The rubric `cohesive-review --scope codebase` follows. It implements the four-phase architecture review whose original specification is preserved at `docs/history/initial-design.md` §15 and whose v0.1 agent set was agreed in `docs/history/plans/2026-05-04-mvp-implementation.md`. Current architecture: see `/ARCHITECTURE.md`.
 
 ## What this rubric optimizes for
 

@@ -4,7 +4,7 @@
 
 Cohesive is a Claude Code plugin for senior architects and engineers building codebases meant to last. When code is cheap, confidence is scarce — Cohesive helps Claude make changes that are not merely locally plausible, but globally coherent with the system's specs, behavior matrices, named invariants, semantic linters, gotchas, locality boundaries, and future product direction.
 
-**Status:** v0.1 MVP. Spec at `docs/initial_design.md`; implementation plan at `docs/implementation_plan.md`.
+**Status:** v0.1 MVP. Architecture at [`ARCHITECTURE.md`](ARCHITECTURE.md); historical design vision at [`docs/history/initial-design.md`](docs/history/initial-design.md); the dated milestone plan at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md).
 
 ## Core idea
 

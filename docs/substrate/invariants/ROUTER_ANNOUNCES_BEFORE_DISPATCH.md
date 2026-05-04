@@ -31,18 +31,18 @@ The announcement is plain text, not a comment, not buried in a tool call.
 
 The router's value depends on legibility. A user invoking `/cohesive:cohesively review my code` benefits from knowing immediately whether the router heard "review the codebase" (multi-phase architecture review) or "review the diff" (lighter PR review) — the two have very different cost and depth. Without the announcement, the user finds out only by watching subskill outputs scroll by.
 
-The announcement also serves substrate review: dogfood transcripts (`docs/transcripts/`) are checkable for invariant compliance with a single grep for the canonical opening sentence. Without the canonical form, transcripts can't be machine-validated.
+The announcement also serves substrate review: dogfood transcripts (`docs/history/transcripts/`) are checkable for invariant compliance with a single grep for the canonical opening sentence. Without the canonical form, transcripts can't be machine-validated.
 
 The self-review on 2026-05-04 noted that this rule lived in prose at `cohesively/SKILL.md:83` and again in the Red flags at line 127 — but with no structural enforcement, a future router edit could silently break it. Promoting to a named invariant + validator check is the substrate fix.
 
 ## Where this rule must hold
 
 - The body of `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md` must specify the announcement format.
-- Every transcript checked into `docs/transcripts/` that captures a router invocation must show the announcement at the top of the transcript section corresponding to the router turn.
+- Every transcript checked into `docs/history/transcripts/` that captures a router invocation must show the announcement at the top of the transcript section corresponding to the router turn.
 
 ## Enforcement
 
-- **Tests:** none yet. V1 will add a transcript-shape check: any `docs/transcripts/<file>.md` whose body shows a `cohesively` invocation must contain the canonical opening sentence within the first ~10 lines of that turn.
+- **Tests:** none yet. V1 will add a transcript-shape check: any `docs/history/transcripts/<file>.md` whose body shows a `cohesively` invocation must contain the canonical opening sentence within the first ~10 lines of that turn.
 - **Semantic linters:** `scripts/validate_plugin.sh` greps `skills/cohesively/SKILL.md` for the canonical announcement template (regex anchored on "I'm treating this as a Cohesive" + the route name list) and fails if missing or modified without updating the invariant.
 - **CI checks:** wired through `validate_plugin.sh` once `.github/workflows/validate.yml` lands.
 
@@ -50,7 +50,7 @@ Behavioral enforcement (does the router actually announce in practice?) is verif
 
 ## Known bypass risks
 
-- **A future contributor adds a route but forgets to update the route list.** The announcement format would still hold for existing routes. Mitigated by `docs/cohesive/router-matrix.md`, which enforces that every route gets a row and a corresponding announcement template.
+- **A future contributor adds a route but forgets to update the route list.** The announcement format would still hold for existing routes. Mitigated by `docs/substrate/matrices/router.md`, which enforces that every route gets a row and a corresponding announcement template.
 - **A user invokes a subskill directly and the router never runs.** Out of scope — the rule is about the router's behavior when it does run.
 - **The harness suppresses the chat output.** Theoretical; not observed. If it happens, the invariant still requires the router to attempt the announcement.
 
@@ -61,16 +61,16 @@ When reviewing a change to `cohesively/SKILL.md`:
 - [ ] Is the canonical announcement form preserved exactly? ("I'm treating this as a Cohesive <route> workflow: ...")
 - [ ] If a new route is added: does the announcement template show how the new route names itself?
 - [ ] Is the announcement still ordered before any subskill dispatch instruction?
-- [ ] Is `docs/cohesive/router-matrix.md` updated to include the new route?
+- [ ] Is `docs/substrate/matrices/router.md` updated to include the new route?
 
-When reviewing a new transcript checked into `docs/transcripts/`:
+When reviewing a new transcript checked into `docs/history/transcripts/`:
 
 - [ ] Does the router turn open with the canonical sentence?
-- [ ] Does the named route match a row in `docs/cohesive/router-matrix.md`?
+- [ ] Does the named route match a row in `docs/substrate/matrices/router.md`?
 
 ## Related
 
-- **`docs/cohesive/router-matrix.md`** — the behavior matrix for router routing decisions; cells reference this invariant.
+- **`docs/substrate/matrices/router.md`** — the behavior matrix for router routing decisions; cells reference this invariant.
 - **`references/skill-conventions.md`** — names this rule for any future skill that takes a "router-like" role.
 - **Self-review** flagged the rule as folklore-only.
 

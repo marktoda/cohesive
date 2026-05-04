@@ -56,7 +56,7 @@ Make the choice explicit at the route level, not at the description-match level.
 ## When this was discovered
 
 - Date: 2026-05-04
-- Source: plan §7 risks list (recognized at design time); confirmed by self-review (`docs/cohesive/reviews/2026-05-04-cohesive-self-review.md`).
+- Source: plan §7 risks list (recognized at design time); confirmed by self-review (`docs/history/reviews/2026-05-04-self-review.md`).
 - One-line summary: two plugins with overlapping discovery concepts compete at the trigger level; documenting the seam (router as canonical entry, descriptions narrow to substrate-specific work) prevents the wrong skill from being chosen.
 
 ## Notes for future contributors

@@ -8,7 +8,7 @@
 **Spec version:** 0.1  
 **Date:** 2026-05-04
 
-> **Note (2026-05-04):** This document is the v0.1 design vision and is preserved as a historical artifact. **It is not the binding spec for what ships.** The binding document is `docs/implementation_plan.md`, which §1 reconciles every delta from this spec (skills collapsed, agents merged, templates relocated, scripts reduced) and §2 carries the canonical file structure. Read this spec for design intent; read the plan for what's in the repo today.
+> **Note (preserved historical artifact):** This document is the v0.1 design vision. **It is not authoritative for current state.** The binding architectural map is `/ARCHITECTURE.md`. The dated implementation plan that drove v0.1 (with the §1 delta table reconciling vision vs ship) is preserved at `docs/history/plans/2026-05-04-mvp-implementation.md`. Read this spec for design intent and historical context; read `ARCHITECTURE.md` for what the system currently is.
 
 ---
 

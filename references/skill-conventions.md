@@ -117,7 +117,7 @@ These deviations are documented; new deviations should be discussed before adopt
 
 1. Read the closest existing skill in `skills/` — choose the one whose role most resembles yours.
 2. Copy its top-level structure; do not invent new section names.
-3. Update `docs/implementation_plan.md` §2 to add the skill row to the canonical structure.
-4. Update `README.md` §"What's in the box" to mirror plan §2.
+3. Update `/ARCHITECTURE.md` only if the new skill changes the broad architectural shape (rare for an additional subskill).
+4. Update `README.md` §"What's in the box" to reflect the new on-disk reality.
 5. Run `bash scripts/validate_plugin.sh`. The validator must pass.
 6. Run `cohesive:cohesive-review --scope diff` on your branch.

@@ -1,7 +1,9 @@
 # Cohesive Implementation Plan
 
-**Companion to:** `initial_design.md` (spec v0.1, 2026-05-04)
-**Status:** Approved 2026-05-04 with simplifications agreed in chat
+> **Note (preserved historical artifact):** This was the binding plan that drove v0.1 implementation. **It is not authoritative for current state.** The binding architectural map is `/ARCHITECTURE.md`. Path references and structural claims within this document reflect the layout at the time of writing (2026-05-04 morning, before the layout migration); some have since moved. Preserved as the dated record of what was decided.
+
+**Companion to:** `initial_design.md` (spec v0.1, 2026-05-04) — preserved at `docs/history/initial-design.md`
+**Status:** Approved 2026-05-04 with simplifications agreed in chat; superseded by `/ARCHITECTURE.md` for current state
 **Date:** 2026-05-04
 
 This plan implements the spec with the following deltas. The substrate thesis, naming, four-phase architecture-review structure, hard-rewrite-specs principle, and fresh-eyes spec review all stand. What changes is the surface: fewer skills, fewer agents, no separate templates tier, one script.
