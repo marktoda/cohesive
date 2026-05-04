@@ -1,6 +1,6 @@
 # Architecture review rubric
 
-The rubric `cohesive-review --scope codebase` follows. It implements the four-phase architecture review whose original specification is preserved at `docs/history/initial-design.md` §15 and whose v0.1 agent set was agreed in `docs/history/plans/2026-05-04-mvp-implementation.md`. Current architecture: see `/ARCHITECTURE.md`.
+The rubric `review-codebase` follows. It implements the four-phase architecture review whose original specification is preserved at `docs/history/initial-design.md` §15 and whose v0.1 agent set was agreed in `docs/history/plans/2026-05-04-mvp-implementation.md`. Current architecture: see `/ARCHITECTURE.md`.
 
 ## What this rubric optimizes for
 
@@ -75,7 +75,7 @@ I should not do a full implementation review yet because the substrate itself is
 1. ...
 
 ### Why this matters
-Reviewing code against contradictory or stale specs produces findings that are not actionable. Repair the substrate first; then re-run `cohesive-review --scope codebase`.
+Reviewing code against contradictory or stale specs produces findings that are not actionable. Repair the substrate first; then re-run `review-codebase`.
 ```
 
 If the substrate is coherent enough to continue, proceed to Phase 3.
@@ -146,7 +146,7 @@ Every finding maps to a substrate artifact. If you can't name one, the finding m
 ## What this review is *not*
 
 - Not a code style review. Naming case, formatting, micro-naming preferences are out of scope.
-- Not a defect hunt. Implementation bugs that aren't substrate gaps belong in `cohesive-review --scope diff` or in the team's normal bug pipeline.
+- Not a defect hunt. Implementation bugs that aren't substrate gaps belong in `review-diff` or in the team's normal bug pipeline.
 - Not a refactor proposal. Findings recommend substrate changes, not large code rewrites. (The team can decide whether to refactor based on the substrate that gets added.)
 
 ## Stop conditions
@@ -154,7 +154,7 @@ Every finding maps to a substrate artifact. If you can't name one, the finding m
 Stop the review and return early if:
 
 - ≥3 blocking issues at the spec level (Phase 2 gate)
-- The codebase has fewer than 5 normative doc files and no architecture.md/CLAUDE.md/AGENTS.md — recommend `cohesive:substrate-audit` instead, since the substrate is too thin for an architecture review
+- The codebase has fewer than 5 normative doc files and no architecture.md/CLAUDE.md/AGENTS.md — recommend `cohesive:audit-substrate` instead, since the substrate is too thin for an architecture review
 - The user explicitly scoped the review to a single subsystem and the subsystem doesn't exist as a clear seam — ask for clarification rather than guessing
 
 ## Token discipline

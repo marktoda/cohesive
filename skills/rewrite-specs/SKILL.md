@@ -1,6 +1,6 @@
 ---
 name: rewrite-specs
-description: Use after brainstorm-design has produced an approved direction and before any code is written. Hard-rewrites design docs, specs, behavior matrices, invariants, gotchas, and substrate maps to describe the chosen end state as if it were already true — not as "we will" or "we should consider." Produces a design delta ledger documenting every change. Triggers on "rewrite the specs for X", "update the design docs to reflect Y", "make the docs match the chosen direction", "produce a spec rewrite for the new architecture". Always work in a worktree; always pair with review-spec-cohesion afterwards.
+description: Use after brainstorm-design has produced an approved direction and before any code is written. Hard-rewrites design docs, specs, behavior matrices, invariants, gotchas, and substrate maps to describe the chosen end state as if it were already true — not as "we will" or "we should consider." Produces a design delta ledger documenting every change. Triggers on "rewrite the specs for X", "update the design docs to reflect Y", "make the docs match the chosen direction", "produce a spec rewrite for the new architecture". Always work in a worktree; always pair with validate-rewrite afterwards.
 ---
 
 # Rewrite specs
@@ -9,7 +9,7 @@ description: Use after brainstorm-design has produced an approved direction and 
 
 - A **set of rewritten docs** that describe the system's chosen end state in present-tense, normative language
 - A **design delta ledger** at `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` (per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`) recording every change
-- A handoff to `review-spec-cohesion` for fresh-eyes review
+- A handoff to `validate-rewrite` for fresh-eyes review
 
 This is one of Cohesive's flagship skills. Spec rewriting is the cheapest place to discover that a design is wrong, and the rewrite-then-review loop is what makes that discovery happen *before* code.
 
@@ -76,7 +76,7 @@ For each new doc, use the appropriate template:
 - Named invariant: `${CLAUDE_PLUGIN_ROOT}/references/templates/invariant.md`
 - Gotcha: `${CLAUDE_PLUGIN_ROOT}/references/templates/gotcha.md`
 - Substrate map: `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-map.md`
-- Claimed system shape (Phase 1 of `cohesive-review --scope codebase`): `${CLAUDE_PLUGIN_ROOT}/references/templates/claimed-system-shape.md`
+- Claimed system shape (Phase 1 of `cohesive:review-codebase`): `${CLAUDE_PLUGIN_ROOT}/references/templates/claimed-system-shape.md`
 
 Place new canonical artifacts (invariants, matrices, gotchas) under `docs/substrate/<category>/` per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`. If the repo has its own convention (`docs/design/`, `docs/specs/`, `docs/adr/`, etc.), extend that — don't impose a parallel layout.
 
@@ -101,9 +101,9 @@ See: docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md
 
 ### 7. Hand off to review
 
-Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md`. Ready for fresh-eyes review via `cohesive:review-spec-cohesion`."
+Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md`. Ready for fresh-eyes review via `cohesive:validate-rewrite`."
 
-Do **not** invoke `review-spec-cohesion` from inside this skill — the review must run in a different context that didn't see the rewrite happen.
+Do **not** invoke `validate-rewrite` from inside this skill — the review must run in a different context that didn't see the rewrite happen.
 
 ## Output format
 
@@ -141,7 +141,7 @@ The skill's chat output (separate from the file changes) is short:
 - <thing the rewrite couldn't fully resolve>
 
 ### Next Cohesive skill
-`cohesive:review-spec-cohesion` — fresh-eyes review of the rewritten specs against the substrate model and approved direction.
+`cohesive:validate-rewrite` — fresh-eyes review of the rewritten specs against the substrate model and approved direction.
 ```
 
 ## Anti-patterns (Red Flags)
@@ -165,10 +165,10 @@ The skill's chat output (separate from the file changes) is short:
 - Substrate map (if it exists) is updated.
 - The rewrite happens on a `design/<slug>` branch in a worktree.
 - A commit captures the rewrite atomically.
-- The skill does not invoke `review-spec-cohesion` — handoff is announced; user invokes the review.
+- The skill does not invoke `validate-rewrite` — handoff is announced; user invokes the review.
 
 ## What this skill is *not*
 
 - Not implementation. No code, no tests, no CI changes.
-- Not the review. The fresh-eyes review of the rewrite is `review-spec-cohesion`, run separately.
+- Not the review. The fresh-eyes review of the rewrite is `validate-rewrite`, run separately.
 - Not where new substrate concepts get *invented*. The direction was decided in `brainstorm-design`. This skill writes that direction down.

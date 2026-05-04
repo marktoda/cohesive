@@ -14,9 +14,9 @@ A structured **substrate discovery report** that names the docs, tests, invarian
 Always invoke this skill (or compose its output) before:
 - `brainstorm-design` — so options are grounded in what the system already says about itself
 - `rewrite-specs` — so the rewrite knows what it's overwriting
-- `cohesive-review --scope codebase` — so the review knows where the normative docs live
-- `cohesive-review --scope diff` — so the review can connect changed files to their substrate
-- `substrate-audit` — same scan, but emphasizes missing-memory findings
+- `review-codebase` — so the review knows where the normative docs live
+- `review-diff` — so the review can connect changed files to their substrate
+- `audit-substrate` — same scan, but emphasizes missing-memory findings
 
 Skip only when the user has *already* run discovery in this session and named the change surface. In that case, re-use the prior report.
 
@@ -96,9 +96,9 @@ This is the highest-value section of the report. The point of substrate discover
 
 If the inventory is trivially empty — no `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`, no `docs/` content, no tests, no CI files — emit `**Empty-substrate verdict: yes**` near the top of the report, before §"Target change surface". Downstream skills check for this line and adapt:
 
-- `cohesive-review --scope codebase` halts at Phase 1.5 and recommends `substrate-audit` instead
+- `review-codebase` halts at Phase 1.5 and recommends `audit-substrate` instead
 - `brainstorm-design` broadens its option-generation rather than grounding in nothing
-- `substrate-audit` proceeds normally — it's the right home for empty-substrate codebases
+- `audit-substrate` proceeds normally — it's the right home for empty-substrate codebases
 
 If the inventory has at least a few normative anchors (≥1 of `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`/`README.md` plus some `docs/` content), do not emit the verdict line.
 
@@ -169,13 +169,13 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 
 ## What this skill is *not*
 
-- Not a full architecture review. Discovery surfaces; review judges. Use `cohesive-review --scope codebase` for judgment.
+- Not a full architecture review. Discovery surfaces; review judges. Use `review-codebase` for judgment.
 - Not a substrate audit. Audit emphasizes *missing* memory across the whole repo. Discovery is scoped to a change surface.
-- Not a search for code defects. Findings about defective code belong in `cohesive-review --scope diff` or `--scope codebase`, not here.
+- Not a search for code defects. Findings about defective code belong in `review-diff` or `review-codebase`, not here.
 
 ## Red flags
 
-- Reading more than ~15 files during discovery. If you're reading this much, you're doing review, not discovery. Stop and recommend `cohesive-review --scope codebase`.
+- Reading more than ~15 files during discovery. If you're reading this much, you're doing review, not discovery. Stop and recommend `review-codebase`.
 - Producing a report with "Existing" full and "Missing memory" empty. That means you searched for what's there and not for what isn't. Re-read step 6.
 - Recommending more than one next skill. Pick one. The router can route again later.
 - Mentioning the implementation files before the spec/test files. Substrate discovery reads normative docs first.

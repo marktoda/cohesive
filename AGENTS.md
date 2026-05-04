@@ -15,7 +15,7 @@ When these disagree, `ARCHITECTURE.md` wins. If your change creates a disagreeme
 Historical context lives separately under `docs/history/`:
 - `docs/history/initial-design.md` — the v0.1 design vision (preserved; not authoritative for current state).
 - `docs/history/plans/2026-05-04-mvp-implementation.md` — the dated milestone plan that drove v0.1 (preserved; not authoritative).
-- `docs/history/reviews/` and `docs/history/delta-ledgers/` — workflow products from prior `cohesive-review` and `rewrite-specs` runs.
+- `docs/history/reviews/` and `docs/history/delta-ledgers/` — workflow products from prior `review-codebase` / `review-diff` / `audit-substrate` and `rewrite-specs` runs (older artifacts may reference predecessor names like `cohesive-review` and `substrate-audit`; preserved as time-stamped record).
 
 ## The one named invariant
 
@@ -31,7 +31,7 @@ Before writing or modifying components, read the relevant convention doc:
 
 - **New or modified skill (SKILL.md)** → [`references/skill-conventions.md`](references/skill-conventions.md). Names the required body sections, frontmatter shape, output format conventions, and red flags. Carries the v0.1 conventions for clarifying questions, router announcements, and recommended-next-skill output blocks.
 - **New or modified reviewer agent (`agents/*.md`)** → [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md). The canonical fresh-eyes review agent shape, including the load-bearing "What you must not do" preamble.
-- **New "claimed system shape" produced by `cohesive-review` Phase 1** → [`references/templates/claimed-system-shape.md`](references/templates/claimed-system-shape.md).
+- **New "claimed system shape" produced by `review-codebase` Phase 1** → [`references/templates/claimed-system-shape.md`](references/templates/claimed-system-shape.md).
 - **Other artifacts (invariants, gotchas, behavior matrices, design delta ledgers, etc.)** → `references/templates/<name>.md`.
 
 ## When you are about to...
@@ -58,4 +58,4 @@ When Cohesive runs against an *external* repo, the default-artifact directory is
 
 ## When in doubt
 
-Run `cohesive:discover-substrate` against the area you are changing. Then run `cohesive:cohesive-review --scope diff` on your change before opening the PR. The plugin reviews itself; that is the substrate's whole point.
+Run `cohesive:discover-substrate` against the area you are changing. Then run `cohesive:review-diff` on your change before opening the PR. The plugin reviews itself; that is the substrate's whole point.

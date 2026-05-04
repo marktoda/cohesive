@@ -1,6 +1,6 @@
 ---
 name: cohesively
-description: Use when the user wants to plan, refactor, design, brainstorm, audit, or review code in a way that should preserve specs, behavior matrices, named invariants, semantic linters, gotchas, architectural seams, tests, and future product direction. The Cohesive router. Triggers on "cohesively", "cohesive design", "design substrate-first", "brainstorm a refactor of X", "review the architecture", "review the codebase", "audit substrate", "what memory is missing", "review my diff for cohesion", "name an invariant", "encode a behavior matrix", "is this the right place to centralize", "rewrite the specs". Picks the right Cohesive workflow, announces it, and chains the relevant subskills.
+description: Use when the user wants to plan, refactor, design, brainstorm, audit, or review code in a way that should preserve specs, behavior matrices, named invariants, semantic linters, gotchas, architectural seams, tests, and future product direction. The Cohesive router. Triggers on "cohesively", "cohesive design", "design substrate-first", "brainstorm a refactor of X", "review the architecture", "review the codebase", "audit substrate", "what memory is missing", "review my diff for cohesion", "name an invariant", "encode a behavior matrix", "is this the right place to centralize", "rewrite the specs", "validate the rewrite". Picks the right Cohesive workflow, announces it, and chains the relevant subskills.
 ---
 
 # Cohesively — the Cohesive router
@@ -10,6 +10,20 @@ description: Use when the user wants to plan, refactor, design, brainstorm, audi
 Cohesive is a substrate-first methodology for senior engineers building durable codebases. Most user requests that touch behavior, architecture, invariants, tests, docs, or future product direction need more than one Cohesive subskill in sequence. This router classifies the request, picks the workflow, announces it, and dispatches.
 
 Cohesive distinguishes itself from Superpowers: **Superpowers optimizes for disciplined implementation; Cohesive optimizes for durable judgment.** Both can run in the same session, and Cohesive composes with Superpowers' `using-git-worktrees`, `code-reviewer`, and `finishing-a-development-branch` skills.
+
+## The user-facing skill set
+
+The flagship workflow chain reads as four imperatives — **discover → brainstorm → rewrite → validate** — paralleling Superpowers' `brainstorm → plan → execute`. Three standalone diagnostics sit off-chain.
+
+| | Skill | Role |
+|---|---|---|
+| 1 | `discover-substrate` | Inventory what the codebase already remembers |
+| 2 | `brainstorm-design` | Propose 2–4 options grounded in substrate; pressure-test |
+| 3 | `rewrite-specs` | Hard-rewrite docs to chosen end state in a worktree |
+| 4 | `validate-rewrite` | Fresh-eyes review of the rewritten specs |
+| | `review-codebase` | Full architecture review |
+| | `review-diff` | PR / branch / working-changes review |
+| | `audit-substrate` | What memory is missing? |
 
 ## Routes
 
@@ -23,7 +37,7 @@ Read the user's request and map to one of these workflows. Use the trigger phras
 1. `discover-substrate` — what does the codebase already remember about this area?
 2. `brainstorm-design` — propose 2–4 options grounded in substrate; pressure-test each
 3. (only if user approves a direction and the change is substantial enough to warrant a spec rewrite) `rewrite-specs` — hard-rewrite docs to chosen end state in a worktree
-4. (only if step 3 ran) `review-spec-cohesion` — fresh-eyes review of the rewritten specs
+4. (only if step 3 ran) `validate-rewrite` — fresh-eyes review of the rewritten specs
 
 **Default behavior:** Run steps 1–2. Pause for user approval before step 3. Many design conversations end at step 2 with a recommendation — don't escalate to spec rewrite unless the user wants it.
 
@@ -35,7 +49,7 @@ Read the user's request and map to one of these workflows. Use the trigger phras
 
 **Chain:**
 1. `discover-substrate` — get the substrate inventory
-2. `cohesive-review --scope codebase` — four-phase architecture review
+2. `review-codebase` — four-phase architecture review
 
 **No clarifying question** — read normative docs first; the answers come from there.
 
@@ -45,17 +59,17 @@ Read the user's request and map to one of these workflows. Use the trigger phras
 
 **Chain:**
 1. `discover-substrate` (scoped to changed files)
-2. `cohesive-review --scope diff`
+2. `review-diff`
 
 **Clarifying question (only if needed):** "Which PR / branch / set of changes? I see <X> uncommitted changes; should I review those, or do you have a PR number?"
 
-### Route: review (substrate audit)
+### Route: audit (substrate)
 
 **When:** "What memory is missing", "audit substrate", "what specs/invariants/gotchas should we have but don't".
 
 **Chain:**
 1. `discover-substrate`
-2. `substrate-audit` — single-pass scan of missing memory; not the same machinery as `cohesive-review`.
+2. `audit-substrate` — single-pass scan of missing memory; not the same machinery as `review-codebase`.
 
 ### Route: rewrite-only
 
@@ -63,7 +77,7 @@ Read the user's request and map to one of these workflows. Use the trigger phras
 
 **Chain:**
 1. `rewrite-specs` (which sets up its own worktree; composes with `superpowers:using-git-worktrees` if installed)
-2. `review-spec-cohesion`
+2. `validate-rewrite`
 
 **Clarifying question (required if no direction is named):** "Has a direction been chosen, or should we run brainstorm-design first?"
 
@@ -71,19 +85,38 @@ Read the user's request and map to one of these workflows. Use the trigger phras
 
 **When:** "Name an invariant", "encode a behavior matrix", "create a gotcha doc".
 
-**Current behavior (until V1):** Return the relevant template path and offer to fill it out inline based on user input. The dedicated artifact skills (`invariant`, `matrix`) ship in V1.
+**Current behavior (until V1):** Return the relevant template path and offer to fill it out inline based on user input. The dedicated artifact skills (`create-invariant`, `create-matrix`) ship in V1.
 
 ```
 Cohesive v0.1 doesn't yet have a dedicated `<artifact>` skill. The template is at
 ${CLAUDE_PLUGIN_ROOT}/references/templates/<template>.md. I can fill it out with you now if you like.
 ```
 
+## Dispatch prompt contract
+
+When the router invokes a subskill, it passes prereq state and chosen-direction context explicitly so the subskill skips its canonical clarifying question. This closes the soft-prereqs gotcha's "router-driven case" exemption.
+
+Per route, the dispatch prompt to the first subskill that has a prereq question must include the relevant fragment from this table. Subsequent subskills in the chain inherit context through their dispatch prompts in the same way.
+
+| Route | Prereq state to pass | Chosen-direction state to pass |
+|---|---|---|
+| `design` | n/a (discover-substrate has no prereq) | n/a until step 3; then "approved direction: <option name + summary>"; ledger path passed to step 4 |
+| `review (codebase)` | "Discovery already complete; report at <path or 'inline above'>." | n/a |
+| `review (diff)` | "Discovery already complete (scoped to <changed-files>); report at <path or 'inline above'>." | n/a |
+| `audit (substrate)` | "Discovery already complete; report at <path or 'inline above'>." | n/a |
+| `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first) |
+| `artifact` | n/a | "Artifact requested: <invariant / matrix / gotcha>" |
+
+Subskills that consume this contract: `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`, `validate-rewrite`. Each has a Hard Constraint stating that when the router passes the relevant fragment, the canonical clarifying question is skipped.
+
+If the user invokes a subskill *directly* (bypassing this router), the subskill asks its canonical question per `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"Clarifying questions" — the contract is router-side only.
+
 ## Required behavior
 
 1. **Announce the route.** One sentence in chat before dispatching, in the canonical form:
    > "I'm treating this as a Cohesive **<route>** workflow: <chain>. Reason: <one short clause>."
 
-   The form is the convention named in [`references/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `review (substrate audit)`, `rewrite-only`, `artifact`.
+   The form is the convention named in [`references/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `artifact`.
 
 2. **Process skills run before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code.
 
@@ -91,12 +124,14 @@ ${CLAUDE_PLUGIN_ROOT}/references/templates/<template>.md. I can fill it out with
 
 4. **Do not implement code.** Cohesive is design/review/audit. If the user wants implementation, recommend Superpowers' workflow after Cohesive's substrate work is done.
 
-5. **Compose with Superpowers when present.** Specifically:
+5. **Honor the dispatch prompt contract.** When invoking a subskill, include the relevant fragment from the table above. Subskills depend on this; omitting it produces a duplicate clarifying question on top of an already-routed turn.
+
+6. **Compose with Superpowers when present.** Specifically:
    - Worktrees: `superpowers:using-git-worktrees` (used by `rewrite-specs`)
    - Implementation discipline: `superpowers:test-driven-development`, `superpowers:writing-plans`, `superpowers:executing-plans`
    - Branch finishing: `superpowers:finishing-a-development-branch`
 
-6. **Track progress with TodoWrite** when chaining 3+ subskills. The user should see the chain as it executes.
+7. **Track progress with TodoWrite** when chaining 3+ subskills. The user should see the chain as it executes.
 
 ## Routing decision logic
 
@@ -104,8 +139,8 @@ When the request is ambiguous, prefer this resolution order:
 
 1. **Explicit user instruction** ("review the codebase" → review/codebase). Always wins.
 2. **Verb tense.** Forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
-3. **Scope hints.** Whole-repo / subsystem / "the codebase" → review/codebase. Diff / PR / branch / changes → review/diff. Missing / gaps / what's-not-there → review (substrate audit).
-4. **Default.** When truly stuck, default to `review (substrate audit)` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
+3. **Scope hints.** Whole-repo / subsystem / "the codebase" → review (codebase). Diff / PR / branch / changes → review (diff). Missing / gaps / what's-not-there → audit (substrate).
+4. **Default.** When truly stuck, default to `audit (substrate)` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
 
 ## Output
 
@@ -125,6 +160,7 @@ Then it invokes the first subskill. Each subskill produces its own output and re
 - At most one clarifying question is asked, and it is precise (not vague).
 - Code is not produced from the router.
 - Long chains (3+ subskills) are tracked with TodoWrite.
+- The dispatch prompt contract is honored — subskills receive prereq/direction state explicitly.
 
 ## Red flags
 
@@ -132,6 +168,7 @@ Then it invokes the first subskill. Each subskill produces its own output and re
 - Routing to multiple workflows in parallel ("I'll do both a design and a review"). Pick one. If the user really wants both, they can ask twice.
 - Producing implementation suggestions or code in the router itself. The router routes; subskills do work.
 - Dispatching subskills without the announcement. Users need to know which workflow they're in.
+- Dispatching subskills without the prereq/direction context the dispatch contract requires. Subskills will then ask their canonical question on top of an already-routed turn.
 
 ## What this skill is *not*
 

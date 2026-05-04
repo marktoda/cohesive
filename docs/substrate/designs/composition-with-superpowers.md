@@ -36,7 +36,7 @@ The fallback is not a feature-equivalent reimplementation. It does the bare mini
 
 ### 2. Recommendation in skill output
 
-Subskills' "Recommended next Cohesive skill" footer can recommend a Superpowers skill when the appropriate next step is implementation rather than more substrate work. Example: `review-spec-cohesion`'s "Approved" branch ends with a hand-off to `superpowers:writing-plans` rather than an internal Cohesive skill.
+Subskills' "Recommended next Cohesive skill" footer can recommend a Superpowers skill when the appropriate next step is implementation rather than more substrate work. Example: `validate-rewrite`'s "Approved" branch ends with a hand-off to `superpowers:writing-plans` rather than an internal Cohesive skill.
 
 This is the common case for any Cohesive workflow that ends in "go implement now."
 

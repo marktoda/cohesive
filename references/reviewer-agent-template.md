@@ -129,7 +129,7 @@ The five existing reviewer agents have minor section-order drift (some put "How 
 1. Read `${CLAUDE_PLUGIN_ROOT}/agents/structure-reviewer.md` — it's the closest reference shape (5 axes; full template).
 2. Copy the section order from this template. Do not invent new section names.
 3. Pick a `color:` not in use by another reviewer.
-4. Verify the dispatching skill body (most often `${CLAUDE_PLUGIN_ROOT}/skills/cohesive-review/SKILL.md`) includes a Task tool dispatch that:
+4. Verify the dispatching skill body (most often `${CLAUDE_PLUGIN_ROOT}/skills/review-codebase/SKILL.md` or `${CLAUDE_PLUGIN_ROOT}/skills/review-diff/SKILL.md`) includes a Task tool dispatch that:
    - Passes the claimed-system-shape summary
    - Passes the list of normative doc paths
    - Passes the scope

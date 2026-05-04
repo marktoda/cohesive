@@ -32,8 +32,8 @@ Conflating any two of the three pushes content into the wrong tier and degrades 
 
 ## Concrete examples in v0.1
 
-- **Skills citing references** — `skills/cohesive-review/SKILL.md` cites `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md` for the four-phase rubric. The skill body says *what to do*; the rubric defines *what counts as good*. Splitting them lets the rubric be updated without touching the skill body.
-- **Skills dispatching agents** — `skills/cohesive-review/SKILL.md` Phase 3 dispatches four reviewer agents in a single message via Task tool. The skill body knows the dispatch shape; each agent file knows its own review lens. The skill doesn't embed reviewer prompts; the agents don't embed orchestration.
+- **Skills citing references** — `skills/review-codebase/SKILL.md` cites `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md` for the four-phase rubric. The skill body says *what to do*; the rubric defines *what counts as good*. Splitting them lets the rubric be updated without touching the skill body.
+- **Skills dispatching agents** — `skills/review-codebase/SKILL.md` Phase 3 dispatches four reviewer agents in a single message via Task tool. The skill body knows the dispatch shape; each agent file knows its own review lens. The skill doesn't embed reviewer prompts; the agents don't embed orchestration.
 - **References as templates** — `references/templates/invariant.md` is filled in by `rewrite-specs` when a new invariant is named. The skill body knows when to fill the template; the template itself knows what the artifact must contain.
 
 ## What this separation forbids
@@ -72,7 +72,7 @@ Conflating any two of the three pushes content into the wrong tier and degrades 
 - **The "agent doing orchestration" failure.** When an agent embeds workflow logic, fresh-eyes is broken (reviews depend on orchestration choices the user can't see) and the agent can't be reused across skills.
 - **The "reference duplicated in three skills" failure.** When the same paragraph appears in three skill bodies, updates drift; reviewers find three versions and can't tell which is authoritative.
 
-The structure-reviewer agent ([`structure-reviewer.md`](../../../agents/structure-reviewer.md)) actively looks for these failure modes during `cohesive-review --scope codebase`.
+The structure-reviewer agent ([`structure-reviewer.md`](../../../agents/structure-reviewer.md)) actively looks for these failure modes during `review-codebase`.
 
 ## Alternatives considered
 

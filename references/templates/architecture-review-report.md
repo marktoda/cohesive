@@ -2,7 +2,7 @@
 
 **Date:** YYYY-MM-DD
 **Scope:** <whole repo / subsystem name>
-**Reviewer:** `cohesive-review --scope codebase`
+**Reviewer:** `cohesive:review-codebase`
 
 > Output starts with the TL;DR block per `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"TL;DR convention" — verdict + 2-3 sentence thesis + top 3 findings + recommended next skill — rendered before any longer body.
 

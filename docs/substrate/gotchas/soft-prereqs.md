@@ -2,7 +2,7 @@
 
 ## Symptom
 
-A Cohesive subskill (most often `brainstorm-design`, `rewrite-specs`, or `cohesive-review`) produces mediocre output: vague design options not anchored in real substrate, a spec rewrite that doesn't know which docs are normative, an architecture review that hallucinates docs that don't exist or misses ones that do.
+A Cohesive subskill (most often `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, or `audit-substrate`) produces mediocre output: vague design options not anchored in real substrate, a spec rewrite that doesn't know which docs are normative, an architecture review that hallucinates docs that don't exist or misses ones that do.
 
 The user invoked the subskill directly, without running `discover-substrate` first. The subskill's body says "if discover-substrate hasn't run yet for this change surface, invoke it first" — but it doesn't say *how* to detect that discovery has run, so the subskill silently assumes prior session context and proceeds.
 
@@ -42,9 +42,9 @@ For the router-driven case, the router passes an explicit "discovery already don
 
 Implementation outline (for the V1 enforcement pass):
 
-1. Update `skills/brainstorm-design/SKILL.md`, `skills/rewrite-specs/SKILL.md`, and `skills/cohesive-review/SKILL.md` Step 0 / "Process" sections to ask the canonical question whenever discovery output is not explicitly passed in.
-2. Update `skills/cohesively/SKILL.md` route definitions to pass an explicit "discovery already complete; report at <path>" instruction when the router has run discovery itself.
-3. Document the question form in `references/skill-conventions.md` under "Clarifying questions."
+1. Update `skills/brainstorm-design/SKILL.md`, `skills/rewrite-specs/SKILL.md`, `skills/review-codebase/SKILL.md`, `skills/review-diff/SKILL.md`, and `skills/audit-substrate/SKILL.md` "Hard constraints" / "Process" sections to ask the canonical question whenever discovery output is not explicitly passed in. (Done in v0.1.)
+2. Update `skills/cohesively/SKILL.md` route definitions to pass an explicit "discovery already complete; report at <path>" instruction when the router has run discovery itself, codified in the "Dispatch prompt contract" section. (Done in v0.1.)
+3. Document the question form in `references/skill-conventions.md` under "Clarifying questions." (Done in v0.1.)
 
 ## Related conventions
 

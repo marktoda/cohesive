@@ -1,13 +1,13 @@
 ---
-name: review-spec-cohesion
-description: Use after rewrite-specs has produced a spec rewrite and a design delta ledger, before implementation. Runs a fresh-eyes review of rewritten docs/specs in a separate agent context that did not participate in the design discussion. Judges whether the new design is internally coherent, behaviorally complete, enforceable, and aligned with the system's stated future direction. Triggers on "review the spec rewrite", "fresh-eyes review of the new design docs", "is the rewrite ready for implementation", "check the spec cohesion". Returns Approved / Issues Found / Design Incoherent.
+name: validate-rewrite
+description: Use after rewrite-specs has produced a spec rewrite and a design delta ledger, before implementation. Runs a fresh-eyes review of rewritten docs/specs in a separate agent context that did not participate in the design discussion. Judges whether the new design is internally coherent, behaviorally complete, enforceable, and aligned with the system's stated future direction. Triggers on "validate the rewrite", "review the spec rewrite", "fresh-eyes review of the new design docs", "is the rewrite ready for implementation", "check the spec cohesion". Returns Approved / Issues Found / Design Incoherent.
 ---
 
-# Review spec cohesion
+# Validate rewrite
 
 ## What this skill produces
 
-A **spec cohesion review report** in chat, optionally written to `docs/history/reviews/YYYY-MM-DD-<slug>-cohesion-review.md`, with a verdict of **Approved**, **Issues Found**, or **Design Incoherent**, plus blocking issues, important issues, substrate gaps, locality concerns, future-fit concerns, enforcement concerns, and ranked recommended repairs.
+A **rewrite validation report** in chat, optionally written to `docs/history/reviews/YYYY-MM-DD-<slug>-cohesion-review.md`, with a verdict of **Approved**, **Issues Found**, or **Design Incoherent**, plus blocking issues, important issues, substrate gaps, locality concerns, future-fit concerns, enforcement concerns, and ranked recommended repairs.
 
 The review's defining property is **fresh eyes**: it must run in a context that did not see the design discussion. That's what gives it the power to flag things the original designer can no longer see.
 
@@ -52,7 +52,7 @@ You are reviewing a spec rewrite. Your inputs are file paths only — do not ass
 
 **Substrate discovery (for context):** <path or "n/a">
 
-Read all of the above. Return a Spec Cohesion Review using the format in
+Read all of the above. Return a Rewrite Validation Review using the format in
 ${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md.
 
 Verdicts: Approved | Issues Found | Design Incoherent.
@@ -79,7 +79,7 @@ Based on verdict:
 The skill's chat output (the agent's report, surfaced):
 
 ```md
-# Spec Cohesion Review — <topic>
+# Rewrite Validation Review — <topic>
 
 **Status:** Approved / Issues Found / Design Incoherent
 

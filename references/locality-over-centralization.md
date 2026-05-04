@@ -81,4 +81,4 @@ When you do centralize, do it from a position of evidence, not a position of "th
 
 ## Output integration
 
-`brainstorm-design` and `cohesive-review` use this reference when answering questions about whether a design's locality choice is sound. See pressure-testing questions 13–17 for the specific battery used during design review.
+`brainstorm-design`, `review-codebase`, and `review-diff` use this reference when answering questions about whether a design's locality choice is sound. See pressure-testing questions 13–17 for the specific battery used during design review.

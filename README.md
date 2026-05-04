@@ -31,14 +31,21 @@ The pattern: **Cohesive shapes the substrate; Superpowers shapes the implementat
 
 ## Main commands
 
+The flagship workflow chain reads as four imperatives — `discover → brainstorm → rewrite → validate` — paralleling Superpowers' `brainstorm → plan → execute`. Three diagnostics sit off-chain.
+
 ```text
 /cohesive:cohesively <task>        # Router — picks the right workflow
+
+# Workflow chain
 /cohesive:discover-substrate       # What does the codebase already remember?
 /cohesive:brainstorm-design        # Options + pressure-test, grounded in substrate
 /cohesive:rewrite-specs            # Hard-rewrite docs to chosen end state (in worktree)
-/cohesive:review-spec-cohesion     # Fresh-eyes review of rewritten specs
-/cohesive:cohesive-review          # Codebase | diff review (architecture / PR)
-/cohesive:substrate-audit          # What memory is missing?
+/cohesive:validate-rewrite         # Fresh-eyes review of rewritten specs
+
+# Off-chain diagnostics
+/cohesive:review-codebase          # Full architecture review
+/cohesive:review-diff              # PR / branch / working-changes review
+/cohesive:audit-substrate          # What memory is missing?
 ```
 
 ## Workflows
@@ -51,14 +58,14 @@ The flagship Cohesive flow. For non-trivial features or refactors:
 /cohesive:cohesively brainstorm a refactor of intake classification
 ```
 
-Behind the scenes: `discover-substrate` → `brainstorm-design` (with pressure-test) → user approves direction → `rewrite-specs` (in worktree) → `review-spec-cohesion`. Implementation happens in a separate session, ideally with Superpowers.
+Behind the scenes: `discover-substrate` → `brainstorm-design` (with pressure-test) → user approves direction → `rewrite-specs` (in worktree) → `validate-rewrite`. Implementation happens in a separate session, ideally with Superpowers.
 
 ### Architecture review
 
 For whole-repo or subsystem reviews:
 
 ```text
-/cohesive:cohesive-review --scope codebase
+/cohesive:review-codebase
 ```
 
 Four phases: read normative substrate → spec-prior gate (stops if specs are inconsistent) → dispatch four reviewer agents in parallel (substrate-alignment, structure, library-native, agent-readiness) → synthesize a thesis-led report. Output written to `docs/history/reviews/YYYY-MM-DD-*.md`.
@@ -68,7 +75,7 @@ Four phases: read normative substrate → spec-prior gate (stops if specs are in
 For PR / diff / working-changes review focused on substrate:
 
 ```text
-/cohesive:cohesive-review --scope diff
+/cohesive:review-diff
 ```
 
 Lighter than codebase review. Two reviewer agents (substrate-alignment, structure). Output rendered in chat.
@@ -78,7 +85,7 @@ Lighter than codebase review. Two reviewer agents (substrate-alignment, structur
 For finding what's missing:
 
 ```text
-/cohesive:substrate-audit
+/cohesive:audit-substrate
 ```
 
 Single-pass scan. Inventories missing memory: implicit rules, branchy behavior without matrices, invariants without enforcement, scars trapped in comments, stale docs.
@@ -94,9 +101,10 @@ skills/
   discover-substrate/               Substrate inventory
   brainstorm-design/                Options + pressure-test
   rewrite-specs/                    Hard spec rewrite (in worktree)
-  review-spec-cohesion/             Fresh-eyes spec review (dispatches agent)
-  cohesive-review/                  Codebase | diff review (architecture / PR)
-  substrate-audit/                  Substrate audit — what memory is missing
+  validate-rewrite/                 Fresh-eyes review of the rewrite (dispatches agent)
+  review-codebase/                  Full architecture review
+  review-diff/                      PR / branch / working-changes review
+  audit-substrate/                  Substrate audit — what memory is missing
 
 agents/
   spec-cohesion-reviewer            Fresh-eyes spec reviewer

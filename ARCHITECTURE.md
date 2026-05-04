@@ -57,7 +57,7 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 | Modify the router | [`docs/substrate/matrices/router.md`](docs/substrate/matrices/router.md) and [`references/skill-conventions.md`](references/skill-conventions.md) §"Router conventions" |
 | Touch any path reference | [`PLUGIN_ROOT_PATHS`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md) |
 | Dispatch a reviewer agent | [`docs/substrate/designs/agent-dispatch-protocol.md`](docs/substrate/designs/agent-dispatch-protocol.md) |
-| Run Cohesive against this repo | `cohesive:cohesive-review --scope codebase` — output lands in [`docs/history/reviews/`](docs/history/reviews/) |
+| Run Cohesive against this repo | `cohesive:review-codebase` — output lands in [`docs/history/reviews/`](docs/history/reviews/) |
 
 ## Risks the design accepts
 
@@ -69,4 +69,6 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 
 ## v0.1 scope
 
-The plugin ships 7 skills, 5 reviewer agents, 8 references, 9 templates, and 2 scripts. The dated milestone plan that drove v0.1 is preserved at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md). The original design vision (more ambitious surface, since trimmed) is at [`docs/history/initial-design.md`](docs/history/initial-design.md).
+The plugin ships 8 skills, 5 reviewer agents, 8 references, 9 templates, and 2 scripts. The dated milestone plan that drove v0.1 is preserved at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md). The original design vision (more ambitious surface, since trimmed) is at [`docs/history/initial-design.md`](docs/history/initial-design.md).
+
+The user-facing skill set is the four-step workflow chain `discover-substrate → brainstorm-design → rewrite-specs → validate-rewrite` (plus the `cohesively` router) and the three off-chain diagnostics `review-codebase`, `review-diff`, `audit-substrate`.

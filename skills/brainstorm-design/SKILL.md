@@ -190,8 +190,8 @@ If the user declines persistence (one-shot brainstorm, no rewrite intended), the
 ## What this skill is *not*
 
 - Not an implementation planner. That's V1's `plan-implementation` (Superpowers' `writing-plans` works for now).
-- Not an architecture review. That's `cohesive-review --scope codebase`.
-- Not a substrate audit. That's `cohesive:substrate-audit`.
+- Not an architecture review. That's `cohesive:review-codebase`.
+- Not a substrate audit. That's `cohesive:audit-substrate`.
 
 ## Composition
 

@@ -117,6 +117,39 @@ if [ -d scripts ]; then
   done
 fi
 
+# 8. v0.1 skill set: the 8 expected skills are present.
+# Locks in the verb-noun lexicon `discover-substrate → brainstorm-design → rewrite-specs → validate-rewrite`
+# plus standalone diagnostics `review-codebase`, `review-diff`, `audit-substrate`, and the router `cohesively`.
+expected_skills=(
+  cohesively
+  discover-substrate
+  brainstorm-design
+  rewrite-specs
+  validate-rewrite
+  review-codebase
+  review-diff
+  audit-substrate
+)
+for s in "${expected_skills[@]}"; do
+  if [ ! -f "skills/$s/SKILL.md" ]; then
+    fail "expected skill missing: skills/$s/SKILL.md"
+  fi
+done
+
+# 9. Every Cohesive skill description contains at least one substrate-vocabulary token.
+# Mitigates the discovery-vs-superpowers gotcha at the trigger-string level: the verb-only
+# names (`review-codebase`, `audit-substrate`, etc.) lose Cohesive brand identity in the name
+# alone, so the description must carry it. Tokens chosen are the canonical Cohesive vocabulary.
+substrate_tokens='substrate|cohesion|cohesive|invariant|gotcha|behavior matrix|spec|rewrite'
+for s in "${expected_skills[@]}"; do
+  skill_md="skills/$s/SKILL.md"
+  [ -f "$skill_md" ] || continue
+  description=$(awk '/^---$/{c++; next} c==1 && /^description:/{flag=1} c==1 && flag{print; if (/^[a-z]+:/ && !/^description:/) exit} c>=2{exit}' "$skill_md" | tr '\n' ' ')
+  if ! echo "$description" | grep -qiE "$substrate_tokens"; then
+    fail "skills/$s/SKILL.md description lacks any substrate-vocabulary token ($substrate_tokens)"
+  fi
+done
+
 echo ""
 if [ "$errors" -eq 0 ]; then
   echo "✅ Validation passed ($warnings warnings)"

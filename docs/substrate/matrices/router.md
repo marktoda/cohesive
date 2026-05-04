@@ -17,16 +17,16 @@ The matrix is normative. When a user request matches a row, the router must sele
 | R001 | Forward-looking on a subsystem | "add retry behavior for webhook delivery" | `design` | Verb tense + subsystem name; substrate-first design flow | _none_ |
 | R002 | Forward-looking on whole repo | "refactor the intake classifier" | `design` (whole-repo) | Same chain; broader change surface | _none_ |
 | R003 | Explicit "review the architecture" | "review the architecture" / "review the codebase" / "is this codebase healthy" | `review (codebase)` | Always wins per resolution rule 1 | _none_ |
-| R004 | Architecture review of named subsystem | "architecture review of the intake module" | `review (codebase)` scoped | Pass subsystem hint to `cohesive-review --scope codebase` | _none_ |
+| R004 | Architecture review of named subsystem | "architecture review of the intake module" | `review (codebase)` scoped | Pass subsystem hint to `review-codebase` | _none_ |
 | R005 | Explicit PR review with PR number | "review PR 1234" | `review (diff)` | Skill fetches diff via `gh pr diff 1234` | _none_ |
 | R006 | Branch / working-changes review | "review my diff" / "review this branch" / "review my changes" | `review (diff)` | Skill detects diff via `git diff main...HEAD` | _none_ |
-| R007 | Substrate audit explicit | "what memory is missing" / "audit substrate" / "what specs/invariants should we have" | `review (substrate audit)` | Invokes the standalone `substrate-audit` skill (single-pass scan, no reviewer-agent dispatch) | _none_ |
+| R007 | Substrate audit explicit | "what memory is missing" / "audit substrate" / "what specs/invariants should we have" | `audit (substrate)` | Invokes the standalone `audit-substrate` skill (single-pass scan, no reviewer-agent dispatch) | _none_ |
 | R008 | Rewrite-only with named direction | "rewrite the specs for [chosen Option C]" / "update design docs to reflect Y" | `rewrite-only` | User has chosen direction; skip brainstorm | _none_ |
 | R009 | Rewrite-only without named direction | "rewrite the specs for X" (no direction in input) | `rewrite-only` (with question) | Asks the canonical clarifying question per the clarifying-question convention in `references/skill-conventions.md`; user can answer "run brainstorm first" | _none_ |
 | R010 | Artifact request (V1 deferred) | "name an invariant" / "encode a behavior matrix" / "create a gotcha doc" | `artifact` | Returns template path + offers inline fill; dedicated artifact skills ship in V1 | _none_ |
 | R011 | Ambiguous "review X" with X being a small change set | "review the changes I just made" with <500 line diff | `review (diff)` | Default per resolution rule 3 (diff-shaped scope) | _none_ |
 | R012 | Ambiguous "review X" with X being whole repo | "review the project" / "review the system" | `review (codebase)` | Default per resolution rule 3 (whole-repo scope) | _none_ |
-| R013 | Ambiguous retrospective | "look at the auth code" with no scope hint | `review (substrate audit)` | Default per resolution rule 4 (retrospective + ambiguous) | _none_ |
+| R013 | Ambiguous retrospective | "look at the auth code" with no scope hint | `audit (substrate)` | Default per resolution rule 4 (retrospective + ambiguous) | _none_ |
 | R014 | Ambiguous forward-looking | "thinking about how to handle Slack" | `design` | Default per resolution rule 4 (forward-looking + ambiguous) | _none_ |
 
 ## Default cells (used when no specific row matches)
@@ -54,7 +54,7 @@ The matrix is normative. When a user request matches a row, the router must sele
 
 - **Behavior of the subskills themselves.** This matrix encodes route selection only. What `discover-substrate` does in route `design` is the subskill's behavior, not the router's, and lives in the subskill's own SKILL.md.
 - **Multi-step workflow chaining within a route.** Each route has a chain (`discover-substrate → brainstorm-design`), and the chain is part of the route definition in `cohesively/SKILL.md`. The matrix encodes the (input → route) mapping, not the (route → chain) mapping.
-- **Direct subskill invocation.** A user invoking `/cohesive:cohesive-review --scope codebase` skips the router entirely. This matrix governs only the router's behavior.
+- **Direct subskill invocation.** A user invoking `/cohesive:review-codebase` skips the router entirely. This matrix governs only the router's behavior.
 
 ## Notes
 
@@ -71,3 +71,4 @@ The matrix is normative. When a user request matches a row, the router must sele
 
 - 2026-05-04 — Created. Promoted from prose-only routing decision logic in `cohesively/SKILL.md:99-106` to a behavior matrix with stable cell IDs.
 - 2026-05-04 — Substrate collapse: cell R007's chain switched from `cohesive-review --scope substrate` to the standalone `substrate-audit` skill. References to demoted invariants (`ROUTER_ANNOUNCES_BEFORE_DISPATCH`, `ONE_PRECISE_QUESTION`) replaced with pointers to the conventions doc that now carries those rules.
+- 2026-05-04 — v0.1 release-lexicon rename: route `review (substrate audit)` renamed to `audit (substrate)` for parallel verb-noun shape; cell R007's standalone skill renamed `substrate-audit` → `audit-substrate`; `cohesive-review` split into `review-codebase` and `review-diff`; `review-spec-cohesion` renamed `validate-rewrite`. Cell IDs preserved per immutability rule.

@@ -8,7 +8,7 @@ A user with both Cohesive and Superpowers installed asks "what's in this codebas
 - Claude invokes both, producing duplicate work and conflicting framings.
 - Claude picks based on description-string match rather than user intent, and the choice is not deterministic across sessions.
 
-Downstream Cohesive skills (`brainstorm-design`, `cohesive-review`) then produce degraded output because they expected a substrate map shaped a particular way.
+Downstream Cohesive skills (`brainstorm-design`, `review-codebase`, `review-diff`) then produce degraded output because they expected a substrate map shaped a particular way.
 
 ## Why it happened
 
@@ -35,11 +35,11 @@ Why it's wrong:
 
 Make the choice explicit at the route level, not at the description-match level.
 
-1. **Cohesive's `discover-substrate` description names what it is for: substrate-first work.** It should not claim general discovery. Triggers like "explore the codebase" should not be in Cohesive's trigger phrases. The skill is for substrate inventory specifically, before brainstorm-design / rewrite-specs / cohesive-review.
+1. **Cohesive's `discover-substrate` description names what it is for: substrate-first work.** It should not claim general discovery. Triggers like "explore the codebase" should not be in Cohesive's trigger phrases. The skill is for substrate inventory specifically, before `brainstorm-design` / `rewrite-specs` / `review-codebase` / `review-diff` / `audit-substrate`.
 
 2. **The router (`cohesively`) is the canonical entry point for Cohesive workflows.** When the user invokes `/cohesive:cohesively review my code`, the router selects `discover-substrate` deterministically as part of the route — there is no competition because the router decided. Users who want Cohesive's framing should invoke the router; users who want Superpowers' framing should invoke Superpowers' skills directly.
 
-3. **Mixed-stack workflows compose explicitly.** A user doing implementation after Cohesive design work runs Cohesive first (substrate / design / spec-rewrite / review-spec-cohesion), then Superpowers (writing-plans / executing-plans / TDD). Each plugin owns its phase. The handoff is a user action, not a skill auto-routing.
+3. **Mixed-stack workflows compose explicitly.** A user doing implementation after Cohesive design work runs Cohesive first (`discover-substrate` / `brainstorm-design` / `rewrite-specs` / `validate-rewrite`), then Superpowers (`writing-plans` / `executing-plans` / TDD). Each plugin owns its phase. The handoff is a user action, not a skill auto-routing.
 
 4. **When a user asks a discovery-shaped question without invoking either router**, Claude prefers the user's expressed intent. "What does this codebase remember?" is a Cohesive question. "Where does the auth flow live?" is a Superpowers question. The trigger phrases reflect the difference.
 

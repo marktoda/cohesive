@@ -64,9 +64,9 @@ The canonical shape `discover-substrate` produces. Five downstream skills consum
 
 When the inventory is trivially empty (no normative docs, no tests, no CI files, no `docs/substrate/` content), `discover-substrate` returns the verdict line `**Empty-substrate verdict: yes**` near the top of the report, before §"Target change surface". Downstream skills check for this line and adapt:
 
-- `cohesive-review --scope codebase` halts with a "this codebase is too sparse for architecture review; run `cohesive:substrate-audit` first" message.
+- `review-codebase` halts with a "this codebase is too sparse for architecture review; run `cohesive:audit-substrate` first" message.
 - `brainstorm-design` broadens its option-generation rather than grounding in nothing.
-- `substrate-audit` is the natural home for an empty-substrate codebase; it produces a "missing memory inventory" without needing prior substrate.
+- `audit-substrate` is the natural home for an empty-substrate codebase; it produces a "missing memory inventory" without needing prior substrate.
 
 ## Which sections each consumer reads
 
@@ -76,9 +76,9 @@ A reader of this template should know which downstream skill cares about which s
 |---|---|---|---|
 | `brainstorm-design` | Relevant specs, Named invariants, Locality boundaries, Future direction (read from "Missing memory") | Behavior matrices, Known gotchas | Existing enforcement, Package files |
 | `rewrite-specs` | Relevant specs, Behavior matrices, Named invariants, Known gotchas | Locality boundaries | Package files |
-| `cohesive-review --scope codebase` | All sections — passed verbatim to all 4 reviewer agents | — | — |
-| `cohesive-review --scope diff` | Relevant specs (scoped to changed files), Existing enforcement, Locality boundaries | Behavior matrices, Known gotchas | Package files (unless library-native triggered by diff size) |
-| `substrate-audit` | Missing memory, Locality boundaries (premature-centralization risks) | All other sections | — |
+| `review-codebase` | All sections — passed verbatim to all 4 reviewer agents | — | — |
+| `review-diff` | Relevant specs (scoped to changed files), Existing enforcement, Locality boundaries | Behavior matrices, Known gotchas | Package files (unless library-native triggered by diff size) |
+| `audit-substrate` | Missing memory, Locality boundaries (premature-centralization risks) | All other sections | — |
 
 When adding a new field to the report, name which consumer needs it and add a row above.
 

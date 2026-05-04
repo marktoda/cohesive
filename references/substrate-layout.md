@@ -64,7 +64,7 @@ Cohesive skills creating new artifacts:
 2. **Otherwise default to the layout above.**
 3. **Never run parallel.** If `docs/specs/` exists for canonical content, don't create a sibling `docs/substrate/`. Pick one.
 
-Cohesive skills reading substrate (`discover-substrate`, `cohesive-review`):
+Cohesive skills reading substrate (`discover-substrate`, `review-codebase`, `review-diff`, `audit-substrate`, `validate-rewrite`):
 
 - Read this layout if present
 - Read existing repo conventions otherwise

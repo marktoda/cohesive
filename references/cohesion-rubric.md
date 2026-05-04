@@ -16,7 +16,7 @@ A cohesive system has these properties:
 
 ## The 9-axis scorecard
 
-`cohesive-review --scope codebase` returns ratings on these nine axes. Use *Healthy / Mostly healthy / Under-enforced / Drifting / At risk* as the rating vocabulary.
+`review-codebase` returns ratings on these nine axes. Use *Healthy / Mostly healthy / Under-enforced / Drifting / At risk* as the rating vocabulary.
 
 ### 1. Spec coherence
 
@@ -92,7 +92,7 @@ Does the architecture create the right change surface for the *next* ten changes
 
 ## Severity vocabulary for findings
 
-When `cohesive-review` returns issues, use:
+When `review-codebase` or `review-diff` returns issues, use:
 
 - **Blocking** — would produce or has produced a real defect; substrate must be repaired before further work in this area
 - **High** — high-leverage substrate gap; not yet a defect, but a predictable source of future defects

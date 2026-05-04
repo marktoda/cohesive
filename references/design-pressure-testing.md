@@ -1,12 +1,12 @@
 # Design pressure-testing
 
-A design that hasn't been attacked is just a preference. Pressure-testing is how Cohesive turns a brainstormed option into a recommendation that has earned its place. It is the second half of `brainstorm-design` and the question battery `rewrite-specs` and `review-spec-cohesion` use to keep designs honest.
+A design that hasn't been attacked is just a preference. Pressure-testing is how Cohesive turns a brainstormed option into a recommendation that has earned its place. It is the second half of `brainstorm-design` and the question battery `rewrite-specs` and `validate-rewrite` use to keep designs honest.
 
 ## When to pressure-test
 
 - After `brainstorm-design` has produced 2–4 options and before any one of them is recommended
 - Before `rewrite-specs` is invoked — pressure-testing is what selects the option being rewritten
-- During `review-spec-cohesion` — the reviewer asks the same questions of the rewritten spec to check that the rewrite preserved the answers
+- During `validate-rewrite` — the reviewer asks the same questions of the rewritten spec to check that the rewrite preserved the answers
 - Whenever a design feels "obviously right" — that's the moment it most needs attack
 
 ## The question battery

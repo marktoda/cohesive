@@ -6,7 +6,7 @@
 
 ## Purpose
 
-The five reviewer agents under `agents/` each produce findings. The canonical finding shape is defined in `references/reviewer-agent-template.md` §"Output format conventions": six fields per finding (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact). The synthesizing skill (`cohesive-review` Phase 4 or `review-spec-cohesion`) merges findings from one or more agents into a unified report — a merge that only works if the agents produce findings in the same shape.
+The five reviewer agents under `agents/` each produce findings. The canonical finding shape is defined in `references/reviewer-agent-template.md` §"Output format conventions": six fields per finding (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact). The synthesizing skills (`review-codebase` Phase 4, `review-diff`, or `validate-rewrite`) merge findings from one or more agents into a unified report — a merge that only works if the agents produce findings in the same shape.
 
 This matrix tracks which agent file teaches which fields. A cell of `✓` means the agent's "How to structure your output" section explicitly lists the field. A cell of `✗` means the field is absent. A cell of `~` means the field is renamed (cell text names the rename).
 
@@ -29,7 +29,7 @@ This matrix's cells reflect the state *after* the 2026-05-04 skill-architecture 
 - The canonical six fields are mandatory in every reviewer agent's "How to structure your output" section, in the order shown above.
 - When adding a new reviewer agent, copy the output-format block from `references/reviewer-agent-template.md` §"Output format conventions" verbatim. Do not invent new fields.
 - When adding a new field (e.g., "Confidence" in some V1 setting), update this matrix and all five agent files in the same pass — partial drift breaks synthesis.
-- `cohesive-review` Phase 4 and `review-spec-cohesion` synthesis can assume canonical shape from any reviewer agent dispatched. If a finding arrives in a different shape, that's a regression to be filed against this matrix.
+- `review-codebase` Phase 4, `review-diff`, and `validate-rewrite` synthesis can assume canonical shape from any reviewer agent dispatched. If a finding arrives in a different shape, that's a regression to be filed against this matrix.
 
 ## Severity vocabulary (also canonical)
 
@@ -63,8 +63,8 @@ Per `references/cohesion-rubric.md`, agents do not mark every finding Blocker. I
 
 - `references/reviewer-agent-template.md` §"Output format conventions" — the canonical shape definition.
 - `docs/substrate/designs/agent-dispatch-protocol.md` — dispatch protocol the synthesizer relies on.
-- `skills/cohesive-review/SKILL.md` Phase 4 — the synthesis step that requires shape uniformity.
-- `skills/review-spec-cohesion/SKILL.md` — single-agent dispatch; same canonical shape required.
+- `skills/review-codebase/SKILL.md` Phase 4 and `skills/review-diff/SKILL.md` — synthesis steps that require shape uniformity.
+- `skills/validate-rewrite/SKILL.md` — single-agent dispatch; same canonical shape required.
 
 ## History
 

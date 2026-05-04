@@ -1,6 +1,6 @@
 # Skill conventions
 
-The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces `PLUGIN_ROOT_PATHS` and structural shape; the rest of the rules below are convention, reviewed in `cohesive-review` rather than mechanically enforced. Treating them as conventions is deliberate — v0.1 is too early to freeze every prose rule into a structural check.
+The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces `PLUGIN_ROOT_PATHS` and structural shape; the rest of the rules below are convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Treating them as conventions is deliberate — v0.1 is too early to freeze every prose rule into a structural check.
 
 ## Frontmatter
 
@@ -50,7 +50,7 @@ Use these when relevant; omit the heading when not:
 - **`## Anti-patterns (Red Flags)`** — a markdown table with three columns (Anti-pattern / Why it's wrong / Fix). Use the table form, not a bulleted list.
 - **`## Composition`** — names skills that typically run before or after this one, plus Superpowers compositions.
 - **`## Routes`** — only for the router (`cohesively`).
-- **`## Token discipline`** — only when the skill's outputs can grow large (currently `cohesive-review`).
+- **`## Token discipline`** — only when the skill's outputs can grow large (currently `review-codebase` and `review-diff`).
 
 ## Output format conventions
 
@@ -76,7 +76,7 @@ Every skill that persists output (writes a file under `docs/history/reviews/`, `
 
 The TL;DR exists because persisted skill outputs (architecture reviews, substrate audits, cohesion reviews) routinely run 5K-10K tokens. A reader needs the verdict, the thesis, and the next move *first* — without scrolling. The full body follows.
 
-Skills with chat-only output (e.g., `cohesive-review --scope diff`) already produce verdict-led terse output and may render the TL;DR as the primary content with no longer body. Skills that don't persist (e.g., the router `cohesively`) are exempt.
+Skills with chat-only output (e.g., `review-diff`) already produce verdict-led terse output and may render the TL;DR as the primary content with no longer body. Skills that don't persist (e.g., the router `cohesively`) are exempt.
 
 ### Recommended-next-skill footer
 
@@ -87,7 +87,7 @@ The skill's "Output format" section includes a final block named:
 `cohesive:<skill-name>` — <reason>
 ```
 
-If the skill has multiple verdict-branches (e.g. `review-spec-cohesion` returns Approved / Issues Found / Design Incoherent), provide one recommended-next per branch. When the appropriate next step is outside Cohesive, the entry names the non-Cohesive action explicitly:
+If the skill has multiple verdict-branches (e.g. `validate-rewrite` returns Approved / Issues Found / Design Incoherent), provide one recommended-next per branch. When the appropriate next step is outside Cohesive, the entry names the non-Cohesive action explicitly:
 
 ```md
 `<next non-Cohesive action>` — <reason>
@@ -124,7 +124,7 @@ When a skill has `discover-substrate` or `brainstorm-design` as a prereq, it can
 or should I run [prereq-skill] first?"
 ```
 
-This is a compliant forced-choice question (two specific options) and counts toward the at-most-one budget. The user answers in one or two words ("yes" / "run it"); the subskill proceeds with explicit knowledge. Subskills using this pattern as of v0.1: `brainstorm-design`, `rewrite-specs`, `cohesive-review`. When the `cohesively` router invokes any of these, the router passes the prereq state explicitly in the dispatch prompt, and the subskill skips the question.
+This is a compliant forced-choice question (two specific options) and counts toward the at-most-one budget. The user answers in one or two words ("yes" / "run it"); the subskill proceeds with explicit knowledge. Subskills using this pattern as of v0.1: `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`. When the `cohesively` router invokes any of these, the router passes the prereq state explicitly in the dispatch prompt per the "Dispatch prompt contract" in `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md`, and the subskill skips the question.
 
 Most skills have a pre-canned clarifying question per route or per ambiguity class. Document these in the skill body so reviewers can verify.
 
@@ -179,4 +179,4 @@ These deviations are documented; new deviations require explicit discussion and 
 3. Update `/ARCHITECTURE.md` only if the new skill changes the broad architectural shape (rare for an additional subskill).
 4. Update `README.md` §"What's in the box" to reflect the new on-disk reality.
 5. Run `bash scripts/validate_plugin.sh`. The validator must pass.
-6. Run `cohesive:cohesive-review --scope diff` on your branch.
+6. Run `cohesive:review-diff` on your branch.

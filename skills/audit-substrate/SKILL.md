@@ -1,21 +1,21 @@
 ---
-name: substrate-audit
-description: Use when auditing a repo for missing memory — implicit rules, branchy behavior without matrices, invariants without enforcement, scars trapped in comments, stale docs. Single-pass scan, no reviewer-agent dispatch. Triggers on "what memory is missing", "audit substrate", "what specs/invariants/gotchas should we have but don't", "what's not yet substrate". For "what's wrong with the architecture" use `cohesive:cohesive-review --scope codebase`; for "review my PR" use `--scope diff`.
+name: audit-substrate
+description: Use when auditing a repo for missing memory — implicit rules, branchy behavior without matrices, invariants without enforcement, scars trapped in comments, stale docs. Single-pass scan, no reviewer-agent dispatch. Triggers on "audit substrate", "what memory is missing", "what specs/invariants/gotchas should we have but don't", "what's not yet substrate". For "what's wrong with the architecture" use `cohesive:review-codebase`; for "review my PR" use `cohesive:review-diff`.
 ---
 
-# Substrate audit
+# Audit substrate
 
 ## What this skill produces
 
 A **substrate audit report** at `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md`, also rendered in chat. The report inventories what *isn't* yet substrate: implicit rules the codebase depends on, branchy behavior with no matrix, invariants without enforcement, scars trapped in comments or PR descriptions, stale docs that no longer describe reality, premature centralizations that haven't earned their abstraction, missing local commands.
 
-This skill is intentionally separate from `cohesive-review`. The codebase and diff reviews of `cohesive-review` dispatch four reviewer agents and synthesize a thesis-led report; substrate audit is a single-pass scan that produces a missing-memory inventory. They share neither machinery nor output shape.
+This skill is intentionally separate from `review-codebase` and `review-diff`. Those reviews dispatch reviewer agents and synthesize a thesis-led report; substrate audit is a single-pass scan that produces a missing-memory inventory. They share neither machinery nor output shape.
 
 ## Hard constraints
 
 1. **Always run `discover-substrate` first.** Or re-use its output from earlier in this session. The audit's job is to compare what exists to what *should* exist; without discovery, you don't know what exists.
 2. **No reviewer-agent dispatch.** A substrate audit is a single-pass scan. Don't burn 4× tokens for a missing-memory inventory.
-3. **Score "does the substrate exist," not "is the code good."** A missing-memory finding is about an absent artifact, not a code defect. Code defects belong in `cohesive-review --scope diff` or in normal review.
+3. **Score "does the substrate exist," not "is the code good."** A missing-memory finding is about an absent artifact, not a code defect. Code defects belong in `cohesive:review-diff` or in normal review.
 4. **Every finding names the artifact to add.** If a finding has no clear substrate target (named invariant / behavior matrix / gotcha / semantic linter / spec / test), it's preference, not a substrate gap. Drop it or restate.
 
 ## Process
@@ -24,7 +24,7 @@ This skill is intentionally separate from `cohesive-review`. The codebase and di
 
 If `discover-substrate` has already run for the repo (or named subsystem) in this session, reuse its report. Otherwise run it.
 
-When invoked from the `cohesively` router with the substrate-audit route, the router passes "discovery already complete; report at <path>" explicitly.
+When invoked from the `cohesively` router with the `audit (substrate)` route, the router passes "discovery already complete; report at <path>" explicitly per the dispatch prompt contract in `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md`.
 
 ### 2. Apply the cohesion rubric to the substrate, not the code
 
@@ -112,7 +112,7 @@ The chat output is the audit report shown in step 3, ending with the canonical "
 
 ## Red flags
 
-- Findings about defective code rather than missing memory. Wrong skill — that's `cohesive-review --scope diff`.
+- Findings about defective code rather than missing memory. Wrong skill — that's `cohesive:review-diff`.
 - Inventorying *every* missing substrate without prioritizing. The point of an audit is to surface the few highest-leverage gaps, not to enumerate the long tail.
 - Recommending more substrate where the codebase clearly has not earned the rules yet. Premature substrate is its own form of debt.
 - Skipping `discover-substrate` because "I can read the directory listing myself." The script's bucketing is the audit's baseline.
@@ -120,13 +120,13 @@ The chat output is the audit report shown in step 3, ending with the canonical "
 
 ## Composition
 
-- **Most often invoked by:** `cohesive:cohesively` route `review (substrate audit)` (cell R007 in [`docs/substrate/matrices/router.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md)). The router passes "discovery already complete; report at <path>" so this skill skips its own discovery prompt.
+- **Most often invoked by:** `cohesive:cohesively` route `audit (substrate)` (cell R007 in [`docs/substrate/matrices/router.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md)). The router passes "discovery already complete; report at <path>" so this skill skips its own discovery prompt.
 - **Always preceded by:** `cohesive:discover-substrate`
 - **Often followed by:** `cohesive:rewrite-specs` (the highest-leverage entries become real artifacts) or no Cohesive follow-up (the audit is the deliverable).
-- **Adjacent skill:** `cohesive:cohesive-review --scope codebase` — for "what's wrong with the architecture given the substrate that exists"; this skill is for "what substrate doesn't yet exist."
+- **Adjacent skill:** `cohesive:review-codebase` — for "what's wrong with the architecture given the substrate that exists"; this skill is for "what substrate doesn't yet exist."
 
 ## What this skill is *not*
 
 - Not a code review. No defect hunt. No style enforcement.
-- Not an architecture review. The judgment about whether the substrate is *good* belongs in `cohesive-review --scope codebase`.
+- Not an architecture review. The judgment about whether the substrate is *good* belongs in `cohesive:review-codebase`.
 - Not a planning skill. Findings recommend artifacts; turning them into a sequenced plan is `superpowers:writing-plans` or `cohesive:rewrite-specs`.

@@ -1,6 +1,6 @@
 # Claimed system shape
 
-The canonical Phase 1 output of `cohesive-review --scope codebase`. Filled by reading the codebase's normative docs (CLAUDE.md / AGENTS.md / architecture.md / README.md / docs/design / docs/specs / docs/adr / docs/invariants / docs/gotchas / docs/testing) and summarizing what the codebase claims about itself.
+The canonical Phase 1 output of `review-codebase`. Filled by reading the codebase's normative docs (CLAUDE.md / AGENTS.md / architecture.md / README.md / docs/design / docs/specs / docs/adr / docs/invariants / docs/gotchas / docs/testing) and summarizing what the codebase claims about itself.
 
 This summary is the baseline for Phase 3. The four reviewer agents compare implementation against *what the docs claim*, not against generic taste — so the quality of this summary determines the quality of the review.
 
@@ -49,9 +49,9 @@ This summary is the baseline for Phase 3. The four reviewer agents compare imple
 
 This template is consumed by:
 
-- `${CLAUDE_PLUGIN_ROOT}/skills/cohesive-review/SKILL.md` Phase 1 (always)
+- `${CLAUDE_PLUGIN_ROOT}/skills/review-codebase/SKILL.md` Phase 1 (always)
 - All four reviewer agents in `${CLAUDE_PLUGIN_ROOT}/agents/` as their first input
-- The synthesizer in `cohesive-review` Phase 4 (to anchor the thesis)
+- The synthesizer in `review-codebase` Phase 4 (to anchor the thesis)
 
 When the template changes, all five files above need to know.
 

@@ -93,4 +93,4 @@ Substrate the team knows is missing. Keeping this list visible makes the gaps fi
 
 - Before changing a subsystem, read the spec(s) and any related matrix/invariant/gotcha docs linked here.
 - After adding new substrate, update this map (or it didn't really happen).
-- During `cohesive-review`, this map is read first.
+- During `review-codebase` and `review-diff`, this map is read first.
