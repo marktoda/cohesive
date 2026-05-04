@@ -45,7 +45,7 @@ Before judging coherence, check whether there is enough substrate to review at a
 ```md
 ## Substrate too sparse for architecture review
 
-This codebase has fewer than 5 normative documents and/or no architectural map (per the empty-substrate threshold in `discover-substrate` step 7). An architecture review against near-empty substrate would hallucinate findings rather than judge alignment.
+This codebase fell below the empty-substrate threshold in `discover-substrate` step 7 (fewer than 5 normative documents in total, or no `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`/`docs/` at all). An architecture review against near-empty substrate would hallucinate findings rather than judge alignment.
 
 ### Recommended next Cohesive skill
 `cohesive:audit-substrate` — produce a missing-memory inventory; the audit is the right tool for "what substrate doesn't yet exist." Once the highest-leverage entries become real artifacts (named invariants, gotcha docs, behavior matrices) and the doc surface has substantive normative content, re-run `cohesive:review-codebase`.

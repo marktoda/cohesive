@@ -104,7 +104,7 @@ Per route, the dispatch prompt to the first subskill that has a prereq question 
 | `review (codebase)` | "Discovery already complete; report at <path or 'inline above'>." | n/a |
 | `review (diff)` | "Discovery already complete (scoped to <changed-files>); report at <path or 'inline above'>." | n/a |
 | `audit (substrate)` | "Discovery already complete; report at <path or 'inline above'>." | n/a |
-| `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first) |
+| `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first); ledger path passed to step 2 once `rewrite-specs` has produced it |
 | `artifact` | n/a | "Artifact requested: <invariant / matrix / gotcha>" |
 
 The consumer list splits along the two columns:
