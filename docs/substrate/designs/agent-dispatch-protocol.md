@@ -94,7 +94,9 @@ The protocol's safety depends on **both** the dispatching skill and the agent en
 - If only the agent forbids context inheritance, but the dispatch prompt embeds a design summary, the agent reads the summary as input and is contaminated.
 - If only the dispatch prompt is clean, but the agent system prompt allows arbitrary glob, the agent may pull in implementation files that bias the review.
 
-Both sides of the protocol exist as independent fences. This is the textual half of [`FRESH_EYES_DISPATCH`](../invariants/FRESH_EYES_DISPATCH.md).
+Both sides of the protocol exist as independent fences. The structural fence underneath both is the harness's Task-subprocess isolation: calling Task with `subagent_type` creates an isolated subprocess with no inherited conversation. The agent-file preamble and the skill-side dispatch prose are convention layers on top of that fence — defense in depth, but the harness is the load-bearer.
+
+The fresh-eyes property was previously formalized as a named invariant (`FRESH_EYES_DISPATCH`). v0.1's substrate collapse demoted it to convention because (a) the structural fence is the harness, not the prose; (b) the verbatim-bullet rule produced enforceable-looking documentation that was, in fact, drifting across the agent files without breaking the property. The property is real; the named-invariant ceremony was performative. The conventions in [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) and [`references/skill-conventions.md`](../../../references/skill-conventions.md) §"Dispatch discipline" carry the rule now.
 
 ## What this protocol forbids
 
@@ -121,14 +123,14 @@ Both sides of the protocol exist as independent fences. This is the textual half
 - **`skills/cohesive-review/SKILL.md` Phase 3** — dispatches four reviewer agents in a single message via Task tool: `substrate-alignment-reviewer`, `structure-reviewer`, `library-native-reviewer`, `agent-readiness-reviewer`.
 - **`skills/review-spec-cohesion/SKILL.md`** — dispatches `spec-cohesion-reviewer` once, with the design delta ledger and rewritten spec paths as inputs.
 
-Both sites honor the protocol. The self-review on 2026-05-04 confirmed the agent-side preamble is present in all five agent files; the dispatch-site prose was confirmed compliant.
+Both sites honor the protocol. The post-Phase-1 architecture review (2026-05-04) found that the agent-file preamble had drifted in wording across the agents — three variants among five files — and that the prior self-review's claim of full compliance was incorrect. That drift is what motivated the v0.1 substrate collapse: the verbatim-bullet rule was producing the appearance of an enforced contract without the substance.
 
 ## Enforcement
 
-- **Agent-side:** every `agents/<name>.md` is grepped by `validate_plugin.sh` for the canonical "Inherit conversation context" bullet. Failure is hard-fail.
-- **Skill-side:** every Task-tool dispatch in `skills/*/SKILL.md` is grepped for nearby fresh-eyes prose. v0.1 enforcement is partial; reviewer judgment is the floor.
+- **Structural (load-bearing):** the harness's Task-subprocess isolation. Reviewer agents have no access to the dispatching skill's conversation. This is the fence that actually prevents context contamination.
+- **Convention (reinforcement):** the agent-file preamble bullet and the skill-side dispatch prose. Each agent file says, in some form, that the agent does not inherit conversation context; each dispatching skill states the same in its dispatch prompt. Verbatim copy from [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) is the safest default. Drift is reviewed in `cohesive-review`, not mechanically enforced.
 
-The agent-side check is the primary fence. The skill-side check is V1 work.
+`scripts/validate_plugin.sh` does not grep for fresh-eyes-preamble strings in v0.1. The structural fence is the harness; the convention is reviewer-judged. If wording stabilizes across agent files in V1, a grep can be added then.
 
 ## Alternatives considered
 
@@ -146,7 +148,6 @@ The agent-side check is the primary fence. The skill-side check is V1 work.
 
 ## Related substrate
 
-- [`docs/substrate/invariants/FRESH_EYES_DISPATCH.md`](../invariants/FRESH_EYES_DISPATCH.md) — the named invariant whose enforcement this protocol describes.
-- [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) — the canonical reviewer-agent shape, including the verbatim preamble.
+- [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) — the canonical reviewer-agent shape, including the canonical preamble.
 - [`references/skill-conventions.md`](../../../references/skill-conventions.md) §"Dispatch discipline" — the canonical skill-side rules.
 - [`three-layer-architecture.md`](three-layer-architecture.md) — the three-tier separation that justifies fresh-eyes review as a load-bearing property.

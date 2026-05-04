@@ -15,38 +15,34 @@ When these disagree, `ARCHITECTURE.md` wins. If your change creates a disagreeme
 Historical context lives separately under `docs/history/`:
 - `docs/history/initial-design.md` — the v0.1 design vision (preserved; not authoritative for current state).
 - `docs/history/plans/2026-05-04-mvp-implementation.md` — the dated milestone plan that drove v0.1 (preserved; not authoritative).
-- `docs/history/reviews/` and `docs/history/design-changes/` — workflow products from prior `cohesive-review` and `rewrite-specs` runs.
+- `docs/history/reviews/` and `docs/history/delta-ledgers/` — workflow products from prior `cohesive-review` and `rewrite-specs` runs.
 
-## Named invariants (read these before changing anything)
+## The one named invariant
 
-Every Cohesive-internal rule that matters is named, scoped, and lives under `docs/substrate/invariants/`. As of v0.1 there are five:
+Cohesive ships v0.1 with a single named invariant:
 
-- **`PLUGIN_ROOT_PATHS`** — every internal path reference uses `${CLAUDE_PLUGIN_ROOT}`. Never a hardcoded `/home/...` or other absolute path.
-- **`FRESH_EYES_DISPATCH`** — every Task-tool dispatch from a Cohesive skill passes explicit input paths, forbids inheriting prior conversation context, and includes the canonical fresh-eyes preamble.
-- **`ROUTER_ANNOUNCES_BEFORE_DISPATCH`** — `cohesively` announces the chosen workflow in chat before invoking any subskill. The form is canonical.
-- **`ONE_PRECISE_QUESTION`** — any Cohesive skill turn asks at most one clarifying question, and that question is a specific forced choice (never "what do you want?" or "can you tell me more?").
-- **`SUBSKILL_RECOMMENDS_NEXT`** — every terminal Cohesive skill output names exactly one recommended next Cohesive skill (one per verdict-branch where multiple verdicts apply).
+- **`PLUGIN_ROOT_PATHS`** — every internal path reference uses `${CLAUDE_PLUGIN_ROOT}`. Never a hardcoded `/home/...` or other absolute path. Doc: [`docs/substrate/invariants/PLUGIN_ROOT_PATHS.md`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md). Enforced by `scripts/validate_plugin.sh`.
 
-These are not preferences. They are the rules a `cohesive-review --scope codebase` of this repo will check for. Violating one without updating the invariant doc and getting review is a regression.
+This is the one rule with a real runtime failure mode (a violation breaks the plugin for users who aren't the author). Other v0.1 rules — skill-output shape, fresh-eyes preamble, router announcement form, clarifying-question discipline — live as conventions in [`references/skill-conventions.md`](references/skill-conventions.md) and [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md). They are real rules, but they are not yet structurally enforced and may shift as the methodology accumulates real institutional knowledge from running on real codebases. Promoting one to a named invariant is a deliberate act, not a reflex.
 
 ## Convention references
 
 Before writing or modifying components, read the relevant convention doc:
 
-- **New or modified skill (SKILL.md)** → `references/skill-conventions.md`. Names the required body sections, frontmatter shape, output format, and red flags.
-- **New or modified reviewer agent (`agents/*.md`)** → `references/reviewer-agent-template.md`. The canonical fresh-eyes review agent shape, including the load-bearing "What you must not do" preamble.
-- **New "claimed system shape" produced by `cohesive-review` Phase 1** → `references/templates/claimed-system-shape.md`. Six-section template.
+- **New or modified skill (SKILL.md)** → [`references/skill-conventions.md`](references/skill-conventions.md). Names the required body sections, frontmatter shape, output format conventions, and red flags. Carries the v0.1 conventions for clarifying questions, router announcements, and recommended-next-skill output blocks.
+- **New or modified reviewer agent (`agents/*.md`)** → [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md). The canonical fresh-eyes review agent shape, including the load-bearing "What you must not do" preamble.
+- **New "claimed system shape" produced by `cohesive-review` Phase 1** → [`references/templates/claimed-system-shape.md`](references/templates/claimed-system-shape.md).
 - **Other artifacts (invariants, gotchas, behavior matrices, design delta ledgers, etc.)** → `references/templates/<name>.md`.
 
 ## When you are about to...
 
-- **Add a new skill** → read `references/skill-conventions.md` and the closest existing skill in `skills/`. Update `ARCHITECTURE.md` only if the new skill changes the broad shape (rare for a subskill); update README's "What's in the box."
-- **Add a new reviewer agent** → read `references/reviewer-agent-template.md` and at least one existing agent in `agents/`. Confirm the dispatch site in the calling skill includes the `FRESH_EYES_DISPATCH` preamble.
-- **Update a skill body** → confirm `PLUGIN_ROOT_PATHS` for any new path references. Confirm `SUBSKILL_RECOMMENDS_NEXT` is honored in the output schema.
-- **Update the router (`cohesively`)** → confirm `ROUTER_ANNOUNCES_BEFORE_DISPATCH` and `ONE_PRECISE_QUESTION`. If you add a route, add a row to `docs/substrate/matrices/router.md`.
-- **Make a cross-cutting design decision** → write or extend a doc in `docs/substrate/designs/`. Add a hook line to `ARCHITECTURE.md` if the decision is broad enough to belong on the map.
-- **Run cohesive against the cohesive repo itself** → save the transcript to `docs/history/transcripts/`. v0.1 release is gated on having two such transcripts.
-- **Change `validate_plugin.sh`** → it should enforce a *named invariant*, not generic shape checks. Reference the invariant by name in the failure message.
+- **Add a new skill** → read [`references/skill-conventions.md`](references/skill-conventions.md) and the closest existing skill in `skills/`. Update `ARCHITECTURE.md` only if the new skill changes the broad shape (rare for a subskill); update README's "What's in the box."
+- **Add a new reviewer agent** → read [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md) and at least one existing agent in `agents/`. The fresh-eyes preamble is convention, not invariant: each agent file says, in some form, that the agent does not inherit conversation context. Verbatim copy from the template is the safest default.
+- **Update a skill body** → confirm `PLUGIN_ROOT_PATHS` for any new path references. Confirm conventions in `references/skill-conventions.md` are honored.
+- **Update the router (`cohesively`)** → read [`references/skill-conventions.md`](references/skill-conventions.md) §"Router conventions" for the announcement form and clarifying-question rule. If you add a route, add a row to [`docs/substrate/matrices/router.md`](docs/substrate/matrices/router.md).
+- **Make a cross-cutting design decision** → write or extend a doc in [`docs/substrate/designs/`](docs/substrate/designs/). Add a hook line to `ARCHITECTURE.md` if the decision is broad enough to belong on the map.
+- **Run cohesive against the cohesive repo itself** → save the artifact (review or transcript) under `docs/history/reviews/` or `docs/history/transcripts/`. v0.1 ships one architecture-review artifact; further dogfood is welcome but not gating.
+- **Change `validate_plugin.sh`** → it should enforce a *named invariant* (currently `PLUGIN_ROOT_PATHS`) or a structural shape check. Reference the rule by name in any failure message.
 
 ## Default substrate locations (in this repo)
 
@@ -55,7 +51,7 @@ Before writing or modifying components, read the relevant convention doc:
 - Behavior matrices: `docs/substrate/matrices/<name>.md`
 - Cross-cutting design docs: `docs/substrate/designs/<name>.md`
 - Reviews produced by Cohesive: `docs/history/reviews/YYYY-MM-DD-<slug>.md`
-- Design delta ledgers: `docs/history/design-changes/YYYY-MM-DD-<slug>.md`
+- Design delta ledgers: `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md`
 - Transcripts (dogfood, manual scenario): `docs/history/transcripts/<date>-<slug>.md`
 
 When Cohesive runs against an *external* repo, the default-artifact directory is `docs/cohesive/<x>/` with detection of existing repo conventions (`docs/design/`, `docs/specs/`, `docs/adr/`, `docs/invariants/`, `docs/gotchas/`, `docs/substrate/`, `docs/history/`) preferring existing if present.

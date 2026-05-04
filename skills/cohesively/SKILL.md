@@ -55,7 +55,7 @@ Read the user's request and map to one of these workflows. Use the trigger phras
 
 **Chain:**
 1. `discover-substrate`
-2. `cohesive-review --scope substrate`
+2. `substrate-audit` — single-pass scan of missing memory; not the same machinery as `cohesive-review`.
 
 ### Route: rewrite-only
 
@@ -80,12 +80,14 @@ ${CLAUDE_PLUGIN_ROOT}/references/templates/<template>.md. I can fill it out with
 
 ## Required behavior
 
-1. **Announce the route.** One sentence in chat before dispatching:
+1. **Announce the route.** One sentence in chat before dispatching, in the canonical form:
    > "I'm treating this as a Cohesive **<route>** workflow: <chain>. Reason: <one short clause>."
+
+   The form is the convention named in [`references/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `review (substrate audit)`, `rewrite-only`, `artifact`.
 
 2. **Prefer process skills before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code.
 
-3. **At most one clarifying question.** Per route (above). Never a vague "what do you want?" question.
+3. **At most one clarifying question.** Per route (above). The question is a specific forced choice, never a vague "what do you want?" prompt — convention defined in [`references/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md) §"Clarifying questions".
 
 4. **Do not implement code.** Cohesive is design/review/audit. If the user wants implementation, recommend Superpowers' workflow after Cohesive's substrate work is done.
 
@@ -102,8 +104,8 @@ When the request is ambiguous, prefer this resolution order:
 
 1. **Explicit user instruction** ("review the codebase" → review/codebase). Always wins.
 2. **Verb tense.** Forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
-3. **Scope hints.** Whole-repo / subsystem / "the codebase" → review/codebase. Diff / PR / branch / changes → review/diff. Missing / gaps / what's-not-there → review/substrate.
-4. **Default.** When truly stuck, default to `review/substrate` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
+3. **Scope hints.** Whole-repo / subsystem / "the codebase" → review/codebase. Diff / PR / branch / changes → review/diff. Missing / gaps / what's-not-there → review (substrate audit).
+4. **Default.** When truly stuck, default to `review (substrate audit)` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
 
 ## Output
 

@@ -1,17 +1,18 @@
 ---
 name: cohesive-review
-description: Use when reviewing a codebase, subsystem, PR/diff, or substrate for cohesion. Has three modes — codebase (full architecture review), diff (PR/branch/working changes), substrate (audit for missing memory). Reads normative docs first; in codebase mode stops if specs are seriously inconsistent; otherwise dispatches focused reviewer agents in parallel and synthesizes a thesis-led report. Triggers on "review the architecture", "architecture review of X", "review my PR for cohesion", "review this diff", "audit the substrate", "what memory is this codebase missing", "is this codebase healthy".
+description: Use when reviewing a codebase, subsystem, or PR/diff for cohesion. Has two modes — codebase (full architecture review) and diff (PR/branch/working changes). Reads normative docs first; in codebase mode stops if specs are seriously inconsistent; otherwise dispatches focused reviewer agents in parallel and synthesizes a thesis-led report. Triggers on "review the architecture", "architecture review of X", "review my PR for cohesion", "review this diff", "is this codebase healthy". For substrate audits ("what memory is this codebase missing", "audit the substrate"), use `cohesive:substrate-audit` instead.
 ---
 
 # Cohesive review
 
 ## What this skill produces
 
-One of three reports depending on `--scope`:
+One of two reports depending on `--scope`:
 
 - **`--scope codebase`** — full architecture review per `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`. Output written to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` and rendered in chat.
 - **`--scope diff`** — PR / branch / working-changes review focused on whether the change preserves substrate. Rendered in chat; not written to disk by default.
-- **`--scope substrate`** — audit for missing memory (specs, matrices, invariants, gotchas, semantic linters, CI gates, local commands). Output written to `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md` and rendered in chat.
+
+For substrate audits (what memory is missing across the repo), invoke [`cohesive:substrate-audit`](${CLAUDE_PLUGIN_ROOT}/skills/substrate-audit/SKILL.md) instead. That skill shares no machinery with codebase/diff modes — its previous existence as `--scope substrate` here was a category error.
 
 ## How to choose the mode
 
@@ -19,11 +20,11 @@ If the user passes `--scope`, honor it. If not, infer:
 
 - "review the architecture", "architecture review", "review the codebase" → `codebase`
 - "review my diff", "review my PR", "review this branch" → `diff`
-- "what's missing", "audit substrate", "what memory does this lack" → `substrate`
 - ambiguous "review X" with X being a small change set → `diff`
 - ambiguous "review X" with X being a whole repo or subsystem → `codebase`
+- "what's missing", "audit substrate" → route to `cohesive:substrate-audit` (different skill)
 
-If you can't decide after a short read of the user's request, ask: "Is this a full architecture review (`--scope codebase`), a PR/diff review (`--scope diff`), or a substrate audit (`--scope substrate`)?"
+If you can't decide after a short read of the user's request, ask: "Is this a full architecture review (`--scope codebase`) or a PR/diff review (`--scope diff`)?"
 
 ## Hard constraints
 
@@ -83,6 +84,8 @@ Each Task prompt includes:
 - The scope ("whole repo" or "subsystem X")
 - An instruction to read **only paths surfaced by discovery**, not to glob
 
+The dispatch prompt also explicitly states, in prose: "The reviewer reads only paths passed to it, not the conversation." This is convention, not invariant — the structural fence is the harness's Task-subprocess isolation, but the prose preamble reinforces it. See [`reviewer-agent-template.md`](${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md) §"The fresh-eyes preamble" for the canonical form.
+
 Token discipline: instruct each agent to keep its output bounded; long discussion goes in linked appendix files if needed.
 
 #### Phase 4: Synthesize
@@ -120,7 +123,7 @@ Lighter-weight. Skip Phase 1's normative read except for files touched by the di
    - `substrate-alignment-reviewer` — does this diff preserve documented behavior and invariants?
    - `structure-reviewer` — does this diff improve or degrade the change surface?
 
-   Skip `library-native-reviewer` and `agent-readiness-reviewer` for diff scope unless the diff is large (>500 lines changed) or restructures architecture.
+   Skip `library-native-reviewer` and `agent-readiness-reviewer` for diff scope unless the diff is large (>500 lines changed) or restructures architecture. The dispatch prompt includes the same fresh-eyes prose as in codebase mode.
 
 4. **Render verdict in chat.** Use this format:
 
@@ -152,54 +155,33 @@ Lighter-weight. Skip Phase 1's normative read except for files touched by the di
 
 ## Highest-leverage fix
 <one specific recommendation>
+
+### Recommended next Cohesive skill
+- If verdict is Pass / Pass with notes: `superpowers:writing-plans` — substrate is preserved; ready for implementation discipline.
+- If verdict is Needs substrate / Risky / Block: `cohesive:rewrite-specs` — the change implies substrate updates that should land before merge.
 ```
 
 5. **Don't persist by default.** Diff reviews are usually conversation-scoped. User can `--persist` if needed.
 
-### Mode: `substrate`
+## Output format
 
-Audit-style: focused on what's missing, not what's there.
-
-1. **Run `discover-substrate`** at the repo root (or named subsystem).
-2. **No subagent dispatch.** A substrate audit is a single-pass scan; don't burn 4× tokens for a missing-memory inventory.
-3. **Apply the rubric** in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, scoring each axis on whether *the substrate exists*, not on whether the code is good.
-4. **Render output** using the format from spec §17.3:
+The skill's chat output for `--scope codebase` matches the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-review-report.md`. The output ends with:
 
 ```md
-# Substrate Audit
+### Recommended next Cohesive skill
 
-## High-risk implicit rules
-- <rule the codebase depends on but hasn't named>
-
-## Branchy behavior without matrix
-- <subsystem and the cases that aren't enumerated>
-
-## Invariants without enforcement
-- <invariant in docs but not structurally enforced>
-
-## Gotchas trapped in comments/issues
-- <scar that should be a doc>
-
-## Docs that describe old reality
-- <stale normative doc>
-
-## Premature centralization risks
-- <abstraction that may not earn its slot>
-
-## Missing local commands
-- <task the team does but hasn't scripted>
-
-## Highest-leverage fixes (ranked)
-1. ...
-2. ...
-3. ...
+Per verdict:
+- **Healthy / Mostly healthy:** `superpowers:writing-plans` — substrate is sound; implementation work can proceed.
+- **Cohesive but under-enforced:** `cohesive:rewrite-specs` — promote convention to enforcement where leverage is highest.
+- **Spec drift risk:** `cohesive:rewrite-specs` — repair the substrate before further code changes.
+- **Architecture risk:** `cohesive:brainstorm-design` — the structural shape itself needs revisiting.
 ```
 
-5. **Persist** to `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md`.
+`--scope diff` chat output ends with the per-verdict footer shown in step 4 above.
 
 ## Output discipline
 
-For all three modes:
+For both modes:
 
 - **Verdict first, then evidence.** Don't bury the lede.
 - **Findings ranked by leverage.** Not alphabetical, not by file location.
@@ -222,8 +204,9 @@ Architecture reviews can burn a lot of tokens. Constraints:
 - For codebase mode: Phase 2 spec-prior gate is honored — if substrate is broken, the review stops early.
 - Reviewers run in parallel via a single message with multiple Task tool calls.
 - Synthesis produces a thesis, not a stitched concatenation.
-- Codebase and substrate reviews persist to `docs/history/reviews/`.
+- Codebase reviews persist to `docs/history/reviews/`.
 - Every finding names the substrate artifact to add or update.
+- Output ends with a per-verdict "Recommended next Cohesive skill" footer.
 
 ## Red flags
 
@@ -237,5 +220,13 @@ Architecture reviews can burn a lot of tokens. Constraints:
 ## Composition
 
 - **Always preceded by:** `discover-substrate` (or reuse of its output)
-- **Often followed by:** `rewrite-specs` (if the review found spec drift requiring repair) or implementation skills (if the review approved the change)
-- **Compatible with:** Superpowers' code-reviewer for the implementation-quality lens, after Cohesive's substrate lens. Run both for a high-stakes review.
+- **Often followed by:** `rewrite-specs` (if the review found spec drift requiring repair) or `superpowers:writing-plans` (if the review approved the change)
+- **Compatible with:** Superpowers' `code-reviewer` for the implementation-quality lens, after Cohesive's substrate lens. Run both for a high-stakes review.
+- **Adjacent skill:** `cohesive:substrate-audit` — for "what's missing" rather than "what's wrong."
+
+## What this skill is *not*
+
+- Not a substrate audit. That's `cohesive:substrate-audit`.
+- Not a code-style review. Naming, formatting, and micro-naming preferences are out of scope.
+- Not a defect hunt. Implementation bugs that aren't substrate gaps belong in normal code review.
+- Not a refactor proposal. Findings recommend substrate changes, not large code rewrites.

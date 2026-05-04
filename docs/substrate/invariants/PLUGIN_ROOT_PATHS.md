@@ -1,58 +1,45 @@
 # PLUGIN_ROOT_PATHS
 
-> Every internal path reference in a Cohesive component uses `${CLAUDE_PLUGIN_ROOT}/<path>`. No hardcoded absolute paths, ever.
+> Every internal path reference in a Cohesive component uses `${CLAUDE_PLUGIN_ROOT}/<path>`. Hardcoded absolute paths break the plugin for every user who isn't the original author.
 
 ## Rule
 
-Every reference to another file inside this plugin (skill, agent, reference, template, script) — whether in a SKILL.md body, an agent system prompt, a script, or a generated artifact — uses the `${CLAUDE_PLUGIN_ROOT}/` prefix. Hardcoded paths like `/home/<user>/...`, `~/...`, or bare relative paths to plugin-internal files are forbidden.
+Every reference to a file inside this plugin (skill, agent, reference, template, script) — whether in a SKILL.md body, an agent system prompt, a script, or a generated artifact — uses the `${CLAUDE_PLUGIN_ROOT}/` prefix. Hardcoded paths like `/home/<user>/...`, `~/...`, or bare relative paths to plugin-internal files are forbidden.
+
+This is the one named invariant Cohesive ships at v0.1. Other v0.1 rules (skill-output shape, fresh-eyes preamble, router announcement form, clarifying-question discipline) live as conventions in [`references/skill-conventions.md`](../../../references/skill-conventions.md) and [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md). They earn invariant status only when their wording has settled and their failure modes are concrete enough to grep for.
 
 ## Scope
 
 ### Applies to
-- All `skills/<name>/SKILL.md` bodies
-- All `agents/<name>.md` system prompts
-- All `references/**/*.md` cross-references
-- All `scripts/*.sh` and `scripts/*.py` that reference plugin-internal files
-- All output formats specified by skills (when those outputs reference plugin-internal files)
-- All examples and code blocks within the above
+- `skills/<name>/SKILL.md` bodies
+- `agents/<name>.md` system prompts
+- `references/**/*.md` cross-references
+- `scripts/*.sh` and `scripts/*.py` referencing plugin-internal files
+- Output formats specified by skills, when those outputs reference plugin-internal files
+- Examples and code blocks within any of the above
 
 ### Does not apply to
-- References to files in the *user's* repo (the codebase Cohesive is being run against). User-repo paths are user-relative and should remain so.
-- The plugin manifest (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`) — these declare metadata, not file references.
-- Documentation that intentionally illustrates a hardcoded path as an anti-example (always inside an "Anti-patterns" or "Don't do this" block).
+- Paths in the *user's* repo (the codebase Cohesive runs against). User-repo paths are user-relative.
+- Plugin manifests (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`).
+- Documentation that intentionally illustrates a hardcoded path as an anti-example, inside an explicit "Anti-patterns" / "Don't do this" block.
 
 ## Why this matters
 
-The plugin is installed by absolute path that varies by user (`~/.claude/plugins/cohesive`, `/usr/local/share/claude/plugins/cohesive`, a development worktree under `/home/toda/dev/cohesive`, etc.). Hardcoded paths break for every user who isn't the original author. `${CLAUDE_PLUGIN_ROOT}` is the harness-provided portable root.
+The plugin installs at a path that varies by user (`~/.claude/plugins/cohesive`, `/usr/local/share/claude/plugins/cohesive`, a development worktree, etc.). Hardcoded paths break for every user who isn't the original author. `${CLAUDE_PLUGIN_ROOT}` is the harness-provided portable root.
 
-This is also load-bearing for substrate discipline: Cohesive's own self-review (`cohesive-review --scope codebase`) flagged `validate_plugin.sh` for *rewarding* non-compliant `references/...` paths in its grep at line 107. An invariant whose violation the validator silently accepts is no invariant at all.
-
-## Where this rule must hold
-
-Every Cohesive-internal file that references another Cohesive-internal file:
-
-- **Skills:** when a skill body cites a reference, template, agent, or script.
-- **Agents:** when an agent prompt cites a reference, another agent, or a script.
-- **References:** when one reference cites another, or cites a skill body, template, or script.
-- **Scripts:** when a script reads or scans a plugin-internal file.
-- **Generated outputs:** when a skill's output schema includes paths to plugin-internal files (e.g., the design delta ledger pointing at `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md`).
+This is a real correctness contract. Unlike v0.1's other rules (output-shape, prose conventions), a violation produces a runtime failure for end users, not just substrate drift. That's why this one survives the substrate collapse as a named invariant.
 
 ## Enforcement
 
-- **Tests:** none yet (V1 will add).
-- **Types:** N/A (Markdown + Bash + Python; no type system to use).
-- **Constraints:** N/A.
-- **Semantic linters:** `scripts/validate_plugin.sh` runs a grep over `skills/`, `agents/`, `references/` for absolute path patterns (`/home/`, `/Users/`, `/usr/`, `~/`) outside fenced "anti-pattern" blocks. Failure is a hard fail.
-- **Runtime wrappers:** N/A.
-- **CI checks:** when `.github/workflows/validate.yml` lands, `validate_plugin.sh` runs on every PR.
+`scripts/validate_plugin.sh` greps `skills/`, `agents/`, and `references/` for hardcoded path patterns (`/home/`, `/Users/`, `/usr/`, `~/`) outside fenced anti-pattern blocks. Failure is a hard fail. The script also asserts that internal-path references in skill bodies use the `${CLAUDE_PLUGIN_ROOT}/` prefix.
 
-The grep-style semantic linter is the load-bearing enforcement. Without it, the rule degrades to reviewer memory.
+The validator runs locally. CI is out of scope for v0.1.
 
 ## Known bypass risks
 
-- **Anti-example blocks.** An "Anti-patterns" table that shows a hardcoded path as the wrong way to do it could be flagged by a naive grep. The linter must scope the check to *non-anti-pattern* contexts (e.g., skip lines inside fenced "Don't do this" blocks).
-- **User-repo paths in skill output schemas.** A skill describing where to write *its* output (e.g., `docs/history/reviews/...`) is referencing a user-repo path, not a plugin-internal one. The linter must distinguish.
-- **`${CLAUDE_PLUGIN_ROOT}` interpolated into a string then concatenated.** A skill body that builds a path through string concatenation could obscure the rule. Discourage in code review; in v0.1 skills are pure Markdown so this is theoretical.
+- **Anti-example blocks.** A line showing a hardcoded path as the wrong way to do it could trip a naive grep. The validator scopes the check to non-anti-pattern contexts (skips lines inside fenced "Don't do this" blocks).
+- **User-repo paths in skill output schemas.** A skill describing where to write *its* output (e.g., `docs/history/reviews/...`) is referencing a user-repo path, not a plugin-internal one. The validator distinguishes.
+- **`${CLAUDE_PLUGIN_ROOT}` interpolated then concatenated.** Theoretically obscures the rule; in practice v0.1 components are pure Markdown, so this isn't a live risk.
 
 ## Review checklist
 
@@ -65,10 +52,10 @@ When reviewing a change to any Cohesive-internal file:
 
 ## Related
 
-- **Plan §3** locked this rule first ("All internal paths: `${CLAUDE_PLUGIN_ROOT}`. No hardcoded paths.")
-- **Self-review finding 1** (`docs/history/reviews/2026-05-04-self-review.md`) named the gap: rule existed in prose, not in a check.
-- **Convention reference** `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` enforces this for new skills.
+- [`references/skill-conventions.md`](../../../references/skill-conventions.md) — where the demoted v0.1 conventions live (skill output shape, clarifying questions, router announcement form).
+- [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) — where the fresh-eyes-preamble convention lives.
 
 ## History
 
-- 2026-05-04 — Created. Promoted from plan §3 prose to a named invariant. Enforcement currently aspirational; semantic linter to be added in the same Phase 1 substrate pass.
+- 2026-05-04 — Created from plan §3 prose during the Phase 1 substrate pass.
+- 2026-05-04 — Substrate collapse: the four other v0.1 invariants demoted to conventions; this rule kept because it is the one with a real runtime failure mode. Doc simplified: dropped the elaborate Tests/Types/Constraints/Semantic-linters/Runtime-wrappers/CI-checks enforcement schema in favor of a single-paragraph statement of what's actually enforced.

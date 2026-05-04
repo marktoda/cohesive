@@ -1,6 +1,6 @@
 # Skill conventions
 
-The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces the structural rules below; the stylistic ones are reviewed in `cohesive-review --scope codebase`.
+The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces `PLUGIN_ROOT_PATHS` and structural shape; the rest of the rules below are convention, reviewed in `cohesive-review` rather than mechanically enforced. Treating them as conventions is deliberate — v0.1 is too early to freeze every prose rule into a structural check.
 
 ## Frontmatter
 
@@ -50,17 +50,24 @@ Use these when relevant; omit the heading when not:
 - **`## Anti-patterns (Red Flags)`** — a markdown table with three columns (Anti-pattern / Why it's wrong / Fix). Use the table form, not a bulleted list.
 - **`## Composition`** — names skills that typically run before or after this one, plus Superpowers compositions.
 - **`## Routes`** — only for the router (`cohesively`).
+- **`## Token discipline`** — only when the skill's outputs can grow large (currently `cohesive-review`).
 
 ## Output format conventions
 
-The "Output format" section shows the canonical chat output the skill produces. It must include a final block named:
+The "Output format" section shows the canonical chat output the skill produces. It includes a final block named:
 
 ```md
 ### Recommended next Cohesive skill
 `cohesive:<skill-name>` — <reason>
 ```
 
-This footer is enforced by named invariant `SUBSKILL_RECOMMENDS_NEXT`. If the skill has multiple verdict-branches (e.g. `review-spec-cohesion` returns Approved / Issues Found / Design Incoherent), provide one recommended-next per branch.
+If the skill has multiple verdict-branches (e.g. `review-spec-cohesion` returns Approved / Issues Found / Design Incoherent), provide one recommended-next per branch. When the appropriate next step is outside Cohesive, the entry names the non-Cohesive action explicitly:
+
+```md
+`<next non-Cohesive action>` — <reason>
+```
+
+The router (`cohesively`) is exempt: its output is a one-sentence announcement, not a workflow output.
 
 ## Path discipline
 
@@ -70,19 +77,33 @@ Every reference to another skill, agent, reference, template, or script in the b
 - `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md`
 - `${CLAUDE_PLUGIN_ROOT}/skills/discover-substrate/SKILL.md`
 
-This is enforced by named invariant `PLUGIN_ROOT_PATHS` and checked by `validate_plugin.sh`.
+This is the one named invariant (`PLUGIN_ROOT_PATHS`) and is enforced by `scripts/validate_plugin.sh`.
 
 ## Dispatch discipline
 
-Skills that dispatch to reviewer agents via the Task tool must include the canonical fresh-eyes preamble in the dispatch prompt. The preamble is defined in named invariant `FRESH_EYES_DISPATCH` and templated in `${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md`.
+Skills that dispatch to reviewer agents via the Task tool include a fresh-eyes preamble in the dispatch prompt. The preamble's job is to state — in some compatible form — that the agent does not inherit conversation context, reads only the paths passed to it, and does not pre-summarize or pre-rank findings. The canonical wording is in [`reviewer-agent-template.md`](reviewer-agent-template.md); copying it verbatim is the safest default.
 
-The dispatching skill body must explicitly state, in prose: "The reviewer reads only paths passed to it, not the conversation."
+The dispatching skill body explicitly states, in prose, that the reviewer reads only paths passed to it, not the conversation. The structural fence is the harness's Task-subprocess isolation; the prose preamble is convention reinforcement.
 
 ## Clarifying questions
 
-A skill turn asks **at most one** clarifying question. The question is a specific forced choice (e.g., "Should I review the codebase or the diff?"), never a vague open prompt ("What do you want?", "Can you tell me more?"). This is enforced by named invariant `ONE_PRECISE_QUESTION`.
+A skill turn asks **at most one** clarifying question. The question is a specific forced choice (e.g., "Should I review the codebase or the diff?"), never a vague open prompt. Forbidden phrasings include "What do you want?", "Can you tell me more?", "What are you trying to accomplish?", "Anything else I should know?".
 
 Most skills have a pre-canned clarifying question per route or per ambiguity class. Document these in the skill body so reviewers can verify.
+
+## Router conventions
+
+The router (`cohesively`) follows two extra rules:
+
+1. **Announcement before dispatch.** Whenever the router selects a route and is about to invoke the first subskill, it emits one sentence in this form, before any tool call:
+
+   ```
+   I'm treating this as a Cohesive <route> workflow: <subskill-1> → <subskill-2> → <subskill-3>. Reason: <one short clause>.
+   ```
+
+   `<route>` is one of the canonical route names (`design`, `review (codebase)`, `review (diff)`, `review (substrate audit)`, `rewrite-only`, `artifact`). The reason clause is one sentence, not a paragraph. The announcement is plain text, not a comment, not buried in a tool call.
+
+2. **One pre-canned clarifying question per route.** Per the rule above, vague phrasing forbidden. The matrix at [`docs/substrate/matrices/router.md`](../docs/substrate/matrices/router.md) names which routes ask which question.
 
 ## Tone
 
@@ -95,9 +116,8 @@ Most skills have a pre-canned clarifying question per route or per ambiguity cla
 
 These deviations are observed and accepted in v0.1:
 
-- The router (`cohesively`) replaces "Process" with "Routes" and adds a "Routing decision logic" section. Routers route; they don't have a single linear process.
-- `cohesive-review` carries three sub-bodies (one per scope). Each sub-body honors the section conventions internally.
-- A skill may add a "## Token discipline" section if its outputs can grow large (e.g., `cohesive-review`).
+- The router (`cohesively`) replaces "Process" with "Routes" and adds a "Routing decision logic" section. Routers route; they don't have a single linear process. The router may also use "Required behavior" instead of "Hard constraints" given its different shape.
+- A skill may add a "## Token discipline" section if its outputs can grow large.
 
 These deviations are documented; new deviations should be discussed before adoption.
 
@@ -106,12 +126,13 @@ These deviations are documented; new deviations should be discussed before adopt
 | Anti-pattern | Why it's wrong | Fix |
 |---|---|---|
 | Hardcoded paths in the body (`/home/...`, `references/...` without `${CLAUDE_PLUGIN_ROOT}`) | Breaks portability; `validate_plugin.sh` fails | Always prefix with `${CLAUDE_PLUGIN_ROOT}/` |
-| Missing "Recommended next Cohesive skill" footer | Breaks `SUBSKILL_RECOMMENDS_NEXT` | Add the footer; if multiple verdicts, one per verdict |
-| Vague clarifying question | Breaks `ONE_PRECISE_QUESTION` | Pre-can the question as a forced choice |
+| Missing "Recommended next Cohesive skill" footer | Workflow legibility breaks; user has to re-derive next step | Add the footer; if multiple verdicts, one per verdict |
+| Vague clarifying question | Wastes a turn; reroutes design responsibility back to the user | Pre-can the question as a forced choice |
 | "Hard constraints" as a bulleted list of vibes | Constraints must be enforceable | Each constraint is a one-sentence rule + rationale |
 | "Anti-patterns" as a bulleted list | Conventionally a table in this repo | Use the three-column Anti-pattern / Why / Fix table |
 | Frontmatter `description` written in first person ("I help you...") | Breaks the third-person plugin-dev convention | Rewrite in third person beginning with "Use when" |
-| New skill not mentioned in plan §2 or README "What's in the box" | Source-of-truth disagreement | Update plan §2 and README in the same pass |
+| New skill not mentioned in `ARCHITECTURE.md` §"v0.1 scope" or README "What's in the box" | Source-of-truth disagreement | Update both in the same pass |
+| Router omits the canonical announcement before dispatching | User can't tell which workflow is running | Use the canonical opening sentence; name the route |
 
 ## Process when adding a new skill
 

@@ -64,15 +64,17 @@ You are the **<Agent Display Name>** for Cohesive <kind> reviews. You answer one
 (One short paragraph. Always declares: specific, file:line references, no filler.)
 ```
 
-## The fresh-eyes preamble (load-bearing — verbatim)
+## The fresh-eyes preamble (convention)
 
-Every reviewer agent's "What you must not do" section must include this exact bullet:
+Every reviewer agent's "What you must not do" section includes a bullet that names, in some compatible form, the no-context-inheritance rule. The canonical wording is:
 
 ```md
 - Inherit conversation context from the calling skill. Treat your input prompt as the entire context.
 ```
 
-This is the textual half of named invariant `FRESH_EYES_DISPATCH`. The runtime half is enforced at the dispatch site in the calling skill body. Both halves must be present for the invariant to hold.
+Copying this verbatim is the safest default — divergence in wording produces drift across agent files that the structural fence (the harness's Task-subprocess isolation) doesn't catch.
+
+The structural fence does the heavy lifting: calling Task tool with `subagent_type` creates an isolated subprocess with no inherited conversation. The agent-file bullet is convention reinforcement on top of that fence. See [`docs/substrate/designs/agent-dispatch-protocol.md`](../docs/substrate/designs/agent-dispatch-protocol.md) for the full property and why both halves matter.
 
 If the agent reads any reference docs as part of its job, list them under "Inputs you will receive" with explicit `${CLAUDE_PLUGIN_ROOT}/...` paths. The agent must not glob.
 
@@ -132,14 +134,14 @@ The five existing reviewer agents have minor section-order drift (some put "How 
    - Passes the list of normative doc paths
    - Passes the scope
    - States "The reviewer reads only paths passed to it, not the conversation."
-5. Add the agent to plan §2 and §5 in the same pass.
+5. Update `/ARCHITECTURE.md` agent count and `README.md` §"What's in the box" in the same pass.
 6. Run `bash scripts/validate_plugin.sh`.
 
 ## Anti-patterns
 
 | Anti-pattern | Why it's wrong | Fix |
 |---|---|---|
-| Missing the fresh-eyes preamble bullet | Breaks `FRESH_EYES_DISPATCH` | Copy the bullet verbatim |
+| Missing the fresh-eyes preamble bullet | Drift across agent files; loosens convention reinforcement | Copy the bullet verbatim |
 | Agent body assumes prior conversation context | Reviewer runs in a fresh subprocess | Treat the dispatch prompt as the whole context |
 | Globbing the repo "to find relevant files" | Token discipline / scope discipline | Read only paths in "Inputs" |
 | Output without "Substrate artifact to add or update" lines | Findings without targets aren't actionable | Every finding maps to an artifact |

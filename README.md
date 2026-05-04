@@ -60,7 +60,7 @@ For whole-repo or subsystem reviews:
 /cohesive:cohesive-review --scope codebase
 ```
 
-Four phases: read normative substrate → spec-prior gate (stops if specs are inconsistent) → dispatch four reviewer agents in parallel (substrate-alignment, structure, library-native, agent-readiness) → synthesize a thesis-led report. Output written to `docs/cohesive/reviews/YYYY-MM-DD-*.md`.
+Four phases: read normative substrate → spec-prior gate (stops if specs are inconsistent) → dispatch four reviewer agents in parallel (substrate-alignment, structure, library-native, agent-readiness) → synthesize a thesis-led report. Output written to `docs/history/reviews/YYYY-MM-DD-*.md`.
 
 ### Change review
 
@@ -77,7 +77,7 @@ Lighter than codebase review. Two reviewer agents (substrate-alignment, structur
 For finding what's missing:
 
 ```text
-/cohesive:cohesive-review --scope substrate
+/cohesive:substrate-audit
 ```
 
 Single-pass scan. Inventories missing memory: implicit rules, branchy behavior without matrices, invariants without enforcement, scars trapped in comments, stale docs.
@@ -94,7 +94,8 @@ skills/
   brainstorm-design/                Options + pressure-test
   rewrite-specs/                    Hard spec rewrite (in worktree)
   review-spec-cohesion/             Fresh-eyes spec review (dispatches agent)
-  cohesive-review/                  Codebase | diff | substrate review
+  cohesive-review/                  Codebase | diff review (architecture / PR)
+  substrate-audit/                  Substrate audit — what memory is missing
 
 agents/
   spec-cohesion-reviewer            Fresh-eyes spec reviewer
@@ -109,14 +110,17 @@ references/
   design-pressure-testing.md        25-question battery for design options
   locality-over-centralization.md   When to centralize vs duplicate
   architecture-review-rubric.md     Four-phase review process
+  skill-conventions.md              Canonical SKILL.md shape + v0.1 conventions
+  reviewer-agent-template.md        Canonical reviewer-agent shape
+  substrate-layout.md               Where artifacts live in this repo
   templates/                        Behavior matrix, invariant, gotcha,
-                                    semantic linter, design delta ledger,
-                                    cohesion review, architecture review report,
-                                    substrate map, implementation plan
+                                    design delta ledger, cohesion review,
+                                    architecture review report, substrate map,
+                                    claimed system shape
 
 scripts/
   scan_substrate.py                 Fast substrate inventory
-  validate_plugin.sh                Plugin static validation
+  validate_plugin.sh                Plugin static validation (PLUGIN_ROOT_PATHS + structural shape)
 ```
 
 ## Installation

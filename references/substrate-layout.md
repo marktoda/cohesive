@@ -11,11 +11,13 @@ docs/
 │   ├── invariants/       # SHOUTY_NAME.md
 │   ├── matrices/         # kebab-case.md
 │   ├── gotchas/          # kebab-case.md
+│   ├── designs/          # kebab-case.md (cross-cutting design decisions)
 │   └── SUBSTRATE-MAP.md  # index of the above (optional until ≥3 artifacts)
 └── history/              # DATED append-only — workflow outputs and retired docs
     ├── plans/            # YYYY-MM-DD-<slug>.md
     ├── reviews/          # YYYY-MM-DD-<slug>-architecture-review.md, ...
-    └── delta-ledgers/    # YYYY-MM-DD-<slug>.md (rewrite-specs output)
+    ├── delta-ledgers/    # YYYY-MM-DD-<slug>.md (rewrite-specs output)
+    └── transcripts/      # <date>-<slug>.md (dogfood / scenario captures, optional)
 ```
 
 `docs/substrate/` is **rewritten in place**. When an invariant is strengthened, the file is edited; the diff in git history records the change. No date in the filename.
@@ -34,9 +36,11 @@ Mixing canonical and historical content in one directory produces the pain Cohes
 | Invariant | `SHOUTY_CASE.md` | `AUDIT_EXTERNAL_MUTATION.md` |
 | Behavior matrix | `kebab-case.md` | `intake-decision-kernel.md` |
 | Gotcha | `kebab-case.md` | `slack-thread-truncation.md` |
+| Design | `kebab-case.md` | `three-layer-architecture.md` |
 | Plan | `YYYY-MM-DD-<slug>.md` | `2026-05-04-mvp-implementation.md` |
 | Review | `YYYY-MM-DD-<slug>-architecture-review.md` | `2026-05-04-codebase-architecture-review.md` |
 | Delta ledger | `YYYY-MM-DD-<slug>.md` | `2026-05-04-intake-classification.md` |
+| Transcript | `YYYY-MM-DD-<slug>.md` | `2026-05-04-substrate-collapse.md` |
 
 ## Growth pattern
 
@@ -44,8 +48,9 @@ Don't create empty directories preemptively. Grow as needed:
 
 1. **Phase 0** — A repo with a `CLAUDE.md` or `README.md` is fine. No substrate dirs yet.
 2. **Phase 1** — First named invariant or behavior matrix → create `docs/substrate/<category>/` and put it there.
-3. **Phase 2** — First Cohesive workflow output → create `docs/history/<category>/` and put it there.
-4. **Phase 3** — Mature: most subdirs populated; `docs/substrate/SUBSTRATE-MAP.md` indexes them.
+3. **Phase 2** — First cross-cutting design decision worth pulling out of `ARCHITECTURE.md` → create `docs/substrate/designs/` and put it there.
+4. **Phase 3** — First Cohesive workflow output → create `docs/history/<category>/` and put it there.
+5. **Phase 4** — Mature: most subdirs populated; `docs/substrate/SUBSTRATE-MAP.md` indexes them.
 
 Empty subdirs in mature projects are fine — an empty `gotchas/` signals "you should have some of these." But don't create them just to have the structure look complete.
 

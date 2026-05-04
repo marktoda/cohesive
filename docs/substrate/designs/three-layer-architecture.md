@@ -94,7 +94,6 @@ None of these apply in v0.1.
 ## Related substrate
 
 - [`docs/substrate/invariants/PLUGIN_ROOT_PATHS.md`](../invariants/PLUGIN_ROOT_PATHS.md) — every cross-tier reference uses `${CLAUDE_PLUGIN_ROOT}/`.
-- [`docs/substrate/invariants/FRESH_EYES_DISPATCH.md`](../invariants/FRESH_EYES_DISPATCH.md) — the load-bearing safety property that justifies separating agents from skills.
+- [`agent-dispatch-protocol.md`](agent-dispatch-protocol.md) — the cross-tier interface between skills and agents; describes fresh-eyes as a load-bearing property held by harness subprocess isolation plus convention reinforcement.
 - [`references/locality-over-centralization.md`](../../../references/locality-over-centralization.md) — the principle this separation operationalizes.
-- [`agent-dispatch-protocol.md`](agent-dispatch-protocol.md) — the cross-tier interface between skills and agents.
 - [`composition-with-superpowers.md`](composition-with-superpowers.md) — extends the same separation principle outward (Cohesive owns substrate; Superpowers owns implementation).

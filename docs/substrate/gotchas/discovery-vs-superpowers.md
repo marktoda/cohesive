@@ -43,9 +43,9 @@ Make the choice explicit at the route level, not at the description-match level.
 
 4. **When a user asks a discovery-shaped question without invoking either router**, Claude prefers the user's expressed intent. "What does this codebase remember?" is a Cohesive question. "Where does the auth flow live?" is a Superpowers question. The trigger phrases reflect the difference.
 
-## Related invariant
+## Related convention
 
-- `ROUTER_ANNOUNCES_BEFORE_DISPATCH` — the router's announcement makes the skill choice visible before any subskill runs, so the user can correct mid-route if Cohesive was the wrong framing.
+- **Router announcement** ([`references/skill-conventions.md`](../../../references/skill-conventions.md) §"Router conventions") — the router's announcement makes the skill choice visible before any subskill runs, so the user can correct mid-route if Cohesive was the wrong framing.
 
 ## Tests / checks that preserve this
 

@@ -36,7 +36,7 @@ Each subskill that has `discover-substrate` as a prereq opens its turn with a sh
 
 > "I see we're about to run [subskill]. Has substrate discovery already happened for this change surface, or should I run `discover-substrate` first?"
 
-This is a compliant `ONE_PRECISE_QUESTION`: a forced choice between two specific options. The user answers in one word ("yes" / "run it"), the subskill proceeds with explicit knowledge of the state, and no false-positive heuristic runs.
+This complies with the clarifying-question convention in `references/skill-conventions.md`: a forced choice between two specific options. The user answers in one word ("yes" / "run it"), the subskill proceeds with explicit knowledge of the state, and no false-positive heuristic runs.
 
 For the router-driven case, the router passes an explicit "discovery already done; here is the report" flag in its dispatch instruction, so the subskill skips the question.
 
@@ -46,10 +46,10 @@ Implementation outline (for the V1 enforcement pass):
 2. Update `skills/cohesively/SKILL.md` route definitions to pass an explicit "discovery already complete; report at <path>" instruction when the router has run discovery itself.
 3. Document the question form in `references/skill-conventions.md` under "Clarifying questions."
 
-## Related invariant
+## Related conventions
 
-- `ONE_PRECISE_QUESTION` — the prereq detection question must be a forced choice, not a vague open prompt.
-- `SUBSKILL_RECOMMENDS_NEXT` — when the user says "no, run it first," the subskill recommends `cohesive:discover-substrate` rather than fumbling forward.
+- **Clarifying-question convention** ([`references/skill-conventions.md`](../../../references/skill-conventions.md) §"Clarifying questions") — the prereq detection question must be a forced choice, not a vague open prompt.
+- **Recommended-next-skill convention** ([`references/skill-conventions.md`](../../../references/skill-conventions.md) §"Output format conventions") — when the user says "no, run it first," the subskill recommends `cohesive:discover-substrate` rather than fumbling forward.
 
 ## Tests / checks that preserve this
 

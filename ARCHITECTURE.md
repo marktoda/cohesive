@@ -8,7 +8,7 @@ This is the binding architectural map. Hook lines point at the design docs, inva
 
 Cohesive is a Claude Code plugin organized in three deliberate tiers under `${CLAUDE_PLUGIN_ROOT}`:
 
-- **`skills/`** — workflow orchestration. The router (`cohesively`) and five subskills are the user-facing surface. Each skill is a process; skills do not run reviews directly.
+- **`skills/`** — workflow orchestration. The router (`cohesively`) and six subskills are the user-facing surface. Each skill is a process; skills do not run reviews directly.
 - **`agents/`** — fresh-context reviewer agents. Dispatched via the Task tool with explicit input paths. They do not inherit conversation context; each review runs in a clean subprocess.
 - **`references/`** — pure content consumed at runtime by skills and agents: the substrate model, rubrics, templates, and convention references. Shipped to plugin users.
 
@@ -26,13 +26,13 @@ Cohesive owns substrate; Superpowers owns implementation. The seam between the t
 
 ## Fresh-eyes review
 
-Reviewer agents run in isolated subprocesses with no conversation-context inheritance. The dispatching skill passes inputs as explicit file paths; the agent system prompt forbids reading prior conversation. This is the load-bearing safety property of every Cohesive review — without it, reviews degrade to performance. → see [`docs/substrate/designs/agent-dispatch-protocol.md`](docs/substrate/designs/agent-dispatch-protocol.md) and the named invariant [`FRESH_EYES_DISPATCH`](docs/substrate/invariants/FRESH_EYES_DISPATCH.md).
+Reviewer agents run in isolated subprocesses with no conversation-context inheritance. The dispatching skill passes inputs as explicit file paths; the agent system prompt forbids reading prior conversation. This is the load-bearing safety property of every Cohesive review — without it, reviews degrade to performance. The harness's Task-tool isolation provides the structural fence; the agent-file preamble is convention reinforcement. → see [`docs/substrate/designs/agent-dispatch-protocol.md`](docs/substrate/designs/agent-dispatch-protocol.md).
 
 ## Substrate
 
 Current canonical substrate lives under `docs/substrate/`:
 
-- **[`invariants/`](docs/substrate/invariants/)** — named global rules with structural enforcement. Five named in v0.1: `PLUGIN_ROOT_PATHS`, `FRESH_EYES_DISPATCH`, `ROUTER_ANNOUNCES_BEFORE_DISPATCH`, `ONE_PRECISE_QUESTION`, `SUBSKILL_RECOMMENDS_NEXT`. Each is scoped, has a stated enforcement story, and is referenced by name from `validate_plugin.sh` and reviewer agents.
+- **[`invariants/`](docs/substrate/invariants/)** — named global rules with structural enforcement. v0.1 ships one: `PLUGIN_ROOT_PATHS` (every internal path uses `${CLAUDE_PLUGIN_ROOT}`), enforced by `scripts/validate_plugin.sh`. This is the only rule with a real runtime failure mode; other v0.1 rules live as conventions until their wording stabilizes and a real failure mode justifies promotion.
 - **[`gotchas/`](docs/substrate/gotchas/)** — documented scars. Each names a symptom, a tempting wrong fix, and the correct pattern.
 - **[`matrices/`](docs/substrate/matrices/)** — branchy behavior written down as cells with stable IDs. The router behavior matrix lives here.
 - **[`designs/`](docs/substrate/designs/)** — cross-cutting design docs that span multiple components.
@@ -41,11 +41,12 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 
 ## Conventions
 
-- **Skill conventions** — required vs optional sections, frontmatter shape, output schema, anti-patterns: [`references/skill-conventions.md`](references/skill-conventions.md).
+- **Skill conventions** — required body sections, frontmatter shape, output format, router announcement form, clarifying-question discipline, recommended-next-skill output blocks, anti-patterns: [`references/skill-conventions.md`](references/skill-conventions.md).
 - **Reviewer agent conventions** — required sections, the canonical fresh-eyes preamble: [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md).
 - **Path discipline** — every internal reference uses `${CLAUDE_PLUGIN_ROOT}/...`. Enforced by [`PLUGIN_ROOT_PATHS`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md).
 - **Source-of-truth hierarchy** — this doc is binding for current architecture. The README §"What's in the box" is derived from this doc and from on-disk reality. The historical plan at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md) is preserved as the dated artifact that drove v0.1; not authoritative for current state.
 - **Default artifact dir for Cohesive run against external repos:** `docs/cohesive/<x>/` with detection of existing repo conventions (`docs/design/`, `docs/specs/`, `docs/adr/`, `docs/invariants/`, `docs/gotchas/`, `docs/substrate/`, `docs/history/`) — prefer existing if present.
+- **Local validation only.** `scripts/validate_plugin.sh` runs locally. CI is out of scope for v0.1.
 
 ## Where to look first
 
@@ -53,9 +54,9 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 |---|---|
 | Add or modify a skill | [`references/skill-conventions.md`](references/skill-conventions.md) and the closest existing skill |
 | Add or modify a reviewer agent | [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md) |
-| Modify the router | [`docs/substrate/matrices/router.md`](docs/substrate/matrices/router.md) and [`ROUTER_ANNOUNCES_BEFORE_DISPATCH`](docs/substrate/invariants/ROUTER_ANNOUNCES_BEFORE_DISPATCH.md) |
+| Modify the router | [`docs/substrate/matrices/router.md`](docs/substrate/matrices/router.md) and [`references/skill-conventions.md`](references/skill-conventions.md) §"Router conventions" |
 | Touch any path reference | [`PLUGIN_ROOT_PATHS`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md) |
-| Dispatch a reviewer agent | [`FRESH_EYES_DISPATCH`](docs/substrate/invariants/FRESH_EYES_DISPATCH.md) and [`agent-dispatch-protocol.md`](docs/substrate/designs/agent-dispatch-protocol.md) |
+| Dispatch a reviewer agent | [`docs/substrate/designs/agent-dispatch-protocol.md`](docs/substrate/designs/agent-dispatch-protocol.md) |
 | Run Cohesive against this repo | `cohesive:cohesive-review --scope codebase` — output lands in [`docs/history/reviews/`](docs/history/reviews/) |
 
 ## Risks the design accepts
@@ -64,7 +65,8 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 - **Soft prereqs may produce mediocre output.** When subskills are invoked without prior substrate discovery, output quality degrades. Detection pattern in [`soft-prereqs.md`](docs/substrate/gotchas/soft-prereqs.md).
 - **Reviewer token budgets.** Token discipline is part of every reviewer agent's contract but is enforced by reviewer judgment, not structurally.
 - **Behavior matrix template is unproven** until real-world matrices are produced from external repos.
+- **Conventions over invariants.** Most v0.1 rules (output shape, fresh-eyes preamble, router announcement, clarifying questions) live as convention, not enforced invariant. They may drift in wording before they earn structural enforcement. The trade-off is intentional: premature enforcement freezes the wrong shape.
 
 ## v0.1 scope
 
-The plugin ships 6 skills, 5 reviewer agents, 5 references, 9 templates, and 2 scripts. The dated milestone plan that drove v0.1 is preserved at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md). The original design vision (more ambitious surface, since trimmed) is at [`docs/history/initial-design.md`](docs/history/initial-design.md).
+The plugin ships 7 skills, 5 reviewer agents, 5 references, 7 templates, and 2 scripts. The dated milestone plan that drove v0.1 is preserved at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md). The original design vision (more ambitious surface, since trimmed) is at [`docs/history/initial-design.md`](docs/history/initial-design.md).
