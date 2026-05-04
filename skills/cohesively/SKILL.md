@@ -1,0 +1,138 @@
+---
+name: cohesively
+description: Use when the user wants to plan, refactor, design, brainstorm, audit, or review code in a way that should preserve specs, behavior matrices, named invariants, semantic linters, gotchas, architectural seams, tests, and future product direction. The Cohesive router. Triggers on "cohesively", "cohesive design", "design substrate-first", "brainstorm a refactor of X", "review the architecture", "review the codebase", "audit substrate", "what memory is missing", "review my diff for cohesion", "name an invariant", "encode a behavior matrix", "is this the right place to centralize", "rewrite the specs". Picks the right Cohesive workflow, announces it, and chains the relevant subskills.
+---
+
+# Cohesively — the Cohesive router
+
+## What this skill does
+
+Cohesive is a substrate-first methodology for senior engineers building durable codebases. Most user requests that touch behavior, architecture, invariants, tests, docs, or future product direction need more than one Cohesive subskill in sequence. This router classifies the request, picks the workflow, announces it, and dispatches.
+
+Cohesive distinguishes itself from Superpowers: **Superpowers optimizes for disciplined implementation; Cohesive optimizes for durable judgment.** Both can run in the same session, and Cohesive composes with Superpowers' `using-git-worktrees`, `code-reviewer`, and `finishing-a-development-branch` skills.
+
+## Routes
+
+Read the user's request and map to one of these workflows. Use the trigger phrases as primary signal; use the topic and verb tense as secondary signal.
+
+### Route: design
+
+**When:** Brainstorm or refactor a feature/subsystem. Forward-looking ("add", "refactor", "support", "build").
+
+**Chain:**
+1. `discover-substrate` — what does the codebase already remember about this area?
+2. `brainstorm-design` — propose 2–4 options grounded in substrate; pressure-test each
+3. (only if user approves a direction and the change is substantial enough to warrant a spec rewrite) `rewrite-specs` — hard-rewrite docs to chosen end state in a worktree
+4. (only if step 3 ran) `review-spec-cohesion` — fresh-eyes review of the rewritten specs
+
+**Default behavior:** Run steps 1–2. Pause for user approval before step 3. Many design conversations end at step 2 with a recommendation — don't escalate to spec rewrite unless the user wants it.
+
+**Clarifying question (optional, max one):** "Which future pressure should this design optimize for most: <option A>, <option B>, <option C>?"
+
+### Route: review (codebase)
+
+**When:** Whole codebase or subsystem architecture review. "Review the architecture", "review the codebase", "is this codebase healthy".
+
+**Chain:**
+1. `discover-substrate` — get the substrate inventory
+2. `cohesive-review --scope codebase` — four-phase architecture review
+
+**No clarifying question** — read normative docs first; the answers come from there.
+
+### Route: review (diff)
+
+**When:** PR / branch / working-changes review. "Review my PR", "review this diff", "review the change".
+
+**Chain:**
+1. `discover-substrate` (scoped to changed files)
+2. `cohesive-review --scope diff`
+
+**Clarifying question (only if needed):** "Which PR / branch / set of changes? I see <X> uncommitted changes; should I review those, or do you have a PR number?"
+
+### Route: review (substrate audit)
+
+**When:** "What memory is missing", "audit substrate", "what specs/invariants/gotchas should we have but don't".
+
+**Chain:**
+1. `discover-substrate`
+2. `cohesive-review --scope substrate`
+
+### Route: rewrite-only
+
+**When:** User has already chosen a direction (or has a brainstorm output from earlier) and wants the spec rewrite without re-brainstorming. "Rewrite the specs for X", "update the design docs to reflect Y".
+
+**Chain:**
+1. `rewrite-specs` (which sets up its own worktree; composes with `superpowers:using-git-worktrees` if installed)
+2. `review-spec-cohesion`
+
+**Clarifying question (required if no direction is named):** "Has a direction been chosen, or should we run brainstorm-design first?"
+
+### Route: artifact (V1 — deferred)
+
+**When:** "Name an invariant", "encode a behavior matrix", "create a gotcha doc".
+
+**Current behavior (until V1):** Return the relevant template path and offer to fill it out inline based on user input. The dedicated artifact skills (`invariant`, `matrix`) ship in V1.
+
+```
+Cohesive v0.1 doesn't yet have a dedicated `<artifact>` skill. The template is at
+${CLAUDE_PLUGIN_ROOT}/references/templates/<template>.md. I can fill it out with you now if you like.
+```
+
+## Required behavior
+
+1. **Announce the route.** One sentence in chat before dispatching:
+   > "I'm treating this as a Cohesive **<route>** workflow: <chain>. Reason: <one short clause>."
+
+2. **Prefer process skills before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code.
+
+3. **At most one clarifying question.** Per route (above). Never a vague "what do you want?" question.
+
+4. **Do not implement code.** Cohesive is design/review/audit. If the user wants implementation, recommend Superpowers' workflow after Cohesive's substrate work is done.
+
+5. **Compose with Superpowers when present.** Specifically:
+   - Worktrees: `superpowers:using-git-worktrees` (used by `rewrite-specs`)
+   - Implementation discipline: `superpowers:test-driven-development`, `superpowers:writing-plans`, `superpowers:executing-plans`
+   - Branch finishing: `superpowers:finishing-a-development-branch`
+
+6. **Track progress with TodoWrite** when chaining 3+ subskills. The user should see the chain as it executes.
+
+## Routing decision logic
+
+When the request is ambiguous, prefer this resolution order:
+
+1. **Explicit user instruction** ("review the codebase" → review/codebase). Always wins.
+2. **Verb tense.** Forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
+3. **Scope hints.** Whole-repo / subsystem / "the codebase" → review/codebase. Diff / PR / branch / changes → review/diff. Missing / gaps / what's-not-there → review/substrate.
+4. **Default.** When truly stuck, default to `review/substrate` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
+
+## Output
+
+The router itself produces minimal output:
+
+```md
+I'm treating this as a Cohesive <route> workflow: <subskill-1> → <subskill-2> → <subskill-3>.
+Reason: <one short clause>.
+```
+
+Then it invokes the first subskill. Each subskill produces its own output and recommends the next. The user can stop the chain at any subskill boundary.
+
+## Acceptance criteria
+
+- The router classifies every Cohesive-relevant request to exactly one route.
+- The route is announced before any subskill runs.
+- At most one clarifying question is asked, and it is precise (not vague).
+- Code is not produced from the router.
+- Long chains (3+ subskills) are tracked with TodoWrite.
+
+## Red flags
+
+- Asking "what do you want?" or "can you tell me more?" — both are too vague. If a question is needed, it must be a specific forced choice.
+- Routing to multiple workflows in parallel ("I'll do both a design and a review"). Pick one. If the user really wants both, they can ask twice.
+- Producing implementation suggestions or code in the router itself. The router routes; subskills do work.
+- Dispatching subskills without the announcement. Users need to know which workflow they're in.
+
+## What this skill is *not*
+
+- Not the workflow itself. The router picks; the subskills work.
+- Not a general-purpose AI coding assistant. Cohesive is opinionated about what kinds of work it does.
+- Not a replacement for Superpowers. Cohesive handles substrate; Superpowers handles implementation discipline. Use both.

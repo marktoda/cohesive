@@ -1,0 +1,7 @@
+.worktrees/
+worktrees/
+.claude/*.local.md
+.DS_Store
+*.pyc
+__pycache__/
+node_modules/

@@ -1,0 +1,22 @@
+{
+  "name": "cohesive",
+  "version": "0.1.0",
+  "description": "Substrate-first agentic engineering for senior architects. Helps Claude make changes that preserve specs, behavior matrices, named invariants, semantic linters, gotchas, locality boundaries, and future product direction. Routes through cohesively for design, architecture review, change-cohesion review, and substrate audits.",
+  "author": {
+    "name": "Mark Toda",
+    "email": "mark.toda@uniswap.org"
+  },
+  "homepage": "https://github.com/marktoda/cohesive",
+  "repository": "https://github.com/marktoda/cohesive",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "architecture",
+    "specs",
+    "invariants",
+    "substrate",
+    "code-review",
+    "cohesion",
+    "agentic-engineering"
+  ]
+}

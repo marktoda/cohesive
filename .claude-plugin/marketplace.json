@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "cohesive",
+  "description": "Substrate-first agentic engineering — helps your codebase remember.",
+  "owner": {
+    "name": "Mark Toda",
+    "email": "mark.toda@uniswap.org"
+  },
+  "plugins": [
+    {
+      "name": "cohesive",
+      "description": "Substrate-first agentic engineering for senior architects. Helps Claude make changes that preserve specs, behavior matrices, named invariants, semantic linters, gotchas, locality boundaries, and future product direction.",
+      "author": {
+        "name": "Mark Toda"
+      },
+      "category": "development",
+      "source": "./",
+      "homepage": "https://github.com/marktoda/cohesive"
+    }
+  ]
+}
