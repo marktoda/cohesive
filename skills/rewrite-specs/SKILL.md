@@ -15,7 +15,12 @@ This is one of Cohesive's flagship skills. Spec rewriting is the cheapest place 
 
 ## Hard constraints
 
-1. **An approved direction is required.** If `brainstorm-design` hasn't recommended a direction (or the user hasn't named one), stop and route to `brainstorm-design`.
+1. **An approved direction is required.** Don't try to detect prior brainstorm output from session memory — per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, that detection silently degrades. Instead, open the turn with the canonical forced-choice question:
+
+   > "I see we're about to run rewrite-specs. Has a direction been chosen (from a prior `brainstorm-design`, an architecture review, or named by you), or should I run `brainstorm-design` first to produce one?"
+
+   When the dispatching skill is the `cohesively` router, the router passes the chosen direction explicitly in its dispatch prompt, so this skill can skip the question.
+
 2. **Work in a worktree.** Spec rewrites can be invasive. Isolation lets the user review the rewrite as a coherent diff and discard if needed. See "Worktree handling" below.
 3. **No code changes.** Specs and docs only. If a doc claims behavior the implementation doesn't yet have, that's expected — implementation follows in a separate phase.
 4. **Hard rewrite, not append.** Replace obsolete normative claims; don't leave them in place with a "(deprecated)" note next to the new claim. Contradictory docs are worse than slightly-stale docs.

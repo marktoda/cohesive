@@ -19,7 +19,12 @@ The output is the input to either `rewrite-specs` (if a direction is approved) o
 ## Hard constraints
 
 1. **Never produce code from this skill.** Not a snippet, not a function signature. Brainstorming ends at "here's the recommended direction."
-2. **Always run `discover-substrate` first** if it hasn't already been run for this change surface in this session. Brainstorming without substrate context produces generic options, not codebase-specific ones.
+2. **Substrate discovery is a prereq; ask the user, don't guess.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, detecting prior discovery from session memory silently degrades. Open the turn with the canonical forced-choice question:
+
+   > "I see we're about to run brainstorm-design. Has substrate discovery already happened for this change surface, or should I run `discover-substrate` first?"
+
+   When the `cohesively` router invokes this skill, it passes "discovery already complete; report at <path>" in the dispatch prompt and this skill skips the question.
+
 3. **Always propose at least two credible options for non-trivial changes.** Single-option "design" is just a proposal, not a decision.
 4. **Never recommend an option whose main risk is mitigated by "we'll be careful."** Mitigation is structure: a test, a linter, a boundary, a constraint.
 
@@ -27,7 +32,7 @@ The output is the input to either `rewrite-specs` (if a direction is approved) o
 
 ### Phase 1: Ground the brainstorm
 
-If `discover-substrate` hasn't run yet for this change surface, invoke it first. Use its output as the starting material.
+Use the discovery report (passed by the router or produced by Hard constraint #2's pre-check) as the starting material. If the discovery report carries `**Empty-substrate verdict: yes**`, broaden option-generation to fundamentals rather than grounding in nothing — this is a fresh-substrate codebase, not a mature one.
 
 Then, in chat, capture three things separately:
 
@@ -144,12 +149,24 @@ For each option (or just the recommended one if the others are clearly out):
 - Gotchas: ...
 - Semantic linters (proposed): ...
 
-## Next Cohesive skill
+### Recommended next Cohesive skill
 
 `cohesive:rewrite-specs` — proceed to spec rewrite in a design worktree
 or
 `cohesive:brainstorm-design` — another round; <reason>
 ```
+
+## Persistence
+
+When the user accepts a recommendation (or after Phase 4 if the chain proceeds to `rewrite-specs`), persist the brainstorm output to:
+
+```
+docs/history/brainstorms/YYYY-MM-DD-<slug>.md
+```
+
+The file uses the same shape as the chat output above. This lets `rewrite-specs` consume the chosen direction as a path rather than asking the user to re-state it from conversation memory — closing the soft-prereqs hand-off gap that previously made `brainstorm-design → rewrite-specs` rely on human memory.
+
+If the user declines persistence (one-shot brainstorm, no rewrite intended), the skill is conversation-only.
 
 ## Acceptance criteria
 
@@ -159,6 +176,7 @@ or
 - The recommendation states a main risk *and* a structural mitigation.
 - The recommendation lists required substrate by category.
 - Exactly one next-skill recommendation.
+- When the recommendation is accepted, the brainstorm output is persisted to `docs/history/brainstorms/YYYY-MM-DD-<slug>.md`.
 
 ## Red flags
 

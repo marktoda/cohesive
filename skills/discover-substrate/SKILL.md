@@ -1,6 +1,6 @@
 ---
 name: discover-substrate
-description: Use when starting Cohesive work on a feature, refactor, review, or audit, before brainstorming or implementing. Discovers what the codebase already remembers — specs, tests, behavior matrices, named invariants, semantic linters, gotchas, architectural seams, CI checks, and local commands — and identifies what is missing. Triggers on "discover substrate", "what does this codebase remember", "what specs/tests/invariants exist for X", "audit substrate before changing X", and is invoked by every Cohesive workflow as its first step.
+description: Use when starting substrate-first Cohesive work — before brainstorming a refactor, rewriting specs, or running a cohesion review — to inventory what specs, behavior matrices, named invariants, gotchas, semantic linters, CI checks, and local commands the codebase already carries, and to surface what's missing in the change surface. Substrate-first scope only; for general codebase exploration use Superpowers' research/exploration skills instead. Triggers on "discover substrate", "what specs/invariants/gotchas exist for X", "audit substrate before changing X", "what does Cohesive find in this repo".
 ---
 
 # Discover substrate
@@ -92,14 +92,28 @@ For the change surface, name the substrate that *doesn't* exist but probably sho
 
 This is the highest-value section of the report. The point of substrate discovery is not to celebrate what exists but to find what's missing before code is written.
 
-### 7. Recommend the next Cohesive skill
+### 7. Detect empty-substrate codebases
+
+If the inventory is trivially empty — no `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`, no `docs/` content, no tests, no CI files — emit `**Empty-substrate verdict: yes**` near the top of the report, before §"Target change surface". Downstream skills check for this line and adapt:
+
+- `cohesive-review --scope codebase` halts at Phase 1.5 and recommends `substrate-audit` instead
+- `brainstorm-design` broadens its option-generation rather than grounding in nothing
+- `substrate-audit` proceeds normally — it's the right home for empty-substrate codebases
+
+If the inventory has at least a few normative anchors (≥1 of `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`/`README.md` plus some `docs/` content), do not emit the verdict line.
+
+### 8. Recommend the next Cohesive skill
 
 Based on what you found and what the user asked for, recommend exactly one next skill to invoke (or hand back to `cohesively` if the route is unclear).
 
 ## Output format
 
+The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-discovery-report.md`. That template carries the field definitions and a "Which sections each consumer reads" map; this section reproduces the chat-rendered shape:
+
 ```md
 ## Substrate discovered
+
+**Empty-substrate verdict: yes**  <!-- only when applicable per Step 7 -->
 
 ### Target change surface
 - Subsystem: <name or "(repo-wide)">
@@ -132,6 +146,10 @@ Based on what you found and what the user asked for, recommend exactly one next 
 - Subsystem A seam at <path>; coupling to B via <interface>
 - Suspected premature centralization at <path>
 - Suspected duplication-that-wants-abstraction at <paths>
+
+### Package files (for library-native review)
+- <path> — <type: package.json / pyproject.toml / Cargo.toml / go.mod / etc.>
+- ...
 
 ### Missing memory
 - <highest-leverage gap first>

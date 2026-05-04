@@ -84,7 +84,7 @@ For `--scope diff`: read only the diff and substrate it touches.
 
 ## How to structure your output
 
-Return findings ranked by leverage. Each finding includes:
+Return findings ranked by leverage × severity. Each finding uses the canonical six-field shape from `${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md` §"Output format conventions":
 
 ```md
 ### <Finding title>
@@ -92,14 +92,11 @@ Return findings ranked by leverage. Each finding includes:
 **Severity:** Blocker / High / Medium / Low
 **Category:** Spec drift / Invariant enforcement / Test guarantee / Implicit invariant
 
-**Claim in docs:**
-<what the docs say> at <doc path>
-
-**Reality in code:**
-<what actually happens> at <code path:line>
-
 **Why it matters:**
-<concrete consequence — not "could lead to bugs">
+<concrete consequence — not "could lead to bugs". Embed the doc claim and the code reality inline as part of explaining the gap: "Docs at <path:line> claim X; implementation at <path:line> does Y, so <consequence>.">
+
+**Evidence:**
+<file:line references; quoted snippets when illustrative; both doc and code anchors>
 
 **Recommended fix:**
 <specific next step>
@@ -108,7 +105,9 @@ Return findings ranked by leverage. Each finding includes:
 Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boundary
 ```
 
-Group findings under three headings:
+This is the same canonical shape every other reviewer agent uses — tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md`.
+
+Optionally group findings under these headings (omit any heading with no observed findings; do not fill empty sections):
 
 ```md
 ## Spec drift
@@ -126,11 +125,15 @@ Group findings under three headings:
 
 ## What you must not do
 
+- Inherit conversation context from the calling skill. Treat your input prompt as the entire context.
 - Surface every minor mismatch. Rank by leverage — the highest-cost gaps first.
 - Recommend large refactors. Recommend substrate additions. The team decides whether to refactor.
 - Read code that isn't anchored to a doc claim or a test. Scope discipline.
-- Mark every finding "blocker." If everything's blocking, the prioritization is failing.
-- Inherit conversation context from the calling skill. Treat your input prompt as the entire context.
+- Mark every finding "Blocker." Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything's blocking, the prioritization is failing.
+
+## Token discipline
+
+Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty sections. Long discussion goes in linked appendix files only if explicitly requested by the dispatching skill.
 
 ## Tone
 

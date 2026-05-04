@@ -28,7 +28,12 @@ If you can't decide after a short read of the user's request, ask: "Is this a fu
 
 ## Hard constraints
 
-1. **Always run `discover-substrate` first.** Or re-use its output from earlier in this session. The reviewer agents read what discovery surfaced; without it, they glob the world.
+1. **Substrate discovery is a prereq; ask the user, don't guess.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, detecting prior discovery from session memory silently degrades. Open the turn with the canonical forced-choice question:
+
+   > "I see we're about to run cohesive-review. Has substrate discovery already happened for this scope, or should I run `discover-substrate` first?"
+
+   When the `cohesively` router invokes this skill, it passes "discovery already complete; report at <path>" in the dispatch prompt and this skill skips the question.
+
 2. **Reviewers receive paths, not summaries.** Pass the agents file paths; let them read. Pre-summarizing biases the review.
 3. **Reviewers run in parallel.** Use a single message with multiple Task tool calls. Sequential is wasted wall-clock time and burns more tokens because each agent re-loads context.
 4. **Synthesize, don't concatenate.** The final report is a thesis-led synthesis. Stitching together four agent outputs is the failure mode — not the goal.
@@ -49,6 +54,21 @@ Use `discover-substrate` (or its output) to get the list. Read in priority order
 5. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`)
 
 Produce the **claimed system shape** summary (sections from the rubric: Product goal / Architectural priors / Intended seams / Named invariants / Testing philosophy / Future direction implied by docs).
+
+#### Phase 1.5: Sparse-substrate gate
+
+Before judging coherence, check whether there is enough substrate to review at all. If the discovery report carries `**Empty-substrate verdict: yes**` per `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-discovery-report.md`, OR if discovery surfaced fewer than ~5 normative documents in total (no `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`/`README.md` plus minimal `docs/`), **stop** and return:
+
+```md
+## Substrate too sparse for architecture review
+
+This codebase has fewer than ~5 normative documents and no architectural map. An architecture review against near-empty substrate would hallucinate findings rather than judge alignment.
+
+### Recommended next Cohesive skill
+`cohesive:substrate-audit` — produce a missing-memory inventory; the audit is the right tool for "what substrate doesn't yet exist." Once the highest-leverage entries become real artifacts (named invariants, gotcha docs, behavior matrices) and the doc surface has substantive normative content, re-run `cohesive-review --scope codebase`.
+```
+
+If substrate is rich enough to review, proceed to Phase 2.
 
 #### Phase 2: Spec-prior gate
 
@@ -86,18 +106,19 @@ Each Task prompt includes:
 
 The dispatch prompt also explicitly states, in prose: "The reviewer reads only paths passed to it, not the conversation." This is convention, not invariant — the structural fence is the harness's Task-subprocess isolation, but the prose preamble reinforces it. See [`reviewer-agent-template.md`](${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md) §"The fresh-eyes preamble" for the canonical form.
 
-Token discipline: instruct each agent to keep its output bounded; long discussion goes in linked appendix files if needed.
+Token discipline: each reviewer agent already declares its own output budget (≤500 words / ≤8 ranked findings per agent file's "Token discipline" section). The dispatching prompt reinforces by passing the scope and reminding the agent that pre-finding observation sections are optional. Long discussion goes in linked appendix files if explicitly requested.
 
 #### Phase 4: Synthesize
 
 Don't concatenate. Synthesize:
 
-1. **Thesis** — one paragraph naming the codebase's overall shape, the highest-leverage risk, and whether the system can scale development without founder memory. Concrete; specific to this codebase.
-2. **Verdict** — one of: Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk
-3. **Cohesion scorecard** — 9-axis ratings from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`
-4. **Highest-leverage findings** — ranked by leverage × severity, format from rubric
-5. **Substrate improvements** — specs to rewrite, matrices to add, semantic linters to add, gotchas to document
-6. **Phased roadmap** — first repair substrate, then simplify architecture, then strengthen enforcement
+1. **TL;DR** — verdict + 3-line thesis + top 3 findings + recommended next skill, in this order, as the very first content in chat. The TL;DR convention is in `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"TL;DR convention" and applies to every persisted skill output.
+2. **Thesis** — one paragraph naming the codebase's overall shape, the highest-leverage risk, and whether the system can scale development without founder memory. Concrete; specific to this codebase.
+3. **Verdict** — one of: Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk
+4. **Cohesion scorecard** — 9-axis ratings from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`
+5. **Highest-leverage findings** — ranked by leverage × severity, format from rubric (canonical six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md`)
+6. **Substrate improvements** — specs to rewrite, matrices to add, semantic linters to add, gotchas to document
+7. **Phased roadmap** — first repair substrate, then simplify architecture, then strengthen enforcement
 
 Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-review-report.md`.
 

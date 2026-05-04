@@ -54,7 +54,33 @@ Use these when relevant; omit the heading when not:
 
 ## Output format conventions
 
-The "Output format" section shows the canonical chat output the skill produces. It includes a final block named:
+The "Output format" section shows the canonical chat output the skill produces. Two pieces are conventional: a TL;DR lead, and a recommended-next-skill footer.
+
+### TL;DR convention
+
+Every skill that persists output (writes a file under `docs/history/reviews/`, `docs/history/delta-ledgers/`, `docs/history/brainstorms/`, etc.) renders a TL;DR block as the *very first content in chat*, before any longer body. The TL;DR shape:
+
+```md
+## TL;DR
+
+**Verdict:** <one of the skill's verdict vocabulary>
+**Thesis:** <2-3 sentences. The headline finding plus the highest-leverage move.>
+**Top findings:**
+1. <finding title> — <one-clause why it matters>
+2. ...
+3. ...
+
+### Recommended next Cohesive skill
+`cohesive:<skill-name>` — <reason>
+```
+
+The TL;DR exists because persisted skill outputs (architecture reviews, substrate audits, cohesion reviews) routinely run 5K-10K tokens. A reader needs the verdict, the thesis, and the next move *first* — without scrolling. The full body follows.
+
+Skills with chat-only output (e.g., `cohesive-review --scope diff`) already produce verdict-led terse output and may render the TL;DR as the primary content with no longer body. Skills that don't persist (e.g., the router `cohesively`) are exempt.
+
+### Recommended-next-skill footer
+
+The skill's "Output format" section includes a final block named:
 
 ```md
 ### Recommended next Cohesive skill
@@ -88,6 +114,17 @@ The dispatching skill body explicitly states, in prose, that the reviewer reads 
 ## Clarifying questions
 
 A skill turn asks **at most one** clarifying question. The question is a specific forced choice (e.g., "Should I review the codebase or the diff?"), never a vague open prompt. Forbidden phrasings include "What do you want?", "Can you tell me more?", "What are you trying to accomplish?", "Anything else I should know?".
+
+### Canonical prereq-detection question
+
+When a skill has `discover-substrate` or `brainstorm-design` as a prereq, it cannot reliably detect prior-skill output from session memory — the heuristic produces false positives. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, ask the user. The canonical form:
+
+```
+"I see we're about to run [subskill]. Has [prereq] already happened for this change surface,
+or should I run [prereq-skill] first?"
+```
+
+This is a compliant forced-choice question (two specific options) and counts toward the at-most-one budget. The user answers in one or two words ("yes" / "run it"); the subskill proceeds with explicit knowledge. Subskills using this pattern as of v0.1: `brainstorm-design`, `rewrite-specs`, `cohesive-review`. When the `cohesively` router invokes any of these, the router passes the prereq state explicitly in the dispatch prompt, and the subskill skips the question.
 
 Most skills have a pre-canned clarifying question per route or per ambiguity class. Document these in the skill body so reviewers can verify.
 

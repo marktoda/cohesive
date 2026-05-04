@@ -32,7 +32,7 @@ This is a different lens from `structure-reviewer`. Structure asks "are seams in
 - **Claimed system shape** — Phase 1 summary from `cohesive-review`
 - **Normative doc paths** — what was read in Phase 1
 - **Scope** — `codebase` (whole repo or named subsystem) or `diff` (a list of changed files)
-- **Substrate discovery report** — includes package files (`package.json`, `pyproject.toml`, etc.)
+- **Substrate discovery report** — including the §"Package files" section per `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-discovery-report.md` (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, etc.). If the report omits this section, request the dispatching skill pass package paths explicitly rather than globbing.
 
 You also have access to:
 - `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` (axis 7: library-native alignment)
@@ -108,51 +108,64 @@ You do **not** read every file. Sample heavily.
 
 ## How to structure your output
 
+The ranked findings list is the contract. The pre-finding sections are *optional* observation buckets — write "none observed" or omit a section entirely if you have nothing leverage-bearing for it.
+
 ```md
-## Stack identified
-- <framework + version>
-- <major library + version>
-- ...
-
-## Reinvented primitives
-| What | Where | Native alternative | Cost of switching |
-|---|---|---|---|
-| <name> | `<path>` | `<library or built-in>` | <small / medium / large> |
-
-## Type system circumvention
-| Pattern | Location | Why it's a smell | Suggested fix |
-|---|---|---|---|
-| <`any` cluster> | `<path:lines>` | <reason> | <fix> |
-
-## Idiom mismatches
-- <framework>: <idiom ignored>; codebase pattern: <description>; recommendation: <adopt / document why deviation>
-
-## External library misuse
-- <library>: <misuse>; recommended pattern: <description>
-
-## Build/tooling
-- <setting>: <current value>; recommended: <value>; reason: <reason>
-
-## Deviation that looks correct
-- <pattern>: <why it's right despite being non-idiomatic>
-
 ## High-leverage findings (ranked)
 
 ### 1. <title>
 **Severity:** Blocker / High / Medium / Low
+**Category:** Reinvention / Type circumvention / Idiom mismatch / External misuse / Build-tooling
 **Why it matters:** <concrete cost — extra learning curve, real bugs, harder upgrades>
 **Evidence:** <file:line>
 **Recommended fix:** <specific next step>
 **Substrate artifact to add or update:** <which one — often a gotcha doc explaining a deviation, or a semantic linter blocking re-occurrence>
 ```
 
+This canonical six-field shape is tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md`.
+
+Optional pre-finding observation sections (omit any with no findings):
+
+```md
+## Stack identified (optional)
+- <framework + version>
+- <major library + version>
+
+## Reinvented primitives (optional)
+| What | Where | Native alternative | Cost of switching |
+|---|---|---|---|
+| <name> | `<path>` | `<library or built-in>` | <small / medium / large> |
+
+## Type system circumvention (optional)
+| Pattern | Location | Why it's a smell | Suggested fix |
+|---|---|---|---|
+| <`any` cluster> | `<path:lines>` | <reason> | <fix> |
+
+## Idiom mismatches (optional)
+- <framework>: <idiom ignored>; codebase pattern: <description>; recommendation: <adopt / document why deviation>
+
+## External library misuse (optional)
+- <library>: <misuse>; recommended pattern: <description>
+
+## Build/tooling (optional)
+- <setting>: <current value>; recommended: <value>; reason: <reason>
+
+## Deviation that looks correct (optional)
+- <pattern>: <why it's right despite being non-idiomatic>
+```
+
 ## What you must not do
 
+- Inherit conversation context from the calling skill. Treat your input prompt as the entire context.
 - Recommend wholesale framework migration. That's an architecture decision, not a substrate finding.
 - Treat all custom code as misuse. Some deviation is right; identify the load-bearing reason or recommend documenting it.
 - Recommend strict mode for its own sake. Tighter type-checking is good *if* the team commits to honoring it; flipping the switch and disabling rules is worse than the original.
 - Read every file. Sample.
-- Inherit conversation context. Treat your input prompt as the entire context.
+- Glob the repo for package files. Read only the package files surfaced in the substrate-discovery report's §"Package files"; if absent, request explicit paths from the dispatching skill rather than globbing.
+
+## Token discipline
+
+Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty optional sections. Pre-finding observation buckets are optional — only the ranked findings are the contract. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
 
 ## Tone
 

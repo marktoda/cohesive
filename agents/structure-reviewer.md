@@ -104,32 +104,9 @@ For `--scope diff`: focus on whether the diff's structural choices fit the exist
 
 ## How to structure your output
 
+The ranked findings list is the contract. The pre-finding sections are *optional* observation buckets — write "none observed" or omit a section entirely if you have nothing leverage-bearing for it. Do not fill them just to look thorough.
+
 ```md
-## Seams and boundaries
-- <observation> at <path>
-- ...
-
-## Concept clarity
-| Concept | Issue | Recommendation |
-|---|---|---|
-| <name> | <weak / overlapping / missing / generic> | <rename / split / merge / introduce> |
-
-## Locality
-- <subsystem> requires reading <N> files to safely change. Driver: <reason>
-- ...
-
-## Premature centralization
-- <abstraction at path> — shared contract is <unreal/unstable/unenforced>; suggested action: <split/duplicate/keep>
-- ...
-
-## Duplication signaling missing concepts
-- <pattern at paths> — likely missing concept: <name>; substrate fix: <invariant/gotcha/seam>
-- ...
-
-## Complexity worth deleting or committing
-- <code at path> — speculative abstraction with one user; action: <delete or commit>
-- ...
-
 ## High-leverage findings (ranked)
 
 ### 1. <title>
@@ -141,14 +118,44 @@ For `--scope diff`: focus on whether the diff's structural choices fit the exist
 **Substrate artifact to add or update:** <which one>
 ```
 
+This canonical six-field shape is tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md`.
+
+Optional pre-finding observation sections (omit any with no findings; do not fill empty):
+
+```md
+## Seams and boundaries (optional)
+- <observation> at <path>
+
+## Concept clarity (optional)
+| Concept | Issue | Recommendation |
+|---|---|---|
+| <name> | <weak / overlapping / missing / generic> | <rename / split / merge / introduce> |
+
+## Locality (optional)
+- <subsystem> requires reading <N> files to safely change. Driver: <reason>
+
+## Premature centralization (optional)
+- <abstraction at path> — shared contract is <unreal/unstable/unenforced>; suggested action: <split/duplicate/keep>
+
+## Duplication signaling missing concepts (optional)
+- <pattern at paths> — likely missing concept: <name>; substrate fix: <invariant/gotcha/seam>
+
+## Complexity worth deleting or committing (optional)
+- <code at path> — speculative abstraction with one user; action: <delete or commit>
+```
+
 ## What you must not do
 
+- Inherit conversation context from the calling skill. Treat your input prompt as the entire context.
 - Recommend renaming for taste reasons. Names are substrate; rename only when the current name actively misleads.
 - Recommend large refactors. Recommend the smallest structural change that fixes the highest-leverage problem.
 - Treat duplication as inherently bad. Apply `locality-over-centralization.md`.
 - Recommend "make this more abstract." Abstraction is a tax; recommend it only when there's clear payoff.
 - Read every file. Scope discipline.
-- Inherit conversation context. Treat your input prompt as the entire context.
+
+## Token discipline
+
+Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty optional sections. Pre-finding observation buckets are optional — only the ranked findings are the contract. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
 
 ## Tone
 

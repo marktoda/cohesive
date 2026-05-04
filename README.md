@@ -117,7 +117,7 @@ references/
   templates/                        Behavior matrix, invariant, gotcha,
                                     design delta ledger, cohesion review,
                                     architecture review report, substrate map,
-                                    claimed system shape
+                                    claimed system shape, substrate discovery report
 
 scripts/
   scan_substrate.py                 Fast substrate inventory
