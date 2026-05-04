@@ -17,6 +17,7 @@ docs/
     ├── plans/            # YYYY-MM-DD-<slug>.md
     ├── reviews/          # YYYY-MM-DD-<slug>-architecture-review.md, ...
     ├── delta-ledgers/    # YYYY-MM-DD-<slug>.md (rewrite-specs output)
+    ├── brainstorms/      # YYYY-MM-DD-<slug>.md (brainstorm-design output, when persisted)
     └── transcripts/      # <date>-<slug>.md (dogfood / scenario captures, optional)
 ```
 
@@ -40,6 +41,7 @@ Mixing canonical and historical content in one directory produces the pain Cohes
 | Plan | `YYYY-MM-DD-<slug>.md` | `2026-05-04-mvp-implementation.md` |
 | Review | `YYYY-MM-DD-<slug>-architecture-review.md` | `2026-05-04-codebase-architecture-review.md` |
 | Delta ledger | `YYYY-MM-DD-<slug>.md` | `2026-05-04-intake-classification.md` |
+| Brainstorm | `YYYY-MM-DD-<slug>.md` | `2026-05-04-intake-classification.md` |
 | Transcript | `YYYY-MM-DD-<slug>.md` | `2026-05-04-substrate-collapse.md` |
 
 ## Growth pattern
