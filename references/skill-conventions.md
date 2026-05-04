@@ -117,9 +117,10 @@ The router (`cohesively`) follows two extra rules:
 These deviations are observed and accepted in v0.1:
 
 - The router (`cohesively`) replaces "Process" with "Routes" and adds a "Routing decision logic" section. Routers route; they don't have a single linear process. The router may also use "Required behavior" instead of "Hard constraints" given its different shape.
+- The substrate-discovery skill (`discover-substrate`) uses "When to invoke" + "Inputs" + "Process" instead of "Hard constraints" + "Process." It is a no-dispatch utility skill that has prereq-shaped guidance to give rather than process-internal constraints to enforce. The "When to invoke" section is the load-bearing one for callers.
 - A skill may add a "## Token discipline" section if its outputs can grow large.
 
-These deviations are documented; new deviations should be discussed before adoption.
+These deviations are documented; new deviations require explicit discussion and an entry in this section before adoption.
 
 ## Anti-patterns to avoid
 

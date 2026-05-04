@@ -118,11 +118,11 @@ Don't mark everything blocking. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-r
 
 ## Token discipline
 
-Every reviewer agent body should declare a token-discipline note ("Output ~500 lines max. Read only paths above.") near the bottom or inside "How to structure your output." Reviewers can blow up token budgets quickly; the constraint is part of the contract.
+Every reviewer agent body declares a token-discipline note ("Output ~500 lines max. Read only paths above.") near the bottom or inside "How to structure your output." Reviewers can blow up token budgets quickly; the constraint is part of the contract.
 
 ## Section-order deviations
 
-The five existing reviewer agents have minor section-order drift (some put "How to scope" before "How to structure," some after). New agents should follow the order above. Existing agents will be brought into line in a future cleanup pass.
+The five existing reviewer agents have minor section-order drift (some put "How to scope" before "How to structure," some after). New agents follow the order above. *Future cleanup, non-normative:* existing agents will be brought into line when their wording stabilizes.
 
 ## When adding a new reviewer agent
 

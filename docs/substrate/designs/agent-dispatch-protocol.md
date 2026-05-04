@@ -125,6 +125,8 @@ The fresh-eyes property was previously formalized as a named invariant (`FRESH_E
 
 Both sites honor the protocol. The post-Phase-1 architecture review (2026-05-04) found that the agent-file preamble had drifted in wording across the agents — three variants among five files — and that the prior self-review's claim of full compliance was incorrect. That drift is what motivated the v0.1 substrate collapse: the verbatim-bullet rule was producing the appearance of an enforced contract without the substance.
 
+The substrate collapse demoted the verbatim-bullet rule to convention; it did not sweep the five agent files. The drift survives as drift-from-convention rather than drift-from-invariant. A future tightening pass may sweep the corpus to canonical wording when the wording itself stabilizes — until then, the property is held by the harness fence (structural) plus reviewer judgment of the convention (not mechanical enforcement).
+
 ## Enforcement
 
 - **Structural (load-bearing):** the harness's Task-subprocess isolation. Reviewer agents have no access to the dispatching skill's conversation. This is the fence that actually prevents context contamination.

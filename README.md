@@ -37,7 +37,8 @@ The pattern: **Cohesive shapes the substrate; Superpowers shapes the implementat
 /cohesive:brainstorm-design        # Options + pressure-test, grounded in substrate
 /cohesive:rewrite-specs            # Hard-rewrite docs to chosen end state (in worktree)
 /cohesive:review-spec-cohesion     # Fresh-eyes review of rewritten specs
-/cohesive:cohesive-review          # Codebase | diff | substrate modes
+/cohesive:cohesive-review          # Codebase | diff review (architecture / PR)
+/cohesive:substrate-audit          # What memory is missing?
 ```
 
 ## Workflows

@@ -157,8 +157,11 @@ Lighter-weight. Skip Phase 1's normative read except for files touched by the di
 <one specific recommendation>
 
 ### Recommended next Cohesive skill
-- If verdict is Pass / Pass with notes: `superpowers:writing-plans` — substrate is preserved; ready for implementation discipline.
-- If verdict is Needs substrate / Risky / Block: `cohesive:rewrite-specs` — the change implies substrate updates that should land before merge.
+- **Pass:** `superpowers:writing-plans` — substrate is preserved; ready for implementation discipline.
+- **Pass with notes:** `superpowers:writing-plans` — proceed; the notes are advisory, not gating.
+- **Needs substrate:** `cohesive:rewrite-specs` — the change implies substrate updates that should land before merge.
+- **Risky:** `cohesive:cohesive-review --scope codebase` — risk straddles the diff boundary; broader review is warranted before a fix.
+- **Block:** `cohesive:brainstorm-design` — the change conflicts with the substrate at a level that requires re-deciding direction, not just rewriting docs.
 ```
 
 5. **Don't persist by default.** Diff reviews are usually conversation-scoped. User can `--persist` if needed.

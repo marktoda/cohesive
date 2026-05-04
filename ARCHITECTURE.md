@@ -69,4 +69,4 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 
 ## v0.1 scope
 
-The plugin ships 7 skills, 5 reviewer agents, 5 references, 7 templates, and 2 scripts. The dated milestone plan that drove v0.1 is preserved at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md). The original design vision (more ambitious surface, since trimmed) is at [`docs/history/initial-design.md`](docs/history/initial-design.md).
+The plugin ships 7 skills, 5 reviewer agents, 8 references, 8 templates, and 2 scripts. The dated milestone plan that drove v0.1 is preserved at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md). The original design vision (more ambitious surface, since trimmed) is at [`docs/history/initial-design.md`](docs/history/initial-design.md).

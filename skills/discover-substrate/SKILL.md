@@ -16,7 +16,7 @@ Always invoke this skill (or compose its output) before:
 - `rewrite-specs` — so the rewrite knows what it's overwriting
 - `cohesive-review --scope codebase` — so the review knows where the normative docs live
 - `cohesive-review --scope diff` — so the review can connect changed files to their substrate
-- `cohesive-review --scope substrate` — same scan, but emphasizes missing-memory findings
+- `substrate-audit` — same scan, but emphasizes missing-memory findings
 
 Skip only when the user has *already* run discovery in this session and named the change surface. In that case, re-use the prior report.
 

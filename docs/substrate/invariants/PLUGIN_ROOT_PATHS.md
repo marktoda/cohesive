@@ -31,7 +31,9 @@ This is a real correctness contract. Unlike v0.1's other rules (output-shape, pr
 
 ## Enforcement
 
-`scripts/validate_plugin.sh` greps `skills/`, `agents/`, and `references/` for hardcoded path patterns (`/home/`, `/Users/`, `/usr/`, `~/`) outside fenced anti-pattern blocks. Failure is a hard fail. The script also asserts that internal-path references in skill bodies use the `${CLAUDE_PLUGIN_ROOT}/` prefix.
+**Current state (today):** `scripts/validate_plugin.sh` checks frontmatter shape, JSON validity, and that `references/...` and `templates/...` paths cited in skill bodies resolve to existing files. The path-discipline grep described below is the validator's *intended* state; the substrate collapse described what should be enforced but did not change the script. Until the grep lands, this invariant is held by reviewer judgment (`cohesive-review --scope diff` flags hardcoded paths) and the file-existence check (a hardcoded `/home/...` reference will resolve to a non-existent path on every other user's machine and trip the existing warning).
+
+**Intended state (follow-up implementation):** `scripts/validate_plugin.sh` greps `skills/`, `agents/`, and `references/` for hardcoded path patterns (`/home/`, `/Users/`, `/usr/`, `~/`) outside fenced anti-pattern blocks. Failure is a hard fail. The script asserts that internal-path references in skill bodies use the `${CLAUDE_PLUGIN_ROOT}/` prefix.
 
 The validator runs locally. CI is out of scope for v0.1.
 

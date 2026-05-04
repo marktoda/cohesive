@@ -154,7 +154,7 @@ Every finding maps to a substrate artifact. If you can't name one, the finding m
 Stop the review and return early if:
 
 - ≥3 blocking issues at the spec level (Phase 2 gate)
-- The codebase has fewer than 5 normative doc files and no architecture.md/CLAUDE.md/AGENTS.md — recommend `cohesive-review --scope substrate` instead, since the substrate is too thin for an architecture review
+- The codebase has fewer than 5 normative doc files and no architecture.md/CLAUDE.md/AGENTS.md — recommend `cohesive:substrate-audit` instead, since the substrate is too thin for an architecture review
 - The user explicitly scoped the review to a single subsystem and the subsystem doesn't exist as a clear seam — ask for clarification rather than guessing
 
 ## Token discipline

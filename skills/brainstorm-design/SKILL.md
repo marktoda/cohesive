@@ -173,7 +173,7 @@ or
 
 - Not an implementation planner. That's V1's `plan-implementation` (Superpowers' `writing-plans` works for now).
 - Not an architecture review. That's `cohesive-review --scope codebase`.
-- Not a substrate audit. That's `cohesive-review --scope substrate`.
+- Not a substrate audit. That's `cohesive:substrate-audit`.
 
 ## Composition
 

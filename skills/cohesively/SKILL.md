@@ -85,7 +85,7 @@ ${CLAUDE_PLUGIN_ROOT}/references/templates/<template>.md. I can fill it out with
 
    The form is the convention named in [`references/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `review (substrate audit)`, `rewrite-only`, `artifact`.
 
-2. **Prefer process skills before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code.
+2. **Process skills run before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code.
 
 3. **At most one clarifying question.** Per route (above). The question is a specific forced choice, never a vague "what do you want?" prompt — convention defined in [`references/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md) §"Clarifying questions".
 
