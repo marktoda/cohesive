@@ -52,7 +52,7 @@ For each file in <scope>:
 Include the **error message** the linter should produce. The message is part of the substrate — it teaches contributors why the rule exists at the moment it triggers.
 
 Example error message:
-> "ENV_SPEC_DIVERGENCE: `process.env.SLACK_TOKEN` referenced here but not declared in `env.spec.ts`. Every environment variable used in code must be declared in the spec so deployment validation works. See `docs/invariants/env-spec-coverage.md`."
+> "ENV_SPEC_DIVERGENCE: `process.env.SLACK_TOKEN` referenced here but not declared in `env.spec.ts`. Every environment variable used in code must be declared in the spec so deployment validation works. See `docs/substrate/invariants/ENV_SPEC_COVERAGE.md`."
 
 ## CI integration
 

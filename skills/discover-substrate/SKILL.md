@@ -46,7 +46,7 @@ In this order, if present:
 1. `CLAUDE.md` and `AGENTS.md` (highest priority — these often contain rules the codebase depends on)
 2. `architecture.md` and `README.md`
 3. `docs/design/**`, `docs/specs/**`, `docs/adr/**`
-4. `docs/invariants/**`, `docs/gotchas/**`, `docs/testing/**`
+4. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`)
 
 If the user named a subsystem, prefer docs whose path or title contains the subsystem name. Read normative docs *before* reading implementation files — they tell you what the system is supposed to do, which is more important than what it currently does.
 
@@ -61,7 +61,7 @@ These are the tests that *guarantee* behavior. Lower-level unit tests are useful
 
 ### 4. Search for existing matrices, invariants, gotchas, linters
 
-Even if the codebase doesn't have dedicated docs/invariants directories, the equivalents may exist informally:
+Even if the codebase doesn't have dedicated `docs/substrate/invariants/` (or `docs/invariants/`) directories, the equivalents may exist informally:
 - comments containing words like "INVARIANT", "MUST", "NEVER", "WARNING", "DO NOT"
 - custom check scripts under `scripts/`, `bin/`, `tools/`
 - pre-commit hooks

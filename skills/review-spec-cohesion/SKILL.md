@@ -7,7 +7,7 @@ description: Use after rewrite-specs has produced a spec rewrite and a design de
 
 ## What this skill produces
 
-A **spec cohesion review report** in chat, optionally written to `docs/cohesive/<topic>/cohesion-review.md`, with a verdict of **Approved**, **Issues Found**, or **Design Incoherent**, plus blocking issues, important issues, substrate gaps, locality concerns, future-fit concerns, enforcement concerns, and ranked recommended repairs.
+A **spec cohesion review report** in chat, optionally written to `docs/history/reviews/YYYY-MM-DD-<slug>-cohesion-review.md`, with a verdict of **Approved**, **Issues Found**, or **Design Incoherent**, plus blocking issues, important issues, substrate gaps, locality concerns, future-fit concerns, enforcement concerns, and ranked recommended repairs.
 
 The review's defining property is **fresh eyes**: it must run in a context that did not see the design discussion. That's what gives it the power to flag things the original designer can no longer see.
 
@@ -23,7 +23,7 @@ The review's defining property is **fresh eyes**: it must run in a context that 
 
 Required inputs the calling user or skill must provide (or that this skill should locate):
 
-- **Design delta ledger path** — usually `docs/cohesive/<topic>/design-delta.md`
+- **Design delta ledger path** — usually `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md`
 - **Rewritten spec paths** — extracted from the design delta ledger's "Files rewritten" / "Files added" sections
 - **Substrate discovery report path** (optional) — if `discover-substrate` ran earlier, pass its output path so the reviewer can compare what existed before to what now exists
 - **Approved direction summary** — one or two sentences from `brainstorm-design`
@@ -64,7 +64,7 @@ Run the agent in the foreground — its result is what this skill returns.
 
 ### 3. Render the verdict
 
-When the agent returns, surface its report in chat. If the user requested persistence (or this is part of a `cohesively`-orchestrated workflow), also write it to `docs/cohesive/<topic>/cohesion-review.md`.
+When the agent returns, surface its report in chat. If the user requested persistence (or this is part of a `cohesively`-orchestrated workflow), also write it to `docs/history/reviews/YYYY-MM-DD-<slug>-cohesion-review.md`.
 
 ### 4. Recommend the next step
 

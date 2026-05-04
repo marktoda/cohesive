@@ -29,7 +29,7 @@ Global rules with stable names.
 
 | Invariant | Scope | Enforcement (summary) | Spec |
 |---|---|---|---|
-| `INVARIANT_NAME` | <where it applies> | <test / type / constraint / linter / runtime wrapper / CI> | `docs/invariants/...` |
+| `INVARIANT_NAME` | <where it applies> | <test / type / constraint / linter / runtime wrapper / CI> | `docs/substrate/invariants/INVARIANT_NAME.md` |
 
 ## Semantic linters
 
@@ -45,7 +45,7 @@ Documented scars. Reference by name; the doc has the symptom/cause/correct-patte
 
 | Gotcha | Subsystem | Doc |
 |---|---|---|
-| <name> | <subsystem> | `docs/gotchas/...` |
+| <name> | <subsystem> | `docs/substrate/gotchas/<name>.md` |
 
 ## Tests of record
 

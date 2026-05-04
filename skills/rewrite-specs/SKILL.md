@@ -8,7 +8,7 @@ description: Use after brainstorm-design has produced an approved direction and 
 ## What this skill produces
 
 - A **set of rewritten docs** that describe the system's chosen end state in present-tense, normative language
-- A **design delta ledger** at `docs/cohesive/<topic>/design-delta.md` (or repo-convention path) recording every change
+- A **design delta ledger** at `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` (per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`) recording every change
 - A handoff to `review-spec-cohesion` for fresh-eyes review
 
 This is one of Cohesive's flagship skills. Spec rewriting is the cheapest place to discover that a design is wrong, and the rewrite-then-review loop is what makes that discovery happen *before* code.
@@ -73,7 +73,7 @@ For each new doc, use the appropriate template:
 - Substrate map: `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-map.md`
 - Claimed system shape (Phase 1 of `cohesive-review --scope codebase`): `${CLAUDE_PLUGIN_ROOT}/references/templates/claimed-system-shape.md`
 
-Place new docs under the existing repo convention if one exists (e.g. `docs/design/`, `docs/specs/`, `docs/invariants/`, `docs/substrate/`). Otherwise default to `docs/cohesive/<topic>/`.
+Place new canonical artifacts (invariants, matrices, gotchas) under `docs/substrate/<category>/` per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`. If the repo has its own convention (`docs/design/`, `docs/specs/`, `docs/adr/`, etc.), extend that — don't impose a parallel layout.
 
 ### 4. Update the substrate map
 
@@ -81,7 +81,7 @@ If a substrate map exists at the repo level, update it to reflect the rewrites: 
 
 ### 5. Produce the design delta ledger
 
-Write `docs/cohesive/<topic>/design-delta.md` (or `<repo-convention>/design-delta.md`) using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md`. The ledger is what the fresh-eyes reviewer reads to understand the rewrite as a delta.
+Write `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md`. Delta ledgers are dated, append-only history. The ledger is what the fresh-eyes reviewer reads to understand the rewrite as a delta.
 
 ### 6. Commit the rewrite
 
@@ -90,13 +90,13 @@ git add -A
 git commit -m "design: rewrite specs for <topic>
 
 Approved direction: <option name>
-See: docs/cohesive/<topic>/design-delta.md
+See: docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md
 "
 ```
 
 ### 7. Hand off to review
 
-Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger at `docs/cohesive/<topic>/design-delta.md`. Ready for fresh-eyes review via `cohesive:review-spec-cohesion`."
+Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md`. Ready for fresh-eyes review via `cohesive:review-spec-cohesion`."
 
 Do **not** invoke `review-spec-cohesion` from inside this skill — the review must run in a different context that didn't see the rewrite happen.
 
@@ -130,7 +130,7 @@ The skill's chat output (separate from the file changes) is short:
 - Semantic linter specs (proposed, not implemented): <count>
 
 ### Design delta ledger
-`docs/cohesive/<topic>/design-delta.md`
+`docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md`
 
 ### Remaining ambiguity
 - <thing the rewrite couldn't fully resolve>

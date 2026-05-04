@@ -9,9 +9,9 @@ description: Use when reviewing a codebase, subsystem, PR/diff, or substrate for
 
 One of three reports depending on `--scope`:
 
-- **`--scope codebase`** — full architecture review per `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`. Output written to `docs/cohesive/reviews/YYYY-MM-DD-<slug>-architecture-review.md` and rendered in chat.
+- **`--scope codebase`** — full architecture review per `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`. Output written to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` and rendered in chat.
 - **`--scope diff`** — PR / branch / working-changes review focused on whether the change preserves substrate. Rendered in chat; not written to disk by default.
-- **`--scope substrate`** — audit for missing memory (specs, matrices, invariants, gotchas, semantic linters, CI gates, local commands). Output written to `docs/cohesive/reviews/YYYY-MM-DD-<slug>-substrate-audit.md` and rendered in chat.
+- **`--scope substrate`** — audit for missing memory (specs, matrices, invariants, gotchas, semantic linters, CI gates, local commands). Output written to `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md` and rendered in chat.
 
 ## How to choose the mode
 
@@ -45,7 +45,7 @@ Use `discover-substrate` (or its output) to get the list. Read in priority order
 2. `ARCHITECTURE.md`, `architecture.md`
 3. `README.md`
 4. `docs/design/**`, `docs/specs/**`, `docs/adr/**`, `docs/substrate/**`
-5. `docs/invariants/**`, `docs/gotchas/**`, `docs/testing/**`
+5. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`)
 
 Produce the **claimed system shape** summary (sections from the rubric: Product goal / Architectural priors / Intended seams / Named invariants / Testing philosophy / Future direction implied by docs).
 
@@ -100,9 +100,9 @@ Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-rev
 
 #### Phase 5: Persist
 
-Write the report to `docs/cohesive/reviews/YYYY-MM-DD-<slug>-architecture-review.md` (where `<slug>` is derived from the scope). Render the same content in chat.
+Write the report to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` (where `<slug>` is derived from the scope). Render the same content in chat.
 
-If `docs/cohesive/reviews/` doesn't exist, create it. Add `docs/cohesive/` to `.gitignore`? **No** — Cohesive reviews are substrate; they should be committed. (User can choose to suppress with `--no-write` if they don't want it persisted.)
+If `docs/history/reviews/` doesn't exist, create it. Reviews are append-only history (per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`) — commit them. User can suppress persistence with `--no-write` if they want it transient.
 
 ### Mode: `diff`
 
@@ -195,7 +195,7 @@ Audit-style: focused on what's missing, not what's there.
 3. ...
 ```
 
-5. **Persist** to `docs/cohesive/reviews/YYYY-MM-DD-<slug>-substrate-audit.md`.
+5. **Persist** to `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md`.
 
 ## Output discipline
 
@@ -222,7 +222,7 @@ Architecture reviews can burn a lot of tokens. Constraints:
 - For codebase mode: Phase 2 spec-prior gate is honored — if substrate is broken, the review stops early.
 - Reviewers run in parallel via a single message with multiple Task tool calls.
 - Synthesis produces a thesis, not a stitched concatenation.
-- Codebase and substrate reviews persist to `docs/cohesive/reviews/`.
+- Codebase and substrate reviews persist to `docs/history/reviews/`.
 - Every finding names the substrate artifact to add or update.
 
 ## Red flags

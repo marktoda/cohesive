@@ -46,7 +46,7 @@ Run this checklist against each option. The output of `brainstorm-design` should
 20. **What future idea does this *appear* to make easy but actually doesn't?** This is the most dangerous category.
 
 ### Gotcha and scar surface
-21. **Which existing gotcha does this design rediscover?** Read `docs/gotchas/**` and any incident notes before answering.
+21. **Which existing gotcha does this design rediscover?** Read `docs/substrate/gotchas/**` (or repo-native equivalents) and any incident notes before answering.
 22. **Which gotcha does this design retire?** Conversely.
 23. **What new failure mode does this design introduce that the team hasn't seen before?**
 
