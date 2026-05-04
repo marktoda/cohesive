@@ -204,17 +204,35 @@ The companion brainstorm output is in conversation; the immediate predecessor is
 
 ## Remaining ambiguity
 
-- **Output filename pattern for audits.** `audit-substrate` writes to `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md` — the *artifact* keeps its noun-phrase filename even though the producing skill renamed. Reviewer should confirm this is the right call (vs renaming the filename pattern to match the new skill name).
 - **The `artifact` route deferral wording.** The router's artifact route still references "dedicated artifact skills (`create-invariant`, `create-matrix`) ship in V1" — the future names match the verb-noun pattern this rename establishes, but they aren't load-bearing yet. A future contributor should re-validate the future names when V1 work begins.
 - **Description triggers vs Superpowers competition.** The substrate-vocabulary grep (validator check 9) is the structural mitigation, but it doesn't audit Cohesive triggers *against* Superpowers' published descriptions. A separate (out-of-scope) PR could grep for overly broad triggers like "review the codebase" appearing in *any* Cohesive skill's description.
 
+## Repairs from validate-rewrite review
+
+A first `validate-rewrite` pass on this rewrite returned **Issues Found** with two blockers and four important issues. All six were addressed in a follow-up commit; the repairs are recorded here for the next reviewer to read alongside the original rewrite.
+
+- **B1 (closed)** — `references/skill-conventions.md:141` listed the old route name `review (substrate audit)`. Updated to `audit (substrate)` so the conventions doc agrees with the router skill body that cites it.
+- **B2 (closed)** — `ARCHITECTURE.md:11` said "the router and *six* subskills are the user-facing surface." Updated to "seven subskills" so the source-of-truth doc agrees with itself (line 74's "8 skills" total).
+- **I1 (closed)** — Persisted-artifact filename patterns were renamed to match the verb-noun skill names: `audit-substrate` now writes to `<slug>-audit-substrate.md` (was `<slug>-substrate-audit.md`); `validate-rewrite` writes to `<slug>-rewrite-validation.md` (was `<slug>-cohesion-review.md`). `references/substrate-layout.md`'s naming table grew a "Producing skill" column and three new rows (architecture review, substrate audit, rewrite validation) plus a one-paragraph note explaining that new artifacts use the verb-noun-skill suffix while older artifacts under `docs/history/reviews/` keep their noun-phrase suffixes (preserved as time-stamped record).
+- **I2 (closed)** — `validate-rewrite/SKILL.md` now persists by default to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md` and supports `--no-write` to suppress, mirroring `audit-substrate`. Step 3 names both the default and the override mechanism explicitly.
+- **I3 (closed)** — The empty-substrate threshold is now defined exactly once, in `discover-substrate/SKILL.md` step 7: trivially-empty *or* fewer than 5 normative docs total. `review-codebase`'s Phase 1.5 now reads only the verdict line (single canonical signal). The vague "~5" qualifier was dropped.
+- **I4 (closed)** — `cohesively/SKILL.md`'s consumer list under "Dispatch prompt contract" was split along the two columns: prereq-state consumers (5 subskills, matching `soft-prereqs.md`'s enumeration) and chosen-direction / ledger-path consumers (`rewrite-specs`, `validate-rewrite`, plus V1 artifact skills). Made explicit that `validate-rewrite` does not consume the prereq-state contract — its router-passed input is the ledger path, not a discovery state.
+
+### Framing change (separate from review issues)
+
+The user requested that `validate-rewrite` and `rewrite-specs` not tell the user the review "must run in a different context." The framing was conventional reinforcement, not the structural fence — the structural fence is the harness's Task-subprocess isolation, which holds regardless of which conversation invokes the skill. The skill always dispatches the `spec-cohesion-reviewer` agent via Task tool; the agent reads only the paths it's passed.
+
+- `validate-rewrite/SKILL.md` — "What this skill produces" reframed to name the structural fence (Task subprocess isolation) directly, not the user-context question. Hard constraint #1 reframed: "Always dispatch the `spec-cohesion-reviewer` agent via Task tool" (was: "Run in a fresh agent context"). "Why fresh eyes matter here" updated to attribute the property to the dispatched agent's subprocess. Red flags rewritten — removed "Reviewing in the same conversation context as the rewrite. The skill must dispatch a subagent" since the skill always dispatches by definition; replaced with red flags about prompt-content contamination (the only way fresh-eyes can break given the harness fence holds).
+- `rewrite-specs/SKILL.md` — step 7 ("Hand off to review") removed the prohibition "Do not invoke `validate-rewrite` from inside this skill — the review must run in a different context that didn't see the rewrite happen." Replaced with a one-paragraph note that `validate-rewrite` always dispatches via Task subprocess, so direct invocation from the same turn (e.g. by the `cohesively` router chaining the `design` route) is fine.
+
 ## Ready for fresh-eyes review?
 
-**Yes.** The validator passes (0 errors, 0 warnings). All 22 affected files are committed in one logical PR. The remaining ambiguity items are flagged for the reviewer to confirm or reroute.
+**Yes** — second pass. The validator still passes (0 errors, 0 warnings). The two blocking and four important issues from the first `validate-rewrite` pass are closed in this same worktree under a follow-up commit. The reviewer's "What looked right" observations remain in force; the repairs are local edits, not structural changes.
 
 ## How to read this ledger
 
 1. The "Approved direction" line names the destination — Option A from this conversation's brainstorm output.
 2. "Conceptual changes" surfaces the six things that are *different*; the rest is mechanical citation update.
 3. "Files rewritten" with before/after entries lets the reviewer verify each rewrite without re-reading every file end-to-end.
-4. "Remaining ambiguity" is the focused review punch list.
+4. "Repairs from validate-rewrite review" lists the six issues closed by the follow-up commit.
+5. "Remaining ambiguity" is the focused review punch list.

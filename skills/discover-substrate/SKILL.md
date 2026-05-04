@@ -94,13 +94,20 @@ This is the highest-value section of the report. The point of substrate discover
 
 ### 7. Detect empty-substrate codebases
 
-If the inventory is trivially empty — no `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`, no `docs/` content, no tests, no CI files — emit `**Empty-substrate verdict: yes**` near the top of the report, before §"Target change surface". Downstream skills check for this line and adapt:
+Emit `**Empty-substrate verdict: yes**` near the top of the report (before §"Target change surface") when *either* of these holds:
+
+- **Trivially empty:** no `CLAUDE.md`, no `AGENTS.md`, no `ARCHITECTURE.md`, no `docs/` content, no tests, no CI files.
+- **Below the substrate-review threshold:** the inventory surfaces fewer than 5 normative documents in total. "Normative documents" means anything in the `Normative docs`, `Design docs / specs / ADRs`, `Invariant docs`, `Gotcha / scar docs`, or `Behavior matrices` buckets of `scan_substrate.py`.
+
+Either condition is sufficient. The single signal lets every downstream consumer make the same decision from one source of truth — don't replicate the threshold logic in `review-codebase`'s Phase 1.5 or anywhere else.
+
+Downstream skills check for the verdict line and adapt:
 
 - `review-codebase` halts at Phase 1.5 and recommends `audit-substrate` instead
 - `brainstorm-design` broadens its option-generation rather than grounding in nothing
 - `audit-substrate` proceeds normally — it's the right home for empty-substrate codebases
 
-If the inventory has at least a few normative anchors (≥1 of `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`/`README.md` plus some `docs/` content), do not emit the verdict line.
+If the verdict applies, the report's "Missing memory" section should note the high-level absence rather than enumerating per-area gaps — there's not enough substrate yet to scope what's missing.
 
 ### 8. Recommend the next Cohesive skill
 

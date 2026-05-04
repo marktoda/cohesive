@@ -40,12 +40,12 @@ Produce the **claimed system shape** summary (sections from the rubric: Product 
 
 ### Phase 1.5: Sparse-substrate gate
 
-Before judging coherence, check whether there is enough substrate to review at all. If the discovery report carries `**Empty-substrate verdict: yes**` per `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-discovery-report.md`, OR if discovery surfaced fewer than ~5 normative documents in total (no `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`/`README.md` plus minimal `docs/`), **stop** and return:
+Before judging coherence, check whether there is enough substrate to review at all. If the discovery report carries `**Empty-substrate verdict: yes**` (per `${CLAUDE_PLUGIN_ROOT}/skills/discover-substrate/SKILL.md` step 7, which is the single canonical source for this signal), **stop** and return:
 
 ```md
 ## Substrate too sparse for architecture review
 
-This codebase has fewer than ~5 normative documents and no architectural map. An architecture review against near-empty substrate would hallucinate findings rather than judge alignment.
+This codebase has fewer than 5 normative documents and/or no architectural map (per the empty-substrate threshold in `discover-substrate` step 7). An architecture review against near-empty substrate would hallucinate findings rather than judge alignment.
 
 ### Recommended next Cohesive skill
 `cohesive:audit-substrate` — produce a missing-memory inventory; the audit is the right tool for "what substrate doesn't yet exist." Once the highest-leverage entries become real artifacts (named invariants, gotcha docs, behavior matrices) and the doc surface has substantive normative content, re-run `cohesive:review-codebase`.

@@ -7,14 +7,14 @@ description: Use after rewrite-specs has produced a spec rewrite and a design de
 
 ## What this skill produces
 
-A **rewrite validation report** in chat, optionally written to `docs/history/reviews/YYYY-MM-DD-<slug>-cohesion-review.md`, with a verdict of **Approved**, **Issues Found**, or **Design Incoherent**, plus blocking issues, important issues, substrate gaps, locality concerns, future-fit concerns, enforcement concerns, and ranked recommended repairs.
+A **rewrite validation report** in chat, written by default to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md` (use `--no-write` to suppress persistence), with a verdict of **Approved**, **Issues Found**, or **Design Incoherent**, plus blocking issues, important issues, substrate gaps, locality concerns, future-fit concerns, enforcement concerns, and ranked recommended repairs.
 
-The review's defining property is **fresh eyes**: it must run in a context that did not see the design discussion. That's what gives it the power to flag things the original designer can no longer see.
+The review's defining property is **fresh eyes**: this skill always dispatches the `spec-cohesion-reviewer` agent via the Task tool, which runs in an isolated subprocess with no inherited conversation context. The structural fence is the harness's Task-subprocess isolation — that's what gives the review the power to flag things the original designer can no longer see, regardless of whether this skill is invoked from the same conversation that produced the rewrite.
 
 ## Hard constraints
 
-1. **Run in a fresh agent context.** This skill dispatches the `spec-cohesion-reviewer` agent via the Task tool. The agent reads only the rewritten specs and the design delta ledger — it must not inherit conversation context from the rewrite.
-2. **Inputs must be paths, not summaries.** Pass the agent file paths to read; don't pre-summarize the design for it. Pre-summary defeats the fresh-eyes property.
+1. **Always dispatch the `spec-cohesion-reviewer` agent via Task tool.** The skill itself never renders the verdict from in-conversation reading — it dispatches and surfaces the agent's report. The Task subprocess provides the structural fresh-eyes fence; this skill's job is the dispatch and the synthesis.
+2. **Inputs must be paths, not summaries.** Pass the agent file paths to read; don't pre-summarize the design for it. The dispatch prompt's content is the entire context the agent has, so any summary the dispatching skill writes into it bypasses fresh-eyes — the harness fence prevents conversation inheritance, but it can't prevent prompt contamination.
 3. **The review can block implementation.** A "Design Incoherent" or "Issues Found (blocking)" verdict means `rewrite-specs` should run again, not `plan-implementation`.
 
 ## Process
@@ -62,9 +62,11 @@ Do not read any file not listed above unless the design delta ledger explicitly 
 
 Run the agent in the foreground — its result is what this skill returns.
 
-### 3. Render the verdict
+### 3. Render the verdict and persist
 
-When the agent returns, surface its report in chat. If the user requested persistence (or this is part of a `cohesively`-orchestrated workflow), also write it to `docs/history/reviews/YYYY-MM-DD-<slug>-cohesion-review.md`.
+When the agent returns, surface its report in chat. By default, also write it to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md`. Reviews are append-only history per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` — commit them.
+
+If the user passed `--no-write`, render in chat only and skip persistence. The router's dispatch prompt for the `design` route step 4 and the `rewrite-only` route step 2 includes the ledger path; persistence is the default in both router-driven and direct-invocation cases.
 
 ### 4. Recommend the next step
 
@@ -121,7 +123,7 @@ The skill's chat output (the agent's report, surfaced):
 
 The original architect can no longer see what's underspecified, because they remember the design discussion. They know that "the kernel is pure" implies certain constraints — but a future reader (human or agent) does not have that conversation in their head. Only the docs do.
 
-A fresh-context reviewer simulates the future reader. If the reviewer (who has read only the rewritten docs) can't tell whether some behavior is intentional or accidental, then no future contributor will be able to either. That's the gap the rewrite needs to close before implementation.
+The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It runs in a Task subprocess with no inherited context and reads only the file paths the dispatch prompt names. If the reviewer (who has read only the rewritten docs) can't tell whether some behavior is intentional or accidental, then no future contributor will be able to either. That's the gap the rewrite needs to close before implementation.
 
 ## Acceptance criteria
 
@@ -133,8 +135,8 @@ A fresh-context reviewer simulates the future reader. If the reviewer (who has r
 
 ## Red flags
 
-- Calling the agent with a long contextual preamble that summarizes the design. That bypasses fresh-eyes.
-- Reviewing in the same conversation context as the rewrite. The skill must dispatch a subagent.
+- Calling the agent with a long contextual preamble that summarizes the design. That bypasses fresh-eyes by smuggling the calling skill's mental model into the agent's prompt — the harness fence can't prevent prompt contamination, only conversation inheritance.
+- Rendering the verdict from in-conversation reading instead of dispatching the agent. The skill always dispatches; that's the structural fence.
 - Verdict of "Approved" with no positive observations about what looked right. Calibration matters.
 - Verdict of "Issues Found" with all issues marked blocking. If everything is blocking, the prioritization is failing.
 - The reviewer reading implementation files. Specs only.

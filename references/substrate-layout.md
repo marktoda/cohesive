@@ -31,18 +31,22 @@ Mixing canonical and historical content in one directory produces the pain Cohes
 
 ## Naming
 
-| Category | Convention | Example |
-|---|---|---|
-| Architecture | top-level `ARCHITECTURE.md` | `ARCHITECTURE.md` |
-| Invariant | `SHOUTY_CASE.md` | `AUDIT_EXTERNAL_MUTATION.md` |
-| Behavior matrix | `kebab-case.md` | `intake-decision-kernel.md` |
-| Gotcha | `kebab-case.md` | `slack-thread-truncation.md` |
-| Design | `kebab-case.md` | `three-layer-architecture.md` |
-| Plan | `YYYY-MM-DD-<slug>.md` | `2026-05-04-mvp-implementation.md` |
-| Review | `YYYY-MM-DD-<slug>-architecture-review.md` | `2026-05-04-codebase-architecture-review.md` |
-| Delta ledger | `YYYY-MM-DD-<slug>.md` | `2026-05-04-intake-classification.md` |
-| Brainstorm | `YYYY-MM-DD-<slug>.md` | `2026-05-04-intake-classification.md` |
-| Transcript | `YYYY-MM-DD-<slug>.md` | `2026-05-04-substrate-collapse.md` |
+| Category | Convention | Example | Producing skill |
+|---|---|---|---|
+| Architecture | top-level `ARCHITECTURE.md` | `ARCHITECTURE.md` | (manually maintained) |
+| Invariant | `SHOUTY_CASE.md` | `AUDIT_EXTERNAL_MUTATION.md` | (V1 `create-invariant`) |
+| Behavior matrix | `kebab-case.md` | `intake-decision-kernel.md` | (V1 `create-matrix`) |
+| Gotcha | `kebab-case.md` | `slack-thread-truncation.md` | (manually authored) |
+| Design | `kebab-case.md` | `three-layer-architecture.md` | (manually authored) |
+| Plan | `YYYY-MM-DD-<slug>.md` | `2026-05-04-mvp-implementation.md` | (manually authored) |
+| Architecture review | `YYYY-MM-DD-<slug>-architecture-review.md` | `2026-05-04-codebase-architecture-review.md` | `review-codebase` |
+| Substrate audit | `YYYY-MM-DD-<slug>-audit-substrate.md` | `2026-05-04-codebase-audit-substrate.md` | `audit-substrate` |
+| Rewrite validation | `YYYY-MM-DD-<slug>-rewrite-validation.md` | `2026-05-04-intake-classification-rewrite-validation.md` | `validate-rewrite` |
+| Delta ledger | `YYYY-MM-DD-<slug>.md` | `2026-05-04-intake-classification.md` | `rewrite-specs` |
+| Brainstorm | `YYYY-MM-DD-<slug>.md` | `2026-05-04-intake-classification.md` | `brainstorm-design` |
+| Transcript | `YYYY-MM-DD-<slug>.md` | `2026-05-04-substrate-collapse.md` | (manually captured) |
+
+The skill-output filenames embed the *producing-skill name* as the suffix (`-audit-substrate`, `-rewrite-validation`) so a future contributor reading a directory listing can tell which skill produced each artifact. Cohesive's older review artifacts (`-architecture-review.md`, `-self-review.md`) predate the rename and use noun-phrase suffixes; new artifacts use the verb-noun pattern that matches the producing skill.
 
 ## Growth pattern
 

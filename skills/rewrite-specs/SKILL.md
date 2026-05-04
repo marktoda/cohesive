@@ -103,7 +103,7 @@ See: docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md
 
 Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md`. Ready for fresh-eyes review via `cohesive:validate-rewrite`."
 
-Do **not** invoke `validate-rewrite` from inside this skill — the review must run in a different context that didn't see the rewrite happen.
+`validate-rewrite` always dispatches the `spec-cohesion-reviewer` agent in a Task subprocess with no inherited conversation context — the structural fresh-eyes fence is the harness's subprocess isolation, not which conversation the user invokes the review from. Whether `validate-rewrite` is invoked directly from this turn (e.g. by the `cohesively` router chaining the `design` route) or from a fresh session, the dispatched agent reads only paths it's passed.
 
 ## Output format
 

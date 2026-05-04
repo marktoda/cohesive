@@ -107,7 +107,12 @@ Per route, the dispatch prompt to the first subskill that has a prereq question 
 | `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first) |
 | `artifact` | n/a | "Artifact requested: <invariant / matrix / gotcha>" |
 
-Subskills that consume this contract: `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`, `validate-rewrite`. Each has a Hard Constraint stating that when the router passes the relevant fragment, the canonical clarifying question is skipped.
+The consumer list splits along the two columns:
+
+- **Prereq-state consumers** (subskills with a `discover-substrate` prereq): `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`. Each has a Hard Constraint stating that when the router passes the prereq fragment, the canonical clarifying question is skipped. This list matches `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`.
+- **Chosen-direction / ledger-path consumers**: `rewrite-specs` (consumes the chosen direction), `validate-rewrite` (consumes the ledger path), and the V1 artifact skills.
+
+`validate-rewrite` does not consume the prereq-state contract — it has no `discover-substrate` prereq. Its router-passed input is the design delta ledger path, not a discovery state.
 
 If the user invokes a subskill *directly* (bypassing this router), the subskill asks its canonical question per `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"Clarifying questions" — the contract is router-side only.
 

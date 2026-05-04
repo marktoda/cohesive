@@ -7,7 +7,7 @@ description: Use when auditing a repo for missing memory — implicit rules, bra
 
 ## What this skill produces
 
-A **substrate audit report** at `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md`, also rendered in chat. The report inventories what *isn't* yet substrate: implicit rules the codebase depends on, branchy behavior with no matrix, invariants without enforcement, scars trapped in comments or PR descriptions, stale docs that no longer describe reality, premature centralizations that haven't earned their abstraction, missing local commands.
+A **substrate audit report** at `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md`, also rendered in chat. The report inventories what *isn't* yet substrate: implicit rules the codebase depends on, branchy behavior with no matrix, invariants without enforcement, scars trapped in comments or PR descriptions, stale docs that no longer describe reality, premature centralizations that haven't earned their abstraction, missing local commands.
 
 This skill is intentionally separate from `review-codebase` and `review-diff`. Those reviews dispatch reviewer agents and synthesize a thesis-led report; substrate audit is a single-pass scan that produces a missing-memory inventory. They share neither machinery nor output shape.
 
@@ -93,7 +93,7 @@ Walk each axis from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`. For e
 
 ### 4. Persist
 
-Write the report to `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md`. Reviews and audits are append-only history per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` — commit them.
+Write the report to `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md`. Reviews and audits are append-only history per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` — commit them.
 
 If the user passes `--no-write`, render in chat only.
 

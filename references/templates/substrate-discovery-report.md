@@ -62,7 +62,7 @@ The canonical shape `discover-substrate` produces. Five downstream skills consum
 
 ## Empty-substrate verdict
 
-When the inventory is trivially empty (no normative docs, no tests, no CI files, no `docs/substrate/` content), `discover-substrate` returns the verdict line `**Empty-substrate verdict: yes**` near the top of the report, before §"Target change surface". Downstream skills check for this line and adapt:
+When the inventory is trivially empty *or* surfaces fewer than 5 normative documents in total (per `discover-substrate` step 7), the report carries the verdict line `**Empty-substrate verdict: yes**` near the top of the report, before §"Target change surface". This is the single canonical signal; downstream skills check this line and adapt:
 
 - `review-codebase` halts with a "this codebase is too sparse for architecture review; run `cohesive:audit-substrate` first" message.
 - `brainstorm-design` broadens its option-generation rather than grounding in nothing.
