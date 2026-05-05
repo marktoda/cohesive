@@ -107,6 +107,8 @@ For `--scope diff`: focus on whether the diff's structural choices fit the exist
 The ranked findings list is the contract. The pre-finding sections are *optional* observation buckets — write "none observed" or omit a section entirely if you have nothing leverage-bearing for it. Do not fill them just to look thorough.
 
 ```md
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
 ## High-leverage findings (ranked)
 
 ### 1. <title>

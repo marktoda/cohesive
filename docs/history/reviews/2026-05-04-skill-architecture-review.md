@@ -14,7 +14,7 @@
 
 ## Thesis
 
-The post-collapse skill architecture is structurally sound — the substrate-audit split repaired the one real category error, three-tier separation holds, and conventions-vs-invariant boundaries are explicit. But three specific sharp edges keep this from "Healthy." Two of them are about implicit contracts that propagate sloppiness silently, and one is about agent prompt concision: **all five agent files are missing the token-discipline note that `references/reviewer-agent-template.md:119-121` explicitly requires.** The two reviewers dispatched for this very review both produced ~2K-word reports rather than the bounded ones the convention demands — the failure mode is observable in this very review's tooling. The sharp edges are small in code-mass but high in user-experience leverage.
+The post-collapse skill architecture is structurally sound — the substrate-audit split repaired the one real category error, three-tier separation holds, and conventions-vs-invariant boundaries are explicit. But three specific sharp edges keep this from "Healthy." Two of them are about implicit contracts that propagate sloppiness silently, and one is about agent prompt concision: **all five agent files are missing the token-discipline note that `docs/substrate/designs/reviewer-agent-template.md:119-121` explicitly requires.** The two reviewers dispatched for this very review both produced ~2K-word reports rather than the bounded ones the convention demands — the failure mode is observable in this very review's tooling. The sharp edges are small in code-mass but high in user-experience leverage.
 
 ## Cohesion scorecard
 
@@ -89,7 +89,7 @@ Organized under the three sub-questions the reviewers were asked.
 **Category:** Sharp edge / Convention gap
 **Why it matters:** A `cohesive-review --scope codebase` produces 5K-10K tokens. Diff mode has a tight chat verdict table; codebase mode does not. No verdict-first compressed view as the lead.
 **Evidence:** `skills/cohesive-review/SKILL.md:91-101` and `:170-181` define a 6-section template with no TL;DR.
-**Recommended fix:** Add TL;DR convention to `references/skill-conventions.md` for any persisted skill output (verdict + top 1-3 findings + recommended next skill).
+**Recommended fix:** Add TL;DR convention to `docs/substrate/designs/skill-conventions.md` for any persisted skill output (verdict + top 1-3 findings + recommended next skill).
 **Substrate artifact to add or update:** Conventions doc + architecture-review-report template.
 
 #### 7. `discover-substrate` description is too generic — competes with Superpowers
@@ -107,7 +107,7 @@ Organized under the three sub-questions the reviewers were asked.
 
 **Severity:** High
 **Category:** Convention drift / Agent-readiness
-**Why it matters:** `references/reviewer-agent-template.md:119-121` explicitly requires every reviewer agent to declare a token-discipline note ("Output ~500 lines max. Read only paths above."). None of the five agent files contain such a line. Dispatched reviewers reach for the section list as the contract and emit ~2K-word reports — observable failure mode in this very review's two dispatches.
+**Why it matters:** `docs/substrate/designs/reviewer-agent-template.md:119-121` explicitly requires every reviewer agent to declare a token-discipline note ("Output ~500 lines max. Read only paths above."). None of the five agent files contain such a line. Dispatched reviewers reach for the section list as the contract and emit ~2K-word reports — observable failure mode in this very review's two dispatches.
 **Evidence:** Template at `:119-121`; absent in `agents/spec-cohesion-reviewer.md`, `agents/substrate-alignment-reviewer.md`, `agents/structure-reviewer.md`, `agents/library-native-reviewer.md`, `agents/agent-readiness-reviewer.md`.
 **Recommended fix:** Add a single concrete-bound line to each agent: "Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty sections."
 **Substrate artifact to add or update:** All 5 agent files.
@@ -135,7 +135,7 @@ Organized under the three sub-questions the reviewers were asked.
 **Severity:** Medium
 **Category:** Convention drift
 **Why it matters:** Only the complementary bullet is present at `:89-96` ("Read prior conversation context. You won't have it; don't pretend."). The load-bearing canonical bullet ("Inherit conversation context from the calling skill. Treat your input prompt as the entire context.") is absent. Other 4 agents have it.
-**Evidence:** `agents/spec-cohesion-reviewer.md:89-96` vs `references/reviewer-agent-template.md:71-73`.
+**Evidence:** `agents/spec-cohesion-reviewer.md:89-96` vs `docs/substrate/designs/reviewer-agent-template.md:71-73`.
 **Recommended fix:** Add the verbatim bullet. One-line edit.
 **Substrate artifact to add or update:** One agent file.
 

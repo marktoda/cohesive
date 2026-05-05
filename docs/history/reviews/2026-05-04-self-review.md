@@ -95,7 +95,7 @@ Each invariant goes in a new `docs/invariants/` directory (or under `references/
 **Category:** Agent-readiness / Domain model
 **Why it matters:** Six SKILL.md files differ in section list (`cohesively` lacks "Hard constraints" and "Composition"; `discover-substrate` has no "Composition"; `rewrite-specs` is the only one with anti-patterns as a *table* vs others' bullet lists). No reference document names the canonical skill body shape. An agent writing the V1 `invariant` skill will pick whichever sibling they read first and silently produce something subtly off. Same drift exists across the five agent files (preamble structure, "How to scope your reading" placement, color choice).
 **Evidence:** skills/cohesively/SKILL.md (no Hard constraints); skills/rewrite-specs/SKILL.md:141 (table); skills/brainstorm-design/SKILL.md:163 (bullets); agents/agent-readiness-reviewer.md:124–131 vs agents/library-native-reviewer.md:100–107 vs agents/substrate-alignment-reviewer.md:73–83.
-**Recommended fix:** Add `references/skill-conventions.md` and `references/reviewer-agent-template.md` naming required vs optional sections, frontmatter format, anti-pattern presentation, and "Recommended next Cohesive skill" footer convention. Reference both from a new repo-root `AGENTS.md` so substrate discovery surfaces them. Add a section-presence check to `validate_plugin.sh`.
+**Recommended fix:** Add `docs/substrate/designs/skill-conventions.md` and `docs/substrate/designs/reviewer-agent-template.md` naming required vs optional sections, frontmatter format, anti-pattern presentation, and "Recommended next Cohesive skill" footer convention. Reference both from a new repo-root `AGENTS.md` so substrate discovery surfaces them. Add a section-presence check to `validate_plugin.sh`.
 **Substrate artifact to add or update:** Two convention references + AGENTS.md + validator extension.
 
 ### 5. `cohesive-review --scope substrate` is a category error in the unification
@@ -259,7 +259,7 @@ Cohesive looks like a real Claude Code plugin, not a methodology PDF wedged into
 
 ### Templates to add or remove
 - ADD: `references/templates/claimed-system-shape.md`
-- ADD: `references/skill-conventions.md` and `references/reviewer-agent-template.md`
+- ADD: `docs/substrate/designs/skill-conventions.md` and `docs/substrate/designs/reviewer-agent-template.md`
 - ADD: `references/composing-with-superpowers.md`
 - DECIDE: `references/templates/implementation-plan.md` — delete or commit by adding a V1 skill
 
@@ -279,7 +279,7 @@ Cohesive looks like a real Claude Code plugin, not a methodology PDF wedged into
 ### Phase 1: Repair substrate (1–2 sessions, blocking v0.1 release)
 1. Add `AGENTS.md` and a §0 source-of-truth hierarchy to plan.
 2. Name the five invariants in `docs/invariants/` (or `references/invariants/`); fill out using the existing template.
-3. Add `references/skill-conventions.md` and `references/reviewer-agent-template.md`.
+3. Add `docs/substrate/designs/skill-conventions.md` and `docs/substrate/designs/reviewer-agent-template.md`.
 4. Add `references/templates/claimed-system-shape.md`.
 5. Write the two soft-prereqs and superpowers-competition gotchas.
 6. Generate the two dogfood transcripts (this review counts as one).

@@ -85,7 +85,7 @@ Plus complementary bullets:
 - Pre-summarize the design's intent. Read the docs as the source of truth.
 ```
 
-The exact phrasing is the canonical preamble defined in [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md). New reviewer agents copy it verbatim.
+The exact phrasing is the canonical preamble defined in [`docs/substrate/designs/reviewer-agent-template.md`](reviewer-agent-template.md). New reviewer agents copy it verbatim.
 
 ## Both halves are required
 
@@ -96,7 +96,7 @@ The protocol's safety depends on **both** the dispatching skill and the agent en
 
 Both sides of the protocol exist as independent fences. The structural fence underneath both is the harness's Task-subprocess isolation: calling Task with `subagent_type` creates an isolated subprocess with no inherited conversation. The agent-file preamble and the skill-side dispatch prose are convention layers on top of that fence — defense in depth, but the harness is the load-bearer.
 
-The fresh-eyes property was previously formalized as a named invariant (`FRESH_EYES_DISPATCH`). v0.1's substrate collapse demoted it to convention because (a) the structural fence is the harness, not the prose; (b) the verbatim-bullet rule produced enforceable-looking documentation that was, in fact, drifting across the agent files without breaking the property. The property is real; the named-invariant ceremony was performative. The conventions in [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) and [`references/skill-conventions.md`](../../../references/skill-conventions.md) §"Dispatch discipline" carry the rule now.
+The fresh-eyes property was previously formalized as a named invariant (`FRESH_EYES_DISPATCH`). v0.1's substrate collapse demoted it to convention because (a) the structural fence is the harness, not the prose; (b) the verbatim-bullet rule produced enforceable-looking documentation that was, in fact, drifting across the agent files without breaking the property. The property is real; the named-invariant ceremony was performative. The conventions in [`docs/substrate/designs/reviewer-agent-template.md`](reviewer-agent-template.md) and [`docs/substrate/designs/skill-conventions.md`](skill-conventions.md) §"Dispatch discipline" carry the rule now.
 
 ## What this protocol forbids
 
@@ -131,7 +131,7 @@ The substrate collapse demoted the verbatim-bullet rule to convention; it did no
 ## Enforcement
 
 - **Structural (load-bearing):** the harness's Task-subprocess isolation. Reviewer agents have no access to the dispatching skill's conversation. This is the fence that actually prevents context contamination.
-- **Convention (reinforcement):** the agent-file preamble bullet and the skill-side dispatch prose. Each agent file says, in some form, that the agent does not inherit conversation context; each dispatching skill states the same in its dispatch prompt. Verbatim copy from [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) is the safest default. Drift is reviewed in `review-codebase` / `review-diff`, not mechanically enforced.
+- **Convention (reinforcement):** the agent-file preamble bullet and the skill-side dispatch prose. Each agent file says, in some form, that the agent does not inherit conversation context; each dispatching skill states the same in its dispatch prompt. Verbatim copy from [`docs/substrate/designs/reviewer-agent-template.md`](reviewer-agent-template.md) is the safest default. Drift is reviewed in `review-codebase` / `review-diff`, not mechanically enforced.
 
 `scripts/validate_plugin.sh` does not grep for fresh-eyes-preamble strings in v0.1. The structural fence is the harness; the convention is reviewer-judged. If wording stabilizes across agent files in V1, a grep can be added then.
 
@@ -151,6 +151,6 @@ The substrate collapse demoted the verbatim-bullet rule to convention; it did no
 
 ## Related substrate
 
-- [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) — the canonical reviewer-agent shape, including the canonical preamble.
-- [`references/skill-conventions.md`](../../../references/skill-conventions.md) §"Dispatch discipline" — the canonical skill-side rules.
+- [`docs/substrate/designs/reviewer-agent-template.md`](reviewer-agent-template.md) — the canonical reviewer-agent shape, including the canonical preamble.
+- [`docs/substrate/designs/skill-conventions.md`](skill-conventions.md) §"Dispatch discipline" — the canonical skill-side rules.
 - [`three-layer-architecture.md`](three-layer-architecture.md) — the three-tier separation that justifies fresh-eyes review as a load-bearing property.

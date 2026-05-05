@@ -19,43 +19,53 @@ Historical context lives separately under `docs/history/`:
 
 ## Substrate vs implementation
 
-Files in this repo split into two roles:
+Files in this repo split into two roles, on a **contributor vs user** axis:
 
-- **Substrate** — what the system *claims* about itself. Lives in `docs/substrate/**`, `docs/history/**`, `ARCHITECTURE.md`, `AGENTS.md`, `README.md`. Normative content: invariants, behavior matrices, gotchas, designs, conventions, rubrics — anything that names a rule, a shape, or a judgment framework. A change here changes the rules.
-- **Implementation** — the runtime artifacts that *do* the work. Lives in `skills/**`, `agents/**`, `references/**`, `scripts/**`, `.claude-plugin/**`. Skill prompts Claude reads at invocation, reviewer-agent system prompts, fillable templates, the validator script, the plugin manifest. A change here changes behavior.
+- **Substrate** — rules that govern *this codebase itself*. Contributor-facing. About how to maintain Cohesive: the conventions for writing skills here, the canonical reviewer-agent shape, where this repo's artifacts live, the invariants this repo's contributors must honor, the scars this repo has earned, the design decisions that shape this codebase's structure. Lives in `docs/substrate/**`, `docs/history/**`, `ARCHITECTURE.md`, `AGENTS.md`, `README.md`. Plugin users *receive* these files when they install Cohesive (they ship as part of the repo) but the files don't run at runtime; they're documentation about how the plugin itself is built.
+- **Implementation** — the workflow methodology Cohesive *ships to plugin users*. User-facing. The skills, agents, fillable templates, and runtime references (rubrics, models, voice guide) that get cited at generation time to do the actual workflow's work. Lives in `skills/**`, `agents/**`, `references/**`, `scripts/**`, `.claude-plugin/**`. A change here changes what plugin users experience when they invoke Cohesive on their codebase.
 
-`references/` is implementation: it ships runtime content that skills and agents cite, nothing else. It carries no normative claims of its own. Anything substrate-shaped (a rule, a rubric, a convention, a design principle) belongs under `docs/substrate/`, even when skills cite it at runtime. A skill body citing `${CLAUDE_PLUGIN_ROOT}/docs/substrate/...` is fine — what matters is where the rule *lives*, not whether it's cited.
+The test for which side a file belongs to: **who reads it, and when?**
+
+- A file read by a *contributor* writing or reviewing this repo (skill-conventions, reviewer-agent-template, substrate-layout, the invariants, the gotchas) → substrate.
+- A file read by a *skill or agent* at runtime as part of doing the workflow on the user's codebase (cohesion-rubric, design-pressure-testing, locality-over-centralization, architecture-review-rubric, substrate-model, output-voice) → implementation.
+
+A file can be cited *from both sides* — `output-voice.md` is cited by skills at runtime (implementation use) and read by contributors authoring new Output format blocks (contributor use). When that happens, the file's home is determined by its *primary* runtime role: cited at generation time → implementation.
+
+Per the 2026-05-04 `cut-anchor-pin` rewrite (repair passes 2–3), `references/` contains the runtime methodology that ships to users (the rubrics, model, voice guide, plus `templates/`); `docs/substrate/designs/` contains contributor-facing conventions (`skill-conventions.md`, `reviewer-agent-template.md`, `substrate-layout.md`) plus pre-existing cross-cutting design docs (`three-layer-architecture.md`, `composition-with-superpowers.md`, `agent-dispatch-protocol.md`).
 
 This distinction matters most for `cohesive:rewrite-specs`. Per its Hard Constraint #3, rewrite-specs touches *substrate only*. If a substrate change implies an implementation change (a new behavior matrix downstream skills must honor; a new validator check; citation updates following a substrate file move), the implementation update is a separate phase — typically `superpowers:writing-plans` → `superpowers:executing-plans`, with `cohesive:review-diff` on the result. Doing both in one rewrite-specs pass conflates "what we claim" with "what we do" and loses the fresh-eyes review power that comes from validating the substrate alone.
 
 The same line applies to `cohesive:review-codebase` and `cohesive:review-diff`: substrate findings recommend substrate repairs (a new invariant, a missing matrix, a gotcha to write); implementation findings recommend `superpowers:writing-plans` to bring runtime artifacts into alignment.
 
-## The one named invariant
+## The named invariants
 
-Cohesive ships v0.1 with a single named invariant:
+Cohesive ships v0.1 with two named invariants:
 
-- **`PLUGIN_ROOT_PATHS`** — every internal path reference uses `${CLAUDE_PLUGIN_ROOT}`. Never a hardcoded `/home/...` or other absolute path. Doc: [`docs/substrate/invariants/PLUGIN_ROOT_PATHS.md`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md). Enforced by `scripts/validate_plugin.sh`.
+- **`PLUGIN_ROOT_PATHS`** — every internal path reference uses `${CLAUDE_PLUGIN_ROOT}`. Never a hardcoded `/home/...` or other absolute path. Doc: [`docs/substrate/invariants/PLUGIN_ROOT_PATHS.md`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md). Enforced by `scripts/validate_plugin.sh`. Failure mode: the plugin breaks for users who aren't the author.
+- **`VERDICT_BEFORE_EVIDENCE`** — every verdict-led skill (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`) opens its Output format block with `**Verdict:**` within the first three non-blank lines after the section header. Doc: [`docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`](docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md). Enforced by `scripts/validate_plugin.sh`. Failure mode: chat outputs bury the verdict, the user-reported wordiness scar — see [`docs/substrate/gotchas/wordy-output.md`](docs/substrate/gotchas/wordy-output.md).
 
-This is the one rule with a real runtime failure mode (a violation breaks the plugin for users who aren't the author). Other v0.1 rules — skill-output shape, fresh-eyes preamble, router announcement form, clarifying-question discipline — live as conventions in [`references/skill-conventions.md`](references/skill-conventions.md) and [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md). They are real rules, but they are not yet structurally enforced and may shift as the methodology accumulates real institutional knowledge from running on real codebases. Promoting one to a named invariant is a deliberate act, not a reflex.
+These two are the rules with concrete failure modes that justify mechanical enforcement. Other v0.1 rules — chat-render header-depth cap, density budgets, forbidden phrasings, voice-citation pin, fresh-eyes preamble, router announcement form, clarifying-question discipline — live as conventions in [`docs/substrate/designs/skill-conventions.md`](docs/substrate/designs/skill-conventions.md), [`docs/substrate/designs/reviewer-agent-template.md`](docs/substrate/designs/reviewer-agent-template.md), and [`references/output-voice.md`](references/output-voice.md). Several of those conventions are grep-pinned by `validate_plugin.sh` — pin status is convention-with-enforcement, distinct from named-invariant status. The canonical enumeration of which conventions are pinned (and which are planned versus currently enforced) lives in [`docs/substrate/invariants/PLUGIN_ROOT_PATHS.md`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md) §"Convention pins enforced alongside this invariant." Promoting a convention to a named invariant is a deliberate act, not a reflex; it requires both a clean grep and a real failure mode.
 
 ## Convention references
 
 Before writing or modifying components, read the relevant convention doc:
 
-- **New or modified skill (SKILL.md)** → [`references/skill-conventions.md`](references/skill-conventions.md). Names the required body sections, frontmatter shape, output format conventions, and red flags. Carries the v0.1 conventions for clarifying questions, router announcements, and recommended-next-skill output blocks.
-- **New or modified reviewer agent (`agents/*.md`)** → [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md). The canonical fresh-eyes review agent shape, including the load-bearing "What you must not do" preamble.
+- **New or modified skill (SKILL.md)** → [`docs/substrate/designs/skill-conventions.md`](docs/substrate/designs/skill-conventions.md). Names the required body sections, frontmatter shape, output format conventions (which now include the voice-citation pin and the verdict-leads invariant), and red flags. Carries the v0.1 conventions for clarifying questions, router announcements, and recommended-next-skill output blocks.
+- **Authoring or revising any chat-rendered output (Output format block, reviewer-agent finding shape, router announcement)** → [`references/output-voice.md`](references/output-voice.md) and the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](docs/history/transcripts/output-voice-worked-example.md). Voice rules without a worked example decay; read both before editing.
+- **New or modified reviewer agent (`agents/*.md`)** → [`docs/substrate/designs/reviewer-agent-template.md`](docs/substrate/designs/reviewer-agent-template.md). The canonical fresh-eyes review agent shape, including the load-bearing "What you must not do" preamble.
 - **New "claimed system shape" produced by `review-codebase` Phase 1** → [`references/templates/claimed-system-shape.md`](references/templates/claimed-system-shape.md).
 - **Other artifacts (invariants, gotchas, behavior matrices, design delta ledgers, etc.)** → `references/templates/<name>.md`.
 
 ## When you are about to...
 
-- **Add a new skill** → read [`references/skill-conventions.md`](references/skill-conventions.md) and the closest existing skill in `skills/`. Update `ARCHITECTURE.md` only if the new skill changes the broad shape (rare for a subskill); update README's "What's in the box."
-- **Add a new reviewer agent** → read [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md) and at least one existing agent in `agents/`. The fresh-eyes preamble is convention, not invariant: each agent file says, in some form, that the agent does not inherit conversation context. Verbatim copy from the template is the safest default.
-- **Update a skill body** → confirm `PLUGIN_ROOT_PATHS` for any new path references. Confirm conventions in `references/skill-conventions.md` are honored.
-- **Update the router (`cohesively`)** → read [`references/skill-conventions.md`](references/skill-conventions.md) §"Router conventions" for the announcement form and clarifying-question rule. If you add a route, add a row to [`docs/substrate/matrices/router.md`](docs/substrate/matrices/router.md).
+- **Add a new skill** → read [`docs/substrate/designs/skill-conventions.md`](docs/substrate/designs/skill-conventions.md) and the closest existing skill in `skills/`. Update `ARCHITECTURE.md` only if the new skill changes the broad shape (rare for a subskill); update README's "What's in the box."
+- **Add a new reviewer agent** → read [`docs/substrate/designs/reviewer-agent-template.md`](docs/substrate/designs/reviewer-agent-template.md) and at least one existing agent in `agents/`. The fresh-eyes preamble is convention, not invariant: each agent file says, in some form, that the agent does not inherit conversation context. Verbatim copy from the template is the safest default.
+- **Update a skill body** → confirm `PLUGIN_ROOT_PATHS` for any new path references. Confirm conventions in `docs/substrate/designs/skill-conventions.md` are honored.
+- **Author or revise an Output format block (or any chat-rendered output)** → read [`references/output-voice.md`](references/output-voice.md) and the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](docs/history/transcripts/output-voice-worked-example.md). Voice rules without a worked example decay; read both before editing. The Output format block must open with the `# <title>` then the voice citation then `**Verdict:**` (verdict-led skills) per `VERDICT_BEFORE_EVIDENCE`.
+- **Update the router (`cohesively`)** → read [`docs/substrate/designs/skill-conventions.md`](docs/substrate/designs/skill-conventions.md) §"Router conventions" for the announcement form and clarifying-question rule. If you add a route, add a row to [`docs/substrate/matrices/router.md`](docs/substrate/matrices/router.md).
 - **Make a cross-cutting design decision** → write or extend a doc in [`docs/substrate/designs/`](docs/substrate/designs/). Add a hook line to `ARCHITECTURE.md` if the decision is broad enough to belong on the map.
 - **Run cohesive against the cohesive repo itself** → save the artifact (review or transcript) under `docs/history/reviews/` or `docs/history/transcripts/`. v0.1 ships one architecture-review artifact; further dogfood is welcome but not gating.
-- **Change `validate_plugin.sh`** → it should enforce a *named invariant* (currently `PLUGIN_ROOT_PATHS`) or a structural shape check. Reference the rule by name in any failure message.
+- **Change `validate_plugin.sh`** → it should enforce a *named invariant* (currently `PLUGIN_ROOT_PATHS` or `VERDICT_BEFORE_EVIDENCE`) or a structural shape check. Reference the rule by name in any failure message.
 
 ## Default substrate locations (in this repo)
 

@@ -32,7 +32,7 @@ The output is the input to either `rewrite-specs` (if a direction is approved) o
 
 ### Phase 0: Resolve the artifact directory
 
-If the brainstorm is going to be persisted (the user has asked for it, or the router's `design` route is chaining toward `rewrite-specs`), resolve where it will be written before grounding begins. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" with artifact category `brainstorms/`:
+If the brainstorm is going to be persisted (the user has asked for it, or the router's `design` route is chaining toward `rewrite-specs`), resolve where it will be written before grounding begins. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` §"Artifact directory resolution" with artifact category `brainstorms/`:
 
 1. If `docs/history/brainstorms/` exists, write there.
 2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `brainstorms/` subdir alongside it.
@@ -98,7 +98,9 @@ Recommend exactly one option, or a named hybrid. The recommendation must:
 ## Output format
 
 ```md
-## Brainstorm: <topic>
+# Brainstorm — <topic>
+
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 ### Current scope
 - ...

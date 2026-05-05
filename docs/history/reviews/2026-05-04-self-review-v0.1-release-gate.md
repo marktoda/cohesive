@@ -61,9 +61,9 @@ Phase 1.5 sparse-substrate gate: passed (rich substrate). Phase 2 spec-prior gat
 **Severity:** Blocker
 **Category:** Invariant enforcement / Spec drift (cross-doc)
 
-**Why it matters:** `PLUGIN_ROOT_PATHS` is the one rule Cohesive kept as a named invariant after the 2026-05-04 substrate collapse — kept *specifically because* it has a real runtime failure mode and (per its own doc) deserves structural enforcement. Three top-level docs claim the rule is "enforced by `scripts/validate_plugin.sh`": `ARCHITECTURE.md:35`, `ARCHITECTURE.md:46`, `AGENTS.md:24`, `README.md:124`, `references/skill-conventions.md:106`. The script (re-read at v0.1 commit) checks frontmatter, JSON validity, component-dir placement, executable bits, and emits a `warn` (never `fail`) when a `references/...` or `templates/...` path doesn't resolve — only inside `skills/`, never in `agents/` or `references/`. There is no grep for `/home/`, `/Users/`, `/usr/`, or `~/`. A hardcoded path in a new agent file passes validation cleanly. By the methodology Cohesive itself articulates, the named invariant is held by reviewer memory — exactly what the substrate-collapse said the invariant set must not contain.
+**Why it matters:** `PLUGIN_ROOT_PATHS` is the one rule Cohesive kept as a named invariant after the 2026-05-04 substrate collapse — kept *specifically because* it has a real runtime failure mode and (per its own doc) deserves structural enforcement. Three top-level docs claim the rule is "enforced by `scripts/validate_plugin.sh`": `ARCHITECTURE.md:35`, `ARCHITECTURE.md:46`, `AGENTS.md:24`, `README.md:124`, `docs/substrate/designs/skill-conventions.md:106`. The script (re-read at v0.1 commit) checks frontmatter, JSON validity, component-dir placement, executable bits, and emits a `warn` (never `fail`) when a `references/...` or `templates/...` path doesn't resolve — only inside `skills/`, never in `agents/` or `references/`. There is no grep for `/home/`, `/Users/`, `/usr/`, or `~/`. A hardcoded path in a new agent file passes validation cleanly. By the methodology Cohesive itself articulates, the named invariant is held by reviewer memory — exactly what the substrate-collapse said the invariant set must not contain.
 
-**Evidence:** `scripts/validate_plugin.sh:1-127` (no path-pattern grep, only path-existence warn at lines 99-108); contradicting claims at `ARCHITECTURE.md:35,46`, `README.md:124`, `AGENTS.md:24`, `references/skill-conventions.md:106`. The honest counter-claim is at `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md:32-38` ("intended state, not yet implemented").
+**Evidence:** `scripts/validate_plugin.sh:1-127` (no path-pattern grep, only path-existence warn at lines 99-108); contradicting claims at `ARCHITECTURE.md:35,46`, `README.md:124`, `AGENTS.md:24`, `docs/substrate/designs/skill-conventions.md:106`. The honest counter-claim is at `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md:32-38` ("intended state, not yet implemented").
 
 **Recommended fix:** Implement the grep — five lines of bash:
 
@@ -104,7 +104,7 @@ The rule is well-scoped; there's no reason to keep three docs claiming enforceme
 
 **Evidence:** `skills/cohesive-review/SKILL.md:12,127`, `skills/substrate-audit/SKILL.md:96`, `skills/rewrite-specs/SKILL.md` (artifact path), `skills/brainstorm-design/SKILL.md` (artifact path); contract at `AGENTS.md:57`, `ARCHITECTURE.md:48`.
 
-**Recommended fix:** Add a "Step 0: Resolve artifact directory" to each persisting skill, citing `references/substrate-layout.md` for the detection rules. The detection logic itself goes once, in `substrate-layout.md`. Add a behavior matrix `docs/substrate/matrices/artifact-placement.md` with cells (this-repo / external-repo-with-docs-substrate / external-repo-with-docs-adr / external-repo-empty) × (review / audit / delta-ledger / brainstorm) so the contract is testable.
+**Recommended fix:** Add a "Step 0: Resolve artifact directory" to each persisting skill, citing `docs/substrate/designs/substrate-layout.md` for the detection rules. The detection logic itself goes once, in `substrate-layout.md`. Add a behavior matrix `docs/substrate/matrices/artifact-placement.md` with cells (this-repo / external-repo-with-docs-substrate / external-repo-with-docs-adr / external-repo-empty) × (review / audit / delta-ledger / brainstorm) so the contract is testable.
 
 **Substrate artifact:** Reference (substrate-layout.md detection rules); skill bodies (Step 0 in 4 skills); behavior matrix (artifact-placement.md).
 
@@ -134,7 +134,7 @@ The rule is well-scoped; there's no reason to keep three docs claiming enforceme
 
 **Evidence:** `skills/cohesive-review/SKILL.md:41-129` (codebase mode) vs `skills/cohesive-review/SKILL.md:131-188` (diff mode); precedent at `skills/substrate-audit/SKILL.md:12`.
 
-**Recommended fix:** Either split into `cohesive-review` (codebase) and `cohesive-diff-review`, mirroring the substrate-audit extraction; or accept the two-mode shape and add a third entry to `references/skill-conventions.md` §"When sections may differ" naming scope-modal skills as an accepted deviation. The status quo — undocumented mode-switching in one body — is the worst spot.
+**Recommended fix:** Either split into `cohesive-review` (codebase) and `cohesive-diff-review`, mirroring the substrate-audit extraction; or accept the two-mode shape and add a third entry to `docs/substrate/designs/skill-conventions.md` §"When sections may differ" naming scope-modal skills as an accepted deviation. The status quo — undocumented mode-switching in one body — is the worst spot.
 
 **Substrate artifact:** Either extract a new skill, or document the deviation. *Recommendation: extract.* The substrate-audit precedent is 18 days old; honoring it costs little.
 
@@ -162,7 +162,7 @@ The rule is well-scoped; there's no reason to keep three docs claiming enforceme
 
 **Why it matters:** `skill-conventions.md:153-160` lists two accepted section deviations (`cohesively`, `discover-substrate`) and says any additional deviation requires "explicit discussion." There is no matrix tracking which of the canonical sections each of the 7 skills actually carries; drift surfaces only when a reviewer happens to notice. The `reviewer-output-shape.md` matrix is the working precedent: it caught and named drift across 5 agent files and produced a single grid where compliance is visible at a glance. The same shape applied to skill-section presence would do the same for skill-body drift — and (combined with finding 4) would be testable.
 
-**Evidence:** `docs/substrate/matrices/reviewer-output-shape.md` (working precedent); `references/skill-conventions.md:153-160` (deviation list with no matrix backing).
+**Evidence:** `docs/substrate/matrices/reviewer-output-shape.md` (working precedent); `docs/substrate/designs/skill-conventions.md:153-160` (deviation list with no matrix backing).
 
 **Recommended fix:** Add `docs/substrate/matrices/skill-section-presence.md` — 7 rows × ~10 columns (canonical sections + accepted-optional sections). Mirrors `reviewer-output-shape.md` exactly.
 
@@ -208,7 +208,7 @@ The rule is well-scoped; there's no reason to keep three docs claiming enforceme
 | 10b | `plugin.json` lacks the `$schema` field that `marketplace.json` declares — manifest-hygiene asymmetry | Low | Add schema reference (if Anthropic publishes one) |
 | 10c | Skill-conventions §Frontmatter framing reads as platform requirement; it's Cohesive's narrowing of a free-text field | Low | One-line clarification |
 | 10d | `substrate-audit` opens output with `## Headline` instead of `## TL;DR`; either rename or document exemption | Low | Edit skill body or add exemption to skill-conventions |
-| 10e | `references/skill-conventions.md` step 5 ("validator must pass") overstates coverage; an agent will believe the green check validates more than it does — composes with finding 1 | Low | Rephrase step 5 once finding 1 lands |
+| 10e | `docs/substrate/designs/skill-conventions.md` step 5 ("validator must pass") overstates coverage; an agent will believe the green check validates more than it does — composes with finding 1 | Low | Rephrase step 5 once finding 1 lands |
 | 10f | Two reviewer agents (`agent-readiness`, `substrate-alignment`) have overlapping "candidate invariant" surface; not a problem at 5 agents but worth watching | Low | Defer; revisit at 6th agent |
 
 ---
@@ -220,7 +220,7 @@ By artifact type:
 - **Semantic linter (`scripts/validate_plugin.sh`):** add five grep checks for (a) `PLUGIN_ROOT_PATHS` violations [finding 1], (b) prereq-question presence in three subskills [finding 4], (c) fresh-eyes preamble verbatim across five agents [finding 4], (d) `Recommended next` footer in every persisting skill [finding 4], (e) overly broad description triggers on Cohesive skills [finding 8]. Each is one line.
 - **Behavior matrices (new):** `skill-section-presence.md` [finding 7], `artifact-placement.md` [finding 3]. Both mirror the working `reviewer-output-shape.md` precedent.
 - **Skill body (`cohesively/SKILL.md`):** add a "Dispatch prompt contract" section per route [finding 2]; revise frontmatter triggers [finding 8].
-- **Skill body (4 persisting skills):** add "Step 0: Resolve artifact directory" citing `references/substrate-layout.md` [finding 3].
+- **Skill body (4 persisting skills):** add "Step 0: Resolve artifact directory" citing `docs/substrate/designs/substrate-layout.md` [finding 3].
 - **Skill split:** extract `cohesive-diff-review` from `cohesive-review` per the `substrate-audit` precedent [finding 5]; OR document the deviation in `skill-conventions.md`.
 - **Reference move:** hoist the "Pressure test summary" output format from `brainstorm-design/SKILL.md` into `references/design-pressure-testing.md` [finding 6].
 - **Reference (`substrate-layout.md`):** add the external-repo detection rules [finding 3].

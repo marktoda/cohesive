@@ -91,7 +91,7 @@ The companion brainstorm output is in conversation; the immediate predecessor is
   - **Before:** "Current state" referenced `cohesive-review --scope diff`.
   - **After:** Updated to `review-diff`. (No change to the invariant rule itself or to its intended-vs-current enforcement story; the implementation gap that finding #1 of the self-review flagged is *not* closed in this PR — it remains a separate, named follow-up.)
 
-- `references/skill-conventions.md`
+- `docs/substrate/designs/skill-conventions.md`
   - **Before:** Multiple references to `cohesive-review`, `review-spec-cohesion`. "Process when adding a new skill" step 6 instructed `cohesive:cohesive-review --scope diff`.
   - **After:** Updated throughout. Subskill list under "Canonical prereq-detection question" expanded to include the five subskills now using the pattern; cross-references the new "Dispatch prompt contract" section in the router.
 
@@ -99,7 +99,7 @@ The companion brainstorm output is in conversation; the immediate predecessor is
   - **Before:** Header named `cohesive-review --scope codebase`; stop-conditions and "What this review is not" referenced old names.
   - **After:** Updated throughout.
 
-- `references/reviewer-agent-template.md`
+- `docs/substrate/designs/reviewer-agent-template.md`
   - **Before:** "When adding a new reviewer agent" §step 4 cited `skills/cohesive-review/SKILL.md` as the canonical dispatch site.
   - **After:** Cites both `skills/review-codebase/SKILL.md` and `skills/review-diff/SKILL.md`.
 
@@ -115,7 +115,7 @@ The companion brainstorm output is in conversation; the immediate predecessor is
   - **Before:** "9-axis scorecard" framing and "Severity vocabulary" both referenced `cohesive-review`.
   - **After:** Updated to `review-codebase` for the scorecard and `review-codebase` / `review-diff` for the severity vocabulary.
 
-- `references/substrate-layout.md`
+- `docs/substrate/designs/substrate-layout.md`
   - **Before:** "Cohesive skills reading substrate" listed `discover-substrate` and `cohesive-review`.
   - **After:** Lists `discover-substrate`, `review-codebase`, `review-diff`, `audit-substrate`, `validate-rewrite`.
 
@@ -211,9 +211,9 @@ The companion brainstorm output is in conversation; the immediate predecessor is
 
 A first `validate-rewrite` pass on this rewrite returned **Issues Found** with two blockers and four important issues. All six were addressed in a follow-up commit; the repairs are recorded here for the next reviewer to read alongside the original rewrite.
 
-- **B1 (closed)** — `references/skill-conventions.md:141` listed the old route name `review (substrate audit)`. Updated to `audit (substrate)` so the conventions doc agrees with the router skill body that cites it.
+- **B1 (closed)** — `docs/substrate/designs/skill-conventions.md:141` listed the old route name `review (substrate audit)`. Updated to `audit (substrate)` so the conventions doc agrees with the router skill body that cites it.
 - **B2 (closed)** — `ARCHITECTURE.md:11` said "the router and *six* subskills are the user-facing surface." Updated to "seven subskills" so the source-of-truth doc agrees with itself (line 74's "8 skills" total).
-- **I1 (closed)** — Persisted-artifact filename patterns were renamed to match the verb-noun skill names: `audit-substrate` now writes to `<slug>-audit-substrate.md` (was `<slug>-substrate-audit.md`); `validate-rewrite` writes to `<slug>-rewrite-validation.md` (was `<slug>-cohesion-review.md`). `references/substrate-layout.md`'s naming table grew a "Producing skill" column and three new rows (architecture review, substrate audit, rewrite validation) plus a one-paragraph note explaining that new artifacts use the verb-noun-skill suffix while older artifacts under `docs/history/reviews/` keep their noun-phrase suffixes (preserved as time-stamped record).
+- **I1 (closed)** — Persisted-artifact filename patterns were renamed to match the verb-noun skill names: `audit-substrate` now writes to `<slug>-audit-substrate.md` (was `<slug>-substrate-audit.md`); `validate-rewrite` writes to `<slug>-rewrite-validation.md` (was `<slug>-cohesion-review.md`). `docs/substrate/designs/substrate-layout.md`'s naming table grew a "Producing skill" column and three new rows (architecture review, substrate audit, rewrite validation) plus a one-paragraph note explaining that new artifacts use the verb-noun-skill suffix while older artifacts under `docs/history/reviews/` keep their noun-phrase suffixes (preserved as time-stamped record).
 - **I2 (closed)** — `validate-rewrite/SKILL.md` now persists by default to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md` and supports `--no-write` to suppress, mirroring `audit-substrate`. Step 3 names both the default and the override mechanism explicitly.
 - **I3 (closed)** — The empty-substrate threshold is now defined exactly once, in `discover-substrate/SKILL.md` step 7: trivially-empty *or* fewer than 5 normative docs total. `review-codebase`'s Phase 1.5 now reads only the verdict line (single canonical signal). The vague "~5" qualifier was dropped.
 - **I4 (closed)** — `cohesively/SKILL.md`'s consumer list under "Dispatch prompt contract" was split along the two columns: prereq-state consumers (5 subskills, matching `soft-prereqs.md`'s enumeration) and chosen-direction / ledger-path consumers (`rewrite-specs`, `validate-rewrite`, plus V1 artifact skills). Made explicit that `validate-rewrite` does not consume the prereq-state contract — its router-passed input is the ledger path, not a discovery state.

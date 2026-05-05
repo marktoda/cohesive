@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Five Cohesive skills persist output: `review-codebase`, `audit-substrate`, `rewrite-specs`, `brainstorm-design` (when persistence is requested), `validate-rewrite`. Each writes to a different artifact category (review / audit / delta-ledger / brainstorm / validation) but resolves the output directory by the same four-rule procedure defined in `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution".
+Five Cohesive skills persist output: `review-codebase`, `audit-substrate`, `rewrite-specs`, `brainstorm-design` (when persistence is requested), `validate-rewrite`. Each writes to a different artifact category (review / audit / delta-ledger / brainstorm / validation) but resolves the output directory by the same four-rule procedure defined in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` §"Artifact directory resolution".
 
 This matrix expands the resolution cell-by-cell so the contract is testable. Without it, an external-repo run can silently litter `docs/history/` into a user repo that already has `docs/adr/` — exactly the "spec drift one half names but the other half doesn't honor" failure Cohesive exists to prevent.
 
@@ -46,7 +46,7 @@ The resolved path is announced in chat at the start of the run, before any read 
 
 ## Related substrate
 
-- `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" — the four-rule procedure each skill cites.
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` §"Artifact directory resolution" — the four-rule procedure each skill cites.
 - `${CLAUDE_PLUGIN_ROOT}/AGENTS.md` §"Default substrate locations" — names the layout for this repo's substrate (separate concern from artifact placement).
 - `${CLAUDE_PLUGIN_ROOT}/ARCHITECTURE.md` §"Conventions" — names `docs/cohesive/<x>/` as the external-repo default.
 

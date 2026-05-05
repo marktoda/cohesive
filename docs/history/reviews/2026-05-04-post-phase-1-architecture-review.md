@@ -29,7 +29,7 @@ Phase 1 closed the documentation gap; Phase 3 is the load-bearing pass that has 
 The source-of-truth hierarchy is well-defined (`ARCHITECTURE.md` binding → README/AGENTS derived → on-disk implementation). Five invariants are mutually consistent. The router matrix matches `cohesively/SKILL.md`. Design docs cohere. Two non-blocking inconsistencies were noted and surfaced as Phase-3 findings:
 
 - `README.md:63` says reviews go to `docs/cohesive/reviews/`; ARCHITECTURE/AGENTS/SKILL all say `docs/history/reviews/`.
-- `AGENTS.md:18,58` says delta ledgers live at `docs/history/design-changes/` (matches on-disk); every skill body and `references/substrate-layout.md` say `docs/history/delta-ledgers/`.
+- `AGENTS.md:18,58` says delta ledgers live at `docs/history/design-changes/` (matches on-disk); every skill body and `docs/substrate/designs/substrate-layout.md` say `docs/history/delta-ledgers/`.
 
 Neither is a blocker; both are spec drift findings (Findings #2 and #5).
 
@@ -83,14 +83,14 @@ Ranked by leverage × severity. Convergent across reviewers cited inline.
 
 **Severity:** Blocker
 **Category:** Invariant / Locality (weakens the locality argument)
-**Why it matters:** The canonical bullet at `references/reviewer-agent-template.md:71-73` reads: "Inherit conversation context from the calling skill. Treat your input prompt as the entire context." Of five agents:
+**Why it matters:** The canonical bullet at `docs/substrate/designs/reviewer-agent-template.md:71-73` reads: "Inherit conversation context from the calling skill. Treat your input prompt as the entire context." Of five agents:
 - `agents/substrate-alignment-reviewer.md:133` matches verbatim.
 - `agents/structure-reviewer.md:151`, `library-native-reviewer.md:155`, `agent-readiness-reviewer.md:181` use the shortened "Inherit conversation context. Treat your input prompt as the entire context." (drops "from the calling skill").
 - `agents/spec-cohesion-reviewer.md` does not contain the canonical bullet under "What you must not do" at all; only a near-companion line at :91 ("Read prior conversation context. You won't have it; don't pretend.").
 
 The prior self-review's locality verdict — "the preamble duplication is correctly local because each agent must be standalone-readable" — depends on every copy being faithful. The codebase is not in that state. Worse, `docs/substrate/designs/agent-dispatch-protocol.md:124` explicitly claims: "The self-review on 2026-05-04 confirmed the agent-side preamble is present in all five agent files." That claim is false.
 
-**Evidence:** `references/reviewer-agent-template.md:71-73`; the five agent files cited above. Convergent finding across substrate-alignment, structure, and agent-readiness reviewers.
+**Evidence:** `docs/substrate/designs/reviewer-agent-template.md:71-73`; the five agent files cited above. Convergent finding across substrate-alignment, structure, and agent-readiness reviewers.
 
 **Recommended fix:** Sweep all five agent files to the canonical bullet verbatim. Correct the false claim in `agent-dispatch-protocol.md:124`. Then add the validator grep that `FRESH_EYES_DISPATCH.md:61` already promised.
 
@@ -130,9 +130,9 @@ The prior self-review's locality verdict — "the preamble duplication is correc
 
 **Severity:** High
 **Category:** Seam / Concept
-**Why it matters:** AGENTS.md:18 and :58 say delta ledgers live at `docs/history/design-changes/`; on disk, `docs/history/design-changes/` exists and contains two ledgers. Every other normative doc — `skills/rewrite-specs/SKILL.md:11,84,93,99,133`, `skills/review-spec-cohesion/SKILL.md:26`, `references/substrate-layout.md:18,39` — calls the directory `docs/history/delta-ledgers/`. A future `rewrite-specs` run will write to `delta-ledgers/`; a contributor reading AGENTS.md will look in `design-changes/`. This is exactly the failure mode `substrate-layout.md` was created to prevent.
+**Why it matters:** AGENTS.md:18 and :58 say delta ledgers live at `docs/history/design-changes/`; on disk, `docs/history/design-changes/` exists and contains two ledgers. Every other normative doc — `skills/rewrite-specs/SKILL.md:11,84,93,99,133`, `skills/review-spec-cohesion/SKILL.md:26`, `docs/substrate/designs/substrate-layout.md:18,39` — calls the directory `docs/history/delta-ledgers/`. A future `rewrite-specs` run will write to `delta-ledgers/`; a contributor reading AGENTS.md will look in `design-changes/`. This is exactly the failure mode `substrate-layout.md` was created to prevent.
 
-**Evidence:** `AGENTS.md:18,58`; `references/substrate-layout.md:18,39`; `skills/rewrite-specs/SKILL.md:11`; `docs/history/design-changes/2026-05-04-layout-migration.md` (file in `design-changes/` but content header reads "Design Delta Ledger").
+**Evidence:** `AGENTS.md:18,58`; `docs/substrate/designs/substrate-layout.md:18,39`; `skills/rewrite-specs/SKILL.md:11`; `docs/history/design-changes/2026-05-04-layout-migration.md` (file in `design-changes/` but content header reads "Design Delta Ledger").
 
 **Recommended fix:** Pick one. Cheaper option: `git mv docs/history/design-changes docs/history/delta-ledgers`, patch `AGENTS.md:18,58` to match.
 
@@ -144,13 +144,13 @@ The prior self-review's locality verdict — "the preamble duplication is correc
 
 **Severity:** High
 **Category:** Concept / Substrate gap
-**Why it matters:** `references/substrate-layout.md` is the canonical "where do artifacts live" reference. Its table at lines 7-19 enumerates `invariants/`, `matrices/`, `gotchas/` under `docs/substrate/` — but not `designs/`. ARCHITECTURE.md:38, AGENTS.md:9,47,56, and the layout-migration ledger all treat `docs/substrate/designs/` as a first-class tier with three load-bearing docs (three-layer-architecture, agent-dispatch-protocol, composition-with-superpowers). A contributor reading the layout doc to learn where things go will conclude designs don't exist as a category. The concept is asserted in three places but unowned by the layout reference.
+**Why it matters:** `docs/substrate/designs/substrate-layout.md` is the canonical "where do artifacts live" reference. Its table at lines 7-19 enumerates `invariants/`, `matrices/`, `gotchas/` under `docs/substrate/` — but not `designs/`. ARCHITECTURE.md:38, AGENTS.md:9,47,56, and the layout-migration ledger all treat `docs/substrate/designs/` as a first-class tier with three load-bearing docs (three-layer-architecture, agent-dispatch-protocol, composition-with-superpowers). A contributor reading the layout doc to learn where things go will conclude designs don't exist as a category. The concept is asserted in three places but unowned by the layout reference.
 
-**Evidence:** `references/substrate-layout.md:7-19,30-40`; `ARCHITECTURE.md:38`; `AGENTS.md:47,56`; `docs/substrate/designs/` (3 files).
+**Evidence:** `docs/substrate/designs/substrate-layout.md:7-19,30-40`; `ARCHITECTURE.md:38`; `AGENTS.md:47,56`; `docs/substrate/designs/` (3 files).
 
 **Recommended fix:** Add a `designs/` row to the layout table with a one-sentence criterion ("cross-cutting design decisions spanning multiple components; promoted from history when stable"). Add a row to the naming table at :30-40. Update the §"Growth pattern" block.
 
-**Substrate artifact to add or update:** `references/substrate-layout.md` extension.
+**Substrate artifact to add or update:** `docs/substrate/designs/substrate-layout.md` extension.
 
 ---
 
@@ -213,7 +213,7 @@ The prior self-review's locality verdict — "the preamble duplication is correc
 ### 12. Library-native polish (collected; each Medium-or-Low)
 
 Convergent with prior review's Finding #14, partially still applicable:
-- **`validate_plugin.sh` emits emoji** (`:14-18,122,125`) while `references/reviewer-agent-template.md` forbids them. Self-inconsistency on first run. Replace with `[OK]` / `[WARN]` / `[FAIL]` markers.
+- **`validate_plugin.sh` emits emoji** (`:14-18,122,125`) while `docs/substrate/designs/reviewer-agent-template.md` forbids them. Self-inconsistency on first run. Replace with `[OK]` / `[WARN]` / `[FAIL]` markers.
 - **`plugin.json` lacks `$schema`** while sibling `marketplace.json:2` has it. One-line addition gets free editor validation.
 - **`scan_substrate.py:82` operator-precedence ambiguity** in the dotfile-allowlist filter; benign today, brittle on next edit.
 - **Validator's awk frontmatter parsing duplicated** at :64,88; extract a `fm_field` shell function.
@@ -228,9 +228,9 @@ Convergent with prior review's Finding #14, partially still applicable:
 
 **Severity:** Medium
 **Category:** Invariant / Code-spec drift
-**Why it matters:** `references/skill-conventions.md:79` mandates: "The dispatching skill body must explicitly state, in prose: 'The reviewer reads only paths passed to it, not the conversation.'" `skills/cohesive-review/SKILL.md:79-85` describes Phase 3 dispatch but does not contain that sentence. `review-spec-cohesion/SKILL.md:16-18` does. The prior self-review observed this drift; the conventions doc landed but the skill body did not catch up.
+**Why it matters:** `docs/substrate/designs/skill-conventions.md:79` mandates: "The dispatching skill body must explicitly state, in prose: 'The reviewer reads only paths passed to it, not the conversation.'" `skills/cohesive-review/SKILL.md:79-85` describes Phase 3 dispatch but does not contain that sentence. `review-spec-cohesion/SKILL.md:16-18` does. The prior self-review observed this drift; the conventions doc landed but the skill body did not catch up.
 
-**Evidence:** `skills/cohesive-review/SKILL.md:79-85`; `references/skill-conventions.md:79`; `docs/substrate/invariants/FRESH_EYES_DISPATCH.md:61-64`.
+**Evidence:** `skills/cohesive-review/SKILL.md:79-85`; `docs/substrate/designs/skill-conventions.md:79`; `docs/substrate/invariants/FRESH_EYES_DISPATCH.md:61-64`.
 
 **Recommended fix:** Add the canonical sentence to `cohesive-review/SKILL.md` Phase 3. Add the matching grep to `validate_plugin.sh`.
 
@@ -242,9 +242,9 @@ Convergent with prior review's Finding #14, partially still applicable:
 
 **Severity:** Medium
 **Category:** Convention drift
-**Why it matters:** `references/skill-conventions.md:24-43` requires `Hard constraints`, `Process`, `Output format`, `Acceptance criteria`, `What this skill is *not*`. The router uses `Required behavior` and `Routes`; `discover-substrate` lacks `Hard constraints`. The conventions doc names a router exemption (Routes-replaces-Process) but not the other deviations. A future router-shaped skill or a future no-dispatch skill will copy whichever sibling they read first.
+**Why it matters:** `docs/substrate/designs/skill-conventions.md:24-43` requires `Hard constraints`, `Process`, `Output format`, `Acceptance criteria`, `What this skill is *not*`. The router uses `Required behavior` and `Routes`; `discover-substrate` lacks `Hard constraints`. The conventions doc names a router exemption (Routes-replaces-Process) but not the other deviations. A future router-shaped skill or a future no-dispatch skill will copy whichever sibling they read first.
 
-**Evidence:** `references/skill-conventions.md:23-43,96-99`; `skills/cohesively/SKILL.md`; `skills/discover-substrate/SKILL.md`.
+**Evidence:** `docs/substrate/designs/skill-conventions.md:23-43,96-99`; `skills/cohesively/SKILL.md`; `skills/discover-substrate/SKILL.md`.
 
 **Recommended fix:** Either rename router headings to match or expand `skill-conventions.md` exemptions list. Prefer the rename.
 
@@ -271,7 +271,7 @@ Convergent with prior review's Finding #14, partially still applicable:
 ### Specs to rewrite or annotate
 - `README.md:63` — fix review path (Finding #5)
 - `AGENTS.md:18,58` — align with directory rename (Finding #6)
-- `references/substrate-layout.md` — add `designs/` row (Finding #7)
+- `docs/substrate/designs/substrate-layout.md` — add `designs/` row (Finding #7)
 - `docs/substrate/designs/agent-dispatch-protocol.md:124` — correct false "confirmed" claim (Finding #3)
 - Each invariant's "Enforcement" section — match what the validator actually does (Findings #1, #10)
 
@@ -331,7 +331,7 @@ The substrate documents the corpus must conform to; fix the corpus first, so the
 5. Add canonical skill-side fresh-eyes prose to `cohesive-review` Phase 3 (Finding #13).
 6. Fix `README.md:63` (Finding #5).
 7. Rename `docs/history/design-changes/` → `delta-ledgers/`; patch `AGENTS.md` (Finding #6).
-8. Add `designs/` row to `references/substrate-layout.md` (Finding #7).
+8. Add `designs/` row to `docs/substrate/designs/substrate-layout.md` (Finding #7).
 9. Delete two consumer-less templates (Finding #11).
 10. Land two transcripts (Finding #4) — this review counts as one.
 

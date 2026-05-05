@@ -28,8 +28,8 @@ This ledger records *what changed* in the substrate during the `rewrite-specs` p
 ## Files added
 
 - `AGENTS.md` — repo-root contributor guide for agents and humans. Names the source-of-truth hierarchy, the five named invariants, the convention references, and the "when you are about to..." action map.
-- `references/skill-conventions.md` — canonical SKILL.md body shape: required vs optional sections, frontmatter format, output schema convention, dispatch discipline, anti-pattern table format.
-- `references/reviewer-agent-template.md` — canonical reviewer agent shape: frontmatter with `<example>` blocks, required body sections, the load-bearing fresh-eyes preamble, severity rules, token discipline.
+- `docs/substrate/designs/skill-conventions.md` — canonical SKILL.md body shape: required vs optional sections, frontmatter format, output schema convention, dispatch discipline, anti-pattern table format.
+- `docs/substrate/designs/reviewer-agent-template.md` — canonical reviewer agent shape: frontmatter with `<example>` blocks, required body sections, the load-bearing fresh-eyes preamble, severity rules, token discipline.
 - `references/templates/claimed-system-shape.md` — six-section template for `cohesive-review` Phase 1 output (Product goal / Architectural priors / Intended seams / Named invariants / Testing philosophy / Future direction). Consumed by all four reviewer agents.
 - `docs/invariants/PLUGIN_ROOT_PATHS.md` — every internal path uses `${CLAUDE_PLUGIN_ROOT}`.
 - `docs/invariants/FRESH_EYES_DISPATCH.md` — Task-tool dispatches to reviewer agents pass paths only and forbid context inheritance.
@@ -54,8 +54,8 @@ None this pass. The implementation-plan template (`references/templates/implemen
 | "Routing decision logic" prose in `cohesively/SKILL.md` | `router-matrix.md` with stable cell IDs (R001..R014) | Tightened (prose → matrix) |
 | Spec is binding (implicit) | Plan is binding; spec is preserved vision (explicit) | Replaced |
 | "(V1 template — until then…)" hedge in rewrite-specs | Authoritative reference to `references/templates/invariant.md` | Removed |
-| Skill conventions discoverable only by sibling-imitation | `references/skill-conventions.md` as canonical reference | Tightened |
-| Reviewer agent conventions discoverable only by sibling-imitation | `references/reviewer-agent-template.md` as canonical reference | Tightened |
+| Skill conventions discoverable only by sibling-imitation | `docs/substrate/designs/skill-conventions.md` as canonical reference | Tightened |
+| Reviewer agent conventions discoverable only by sibling-imitation | `docs/substrate/designs/reviewer-agent-template.md` as canonical reference | Tightened |
 | "Claimed system shape" inline in 5 files | Single template at `references/templates/claimed-system-shape.md` | Tightened (inline duplication → shared template) |
 
 ## New or updated substrate

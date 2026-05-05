@@ -48,7 +48,7 @@
   - **After:** adds a paragraph stating the substrate collapse demoted the verbatim-bullet rule to convention but did not sweep the five agent files; drift survives as drift-from-convention; future tightening pass may sweep when wording stabilizes.
   - **Reason:** Honest framing of where the property is held (harness fence, not agent-file wording) (I3).
 
-- `references/skill-conventions.md`
+- `docs/substrate/designs/skill-conventions.md`
   - **Before:** §"When sections may differ" exempted only the router. `discover-substrate`'s deviation was an unowned drift.
   - **After:** explicit exemption row for `discover-substrate` ("uses 'When to invoke' + 'Inputs' + 'Process' instead of 'Hard constraints' + 'Process'... it is a no-dispatch utility skill"). Rationale named.
   - **Reason:** Closes a known-deviation hole flagged in the prior post-Phase-1 review and surfaced again in fresh-eyes review (I4). Sweep was explicitly out of scope per the prior ledger; documenting the exemption is the smaller, more honest move for v0.1.
@@ -58,7 +58,7 @@
   - **After:** explicit "Current state (today)" / "Intended state (follow-up implementation)" split. Today: frontmatter + JSON + file-existence checks. Intended: hardcoded-path grep. The separation closes the credibility gap that the substrate-collapse thesis exists to prevent — the one remaining named invariant should not itself claim enforcement that isn't yet shipped.
   - **Reason:** Folklore-claimed-as-enforcement at 1/5 scale is still folklore-claimed-as-enforcement (enforcement concern from review).
 
-- `references/reviewer-agent-template.md`
+- `docs/substrate/designs/reviewer-agent-template.md`
   - **Before:** "Every reviewer agent body should declare a token-discipline note." / "New agents should follow the order above. Existing agents will be brought into line in a future cleanup pass."
   - **After:** "Every reviewer agent body declares..." / "New agents follow the order above. *Future cleanup, non-normative:* existing agents will be brought into line when their wording stabilizes."
   - **Reason:** Vague modals in normative sections; future-pressure marked non-normative.

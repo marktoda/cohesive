@@ -8,7 +8,7 @@ description: Use after brainstorm-design has produced an approved direction and 
 ## What this skill produces
 
 - A **set of rewritten docs** that describe the system's chosen end state in present-tense, normative language
-- A **design delta ledger** at `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` (per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`) recording every change
+- A **design delta ledger** at `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md`) recording every change
 - A handoff to `validate-rewrite` for fresh-eyes review
 
 This is one of Cohesive's flagship skills. Spec rewriting is the cheapest place to discover that a design is wrong, and the rewrite-then-review loop is what makes that discovery happen *before* code.
@@ -50,7 +50,7 @@ Announce in chat: "Working in worktree `.worktrees/cohesive-${slug}` on branch `
 
 ### 0. Resolve the artifact directory
 
-Before rewriting any docs, resolve where the design delta ledger will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" with artifact category `delta-ledgers/`:
+Before rewriting any docs, resolve where the design delta ledger will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` §"Artifact directory resolution" with artifact category `delta-ledgers/`:
 
 1. If `docs/history/delta-ledgers/` exists, write there.
 2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `delta-ledgers/` subdir alongside it.
@@ -91,7 +91,7 @@ For each new doc, use the appropriate template:
 - Substrate map: `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-map.md`
 - Claimed system shape (Phase 1 of `cohesive:review-codebase`): `${CLAUDE_PLUGIN_ROOT}/references/templates/claimed-system-shape.md`
 
-Place new canonical artifacts (invariants, matrices, gotchas) under `docs/substrate/<category>/` per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`. If the repo has its own convention (`docs/design/`, `docs/specs/`, `docs/adr/`, etc.), extend that — don't impose a parallel layout.
+Place new canonical artifacts (invariants, matrices, gotchas) under `docs/substrate/<category>/` per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md`. If the repo has its own convention (`docs/design/`, `docs/specs/`, `docs/adr/`, etc.), extend that — don't impose a parallel layout.
 
 ### 4. Update the substrate map
 
@@ -123,7 +123,9 @@ Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger 
 The skill's chat output (separate from the file changes) is short:
 
 ```md
-## Spec rewrite complete
+# Spec Rewrite Complete — <topic>
+
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Worktree:** `.worktrees/cohesive-<slug>` on `design/<slug>`
 **Approved direction:** <option name>

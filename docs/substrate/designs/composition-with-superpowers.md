@@ -22,7 +22,7 @@ Two arguments justify the choice:
 
 **Substrate vs implementation are different lenses.** Cohesive optimizes for *durable judgment*: would a future contributor make the right architectural choice, given the codebase's substrate? Superpowers optimizes for *disciplined implementation*: when the plan is clear, does the work happen in the right order with verification at each step? Both lenses are real; both have legitimate skills shipping today. Cohesive recreating Superpowers' worktree discipline would not improve substrate work and would duplicate logic that already has battle-tested behavior in Anthropic's official marketplace.
 
-**Locality over centralization, applied between plugins.** The same principle Cohesive teaches inside a codebase ([`references/locality-over-centralization.md`](../../../references/locality-over-centralization.md)) applies to plugin design. Two plugins doing similar things for similar reasons can compose. Cohesive embedding worktree discipline (different reasons — substrate-rewrite isolation vs implementation isolation) would couple two concerns that should evolve independently.
+**Locality over centralization, applied between plugins.** The same principle Cohesive teaches inside a codebase ([`references/locality-over-centralization.md`](locality-over-centralization.md)) applies to plugin design. Two plugins doing similar things for similar reasons can compose. Cohesive embedding worktree discipline (different reasons — substrate-rewrite isolation vs implementation isolation) would couple two concerns that should evolve independently.
 
 ## The seam
 
@@ -87,6 +87,6 @@ The README (§"Recommended companion") and this design doc state the phase bound
 ## Related substrate
 
 - [`docs/substrate/gotchas/discovery-vs-superpowers.md`](../gotchas/discovery-vs-superpowers.md) — the trigger-competition gotcha.
-- [`references/locality-over-centralization.md`](../../../references/locality-over-centralization.md) — the principle this composition operationalizes.
+- [`references/locality-over-centralization.md`](locality-over-centralization.md) — the principle this composition operationalizes.
 - [`skills/rewrite-specs/SKILL.md`](../../../skills/rewrite-specs/SKILL.md) §"Worktree handling" — the only skill currently consuming Superpowers.
 - [`README.md`](../../../README.md) §"Recommended companion" — the user-facing version of this seam.

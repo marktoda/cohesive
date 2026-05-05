@@ -113,19 +113,41 @@ agents/
   library-native-reviewer           Ecosystem alignment
   agent-readiness-reviewer          Could a future agent change this safely?
 
-references/
+references/                         Runtime methodology cited by skills/agents
+                                    when running on the user's codebase:
   substrate-model.md                The substrate thesis
   cohesion-rubric.md                9-axis scorecard
   design-pressure-testing.md        25-question battery for design options
   locality-over-centralization.md   When to centralize vs duplicate
   architecture-review-rubric.md     Four-phase review process
-  skill-conventions.md              Canonical SKILL.md shape + v0.1 conventions
-  reviewer-agent-template.md        Canonical reviewer-agent shape
-  substrate-layout.md               Where artifacts live in this repo
-  templates/                        Behavior matrix, invariant, gotcha,
-                                    design delta ledger, cohesion review,
+  output-voice.md                   Chat-render voice and density rules
+  templates/                        Fillable forms: behavior matrix, invariant,
+                                    gotcha, design delta ledger, cohesion review,
                                     architecture review report, substrate map,
                                     claimed system shape, substrate discovery report
+
+docs/substrate/                     Contributor-facing rules about THIS repo:
+  designs/
+    skill-conventions.md            Canonical SKILL.md shape + v0.1 conventions
+    reviewer-agent-template.md      Canonical reviewer-agent shape
+    substrate-layout.md             Where this repo's artifacts live
+    three-layer-architecture.md     Plugin's architectural layout
+    composition-with-superpowers.md Plugin composition design
+    agent-dispatch-protocol.md      Reviewer-agent dispatch contract
+  invariants/                       Named global rules: PLUGIN_ROOT_PATHS,
+                                    VERDICT_BEFORE_EVIDENCE
+  gotchas/                          Documented scars: soft-prereqs,
+                                    discovery-vs-superpowers,
+                                    wordy-output, style-guide-rot
+  matrices/                         Branchy behavior with stable IDs:
+                                    router, reviewer-output-shape,
+                                    skill-section-presence, artifact-placement
+
+docs/history/
+  reviews/                          Persisted architecture / cohesion / validation reviews
+  delta-ledgers/                    Spec-rewrite ledgers (dated)
+  transcripts/                      Worked examples and dogfood captures
+  plans/                            Dated milestone plans
 
 scripts/
   scan_substrate.py                 Fast substrate inventory

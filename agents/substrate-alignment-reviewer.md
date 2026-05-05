@@ -84,9 +84,11 @@ For `--scope diff`: read only the diff and substrate it touches.
 
 ## How to structure your output
 
-Return findings ranked by leverage × severity. Each finding uses the canonical six-field shape from `${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md` §"Output format conventions":
+Return findings ranked by leverage × severity. Each finding uses the canonical six-field shape from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions":
 
 ```md
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
 ### <Finding title>
 
 **Severity:** Blocker / High / Medium / Low

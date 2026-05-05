@@ -110,18 +110,18 @@ Consumers:
 - **Prereq-state consumers** (subskills with a `discover-substrate` prereq): `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`. Each Hard Constraint #1 in those skill bodies states that when the router passes the prereq fragment, the canonical clarifying question is skipped.
 - **Chosen-direction / ledger-path consumers**: `rewrite-specs` (chosen direction), `validate-rewrite` (ledger path only — no prereq state; this is the documented exception), V1 artifact skills.
 
-Direct (non-router) invocation: the subskill asks its canonical question per `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"Clarifying questions". The contract is router-side only.
+Direct (non-router) invocation: the subskill asks its canonical question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Clarifying questions". The contract is router-side only.
 
 ## Required behavior
 
 1. **Announce the route.** One sentence in chat before dispatching, in the canonical form:
    > "I'm treating this as a Cohesive **<route>** workflow: <chain>. Reason: <one short clause>."
 
-   The form is the convention named in [`references/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `artifact`.
+   The form is the convention named in [`docs/substrate/designs/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `artifact`.
 
 2. **Process skills run before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code.
 
-3. **At most one clarifying question.** Per route (above). The question is a specific forced choice, never a vague "what do you want?" prompt — convention defined in [`references/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md) §"Clarifying questions".
+3. **At most one clarifying question.** Per route (above). The question is a specific forced choice, never a vague "what do you want?" prompt — convention defined in [`docs/substrate/designs/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md) §"Clarifying questions".
 
 4. **Do not implement code.** Cohesive is design/review/audit. If the user wants implementation, recommend Superpowers' workflow after Cohesive's substrate work is done.
 
@@ -145,14 +145,15 @@ When the request is ambiguous, prefer this resolution order:
 
 ## Output
 
-The router itself produces minimal output:
+The router itself produces minimal output: a single-sentence announcement before the first subskill is invoked. Per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets," the router's render budget is 1–2 sentences — it has no `#` title and is exempt from the voice-citation grep that applies to longer-rendered skills (documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` §"Convention pins enforced alongside this invariant").
 
-```md
-I'm treating this as a Cohesive <route> workflow: <subskill-1> → <subskill-2> → <subskill-3>.
-Reason: <one short clause>.
+The canonical announcement template:
+
+```
+I'm treating this as a Cohesive <route> workflow: <subskill-1> → <subskill-2> → <subskill-3>. Reason: <one short clause>.
 ```
 
-Then it invokes the first subskill. Each subskill produces its own output and recommends the next. The user can stop the chain at any subskill boundary.
+Then the router invokes the first subskill. Each subskill produces its own output (carrying its own voice citation) and recommends the next. The user can stop the chain at any subskill boundary.
 
 ## Acceptance criteria
 

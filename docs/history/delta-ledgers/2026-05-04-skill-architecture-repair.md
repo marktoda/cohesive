@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-04
 **Worktree / branch:** `.worktrees/cohesive-skill-arch-repair` on `design/skill-arch-repair`
-**Approved direction:** Address all 12 findings from the focused skill-architecture review at [`docs/history/reviews/2026-05-04-skill-architecture-review.md`](../reviews/2026-05-04-skill-architecture-review.md). The headline failure: ALL 5 reviewer agent files were missing the token-discipline note that `references/reviewer-agent-template.md:119-121` explicitly required — observable as the two reviewers in this very review's machinery emitting ~2K-word reports each. Plus output-shape drift across 5 agents, soft-prereqs gotcha not propagated into the 3 subskills it names, no stop-condition for empty-substrate codebases, no TL;DR convention, brainstorm-design hand-off via human memory, discover-substrate triggers too generic, library-native-reviewer claiming inputs not actually passed.
+**Approved direction:** Address all 12 findings from the focused skill-architecture review at [`docs/history/reviews/2026-05-04-skill-architecture-review.md`](../reviews/2026-05-04-skill-architecture-review.md). The headline failure: ALL 5 reviewer agent files were missing the token-discipline note that `docs/substrate/designs/reviewer-agent-template.md:119-121` explicitly required — observable as the two reviewers in this very review's machinery emitting ~2K-word reports each. Plus output-shape drift across 5 agents, soft-prereqs gotcha not propagated into the 3 subskills it names, no stop-condition for empty-substrate codebases, no TL;DR convention, brainstorm-design hand-off via human memory, discover-substrate triggers too generic, library-native-reviewer claiming inputs not actually passed.
 
 **Driving review:** [`docs/history/reviews/2026-05-04-skill-architecture-review.md`](../reviews/2026-05-04-skill-architecture-review.md) (12 findings under three sub-questions: skill architecture / sharp edges / agent prompt quality)
 
@@ -60,7 +60,7 @@
   - **After:** Description narrowed to substrate-specific scope per the discovery-vs-superpowers gotcha pattern, with explicit "for general codebase exploration use Superpowers… instead" guidance; output format references the canonical `references/templates/substrate-discovery-report.md`; new Step 7 §"Detect empty-substrate codebases" emits `**Empty-substrate verdict: yes**` for sparse repos; renumbered prior Step 7 to Step 8; output schema includes the new §"Package files" section.
   - **Reason:** Closes Findings #1, #5, #7, #12.
 
-- `references/skill-conventions.md`
+- `docs/substrate/designs/skill-conventions.md`
   - **Before:** §"Output format conventions" had only the recommended-next-skill rule; §"Clarifying questions" defined the at-most-one rule but didn't include the canonical prereq-detection question pattern.
   - **After:** §"Output format conventions" expanded with §"TL;DR convention" — every persisted skill output renders verdict + thesis + top findings + recommended next skill as the first chat content. §"Clarifying questions" expanded with §"Canonical prereq-detection question" — the verbatim question form for skills with discovery/brainstorm prereqs, with explicit router-bypass note.
   - **Reason:** Closes Findings #4, #6.
@@ -92,13 +92,13 @@
 ## What this rewrite *did not* do
 
 - **`validate_plugin.sh` script:** unchanged. The `PLUGIN_ROOT_PATHS` path-discipline grep remains the named "intended state" in the invariant doc; landing the actual grep is implementation work for a separate pass.
-- **`docs/history/brainstorms/` directory:** not pre-created. Will be created on first use per `references/substrate-layout.md`'s "don't create empty directories preemptively" rule.
+- **`docs/history/brainstorms/` directory:** not pre-created. Will be created on first use per `docs/substrate/designs/substrate-layout.md`'s "don't create empty directories preemptively" rule.
 - **ARCHITECTURE.md keep-together rationale for cohesive-review codebase+diff (Finding #3 "Pass 2"):** not addressed in this pass. Deferred deliberately — the more urgent agent and skill repairs land first; documenting the existing architectural choice can wait for a follow-up.
 - **Substrate-discovery `scan_substrate.py` script integration with the empty-substrate verdict:** the verdict logic lives in the skill body's Step 7 instructions, not in the script. The script's bucketing already gives Claude enough signal to decide; promoting the verdict into the script itself is V1.
 
 ## Remaining ambiguity
 
-- **`brainstorms/` subdir under `docs/history/`:** This pass declares the path but doesn't add it to `references/substrate-layout.md`'s structure block. Worth a one-line addition in a follow-up to keep the layout doc in sync. (Soft; not blocking.)
+- **`brainstorms/` subdir under `docs/history/`:** This pass declares the path but doesn't add it to `docs/substrate/designs/substrate-layout.md`'s structure block. Worth a one-line addition in a follow-up to keep the layout doc in sync. (Soft; not blocking.)
 - **The reviewer-output-shape matrix's "after-state" cells are all ✓.** This is by design — the matrix is the post-repair-pass canonical state. But fresh-eyes review may want to verify each agent file actually matches the matrix's claim. The agent files now use the same six-field block; the matrix should reflect reality, not aspiration.
 - **TL;DR convention not yet retrofitted into the existing architecture-review-report template** (`references/templates/architecture-review-report.md`). The convention is in `skill-conventions.md`; the template hasn't been updated. Worth a follow-up.
 
