@@ -74,6 +74,21 @@ Cohesive skills reading substrate (`discover-substrate`, `review-codebase`, `rev
 - Read existing repo conventions otherwise
 - If both exist, treat the existing one as authoritative and flag the duplication for cleanup
 
+## Artifact directory resolution
+
+Persisting skills (`review-codebase`, `audit-substrate`, `rewrite-specs`, `brainstorm-design`, `validate-rewrite`) resolve their output directory by this rule, applied before any write. The rule is the same for every persisting skill; the skills cite this section rather than restate it.
+
+For artifact category C (review / audit / delta-ledger / brainstorm / validation), output goes under the first directory that exists, in this order:
+
+1. **Existing Cohesive layout** — if `docs/history/<C-subdir>/` exists, use it. Subdirs: `reviews/` for review and audit and validation, `delta-ledgers/` for delta-ledger, `brainstorms/` for brainstorm.
+2. **Existing repo convention** — if the repo uses one of `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, `docs/architecture/`, place the artifact alongside it under a category-named subdirectory (e.g., `docs/adr/reviews/`, `docs/specs/delta-ledgers/`). Don't create a sibling `docs/history/` next to a populated `docs/adr/`.
+3. **External-repo Cohesive default** — if neither exists, create `docs/cohesive/<C-subdir>/`. This makes Cohesive's outputs visible without colonizing the user's `docs/` tree.
+4. **No `docs/` directory at all** — create `docs/cohesive/<C-subdir>/`. Skills do not write outside `docs/`.
+
+The resolved path is announced in chat at the start of the persisting skill's run, before any write. This is the "Step 0" preamble each persisting skill carries.
+
+The full cell-by-cell expansion (per artifact category × per repo shape) lives in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/artifact-placement.md` once that matrix exists; until then, the four-rule resolution above is authoritative.
+
 ## Anti-patterns
 
 - Dated file in `docs/substrate/` — move it to `history/` or remove the date

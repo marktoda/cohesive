@@ -13,16 +13,32 @@ This skill is intentionally separate from `review-codebase` and `review-diff`. T
 
 ## Hard constraints
 
-1. **Always run `discover-substrate` first.** Or re-use its output from earlier in this session. The audit's job is to compare what exists to what *should* exist; without discovery, you don't know what exists.
+1. **Substrate discovery is a prereq; ask the user, don't guess.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, detecting prior discovery from session memory silently degrades. Open the turn with the canonical forced-choice question:
+
+   > "I see we're about to run audit-substrate. Has substrate discovery already happened for this scope, or should I run `discover-substrate` first?"
+
+   When the `cohesively` router invokes this skill, it passes "discovery already complete; report at <path>" in the dispatch prompt and this skill skips the question.
+
 2. **No reviewer-agent dispatch.** A substrate audit is a single-pass scan. Don't burn 4× tokens for a missing-memory inventory.
 3. **Score "does the substrate exist," not "is the code good."** A missing-memory finding is about an absent artifact, not a code defect. Code defects belong in `cohesive:review-diff` or in normal review.
 4. **Every finding names the artifact to add.** If a finding has no clear substrate target (named invariant / behavior matrix / gotcha / semantic linter / spec / test), it's preference, not a substrate gap. Drop it or restate.
 
 ## Process
 
-### 1. Re-use or run substrate discovery
+### 0. Resolve the artifact directory
 
-If `discover-substrate` has already run for the repo (or named subsystem) in this session, reuse its report. Otherwise run it.
+Before scanning, resolve where the audit report will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
+
+1. If `docs/history/reviews/` exists, write there.
+2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `reviews/` subdir alongside it.
+3. Else default to `docs/cohesive/reviews/`.
+4. If `docs/` does not exist, still default to `docs/cohesive/reviews/`.
+
+Announce the resolved path in chat before the scan begins.
+
+### 1. Re-use the substrate discovery report
+
+The user's answer to the prereq question (or the router's dispatch prompt) names the report path. Use it. If the user said to run `discover-substrate` first, do that and use its output.
 
 When invoked from the `cohesively` router with the `audit (substrate)` route, the router passes "discovery already complete; report at <path>" explicitly per the dispatch prompt contract in `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md`.
 

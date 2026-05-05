@@ -19,6 +19,17 @@ The review's defining property is **fresh eyes**: this skill always dispatches t
 
 ## Process
 
+### 0. Resolve the artifact directory
+
+Before dispatching the reviewer agent, resolve where the validation report will be persisted. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
+
+1. If `docs/history/reviews/` exists, write there.
+2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `reviews/` subdir alongside it.
+3. Else default to `docs/cohesive/reviews/`.
+4. If `docs/` does not exist, still default to `docs/cohesive/reviews/`.
+
+Announce the resolved path in chat before the dispatch. If `--no-write` is set, skip resolution and render the report in chat only.
+
 ### 1. Locate the inputs
 
 Required inputs the calling user or skill must provide (or that this skill should locate):
@@ -115,8 +126,12 @@ The skill's chat output (the agent's report, surfaced):
 ## Recommended repairs (ranked)
 1. ...
 
-## Next Cohesive skill
-<one of the three options above>
+### Recommended next Cohesive skill
+
+Per verdict:
+- **Approved** — `superpowers:writing-plans` (or `plan-implementation` in V1) — substrate is sound; implementation can proceed.
+- **Issues Found** — `cohesive:rewrite-specs` — repair the blocking issues in the same worktree, then re-run this skill.
+- **Design Incoherent** — `cohesive:brainstorm-design` — the design itself needs revisiting; fixes won't help.
 ```
 
 ## Why fresh eyes matter here
@@ -145,3 +160,10 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 
 - **Always preceded by:** `rewrite-specs`
 - **Followed by:** `rewrite-specs` again (Issues Found) or `brainstorm-design` (Design Incoherent) or implementation planning (Approved)
+
+## What this skill is *not*
+
+- Not the spec rewrite itself. This skill validates the rewrite produced by `rewrite-specs`; it never produces or modifies docs.
+- Not a code review. Specs-only by Hard Constraint #2 — implementation files are out of scope until verdict is `Approved`.
+- Not a substrate audit. Audit asks "what memory is missing across the repo"; validation asks "is this rewrite internally coherent and aligned with its approved direction." Use `cohesive:audit-substrate` for the former.
+- Not a synthesis of multiple agents. Single dispatched reviewer; the skill surfaces its report rather than merging across reviewers.

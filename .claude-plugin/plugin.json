@@ -1,7 +1,7 @@
 {
   "name": "cohesive",
   "version": "0.1.0",
-  "description": "Substrate-first agentic engineering for senior architects. Helps Claude make changes that preserve specs, behavior matrices, named invariants, semantic linters, gotchas, locality boundaries, and future product direction. Workflow chain: discover-substrate → brainstorm-design → rewrite-specs → validate-rewrite. Standalone diagnostics: review-codebase, review-diff, audit-substrate. Router: cohesively.",
+  "description": "Substrate-first agentic engineering — helps your codebase remember.",
   "author": {
     "name": "Mark Toda",
     "email": "mark.toda@uniswap.org"

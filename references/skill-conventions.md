@@ -1,6 +1,6 @@
 # Skill conventions
 
-The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces `PLUGIN_ROOT_PATHS` and structural shape; the rest of the rules below are convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Treating them as conventions is deliberate — v0.1 is too early to freeze every prose rule into a structural check.
+The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces the named invariant `PLUGIN_ROOT_PATHS`, structural plugin shape, and a small set of convention pins: the canonical prereq-detection question in subskills with a discover-substrate prereq, the fresh-eyes preamble bullet across reviewer agents, the `### Recommended next Cohesive skill` footer in every persisting skill, and a negative-trigger check on skill descriptions. The rest of the rules below — section order, tone, output-block contents, anti-pattern table shape — remain convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Convention status is deliberate where wording is still settling; promotion to enforcement happens when a rule earns it.
 
 ## Frontmatter
 

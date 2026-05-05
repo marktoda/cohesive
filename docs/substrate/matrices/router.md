@@ -44,6 +44,25 @@ The matrix is normative. When a user request matches a row, the router must sele
 - The router's announcement (per the router-announcement convention in `references/skill-conventions.md`) names the selected cell ID for transcript-traceability when in doubt.
 - When two cells could both apply, the resolution order from `cohesively/SKILL.md`'s "Routing decision logic" wins: explicit instruction → verb tense → scope hint → default.
 
+## Dispatch prompt contract (per route)
+
+When the router dispatches a subskill, the dispatch prompt carries explicit prereq state and chosen-direction state so the subskill skips its canonical clarifying question (closes the soft-prereqs gotcha's "router-driven case" exemption). This grid mirrors the table in `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md` §"Dispatch prompt contract" and is the matrix-side pin for that contract.
+
+| Route | First subskill | Prereq state passed | Chosen-direction state passed | Notes |
+|---|---|---|---|---|
+| `design` | `discover-substrate` | _none (no prereq)_ | _none (not yet chosen)_ | Step 1; brainstorm-design step receives discovery report path; rewrite-specs step (only if reached) receives chosen direction; validate-rewrite step (only if reached) receives ledger path. |
+| `review (codebase)` | `discover-substrate` (or skip if reused) | "Discovery already complete; report at <path>" passed to `review-codebase` | n/a | Discovery prereq closes the soft-prereqs gotcha. |
+| `review (diff)` | `discover-substrate` (scoped to changed files) | "Discovery already complete (scoped to <changed-files>); report at <path>" passed to `review-diff` | n/a | Same shape, narrower scope. |
+| `audit (substrate)` | `discover-substrate` (or skip if reused) | "Discovery already complete; report at <path>" passed to `audit-substrate` | n/a | Single subskill consumer; no synthesis. |
+| `rewrite-only` | `rewrite-specs` | n/a (no discovery prereq for rewrite-specs) | "Approved direction: <option name + summary>" passed to `rewrite-specs`; ledger path passed to `validate-rewrite` once rewrite produces it | If user has not chosen a direction, route to `design` first. |
+| `artifact` (V1) | template return + offer | n/a | "Artifact requested: <invariant / matrix / gotcha>" | V1: dedicated artifact skills will replace the template-return shape. |
+
+### Dispatch contract exceptions
+
+- **`validate-rewrite` does not consume prereq state.** It has no `discover-substrate` prereq. Its router-passed input is always the design delta ledger path produced by an earlier `rewrite-specs` step (in the `design` or `rewrite-only` route). Treating `validate-rewrite` as a prereq-state consumer is the predictable extension footgun this row exists to prevent.
+
+This grid is normative. Adding a route or subskill requires updating this section *and* `cohesively/SKILL.md` §"Dispatch prompt contract" in the same pass. Drift between the two surfaces produces the exact "soft-prereqs" failure mode the contract closes.
+
 ## Removed cells
 
 | Cell ID | Removed on | Reason |

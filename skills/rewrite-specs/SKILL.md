@@ -30,7 +30,9 @@ This is one of Cohesive's flagship skills. Spec rewriting is the cheapest place 
 
 Before rewriting, set up an isolated workspace.
 
-**If `superpowers:using-git-worktrees` is available:** invoke it with branch name `design/<slug>` where `<slug>` describes the rewrite topic. Superpowers handles directory selection (`.worktrees/` preferred), gitignore safety, project setup, and baseline test run.
+**Detection.** Check the available-skills list in the session's system reminder. If `superpowers:using-git-worktrees` appears there, Superpowers is installed; if not, use the fallback. This is the platform-native check — there is no separate "is plugin X installed" API; the harness exposes installed-skill availability through the system reminder, and that's the source of truth.
+
+**If `superpowers:using-git-worktrees` is available:** invoke it via the Skill tool with branch name `design/<slug>` where `<slug>` describes the rewrite topic. Superpowers handles directory selection (`.worktrees/` preferred), gitignore safety, project setup, and baseline test run.
 
 **Fallback if superpowers isn't installed:**
 
@@ -45,6 +47,17 @@ cd .worktrees/cohesive-${slug}
 Announce in chat: "Working in worktree `.worktrees/cohesive-${slug}` on branch `design/${slug}`."
 
 ## Process
+
+### 0. Resolve the artifact directory
+
+Before rewriting any docs, resolve where the design delta ledger will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" with artifact category `delta-ledgers/`:
+
+1. If `docs/history/delta-ledgers/` exists, write there.
+2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `delta-ledgers/` subdir alongside it.
+3. Else default to `docs/cohesive/delta-ledgers/`.
+4. If `docs/` does not exist, still default to `docs/cohesive/delta-ledgers/`.
+
+Announce the resolved path in chat before rewriting begins.
 
 ### 1. Read the approved direction and the substrate context
 
@@ -140,7 +153,7 @@ The skill's chat output (separate from the file changes) is short:
 ### Remaining ambiguity
 - <thing the rewrite couldn't fully resolve>
 
-### Next Cohesive skill
+### Recommended next Cohesive skill
 `cohesive:validate-rewrite` — fresh-eyes review of the rewritten specs against the substrate model and approved direction.
 ```
 

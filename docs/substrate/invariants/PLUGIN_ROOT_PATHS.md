@@ -31,9 +31,9 @@ This is a real correctness contract. Unlike v0.1's other rules (output-shape, pr
 
 ## Enforcement
 
-**Current state (today):** `scripts/validate_plugin.sh` checks frontmatter shape, JSON validity, and that `references/...` and `templates/...` paths cited in skill bodies resolve to existing files. The path-discipline grep described below is the validator's *intended* state; the substrate collapse described what should be enforced but did not change the script. Until the grep lands, this invariant is held by reviewer judgment (`review-diff` flags hardcoded paths) and the file-existence check (a hardcoded `/home/...` reference will resolve to a non-existent path on every other user's machine and trip the existing warning).
+`scripts/validate_plugin.sh` greps `skills/`, `agents/`, and `references/` for hardcoded path patterns (`/home/`, `/Users/`, `/usr/local/`, `~/`) outside fenced code blocks and explicit anti-pattern lines. A violation is a hard fail; the failure message names this invariant by name. The grep is check 13 in the validator.
 
-**Intended state (follow-up implementation):** `scripts/validate_plugin.sh` greps `skills/`, `agents/`, and `references/` for hardcoded path patterns (`/home/`, `/Users/`, `/usr/`, `~/`) outside fenced anti-pattern blocks. Failure is a hard fail. The script asserts that internal-path references in skill bodies use the `${CLAUDE_PLUGIN_ROOT}/` prefix.
+The validator also runs the convention-layer greps that pin related rules: canonical prereq-detection question in subskill bodies, fresh-eyes preamble bullet in reviewer agent files, "Recommended next Cohesive skill" footer in every persisting skill body, and a negative-trigger check on skill descriptions. None of those rules are named invariants — they remain conventions. They are mentioned here only because they share the same enforcement surface.
 
 The validator runs locally. CI is out of scope for v0.1.
 

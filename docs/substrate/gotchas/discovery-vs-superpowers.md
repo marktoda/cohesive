@@ -49,9 +49,15 @@ Make the choice explicit at the route level, not at the description-match level.
 
 ## Tests / checks that preserve this
 
-- Description-string review (planned): `discover-substrate` description triggers should be substrate-specific ("substrate", "what specs/invariants/gotchas exist for X", "audit substrate before changing X") and not generic ("explore", "what's in this codebase").
-- Router-driven invocation as the recommended path: README and AGENTS.md guidance both direct users to invoke `cohesively` rather than picking subskills directly.
-- Manual scenario test (planned): with both plugins installed, the test prompt "what's in this codebase" should not deterministically pick either; "audit substrate" should pick Cohesive; "explore the auth flow" should pick Superpowers.
+- **Substrate-vocabulary token check (`scripts/validate_plugin.sh` check 9a):** every Cohesive skill description must contain at least one of `substrate`, `cohesion`, `cohesive`, `invariant`, `gotcha`, `behavior matrix`, `spec`, `rewrite`. Necessary but not sufficient.
+- **Negative-trigger check (`scripts/validate_plugin.sh` check 9b):** Cohesive skill descriptions must not use these bare quoted trigger phrases that overlap with Superpowers' code-reviewer surface:
+  - `"review the codebase"`
+  - `"review the architecture"`
+  - `"is this codebase healthy"`
+  - `"review the code"`
+  Tightened forms pass: `"review the codebase for cohesion"`, `"review the architecture for cohesion"`, `"is this codebase cohesion-healthy"`. The narrowing clause is what disambiguates Cohesive from Superpowers' generic code review.
+- **Router-driven invocation as the recommended path:** README and AGENTS.md guidance both direct users to invoke `cohesively` rather than picking subskills directly.
+- **Manual scenario test (planned):** with both plugins installed, the test prompt "what's in this codebase" should not deterministically pick either; "audit substrate" should pick Cohesive; "explore the auth flow" should pick Superpowers.
 
 ## When this was discovered
 

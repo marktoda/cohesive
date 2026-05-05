@@ -30,6 +30,17 @@ The output is the input to either `rewrite-specs` (if a direction is approved) o
 
 ## Process
 
+### Phase 0: Resolve the artifact directory
+
+If the brainstorm is going to be persisted (the user has asked for it, or the router's `design` route is chaining toward `rewrite-specs`), resolve where it will be written before grounding begins. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" with artifact category `brainstorms/`:
+
+1. If `docs/history/brainstorms/` exists, write there.
+2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `brainstorms/` subdir alongside it.
+3. Else default to `docs/cohesive/brainstorms/`.
+4. If `docs/` does not exist, still default to `docs/cohesive/brainstorms/`.
+
+Brainstorms are not always persisted — many design conversations end at the recommendation. When persistence is requested, announce the resolved path in chat before writing.
+
 ### Phase 1: Ground the brainstorm
 
 Use the discovery report (passed by the router or produced by Hard constraint #2's pre-check) as the starting material. If the discovery report carries `**Empty-substrate verdict: yes**`, broaden option-generation to fundamentals rather than grounding in nothing — this is a fresh-substrate codebase, not a mature one.

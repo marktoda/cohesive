@@ -120,7 +120,9 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 ```md
 ## Substrate discovered
 
-**Empty-substrate verdict: yes**  <!-- only when applicable per Step 7 -->
+### Empty-substrate verdict
+
+**Empty-substrate verdict: yes**  <!-- only when applicable per Step 7; consumed structurally by review-codebase Phase 1.5 and brainstorm-design Phase 1. The bold-line form is the literal string downstream skills grep for; do not change it. Omit the line entirely when the verdict is "no". -->
 
 ### Target change surface
 - Subsystem: <name or "(repo-wide)">

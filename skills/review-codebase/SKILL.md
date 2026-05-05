@@ -1,6 +1,6 @@
 ---
 name: review-codebase
-description: Use when reviewing a whole codebase or named subsystem for cohesion — does the implementation agree with the docs, are invariants enforced, are seams in the right places, can a future agent change this safely. Reads normative docs first; stops if specs are seriously inconsistent; otherwise dispatches four reviewer agents in parallel and synthesizes a thesis-led report. Triggers on "review the architecture", "review the codebase", "architecture review of X", "is this codebase healthy". For PR/diff reviews use `cohesive:review-diff`. For substrate audits use `cohesive:audit-substrate`.
+description: Use when reviewing a whole codebase or named subsystem for cohesion — does the implementation agree with the docs, are invariants enforced, are seams in the right places, can a future agent change this safely. Reads normative docs first; stops if specs are seriously inconsistent; otherwise dispatches four reviewer agents in parallel and synthesizes a thesis-led report. Triggers on "review the architecture for cohesion", "review the codebase for cohesion", "cohesion review of X", "is this codebase cohesion-healthy". For PR/diff reviews use `cohesive:review-diff`. For substrate audits use `cohesive:audit-substrate`.
 ---
 
 # Review codebase
@@ -25,7 +25,18 @@ For PR/branch/working-changes reviews, use [`cohesive:review-diff`](${CLAUDE_PLU
 
 ## Process
 
-Implements the four-phase architecture review from `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`.
+Implements the four-phase architecture review from `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`. Phase 0 below resolves where the output is written before any reading begins; Phases 1-5 are the rubric.
+
+### Phase 0: Resolve the artifact directory
+
+Before any reading or dispatch, resolve where the output review will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
+
+1. If `docs/history/reviews/` exists, write there.
+2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `reviews/` subdir alongside it (e.g., `docs/adr/reviews/`).
+3. Else default to `docs/cohesive/reviews/`.
+4. If `docs/` does not exist, still default to `docs/cohesive/reviews/`.
+
+Announce the resolved path in chat before reading begins. Don't hardcode `docs/history/reviews/` — that is only correct for repos that already use the Cohesive layout.
 
 ### Phase 1: Read normative substrate
 
