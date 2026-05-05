@@ -94,7 +94,9 @@ The skill's chat output (the agent's report, surfaced):
 ```md
 # Rewrite Validation Review — <topic>
 
-**Status:** Approved / Issues Found / Design Incoherent
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
+**Verdict:** Approved / Issues Found / Design Incoherent
 
 ## Executive judgment
 <one paragraph>

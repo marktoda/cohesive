@@ -21,15 +21,15 @@ Cell legend:
 
 | Agent | Severity | Category | Why it matters | Evidence | Recommended fix | Substrate artifact | Voice citation |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| substrate-alignment-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
-| structure-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
-| library-native-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
-| agent-readiness-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
-| spec-cohesion-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
+| substrate-alignment-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| structure-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| library-native-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| agent-readiness-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| spec-cohesion-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The first six columns reflect the state *after* the 2026-05-04 skill-architecture repair pass. Prior state showed drift: `substrate-alignment-reviewer` dropped Evidence; `library-native-reviewer` and `agent-readiness-reviewer` dropped Category; `spec-cohesion-reviewer` used a different shape entirely (Risk / Substrate artifact / Suggested repair). That repair pass swept all five to canonical.
 
-The "Voice citation" column was added in the 2026-05-04 `cut-anchor-pin` substrate rewrite. Each agent's "How to structure your output" code block must open with the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. All five cells are `pending` until the implementation follow-up pass (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`) adds the citation line to each agent file. After implementation, all five must be `✓`; `validate_plugin.sh` greps for the citation line as a convention pin.
+The "Voice citation" column was added in the 2026-05-04 `cut-anchor-pin` substrate rewrite. Each agent's "How to structure your output" code block opens with the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. All five cells are `✓` after the cut-anchor-pin implementation pass (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md` §"Implementation pass") added the citation line to each agent file and the validator grep that pins it.
 
 ### Verdict-leads is tracked elsewhere
 

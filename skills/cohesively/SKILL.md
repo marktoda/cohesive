@@ -145,14 +145,15 @@ When the request is ambiguous, prefer this resolution order:
 
 ## Output
 
-The router itself produces minimal output:
+The router itself produces minimal output: a single-sentence announcement before the first subskill is invoked. Per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets," the router's render budget is 1–2 sentences — it has no `#` title and is exempt from the voice-citation grep that applies to longer-rendered skills (documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` §"Convention pins enforced alongside this invariant").
 
-```md
-I'm treating this as a Cohesive <route> workflow: <subskill-1> → <subskill-2> → <subskill-3>.
-Reason: <one short clause>.
+The canonical announcement template:
+
+```
+I'm treating this as a Cohesive <route> workflow: <subskill-1> → <subskill-2> → <subskill-3>. Reason: <one short clause>.
 ```
 
-Then it invokes the first subskill. Each subskill produces its own output and recommends the next. The user can stop the chain at any subskill boundary.
+Then the router invokes the first subskill. Each subskill produces its own output (carrying its own voice citation) and recommends the next. The user can stop the chain at any subskill boundary.
 
 ## Acceptance criteria
 

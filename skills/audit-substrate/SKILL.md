@@ -61,6 +61,10 @@ Walk each axis from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`. For e
 ```md
 # Substrate Audit
 
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
+**Verdict:** Substrate sound / Substrate gaps / Substrate sparse
+
 **Date:** YYYY-MM-DD
 **Scope:** <repo-wide or subsystem name>
 **Substrate discovery:** <path or "inline below">
@@ -115,7 +119,28 @@ If the user passes `--no-write`, render in chat only.
 
 ## Output format
 
-The chat output is the audit report shown in step 3, ending with the canonical "Recommended next Cohesive skill" block.
+The skill renders a chat trailer (canonical verdict-led shape below) and persists the full audit report to `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md` per step 3. The chat render is a faithful subset of the persisted file (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2).
+
+```md
+# Substrate Audit — <scope>
+
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
+**Verdict:** Substrate sound / Substrate gaps / Substrate sparse
+
+**Headline:** <one or two sentences — highest-leverage missing memory and why the codebase is at risk because of it>
+
+## Top fixes
+1. <substrate artifact to add; one-clause justification>
+2. <substrate artifact to add; one-clause justification>
+3. <substrate artifact to add; one-clause justification>
+
+## Persisted report
+`docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md`
+
+### Recommended next Cohesive skill
+`cohesive:rewrite-specs` — most audit findings are substrate-shaped; the rewrite skill is the right vehicle to turn the highest-leverage entries into actual artifacts.
+```
 
 ## Acceptance criteria
 

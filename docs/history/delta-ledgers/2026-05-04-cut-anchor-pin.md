@@ -413,3 +413,85 @@ The fifth `cohesive:validate-rewrite` run returned **Issues Found** with one blo
 ### Ready for fresh-eyes review (sixth pass)?
 
 **Yes** — re-run `cohesive:validate-rewrite`. With B1, I1, and I2 closed plus the substrate-gap closure that names the lesson, the verdict on pass 6 should be **Approved**. If not, the issue surfaces will be sixth-order — the kind of finding that justifies merging to main and addressing in a separate substrate iteration.
+
+---
+
+## Pass-6 validation: Approved
+
+The sixth `cohesive:validate-rewrite` returned **Approved** ([report](../reviews/2026-05-04-cut-anchor-pin-rewrite-validation-pass6.md)). Substrate is sound; ready for implementation.
+
+Per the user's directive ("substrate and implementation ship together"), the next section records the implementation pass landed on this same branch rather than splitting into a separate Superpowers `writing-plans` → `executing-plans` cycle. This deviates from `rewrite-specs` Hard Constraint #3 the same way Repair pass 2 and 3 did (citation sweeps following structural moves) — the rationale is the same: shipping substrate without its enforcement leaves runtime artifacts unaligned with what the substrate now claims.
+
+---
+
+## Implementation pass (2026-05-04)
+
+The substrate now includes `VERDICT_BEFORE_EVIDENCE` (named invariant), the voice-citation convention pin, the canonical title-then-citation-then-verdict layout, and the `references/output-voice.md` guide. This pass brings the runtime artifacts (skill bodies, reviewer agent bodies, validator script) into alignment with what the substrate claims.
+
+### Reviewer agents — voice citation added
+
+All five `agents/*.md` files now open their canonical output code block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. The citation pulls the voice guide into context at finding-generation time. Header nesting in finding shapes is at `###` (already at-cap pre-pass).
+
+- `agents/structure-reviewer.md`
+- `agents/library-native-reviewer.md`
+- `agents/agent-readiness-reviewer.md`
+- `agents/substrate-alignment-reviewer.md`
+- `agents/spec-cohesion-reviewer.md` — also gained an explicit canonical code block (it had prose-only output guidance pre-pass)
+
+### Skill bodies — Output format blocks aligned to canonical layout
+
+Each `skills/*/SKILL.md` Output format code block now follows the canonical `# <title>` → `> Voice and density: ...` → (verdict line, where applicable) layout:
+
+- **Verdict-led skills** (lead with `**Verdict:**` within first 3 non-blank lines):
+  - `skills/review-codebase/SKILL.md` — Output format rewritten to render a chat trailer (verdict + thesis + top findings + persisted-file pointer + recommended-next), with the persisted file carrying the full body per `output-voice.md` rule 2.
+  - `skills/review-diff/SKILL.md` — Output format now contains the canonical chat-rendered shape directly (was "see step 4" pointer pre-pass); step 4 stays as the rendering instruction. Verdict, citation, and table format inline.
+  - `skills/validate-rewrite/SKILL.md` — header switched from `**Status:**` to `**Verdict:**` to match the canonical layout grep, citation added.
+  - `skills/audit-substrate/SKILL.md` — added `**Verdict:** Substrate sound / Substrate gaps / Substrate sparse` (resolves a substrate gap surfaced when this rewrite started: VERDICT_BEFORE_EVIDENCE.md scoped audit-substrate as verdict-led but the skill body had no verdict vocabulary). Output format rewritten to chat-trailer shape.
+
+- **Non-verdict-led skills** (citation only):
+  - `skills/discover-substrate/SKILL.md` — added `# Substrate Discovery — <scope>` title and citation
+  - `skills/brainstorm-design/SKILL.md` — added `# Brainstorm — <topic>` title and citation
+  - `skills/rewrite-specs/SKILL.md` — added `# Spec Rewrite Complete — <topic>` title and citation
+  - `skills/cohesively/SKILL.md` — exempt from the voice-citation grep (the router's render is a 1–2 sentence announcement with no `#` title per `references/output-voice.md` §"Density budgets"); the SKILL.md §"Output" now documents the exemption explicitly and `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` §"Convention pins enforced alongside this invariant" carries the canonical exemption note.
+
+### Validator — two new grep checks
+
+`scripts/validate_plugin.sh` gained checks 13a and 13b/13c (the existing PLUGIN_ROOT_PATHS check renumbered to 14):
+
+- **Check 13a (VERDICT_BEFORE_EVIDENCE).** For each verdict-led skill, an awk pass finds the first `^# ` title inside a fenced code block and verifies `**Verdict:**` appears within the next three non-blank lines. Fails the build with a message naming the invariant.
+- **Check 13b (voice citation, skills).** For each non-router skill, the same anchoring logic verifies the literal `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` appears within the first three non-blank lines after the outermost `#` title in a code block. Cohesively router excluded per the `references/output-voice.md` density-budget exemption. Failure message names the convention pin and references the voice guide and `style-guide-rot.md`.
+- **Check 13c (voice citation, agents).** Every `agents/*.md` first code block must carry the citation in its first three non-blank lines.
+
+Awk gotcha learned during implementation: `END { exit 1 }` runs after `exit 0` and overrides the prior status. Fix: use a found-flag and emit the final status from `END` only. Documented inline in the validator comments since this is the kind of trap any future grep-check author could fall into.
+
+### Matrix — voice-citation cells flipped
+
+`docs/substrate/matrices/reviewer-output-shape.md` Voice-citation column flipped from 5 × `pending` to 5 × `✓`. The matrix's explanatory paragraph updated to say all five carry the citation after this implementation pass.
+
+### Files touched
+
+- 5 reviewer agents: `agents/{agent-readiness,library-native,spec-cohesion,structure,substrate-alignment}-reviewer.md`
+- 8 skills: `skills/{audit-substrate,brainstorm-design,cohesively,discover-substrate,review-codebase,review-diff,rewrite-specs,validate-rewrite}/SKILL.md`
+- `scripts/validate_plugin.sh` (3 new awk-based checks)
+- `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` (cohesively voice-citation exemption added to canonical pin list)
+- `docs/substrate/matrices/reviewer-output-shape.md` (cells flipped, explanatory paragraph updated)
+
+### Hard Constraint #3 reckoning, continued
+
+The user explicitly directed shipping substrate + implementation together on this branch. The rationale matches Repair passes 2 and 3: leaving the runtime out of sync with the substrate window would break the validator the substrate just defined. The substrate-vs-implementation seam is preserved in *thinking* (each section names which side it is) but not in *commit boundaries* (single PR rather than two). Future rewrites can choose differently; this ledger documents the choice so the choice is legible.
+
+### What ships now
+
+- Two named invariants (`PLUGIN_ROOT_PATHS`, `VERDICT_BEFORE_EVIDENCE`) both grep-enforced.
+- Six convention pins, all grep-enforced (verdict-leads + voice-citation are the new ones; the four prior pins were already enforced).
+- Voice guide (`references/output-voice.md`) cited from every relevant skill and agent body. Style-guide-rot defenses encoded in substrate.
+- Every verdict-led skill leads with verdict in its Output format block.
+- Reviewer-output-shape matrix is fully `✓` across the new column.
+
+### Validator state
+
+`bash scripts/validate_plugin.sh` passes with 0 warnings, 0 errors. The two named invariants and four convention pins pre-existing this rewrite, plus the two new pins added by this implementation pass, all enforce on every run.
+
+### Next
+
+`cohesive:review-diff` against this branch (or against the eventual merged-to-main commit) to confirm the runtime artifacts match the substrate after both ship together. The dogfood loop closes here: substrate written → spec-cohesion-reviewer approved → implementation pass aligned → diff review confirms.

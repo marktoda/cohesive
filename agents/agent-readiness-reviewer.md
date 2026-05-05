@@ -135,6 +135,8 @@ You do **not** read every file. Sample with intent.
 The ranked findings list is the contract. The pre-finding observation sections are *optional* — write "none observed" or omit a section entirely. Do not fill them just to look thorough.
 
 ```md
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
 ## High-leverage findings (ranked)
 
 ### 1. <title>

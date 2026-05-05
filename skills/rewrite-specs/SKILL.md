@@ -123,7 +123,9 @@ Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger 
 The skill's chat output (separate from the file changes) is short:
 
 ```md
-## Spec rewrite complete
+# Spec Rewrite Complete — <topic>
+
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Worktree:** `.worktrees/cohesive-<slug>` on `design/<slug>`
 **Approved direction:** <option name>

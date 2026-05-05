@@ -47,7 +47,7 @@ This is a real correctness contract. Unlike v0.1's other rules (output-shape, pr
 **Planned (queued for the implementation follow-up of the 2026-05-04 `cut-anchor-pin` rewrite — see `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`):**
 
 5. **Verdict-leads check** for verdict-led skills (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`). This is the second named invariant; it is *planned* in the validator script but not yet wired in.
-6. **Voice-citation check** in every `skills/*/SKILL.md` Output format block and every `agents/*.md` "How to structure your output" block (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md`). Convention-with-grep status, not invariant.
+6. **Voice-citation check** in every `skills/*/SKILL.md` Output format block and every `agents/*.md` "How to structure your output" block (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md`). Convention-with-grep status, not invariant. **Exemption:** `skills/cohesively/SKILL.md` is exempt — its render budget is 1–2 sentences with no `#` title (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets" and the SKILL.md §"Output"); the grep skips it.
 
 None of the convention pins above (1–4, 6) are named invariants — they remain conventions. They share the same enforcement surface (`validate_plugin.sh`) as the two named invariants (this one, and `VERDICT_BEFORE_EVIDENCE`).
 

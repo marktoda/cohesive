@@ -62,6 +62,23 @@ For every rewritten and added spec, evaluate against the cohesion rubric:
 
 ## How to structure your output
 
+```md
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
+# Rewrite Validation Review — <topic>
+
+**Verdict:** Approved / Issues Found / Design Incoherent
+
+## Executive judgment
+<one paragraph>
+
+## Blocking issues
+### B1. <title>
+- Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact
+
+(Each finding uses the canonical six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions".)
+```
+
 Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`. Your verdict must be one of:
 
 - **Approved** — the rewrite is implementable. List the few highest-quality moves under "What looked right." Important issues may still be listed but should not block.

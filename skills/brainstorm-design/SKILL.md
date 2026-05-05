@@ -98,7 +98,9 @@ Recommend exactly one option, or a named hybrid. The recommendation must:
 ## Output format
 
 ```md
-## Brainstorm: <topic>
+# Brainstorm — <topic>
+
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 ### Current scope
 - ...

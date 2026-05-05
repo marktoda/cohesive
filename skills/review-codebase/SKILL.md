@@ -124,9 +124,25 @@ If `docs/history/reviews/` doesn't exist, create it. Reviews are append-only his
 
 ## Output format
 
-The skill's chat output matches the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-review-report.md`. The output ends with:
+The skill renders a chat trailer (the canonical verdict-led shape below) and persists the full report to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-review-report.md`. The chat render is a faithful subset of the persisted file (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2).
 
 ```md
+# Architecture Review — <scope>
+
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
+**Verdict:** Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk
+
+**Thesis:** <one or two sentences — the codebase's overall shape, the highest-leverage risk, whether the system can scale development without founder memory>
+
+## Top findings
+1. <finding title> — <one-clause why it matters>
+2. <finding title> — <one-clause why it matters>
+3. <finding title> — <one-clause why it matters>
+
+## Persisted report
+`docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md`
+
 ### Recommended next Cohesive skill
 
 Per verdict:

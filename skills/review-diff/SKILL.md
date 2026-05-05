@@ -57,6 +57,8 @@ Use this format:
 ```md
 # Change Cohesion Review
 
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
 **Verdict:** Pass / Pass with notes / Needs substrate / Risky / Block
 
 ## Main concern
@@ -97,7 +99,35 @@ Diff reviews are usually conversation-scoped. User can `--persist` if needed; th
 
 ## Output format
 
-See step 4. The verdict-led, table-shaped output is the canonical form; don't bury the verdict.
+The canonical render produced in step 4:
+
+```md
+# Change Cohesion Review
+
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
+**Verdict:** Pass / Pass with notes / Needs substrate / Risky / Block
+
+## Main concern
+<one sentence>
+
+## Findings
+
+| Severity | Area | Finding | Suggested substrate |
+|---|---|---|---|
+| Blocking | Invariant | <name> | <artifact> |
+
+## Highest-leverage fix
+<one specific recommendation>
+
+### Recommended next Cohesive skill
+- **Pass / Pass with notes:** `superpowers:writing-plans` — substrate is preserved; ready for implementation discipline.
+- **Needs substrate:** `cohesive:rewrite-specs` — the change implies substrate updates that should land before merge.
+- **Risky:** `cohesive:review-codebase` — risk straddles the diff boundary; broader review is warranted.
+- **Block:** `cohesive:brainstorm-design` — the change conflicts with the substrate at a level that requires re-deciding direction.
+```
+
+Don't bury the verdict. Findings are ranked by leverage. Optional sections from step 4 (`## Behavior/spec alignment`, `## Invariant preservation`, `## Test guarantee gaps`, `## Locality and abstraction concerns`) may be added under `## Findings` if they earn their place; omit any that don't.
 
 ## Output discipline
 

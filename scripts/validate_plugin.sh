@@ -229,7 +229,95 @@ for s in "${persisting_skills[@]}"; do
   fi
 done
 
-# 13. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
+# 13a. VERDICT_BEFORE_EVIDENCE: verdict-led skills' Output format block opens with **Verdict:**
+# within the first 3 non-blank lines after the outermost # title in a code block.
+# Per docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md.
+verdict_led_skills=(
+  review-codebase
+  review-diff
+  validate-rewrite
+  audit-substrate
+)
+for s in "${verdict_led_skills[@]}"; do
+  skill_md="skills/$s/SKILL.md"
+  [ -f "$skill_md" ] || continue
+  # Awk: find first `# title` line inside a fenced block, then check next 3 non-blank
+  # lines for `**Verdict:**`. Exits 0 if found, 1 otherwise.
+  if awk '
+    /^```/ { in_block = !in_block; if (!in_block) { found_title=0; count=0 }; next }
+    in_block && !found_title && /^# / { found_title=1; count=0; next }
+    in_block && found_title {
+      if (/^[[:space:]]*$/) next
+      count++
+      if (count > 3) { found_title=0; next }
+      if (/\*\*Verdict:\*\*/) { found_verdict=1; exit 0 }
+    }
+    END { exit found_verdict ? 0 : 1 }
+  ' "$skill_md"; then
+    : # ok
+  else
+    fail "$skill_md violates VERDICT_BEFORE_EVIDENCE: Output format code block must lead with '# <title>' then **Verdict:** within first 3 non-blank lines (per docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md)"
+  fi
+done
+
+# 13b. Voice-citation grep: every skills/*/SKILL.md Output format block has the literal
+# voice citation within the first 3 non-blank lines after the outermost # title in a code
+# block. Same check for every agents/*.md "How to structure your output" code block.
+# Per references/output-voice.md and docs/substrate/gotchas/style-guide-rot.md.
+# Cohesively router is exempt (its render is a 1-2 sentence announcement with no # title;
+# documented in docs/substrate/invariants/PLUGIN_ROOT_PATHS.md §"Convention pins...").
+voice_citation_skills=(
+  discover-substrate
+  brainstorm-design
+  rewrite-specs
+  validate-rewrite
+  review-codebase
+  review-diff
+  audit-substrate
+)
+for s in "${voice_citation_skills[@]}"; do
+  skill_md="skills/$s/SKILL.md"
+  [ -f "$skill_md" ] || continue
+  if awk '
+    /^```/ { in_block = !in_block; if (!in_block) { found_title=0; count=0 }; next }
+    in_block && !found_title && /^# / { found_title=1; count=0; next }
+    in_block && found_title {
+      if (/^[[:space:]]*$/) next
+      count++
+      if (count > 3) { found_title=0; next }
+      if (index($0, "> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md") > 0) { found_voice=1; exit 0 }
+    }
+    END { exit found_voice ? 0 : 1 }
+  ' "$skill_md"; then
+    : # ok
+  else
+    fail "$skill_md missing voice citation in Output format code block (per references/output-voice.md and docs/substrate/gotchas/style-guide-rot.md). Open the canonical code block with '# <title>' then '> Voice and density: \${CLAUDE_PLUGIN_ROOT}/references/output-voice.md' within first 3 non-blank lines."
+  fi
+done
+
+# 13c. Voice-citation grep for reviewer agents: every agents/*.md has the literal voice
+# citation in its first code block.
+if [ -d agents ]; then
+  for agent_md in agents/*.md; do
+    [ -e "$agent_md" ] || continue
+    if awk '
+      /^```/ { in_block = !in_block; if (in_block && !seen_first_block) { count=0; in_first_block=1; seen_first_block=1 } else if (!in_block) { in_first_block=0 }; next }
+      in_block && in_first_block {
+        if (/^[[:space:]]*$/) next
+        count++
+        if (count > 3) { in_first_block=0; next }
+        if (index($0, "> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md") > 0) { found_voice=1; exit 0 }
+      }
+      END { exit found_voice ? 0 : 1 }
+    ' "$agent_md"; then
+      : # ok
+    else
+      fail "$agent_md missing voice citation in first code block (per references/output-voice.md). Open the canonical code block with '> Voice and density: \${CLAUDE_PLUGIN_ROOT}/references/output-voice.md' within first 3 non-blank lines."
+    fi
+  done
+fi
+
+# 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
 # Per docs/substrate/invariants/PLUGIN_ROOT_PATHS.md. Excludes lines inside fenced code
 # blocks and lines marked as anti-pattern examples (so the rule's own anti-pattern
 # documentation doesn't trip the rule).

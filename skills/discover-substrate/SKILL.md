@@ -118,6 +118,10 @@ Based on what you found and what the user asked for, recommend exactly one next 
 The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-discovery-report.md`. That template carries the field definitions and a "Which sections each consumer reads" map; this section reproduces the chat-rendered shape:
 
 ```md
+# Substrate Discovery — <scope>
+
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+
 ## Substrate discovered
 
 ### Empty-substrate verdict
