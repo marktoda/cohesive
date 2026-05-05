@@ -405,6 +405,19 @@ else
   fail "skills/implement-cohesively/SKILL.md must cite docs/substrate/matrices/phase-derivation.md AND docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md (per docs/substrate/gotchas/no-implementation-handoff.md). One or both citations are missing."
 fi
 
+# 13f. Literal bypass-acknowledgment string in validate-rewrite.
+# Per docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md §Known bypass risks
+# and docs/substrate/gotchas/no-implementation-handoff.md "Tests / checks that
+# preserve this" bullet 4. The SKILL body must carry the literal string the
+# Output format renders to the transcript when the bypass row is picked.
+errors_before=$errors
+bypass_string='Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.'
+if grep -qF "$bypass_string" skills/validate-rewrite/SKILL.md; then
+  ok "validate-rewrite carries the literal bypass-acknowledgment string"
+else
+  fail "skills/validate-rewrite/SKILL.md missing the literal bypass-acknowledgment string (per docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md §Known bypass risks). Expected the string '$bypass_string' to appear in the SKILL body."
+fi
+
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
 # Per docs/substrate/invariants/PLUGIN_ROOT_PATHS.md. Excludes lines inside fenced code
 # blocks and lines marked as anti-pattern examples (so the rule's own anti-pattern
