@@ -223,8 +223,15 @@ done
 
 # 10b. Path-prereq subskills carry a directive-error template instead of the canonical question.
 # Per docs/substrate/conventions/skill-shape.md §"Path prereqs use directive errors, not the
-# canonical question". Stable target: a "directive error" phrase plus a "Run cohesive:<upstream>"
-# instruction in the body.
+# canonical question". Three checks, all required:
+#   (a) positive: a "directive error" phrase appears in the body;
+#   (b) positive: an upstream "Run cohesive:<skill>" instruction appears in the body;
+#   (c) negative: neither the canonical-question literal nor the legacy "stop and ask" phrasing
+#       appears anywhere in the body — the canonical question and the directive error are
+#       mutually exclusive prereq-handling shapes, so any path-prereq subskill carrying both
+#       is internally incoherent. The negative check exists to catch the regression class
+#       where Hard constraint #1 prescribes the directive error but Step 0 (or any other
+#       section) silently re-introduces the session-prereq fallback.
 path_prereq_subskills=(
   validate-rewrite
   implement-cohesively
@@ -239,6 +246,14 @@ for s in "${path_prereq_subskills[@]}"; do
   fi
   if ! grep -qE "Run \`?cohesive:" "$skill_md"; then
     fail "skills/$s/SKILL.md directive-error template does not name an upstream cohesive: skill"
+    continue
+  fi
+  if grep -qE "^[[:space:]]*> \"I see we're about to run $s\." "$skill_md"; then
+    fail "skills/$s/SKILL.md carries the canonical clarifying question alongside the directive-error template (path-prereq subskills must not have both — see skill-shape.md §Path prereqs use directive errors)"
+    continue
+  fi
+  if grep -qE "stop and ask" "$skill_md"; then
+    fail "skills/$s/SKILL.md carries 'stop and ask' phrasing alongside the directive-error template (path-prereq subskills must use directive errors only — see skill-shape.md §Path prereqs use directive errors)"
   fi
 done
 [ "$errors" -eq "$errors_before" ] && ok "all ${#path_prereq_subskills[@]} path-prereq subskills carry directive-error templates"

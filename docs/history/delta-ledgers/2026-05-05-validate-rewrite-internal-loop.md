@@ -104,3 +104,23 @@ The two pressures interact: making `validate-rewrite`'s Issues Found loop intern
 **Out of scope for this pass:** No design-layer rewrite. The original design (validate-rewrite drives the loop internally; path-prereq vs. session-prereq distinction with directive errors) is preserved unchanged. Repair pass 1 is **Pure implementation** by the Step 1a classification — every change is a textual fix against a named finding, with no skill purpose / ownership / seam / verdict change.
 
 **Validator state after pass:** `bash scripts/validate_plugin.sh` passes 0 errors, 0 warnings.
+
+## Repair pass 2 (2026-05-05)
+
+**Source review:** `docs/history/reviews/2026-05-05-validate-rewrite-internal-loop-rewrite-validation-pass-2.md` (Verdict: Issues Found; 1 Blocker, 1 Medium, 2 Low).
+
+**Closed findings:** B1, I1, I2, I3 (plus the substrate-gap fix tied to B1 — Check 10b negative grep tightening).
+
+**Per-file changes:**
+
+| File | Change | Closes |
+|---|---|---|
+| `skills/implement-cohesively/SKILL.md` Step 0 (line 58) | Replaced "If any required input is missing, stop and ask. Do not invent inputs." with a one-sentence pointer to Hard constraint #1's directive-error contract; the duplication that produced the two-surface contradiction retires | B1 |
+| `scripts/validate_plugin.sh` Check 10b | Extended with two negative greps: (c) the canonical clarifying question literal must NOT appear in path-prereq subskill bodies, and (d) the legacy "stop and ask" phrasing must NOT appear. Comment updated to enumerate (a) directive-error presence, (b) upstream cohesive: skill citation, (c) no canonical question, (d) no "stop and ask." Structurally pins the B1-class regression | B1 (substrate-gap fix tied to recommendation #2 of the pass-2 review) |
+| `skills/validate-rewrite/SKILL.md` Output format | Added two missing sections to the render template — `## Behavior knowable outside implementation?` and `## What looked right` — in the canonical order from `references/templates/cohesion-review.md`. The render template now matches the agent's actual output | I1 |
+| `docs/substrate/architecture/skills.md` §"Why `validate-rewrite` is separate from `rewrite-specs`" | Appended one sentence: "The internal repair loop preserves this seam — each pass dispatches a fresh `spec-cohesion-reviewer` Task subprocess with paths-only input, so the per-pass fresh-eyes property holds even though `validate-rewrite` and `rewrite-specs` now compose internally." Closes the locality gap a future reader noticing the loop would have hit | I2 |
+| `docs/substrate/matrices/router.md` cell R016 (Notes column) | Appended route-classification qualifier "(route-classification level only; `implement-cohesively` itself uses directive errors per `docs/substrate/conventions/skill-shape.md` §"Path prereqs use directive errors, not the canonical question")" so the cell is self-contained without forcing a reader to scroll to §"Dispatch contract exceptions" | I3 |
+
+**Out of scope for this pass:** No design-layer rewrite. The original design is preserved; pass 2 is **Pure implementation** by Step 1a — every change is a textual fix or a structural validator tightening against a named finding, with no skill purpose / ownership / seam / verdict change. The skills.md sentence is a clarification of an already-named seam, not a new seam.
+
+**Validator state after pass:** `bash scripts/validate_plugin.sh` passes 0 errors, 0 warnings. The Check 10b negative-grep extension passes against both `validate-rewrite` and `implement-cohesively` (neither carries the canonical question or "stop and ask" phrasing in body sections; the prior-pass scenario tests in `gotchas/soft-prereqs.md` use the directive-error description and so do not trip the negative grep).

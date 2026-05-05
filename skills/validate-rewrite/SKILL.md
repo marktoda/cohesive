@@ -171,11 +171,18 @@ The skill's chat output (the agent's report, surfaced):
 ## Enforcement concerns
 ...
 
+## Behavior knowable outside implementation?
+<one paragraph: yes / partially / no, with the surfaces that fall short>
+
 ## Vague language to tighten
 - <file>:<line> — "<phrase>"
 
 ## Recommended repairs (ranked)
 1. ...
+
+## What looked right
+- <calibration bullet — what the reviewer found load-bearing and well-shaped>
+- ...
 
 ### Recommended next Cohesive skill
 

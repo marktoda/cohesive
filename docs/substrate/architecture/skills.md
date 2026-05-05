@@ -35,7 +35,7 @@ The skill set is the answer to several deliberate cuts. Each entry below explain
 
 **Why `audit-substrate` is separate from `discover-substrate`.** Discovery inventories what's there to inform downstream chain skills. Audit judges whether what's there is sufficient and produces a verdict the user acts on. Different output shape, different consumer, different lifecycle. Collapsing them would force every discovery call to verdict, which most chain calls don't want.
 
-**Why `validate-rewrite` is separate from `rewrite-specs`.** Fresh-eyes review is structurally impossible inside the skill that produced the artifact under review — the rewriter and the reviewer cannot share context without breaking the fence. The seam is load-bearing, not aesthetic.
+**Why `validate-rewrite` is separate from `rewrite-specs`.** Fresh-eyes review is structurally impossible inside the skill that produced the artifact under review — the rewriter and the reviewer cannot share context without breaking the fence. The seam is load-bearing, not aesthetic. The internal repair loop preserves this seam — each pass dispatches a fresh `spec-cohesion-reviewer` Task subprocess with paths-only input, so the per-pass fresh-eyes property holds even though `validate-rewrite` and `rewrite-specs` now compose internally.
 
 **Why there is no `synthesize-design` between `brainstorm-design` and `rewrite-specs`.** The design pressure-test battery in `brainstorm-design` produces a chosen direction; that direction is the synthesis. A separate skill would split a coherent decision into two skill turns and add a verdict the user has to pass twice.
 

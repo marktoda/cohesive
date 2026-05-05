@@ -55,7 +55,7 @@ Required inputs:
 - **Branch name** — typically `design/<slug>` from the rewrite worktree. Implementation lands on this branch (or a child branch — see "Branch shape" below).
 - **Substrate discovery report path** (optional) — passed to per-phase reviewer agents for context.
 
-If any required input is missing, stop and ask. Do not invent inputs.
+If any required input is missing, halt with the directive error per Hard constraint #1; do not ask the canonical forced-choice question and do not invent paths. The directive-error templates and the upstream-skill names live in Hard constraint #1 above; this step does not duplicate them.
 
 ### Phase 1. Derive phases from the design delta ledger
 
