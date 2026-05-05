@@ -58,7 +58,7 @@ The per-skill design layer was authored retroactively against existing SKILL.md 
 | `discover-substrate` | inherited | not yet validated against a forward rewrite |
 | `brainstorm-design` | inherited | not yet validated against a forward rewrite |
 | `rewrite-specs` | **validated** | the architecture refactor itself touched its SKILL.md (Step 1a addition); spec-cohesion-reviewer lens 13 confirmed parity through repair-pass-3 |
-| `validate-rewrite` | inherited | not yet validated; verdict vocabulary verified verbatim during repair pass 1 (B2) |
+| `validate-rewrite` | **validated** | validated by the 2026-05-05 validate-rewrite-internal-loop refactor (Purpose / Owns / Inputs / Outputs / Why-this-shape rewritten with the design layer as prior substrate); spec-cohesion-reviewer lens 13 confirmed parity through repair pass 2 |
 | `implement-cohesively` | **validated** | validated by the 2026-05-05 review-diff repair pass; verdict vocabulary reconciled to four terminals (`Implemented / Phase Drift / Substrate Drift / Aborted`) |
 | `review-codebase` | inherited | not yet validated against a forward rewrite |
 | `review-diff` | inherited | not yet validated against a forward rewrite |

@@ -124,3 +124,21 @@ The two pressures interact: making `validate-rewrite`'s Issues Found loop intern
 **Out of scope for this pass:** No design-layer rewrite. The original design is preserved; pass 2 is **Pure implementation** by Step 1a — every change is a textual fix or a structural validator tightening against a named finding, with no skill purpose / ownership / seam / verdict change. The skills.md sentence is a clarification of an already-named seam, not a new seam.
 
 **Validator state after pass:** `bash scripts/validate_plugin.sh` passes 0 errors, 0 warnings. The Check 10b negative-grep extension passes against both `validate-rewrite` and `implement-cohesively` (neither carries the canonical question or "stop and ask" phrasing in body sections; the prior-pass scenario tests in `gotchas/soft-prereqs.md` use the directive-error description and so do not trip the negative grep).
+
+## Inline closure (Approved + Medium, 2026-05-05)
+
+Pass 3 returned `Approved` with two Medium findings. Per the disposition rule in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", row `Approved + Medium`, the disposition is `Close in same worktree → merge` — re-validation is not required; the textual fixes land in this worktree before merge.
+
+**Closed findings:** I1, I2 (from `docs/history/reviews/2026-05-05-validate-rewrite-internal-loop-rewrite-validation-pass-3.md`).
+
+**Per-file changes:**
+
+| File | Change | Closes |
+|---|---|---|
+| `skills/validate-rewrite/SKILL.md` Output format `### B1.` block | Replaced the 3-field finding shape (Risk / Substrate artifact / Suggested repair) with a one-line pointer to the canonical 6-field shape in `references/templates/cohesion-review.md` §"Blocking issues" + `docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions". The render template is now consistent with what the dispatched agent actually produces | I1 |
+| `docs/substrate/architecture/skills.md` Bootstrap status row for `validate-rewrite` | Promoted `inherited` → `**validated**` with a note: "validated by the 2026-05-05 validate-rewrite-internal-loop refactor (Purpose / Owns / Inputs / Outputs / Why-this-shape rewritten with the design layer as prior substrate); spec-cohesion-reviewer lens 13 confirmed parity through repair pass 2" | I2 |
+| `docs/history/delta-ledgers/2026-05-05-validate-rewrite-internal-loop.md` (this file) | Added this §"Inline closure" section recording the I1 + I2 fixes and the `### validate-rewrite` Bootstrap promotion, per the §"Bootstrap status" footer rule "When a section earns validated status, update the row in the same delta ledger that triggered the validation" | I2 |
+
+**Validator state after closure:** `bash scripts/validate_plugin.sh` passes 0 errors, 0 warnings.
+
+**Worktree status:** Ready to merge. The branch carries the original rewrite + 2 repair-pass commits + 3 review-persistence commits + 1 inline-closure commit. The auto-typing complaint is structurally resolved; the path-prereq vs. session-prereq distinction lands cleanly with positive + negative validator pins on Check 10b.
