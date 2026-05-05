@@ -105,7 +105,7 @@ The canonical chat-render shape for verdict-led, persisted-output skills:
 `cohesive:<skill-name>` — <one-clause reason>
 ```
 
-The order is fixed: outermost `#` title, then the voice-citation blockquote, then `**Verdict:**`. Counting non-blank lines after the `#` title: the citation is line 1, `**Verdict:**` is line 2 — well within the three-line budget the `VERDICT_BEFORE_EVIDENCE` grep allows.
+The exemplar order is: outermost `#` title, then the voice-citation blockquote, then `**Verdict:**` — matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). The `VERDICT_BEFORE_EVIDENCE` grep verifies citation and verdict are *each present in lines 1–3 after the `#` title* but does not enforce their order relative to each other; that ordering is the worked-transcript convention, not a structural check (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` §"Enforcement"). Authors of new skills should match the exemplar; reviewers comparing two compliant skills should accept either order while it remains convention.
 
 Skills with chat-only output (`review-diff`) render this shape as their entire output, with no separate persisted file.
 

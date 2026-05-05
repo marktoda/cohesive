@@ -15,8 +15,7 @@ When the matrix shows divergence, the synthesizer must hand-merge — exactly th
 ## Cells
 
 Cell legend:
-- `✓` — both spec required and agent file complies
-- `pending` — spec required (substrate has been updated) but agent file does not yet carry the line; queued for implementation follow-up per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`
+- `✓` — both spec required and agent file complies (the steady-state value)
 - `✗` — spec required and agent file is non-compliant (regression; should not appear in a clean release)
 
 | Agent | Severity | Category | Why it matters | Evidence | Recommended fix | Substrate artifact | Voice citation |
@@ -80,4 +79,5 @@ Per `references/cohesion-rubric.md`, agents do not mark every finding Blocker. I
 ## History
 
 - 2026-05-04 — Created during the skill-architecture repair pass. Promoted from drift identified in `docs/history/reviews/2026-05-04-skill-architecture-review.md` Finding #9 to a tracked behavior matrix.
-- 2026-05-04 — `cut-anchor-pin` substrate rewrite: added the "Voice citation" column tracking the new convention pin (each agent's output block opens with the voice citation line). All cells `pending`; implementation follow-up adds the citations and flips them to `✓`. Cross-referenced `VERDICT_BEFORE_EVIDENCE` as the named invariant covering the synthesizing-skill side, which is out of scope for this matrix.
+- 2026-05-04 — `cut-anchor-pin` substrate rewrite: added the "Voice citation" column tracking the new convention pin (each agent's output block opens with the voice citation line). Cells initially shipped as `pending` and were flipped to `✓` in the same branch's implementation pass. Cross-referenced `VERDICT_BEFORE_EVIDENCE` as the named invariant covering the synthesizing-skill side, which is out of scope for this matrix.
+- 2026-05-04 — Polish pass (post review-diff): legend simplified to `✓` / `✗` (steady-state values only). The transient `pending` value used during the substrate-side rewrite has been removed since no cells are pending in a clean release; if a future rewrite needs to ship substrate ahead of implementation again, re-introduce `pending` in the same commit that uses it.

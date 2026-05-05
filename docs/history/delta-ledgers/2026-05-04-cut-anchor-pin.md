@@ -495,3 +495,43 @@ The user explicitly directed shipping substrate + implementation together on thi
 ### Next
 
 `cohesive:review-diff` against this branch (or against the eventual merged-to-main commit) to confirm the runtime artifacts match the substrate after both ship together. The dogfood loop closes here: substrate written → spec-cohesion-reviewer approved → implementation pass aligned → diff review confirms.
+
+---
+
+## Polish pass (2026-05-04, post review-diff)
+
+`cohesive:review-diff` against this branch returned **Pass with notes**. Two reviewers (substrate-alignment, structure) converged on doc-implementation drift: shipping substrate + implementation together left invariant docs describing the validator greps as "planned" even though they're wired and passing. Five mechanical edits close the convergent High findings.
+
+### Findings closed
+
+- **Substrate-alignment Finding 1 + 2 (High) — VERDICT_BEFORE_EVIDENCE.md and PLUGIN_ROOT_PATHS.md described greps as "planned".** Both rewritten to present tense. `VERDICT_BEFORE_EVIDENCE.md` §"Enforcement" now describes checks 13a/13b/13c as enforcing, with their canonical line-1-to-3 anchor explicitly stated. `PLUGIN_ROOT_PATHS.md` §"Convention pins" moves pins 5 (verdict-leads) and 6 (voice-citation) from "Planned" to "Currently enforced (v0.1)" with validator-check-number references for each pin. The "Shared ownership" paragraph remains since the shared-update protocol is still real.
+- **Substrate-alignment Finding 3 (Medium) — `reviewer-output-shape.md` legend defined `pending` but no cells are pending.** Legend simplified to `✓` / `✗` (steady-state values). History entry records the legend simplification and notes that future rewrites can re-introduce `pending` only in the same commit that uses it.
+- **Substrate-alignment Finding 4 (Medium) — Voice-citation grep is looser than docs claim.** Documented the structural rule (citation/verdict each present in lines 1–3 after title) versus the exemplar (title-then-citation-then-verdict per worked transcript). Updates landed in `VERDICT_BEFORE_EVIDENCE.md` §"Enforcement" and `skill-conventions.md` §"Output format conventions" rule 3, both pointing readers at the exemplar but accepting either order until the shape is dogfooded enough to justify a tightening.
+
+### Findings explicitly deferred
+
+- **Substrate-alignment Finding 5 (Low) — Validator self-test fixture.** A `scripts/test_validator.sh` with bad-skill fixtures would pin the grep itself against silent breakage. Not blocking; deferred to a future substrate iteration when CI lands.
+- **Structure Finding 1 (High) — `output-voice.md` dual-citation tiebreaker is load-bearing-but-undocumented.** The reviewer suggested adding a §"Dual-citation files" pattern to `substrate-layout.md`. Real concern; deferred because the next dual-citation file (the precedent that would copy this one) doesn't exist yet, so the pattern can be named when it earns its place.
+- **Structure Finding 2 (High) — `PLUGIN_ROOT_PATHS.md` owns the cross-cutting convention-pin enumeration.** The reviewer suggested extracting a `docs/substrate/matrices/validator-pins.md` matrix. The centralization smell is real but the move is non-trivial (touching 4 inbound links). Deferred to a focused substrate pass; the "Shared ownership" paragraph documents the cross-doc update protocol in the meantime.
+- **Structure Finding 3 (Medium) — Validator's three awk programs replicate the same "find canonical block" logic.** Extracting a `scripts/_canonical_block.py` helper is the right move; deferred to V1 because the divergence between 13a/13b (anchored on `#` title) and 13c (anchored on first code block) is *intentional* (agents don't have `#` titles in their output blocks, per the asymmetry now documented in `VERDICT_BEFORE_EVIDENCE.md`).
+- **Structure Finding 4 (Medium) — Five repair passes in one ledger.** Real convention-overload; deferred to a future `substrate-layout.md` update that names the multi-pass-ledger pattern (or commits to one-ledger-per-rewrite). For now, this ledger's table of contents reads via the `## Repair pass N` headers.
+- **Structure Finding 5 (Low) — `claimed-system-shape.md` template-consumer dependency is implicit.** Future `template-consumers.md` matrix; not blocking.
+
+### Files touched in polish pass
+
+- `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` — §"Enforcement" rewritten in present tense; "structural vs exemplar" distinction documented; review checklist line cleaned up; two history entries added.
+- `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` — pins 5 + 6 moved to "Currently enforced (v0.1)"; validator-check-number references added to each pin.
+- `docs/substrate/matrices/reviewer-output-shape.md` — legend simplified to `✓` / `✗`; explanatory paragraph and history updated.
+- `docs/substrate/designs/skill-conventions.md` §"Output format conventions" rule 3 — clarified exemplar vs structural rule.
+
+### Why these were polish, not the next substrate iteration
+
+The five findings closed are all doc-implementation drift created by the choice (per user direction) to ship substrate and implementation in one branch. The drift is fixable in present-tense edits to invariant docs whose enforcement is already real. The five deferred findings are real substrate work — new pattern docs, validator refactors, ledger-naming convention updates — that earn their own scoped passes rather than getting lumped into a polish commit.
+
+### Validator state after polish pass
+
+`bash scripts/validate_plugin.sh` passes with 0 warnings, 0 errors. No new checks added; the polish was substrate-only docs alignment to the implementation that landed in the prior pass.
+
+### Recommended next move
+
+The branch is merge-ready. The five deferred findings can be addressed post-merge as separate Cohesive workflows (e.g., a `cohesive:rewrite-specs` pass for the validator-pins matrix extraction, a `cohesive:audit-substrate` pass for the dual-citation pattern naming).

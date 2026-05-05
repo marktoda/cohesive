@@ -47,16 +47,15 @@ This is the second named invariant Cohesive ships, joining `${CLAUDE_PLUGIN_ROOT
 
 ## Enforcement
 
-`scripts/validate_plugin.sh` enforces the invariant via two grep checks (planned for the implementation pass — see `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md` for the implementation handoff):
+`scripts/validate_plugin.sh` enforces the invariant via three awk-based checks (13a, 13b, 13c — see the script for line-level detail):
 
-1. **Verdict-leads check.** For each skill listed under "Applies to" above, grep the SKILL.md "Output format" block. Within the canonical layout, the outermost `#` title is followed (within the first three non-blank lines) by the voice-citation blockquote and then by `**Verdict:**`. The grep verifies that `**Verdict:**` appears in lines 1–3 after the outermost `#` title in the Output format code block. A violation is a hard fail; the failure message names this invariant.
-2. **Voice citation check.** Every `skills/*/SKILL.md` Output format block must contain the line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` (or the same path under whatever the harness expands `${CLAUDE_PLUGIN_ROOT}` to) within the first three non-blank lines after the outermost `#` title. This check is broader than the verdict rule — it applies to every skill, including those out-of-scope for the verdict invariant — because the voice citation is what pulls the voice guide into context at generation time. The check pins the citation as convention; the invariant is the verdict rule itself. The same grep applies to every `agents/*.md` "How to structure your output" code block.
+1. **Verdict-leads check (13a).** For each skill listed under "Applies to" above, the validator finds the first `#` title inside a fenced code block in the SKILL.md and verifies `**Verdict:**` appears within the next three non-blank lines. A violation is a hard fail; the failure message names this invariant.
+2. **Voice-citation check, skills (13b).** Every `skills/*/SKILL.md` Output format code block (excluding `cohesively`, which has no `#` title — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` §"Convention pins" for the exemption) must contain the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` within the first three non-blank lines after the outermost `#` title. The check pins the citation as convention; the invariant is the verdict-leads rule itself.
+3. **Voice-citation check, agents (13c).** Every `agents/*.md` first code block must contain the same citation line in its first three non-blank lines.
 
-Both grep checks anchor on the **outermost `#` title inside the Output format code block**. The canonical layout places title on line 1, citation on line 2 (after a blank), and verdict on line 3 (after a blank). Persisted artifacts inherit the rule because the SKILL.md Output format block is the source of truth for both chat render and persisted file — both render the shape the SKILL.md specifies.
+All three checks anchor on the **outermost `#` title inside a fenced code block**. The canonical layout (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions") places title on line 1 of the rendered output, citation on line 2 (after a blank), and verdict on line 3 (after a blank). The greps verify *citation present in lines 1–3 after title* and *verdict present in lines 1–3 after title* — they do not enforce the line-by-line ordering between citation and verdict; that ordering is the worked-transcript exemplar (`${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md`), not a structural check. A skill author who writes `# title` / `**Verdict:**` / `> Voice and density: …` (verdict before citation) passes the grep; a future tightening could require strict ordering once the worked-transcript shape has been dogfooded across enough real renders.
 
-The validator runs locally. CI is out of scope for v0.1.
-
-Until the implementation pass lands the validator changes, this invariant is enforced by skill-author memory and by `cohesive:review-diff` flagging violations as `**Verdict:**`-shape regressions.
+Persisted artifacts inherit the rule because the SKILL.md Output format block is the source of truth for both chat render and persisted file. The validator runs locally. CI is out of scope for v0.1.
 
 ## Known bypass risks
 
@@ -73,7 +72,7 @@ When reviewing a change to a verdict-led skill (or adding one):
 - [ ] Is the same shape carried into the persisted artifact, if one exists?
 - [ ] If the skill is new, is it added to this invariant's "Applies to" list?
 - [ ] Does the skill's Output format block carry the voice citation line?
-- [ ] `bash scripts/validate_plugin.sh` passes (once the implementation pass adds the grep)?
+- [ ] `bash scripts/validate_plugin.sh` passes?
 
 ## Related
 
@@ -86,5 +85,7 @@ When reviewing a change to a verdict-led skill (or adding one):
 
 ## History
 
-- 2026-05-04 — Created during the `cut-anchor-pin` UX/conciseness rewrite, as the one rule from `references/output-voice.md` promoted to invariant. Validator enforcement (the two grep rules) is queued for the implementation follow-up phase.
+- 2026-05-04 — Created during the `cut-anchor-pin` UX/conciseness rewrite, as the one rule from `references/output-voice.md` promoted to invariant.
 - 2026-05-04 — Repair pass 1: pinned the canonical layout as title-then-citation-then-verdict (matching the worked transcript), tightened the rule statement to enumerate the three lines explicitly, and clarified that persisted artifacts inherit the rule because the SKILL.md Output format block is the single source of truth for both chat and persisted shape.
+- 2026-05-04 — Implementation pass: validator checks 13a (verdict-leads), 13b (voice-citation, skills), and 13c (voice-citation, agents) wired into `scripts/validate_plugin.sh`. The invariant is now mechanically enforced; prior "planned for implementation pass" prose retired.
+- 2026-05-04 — Polish pass (post review-diff): clarified that the greps verify *citation/verdict present in lines 1–3 after title* but do not enforce the structural ordering between citation and verdict; that ordering is the worked-transcript exemplar, not a structural check. A future tightening can require strict ordering once the shape is dogfooded.

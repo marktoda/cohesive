@@ -39,15 +39,12 @@ This is a real correctness contract. Unlike v0.1's other rules (output-shape, pr
 
 **Currently enforced (v0.1):**
 
-1. **Canonical prereq-detection question** in subskill bodies (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`). The forced-choice question prevents soft-prereqs degradation.
-2. **Fresh-eyes preamble bullet** in every `agents/*.md` file (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"The fresh-eyes preamble").
-3. **"Recommended next Cohesive skill" footer** in every persisting skill body.
-4. **Negative-trigger check** on skill descriptions (`description` frontmatter must not contain forbidden trigger phrases).
-
-**Planned (queued for the implementation follow-up of the 2026-05-04 `cut-anchor-pin` rewrite — see `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`):**
-
-5. **Verdict-leads check** for verdict-led skills (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`). This is the second named invariant; it is *planned* in the validator script but not yet wired in.
-6. **Voice-citation check** in every `skills/*/SKILL.md` Output format block and every `agents/*.md` "How to structure your output" block (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md`). Convention-with-grep status, not invariant. **Exemption:** `skills/cohesively/SKILL.md` is exempt — its render budget is 1–2 sentences with no `#` title (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets" and the SKILL.md §"Output"); the grep skips it.
+1. **Canonical prereq-detection question** in subskill bodies (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`). The forced-choice question prevents soft-prereqs degradation. Validator check 10.
+2. **Fresh-eyes preamble bullet** in every `agents/*.md` file (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"The fresh-eyes preamble"). Validator check 11.
+3. **"Recommended next Cohesive skill" footer** in every persisting skill body. Validator check 12.
+4. **Negative-trigger check** on skill descriptions (`description` frontmatter must not contain forbidden trigger phrases). Validator check 9b.
+5. **Verdict-leads check** for verdict-led skills (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`). Validator check 13a. This is the surface-level enforcement of the second named invariant.
+6. **Voice-citation check** in every `skills/*/SKILL.md` Output format block (validator check 13b) and every `agents/*.md` first code block (validator check 13c), per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md`. Convention-with-grep status, not invariant. **Exemption:** `skills/cohesively/SKILL.md` is exempt — its render budget is 1–2 sentences with no `#` title (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets" and the SKILL.md §"Output"); the grep skips it.
 
 None of the convention pins above (1–4, 6) are named invariants — they remain conventions. They share the same enforcement surface (`validate_plugin.sh`) as the two named invariants (this one, and `VERDICT_BEFORE_EVIDENCE`).
 
