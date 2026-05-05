@@ -35,9 +35,9 @@ You merge three concerns (locality, domain-model, complexity) because they all a
 - **Substrate discovery report** — the output of `discover-substrate`
 
 You also have access to:
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/locality-over-centralization.md` (your most-used reference)
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-model.md`
+- `${CLAUDE_PLUGIN_ROOT}/references/locality-over-centralization.md` (your most-used reference)
+- `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`
+- `${CLAUDE_PLUGIN_ROOT}/references/substrate-model.md`
 
 ## What you check
 
@@ -155,7 +155,7 @@ Optional pre-finding observation sections (omit any with no findings; do not fil
 
 ## Token discipline
 
-Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty optional sections. Pre-finding observation buckets are optional — only the ranked findings are the contract. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
+Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty optional sections. Pre-finding observation buckets are optional — only the ranked findings are the contract. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
 
 ## Tone
 

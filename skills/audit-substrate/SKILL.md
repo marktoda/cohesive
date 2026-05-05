@@ -44,7 +44,7 @@ When invoked from the `cohesively` router with the `audit (substrate)` route, th
 
 ### 2. Apply the cohesion rubric to the substrate, not the code
 
-Walk each axis from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`. For each axis, ask: *does the substrate that should exist for this axis actually exist?* — not *is the code well-shaped on this axis*.
+Walk each axis from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`. For each axis, ask: *does the substrate that should exist for this axis actually exist?* — not *is the code well-shaped on this axis*.
 
 - **Spec coherence:** are there docs at all? Are they internally consistent?
 - **Code/spec alignment:** the question here is whether the docs have something to *be aligned with*, not whether they currently are.

@@ -35,8 +35,8 @@ You merge three concerns the spec originally separated (spec-drift, invariant-en
 - **Substrate discovery report** — the output of `discover-substrate`
 
 You also have access to:
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-model.md`
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`
+- `${CLAUDE_PLUGIN_ROOT}/references/substrate-model.md`
+- `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`
 
 ## What you check
 
@@ -129,7 +129,7 @@ Optionally group findings under these headings (omit any heading with no observe
 - Surface every minor mismatch. Rank by leverage — the highest-cost gaps first.
 - Recommend large refactors. Recommend substrate additions. The team decides whether to refactor.
 - Read code that isn't anchored to a doc claim or a test. Scope discipline.
-- Mark every finding "Blocker." Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`, if everything's blocking, the prioritization is failing.
+- Mark every finding "Blocker." Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything's blocking, the prioritization is failing.
 
 ## Token discipline
 

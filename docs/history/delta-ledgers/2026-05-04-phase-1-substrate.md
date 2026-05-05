@@ -21,7 +21,7 @@ This ledger records *what changed* in the substrate during the `rewrite-specs` p
   - **Reason:** Self-review spec-prior issue — readers landing on the spec without reading the plan formed an incorrect mental model. The notes don't rewrite the spec; they re-frame it in place.
 
 - `skills/rewrite-specs/SKILL.md`
-  - **Before:** Step 3 named the invariant template as `(V1 template — until then, use the spec format from docs/substrate/designs/cohesion-rubric.md)`.
+  - **Before:** Step 3 named the invariant template as `(V1 template — until then, use the spec format from references/cohesion-rubric.md)`.
   - **After:** Hedge dropped. The invariant template is authoritative and complete; the hedge sent readers to a non-existent fallback (cohesion-rubric.md doesn't define an invariant *format*, only an axis description). Also added a pointer to the new `claimed-system-shape.md` template.
   - **Reason:** Self-review finding 10 — stale hedge would mislead a future agent rewriting specs.
 

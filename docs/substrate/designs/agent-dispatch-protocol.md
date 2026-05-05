@@ -108,7 +108,7 @@ The fresh-eyes property was previously formalized as a named invariant (`FRESH_E
 
 ## What this protocol does not forbid
 
-- **A reviewer agent referencing rubrics.** The agent's system prompt names `docs/substrate/designs/cohesion-rubric.md`, `docs/substrate/designs/substrate-model.md`, etc. The agent reads those because the agent file says to. This is not context inheritance; it is the agent's defined working set.
+- **A reviewer agent referencing rubrics.** The agent's system prompt names `references/cohesion-rubric.md`, `references/substrate-model.md`, etc. The agent reads those because the agent file says to. This is not context inheritance; it is the agent's defined working set.
 - **A reviewer agent producing detailed findings.** Bounded reading does not mean shallow output. An agent can produce 20 detailed findings as long as each is anchored to a path in its working set.
 - **A skill body explaining the dispatch shape.** The skill's "Phase 3" or "Process" section can describe what it dispatches and why. The constraint is on the *prompt content* sent to the agent, not on the skill body explaining the protocol to a human reader.
 

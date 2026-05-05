@@ -39,20 +39,20 @@ Three layers, each handling what the others can't:
 
 1. **Tighten the canonical shape itself.** `docs/substrate/designs/skill-conventions.md` §"Output format conventions" and `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" cap header depth at `###`, declare that chat renders may be a faithful subset of persisted files, and require branchy content to render as bullets/tables rather than narrative phases. The shape is the rule; future skill authors copy a tight shape, not a wordy one.
 
-2. **Anchor with a voice guide and a worked transcript.** `docs/substrate/designs/output-voice.md` carries the do/don't rules, density budgets, and forbidden phrasings. `docs/history/transcripts/output-voice-worked-example.md` carries the side-by-side wordy-vs-punchy render with each cut justified inline. Every `skills/*/SKILL.md` Output format block opens with a one-line citation pulling the voice guide into context at generation time. Examples teach voice; prose alone doesn't.
+2. **Anchor with a voice guide and a worked transcript.** `references/output-voice.md` carries the do/don't rules, density budgets, and forbidden phrasings. `docs/history/transcripts/output-voice-worked-example.md` carries the side-by-side wordy-vs-punchy render with each cut justified inline. Every `skills/*/SKILL.md` Output format block opens with a one-line citation pulling the voice guide into context at generation time. Examples teach voice; prose alone doesn't.
 
 3. **Pin the most-regressed rule as an invariant.** `VERDICT_BEFORE_EVIDENCE` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`) is the one UX rule promoted from convention to invariant. `validate_plugin.sh` greps verdict-led skills' Output format blocks for `**Verdict:**` in the first three non-blank lines, plus the voice-citation line in every skill. The other voice rules (header-depth cap, density budgets, forbidden phrasings) stay convention until their wording stabilizes and a real regression earns enforcement.
 
 ## Related invariant
 
-- Invariant: `VERDICT_BEFORE_EVIDENCE` — the one rule from this gotcha's correct pattern promoted to enforced status. The remaining rules in `docs/substrate/designs/output-voice.md` are conventions held by skill-author memory and reviewed by `cohesive:review-diff` / `cohesive:review-codebase`.
+- Invariant: `VERDICT_BEFORE_EVIDENCE` — the one rule from this gotcha's correct pattern promoted to enforced status. The remaining rules in `references/output-voice.md` are conventions held by skill-author memory and reviewed by `cohesive:review-diff` / `cohesive:review-codebase`.
 
 ## Tests / checks that preserve this
 
 - `scripts/validate_plugin.sh` (planned for the implementation pass per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`):
   - Verdict-leads grep across `skills/review-codebase`, `skills/review-diff`, `skills/validate-rewrite`, `skills/audit-substrate`
   - Voice-citation grep across every `skills/*/SKILL.md` Output format block
-- `cohesive:review-diff` reads `docs/substrate/designs/output-voice.md` and the persisted output side-by-side; flags chat-render bloat as a "substrate-alignment" finding.
+- `cohesive:review-diff` reads `references/output-voice.md` and the persisted output side-by-side; flags chat-render bloat as a "substrate-alignment" finding.
 - `cohesive:review-codebase` flags voice drift across skills as a "structure" finding (skills' Output format blocks should converge, not diverge).
 
 Until the validator changes ship, this gotcha is enforced by skill-author memory plus reviewer attention. Adding the validator grep is the highest-leverage move in the implementation follow-up.
@@ -65,7 +65,7 @@ Until the validator changes ship, this gotcha is enforced by skill-author memory
 
 ## Notes for future contributors
 
-- Resist adding more rules to `docs/substrate/designs/output-voice.md` instead of pinning existing ones. New rules without enforcement just compound the drift surface.
+- Resist adding more rules to `references/output-voice.md` instead of pinning existing ones. New rules without enforcement just compound the drift surface.
 - The next candidate for invariant promotion is the voice-citation requirement itself (currently a convention pinned by the planned grep). If the citation requirement holds across two release cycles without drift, consider promoting it to a named invariant.
-- If a chat render exceeds the density budget in `docs/substrate/designs/output-voice.md` §"Density budgets," the right move is usually: move detail into the persisted file, replace narrative with bullets/tables, drop the methodology recap. Never the right move: ask the user to be more specific — that's pushing the synthesis problem onto the reader.
+- If a chat render exceeds the density budget in `references/output-voice.md` §"Density budgets," the right move is usually: move detail into the persisted file, replace narrative with bullets/tables, drop the methodology recap. Never the right move: ask the user to be more specific — that's pushing the synthesis problem onto the reader.
 - `cohesive:cohesively`-routed chains can ask multiple clarifying questions across subskills (router asks, brainstorm asks, persistence prompt asks). The convention is one question *per turn*, not one *per chain*. Reducing chain-total questions is a related-but-deferred problem; track it as future substrate when it earns a doc.

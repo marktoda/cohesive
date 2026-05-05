@@ -73,7 +73,7 @@ For each option, immediately note:
 
 ### Phase 3: Pressure-test each option
 
-Apply the question battery from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/design-pressure-testing.md` to every option. Don't skip the option you already prefer; attack it as hard as the others.
+Apply the question battery from `${CLAUDE_PLUGIN_ROOT}/references/design-pressure-testing.md` to every option. Don't skip the option you already prefer; attack it as hard as the others.
 
 The 25 questions cover six categories:
 1. **Spec impact** — what docs change/become obsolete/get renamed

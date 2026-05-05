@@ -20,7 +20,7 @@ This ledger records *what changed* in the substrate during this `rewrite-specs` 
 
 - `AGENTS.md`
   - **Before:** §"The one named invariant" listed `PLUGIN_ROOT_PATHS` as the single rule with a real failure mode; convention references mentioned skill-conventions and reviewer-agent-template. §"When you are about to..." had a `validate_plugin.sh` bullet referencing only `PLUGIN_ROOT_PATHS`.
-  - **After:** §"The named invariants" (renamed) lists two invariants with explicit failure modes for each. Convention references add a new bullet for chat-rendered output pointing at `docs/substrate/designs/output-voice.md` and the worked transcript. The `validate_plugin.sh` bullet references both invariants by name.
+  - **After:** §"The named invariants" (renamed) lists two invariants with explicit failure modes for each. Convention references add a new bullet for chat-rendered output pointing at `references/output-voice.md` and the worked transcript. The `validate_plugin.sh` bullet references both invariants by name.
   - **Reason:** Per the "Pin" layer, the second invariant must be discoverable from the source-of-truth doc agents and contributors read first.
 
 - `ARCHITECTURE.md`
@@ -35,7 +35,7 @@ This ledger records *what changed* in the substrate during this `rewrite-specs` 
 
 ## Files added
 
-- `docs/substrate/designs/output-voice.md` — normative reference for chat-rendered output. Five rules (verdict-leads, faithful-subset, header-depth cap, bullets/tables not narrative phases, single next-recommendation), do/don't table, forbidden-phrasings list, density-budget guideline table, citation requirement. Cited from every Output format block (after implementation follow-up).
+- `references/output-voice.md` — normative reference for chat-rendered output. Five rules (verdict-leads, faithful-subset, header-depth cap, bullets/tables not narrative phases, single next-recommendation), do/don't table, forbidden-phrasings list, density-budget guideline table, citation requirement. Cited from every Output format block (after implementation follow-up).
 - `docs/history/transcripts/output-voice-worked-example.md` — load-bearing companion to the voice guide. Side-by-side wordy-vs-punchy render of the same `cohesive:review-diff` invocation with seven cuts justified inline. Dated, append-only.
 - `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` — the second named invariant. Specifies the rule, scope (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`), why-it-matters, enforcement plan (two grep checks in `validate_plugin.sh`, queued for implementation), known bypass risks, review checklist.
 - `docs/substrate/gotchas/wordy-output.md` — the scar this rewrite retires. Symptom (verdict buried, header soup, multi-recommendations, ceremony), why it happened (voice rules as convention only, no central guide, no worked example, no invariant on the most-regressed rule), tempting wrong fix ("be more concise" in CLAUDE.md), correct pattern (the three-layer Cut/Anchor/Pin model), tests/checks, when discovered.
@@ -59,7 +59,7 @@ _None._ This rewrite is purely additive on the substrate side. (Implementation f
 ## New or updated substrate
 
 ### Specs / references
-- `docs/substrate/designs/output-voice.md` — new normative reference for chat output
+- `references/output-voice.md` — new normative reference for chat output
 - `docs/substrate/designs/skill-conventions.md` — updated Output format conventions (5 rules), Tone scope, anti-patterns
 - `docs/substrate/designs/reviewer-agent-template.md` — updated Output format conventions, anti-patterns
 - `AGENTS.md` — updated "The named invariants," convention references, validator bullet
@@ -78,7 +78,7 @@ _None._ This rewrite is purely additive on the substrate side. (Implementation f
 
 ### Semantic linter specs (proposed, not yet implemented)
 - **Verdict-leads grep.** For each skill in `VERDICT_BEFORE_EVIDENCE.md`'s "Applies to" list, the SKILL.md "Output format" block's first three non-blank lines after the outermost header must contain `**Verdict:**`. Failure message names the invariant.
-- **Voice-citation grep.** Every `skills/*/SKILL.md` Output format block must contain the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md`. Same check for every `agents/*.md` "How to structure your output" code block. Failure message names the convention pin and references `style-guide-rot.md`.
+- **Voice-citation grep.** Every `skills/*/SKILL.md` Output format block must contain the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. Same check for every `agents/*.md` "How to structure your output" code block. Failure message names the convention pin and references `style-guide-rot.md`.
 
 ### Tests / checks proposed (not yet implemented)
 - Manual scenario test: invoke `cohesive:review-diff` with no voice citation in the dispatching skill; verify the chat render still leads with verdict (the invariant) but voice rules drift (the convention).
@@ -135,23 +135,23 @@ After the first `cohesive:validate-rewrite` run, the `spec-cohesion-reviewer` re
 ### Issues closed
 
 - **B1 (Blocker) — Canonical chat-render layout disagreement.** Picked **title-then-citation-then-verdict** as the canonical layout (matching the worked transcript). Updated `docs/substrate/designs/skill-conventions.md` §"Output format conventions" rule 1 and the canonical chat-render shape to put the outermost `#` title first, then the voice-citation blockquote, then `**Verdict:**`. Updated `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` to enumerate the three lines explicitly (title on line 1, citation on line 2, verdict on line 3) and re-spec the validator grep against the new anchor (the outermost `#` title inside the Output format code block, not the section header above it). Worked transcript was already in the chosen layout, so no change there.
-- **B2 (Blocker) — `PLUGIN_ROOT_PATHS.md:8` claimed "the one named invariant".** Updated to "one of two named invariants" with cross-link to `VERDICT_BEFORE_EVIDENCE.md`. Also extended the doc's prose about other rules to acknowledge they live in `docs/substrate/designs/output-voice.md` alongside the existing references. Added a 2026-05-04 history line on the file.
-- **I3 (Medium) — "Faithful subset" undefined.** Added a testable three-part definition to `docs/substrate/designs/output-voice.md` rule 2: (a) verdict matches; (b) every chat claim appears in the persisted file; (c) chat does not introduce findings/recommendations/facts absent from the persisted file. `docs/substrate/designs/skill-conventions.md` rule 3 now points at the definition rather than restating it.
-- **I2 (Medium) — Voice-citation pin status named-but-unranked.** Added §"Why voice-citation is convention-with-grep, not a named invariant" to `docs/substrate/designs/output-voice.md` with two stated reasons (wording is the youngest part of this rewrite; the verdict-leads invariant earns more from promotion because it ratifies a behavior, while voice-citation pinning would ratify a literal string). Promotion criteria spelled out: two release cycles without wording change, a real regression caught by the grep, no further rewording anticipated. Until then, convention-with-grep.
+- **B2 (Blocker) — `PLUGIN_ROOT_PATHS.md:8` claimed "the one named invariant".** Updated to "one of two named invariants" with cross-link to `VERDICT_BEFORE_EVIDENCE.md`. Also extended the doc's prose about other rules to acknowledge they live in `references/output-voice.md` alongside the existing references. Added a 2026-05-04 history line on the file.
+- **I3 (Medium) — "Faithful subset" undefined.** Added a testable three-part definition to `references/output-voice.md` rule 2: (a) verdict matches; (b) every chat claim appears in the persisted file; (c) chat does not introduce findings/recommendations/facts absent from the persisted file. `docs/substrate/designs/skill-conventions.md` rule 3 now points at the definition rather than restating it.
+- **I2 (Medium) — Voice-citation pin status named-but-unranked.** Added §"Why voice-citation is convention-with-grep, not a named invariant" to `references/output-voice.md` with two stated reasons (wording is the youngest part of this rewrite; the verdict-leads invariant earns more from promotion because it ratifies a behavior, while voice-citation pinning would ratify a literal string). Promotion criteria spelled out: two release cycles without wording change, a real regression caught by the grep, no further rewording anticipated. Until then, convention-with-grep.
 - **I1 (High) — Matrix Voice-citation column doesn't self-explain.** Added a cell legend to `docs/substrate/matrices/reviewer-output-shape.md` immediately above the table: `✓` = spec required and agent compliant; `pending` = spec required, agent file queued; `✗` = regression. The legend resolves the "queued vs broken" ambiguity at the table itself rather than only in the explanatory note below.
 - **I4 (Medium) — Worked transcript is authored, not captured.** Added §"Captured transcripts (queued)" to `docs/history/transcripts/output-voice-worked-example.md` naming the next substrate task: capture a real `cohesive:review-codebase` or `cohesive:review-diff` transcript from an external-repo dogfood run, persist as `docs/history/transcripts/output-voice-captured-YYYY-MM-DD-<slug>.md`. When a real capture lands, the captured file becomes canonical and this authored file is preserved as the original pedagogical reference.
 
 ### Vague language tightened
 
-- `docs/substrate/designs/output-voice.md` rule 2: "may be a faithful subset" → "is a faithful subset" (with the testable definition above).
+- `references/output-voice.md` rule 2: "may be a faithful subset" → "is a faithful subset" (with the testable definition above).
 - `docs/substrate/designs/skill-conventions.md` rule 3: "may be a faithful subset of the persisted file" → "is a faithful subset of the persisted file."
 - `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`: "and to any persisted artifact the skill writes" expanded into an explicit two-bullet "Applies to" sub-list (chat output; persisted artifact) with the line that both surfaces are enforced through the SKILL.md Output format block as the single source of truth.
-- `docs/substrate/designs/output-voice.md` density-budgets section: dropped the unreserved `OUTPUT_DENSITY` reference; replaced with prose explaining why density stays convention (every word/paragraph/header proxy is flawed individually).
+- `references/output-voice.md` density-budgets section: dropped the unreserved `OUTPUT_DENSITY` reference; replaced with prose explaining why density stays convention (every word/paragraph/header proxy is flawed individually).
 
 ### Files touched in repair pass 1
 
 - `docs/substrate/designs/skill-conventions.md` — Output format rule 1 layout; canonical chat-render shape title-first; rule 3 references the testable definition; "may" → "is"
-- `docs/substrate/designs/output-voice.md` — rule 2 with testable definition; "may" → "is"; new §"Why voice-citation is convention-with-grep, not a named invariant"; density-budgets prose updated
+- `references/output-voice.md` — rule 2 with testable definition; "may" → "is"; new §"Why voice-citation is convention-with-grep, not a named invariant"; density-budgets prose updated
 - `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` — rule statement enumerates the three lines; enforcement section anchors greps on the outermost `#` title; persisted-artifact scope clarified; new history entry
 - `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` — "one named invariant" → "one of two"; new history entry
 - `docs/substrate/matrices/reviewer-output-shape.md` — cell legend added above the table
@@ -168,7 +168,7 @@ After the first `cohesive:validate-rewrite` run, the `spec-cohesion-reviewer` re
 The original "Implementation follow-up" section above remains the canonical handoff. The grep specifications it describes are now slightly more concrete after this repair pass:
 
 - The verdict-leads grep anchors on the **outermost `#` title inside the Output format code block** and verifies `**Verdict:**` appears in lines 1–3 after that title.
-- The voice-citation grep verifies `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md` appears within the same window.
+- The voice-citation grep verifies `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` appears within the same window.
 - Both greps share the same anchor, so a single parser pass can check both.
 
 ### Ready for fresh-eyes review (second pass)?
@@ -199,13 +199,13 @@ Nine files moved with `git mv` (history preserved):
 |---|---|
 | `references/skill-conventions.md` | `docs/substrate/designs/skill-conventions.md` |
 | `references/reviewer-agent-template.md` | `docs/substrate/designs/reviewer-agent-template.md` |
-| `references/output-voice.md` | `docs/substrate/designs/output-voice.md` |
-| `references/cohesion-rubric.md` | `docs/substrate/designs/cohesion-rubric.md` |
-| `references/design-pressure-testing.md` | `docs/substrate/designs/design-pressure-testing.md` |
-| `references/locality-over-centralization.md` | `docs/substrate/designs/locality-over-centralization.md` |
-| `references/substrate-model.md` | `docs/substrate/designs/substrate-model.md` |
+| `references/output-voice.md` | `references/output-voice.md` |
+| `references/cohesion-rubric.md` | `references/cohesion-rubric.md` |
+| `references/design-pressure-testing.md` | `references/design-pressure-testing.md` |
+| `references/locality-over-centralization.md` | `references/locality-over-centralization.md` |
+| `references/substrate-model.md` | `references/substrate-model.md` |
 | `references/substrate-layout.md` | `docs/substrate/designs/substrate-layout.md` |
-| `references/architecture-review-rubric.md` | `docs/substrate/designs/architecture-review-rubric.md` |
+| `references/architecture-review-rubric.md` | `references/architecture-review-rubric.md` |
 
 ### Citation sweep
 
@@ -243,7 +243,7 @@ Future contributors: the cleaner pattern is to do the move and citation sweep in
 
 The implementation follow-up section from the original ledger (per-skill Output format edits, per-agent output edits, validator greps) still applies. After repair pass 2, the substrate references those edits will cite point at the new `docs/substrate/designs/` paths. Implementation pass should:
 
-1. Add the voice-citation line — `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md` — to each `skills/*/SKILL.md` Output format block (citation now points at substrate, not at the moved-and-deleted `references/output-voice.md`).
+1. Add the voice-citation line — `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` — to each `skills/*/SKILL.md` Output format block (citation now points at substrate, not at the moved-and-deleted `references/output-voice.md`).
 2. Same citation in each `agents/*.md` "How to structure your output" code block.
 3. Verdict-leads grep + voice-citation grep in `scripts/validate_plugin.sh`.
 4. Flip the 5 Voice-citation cells in `reviewer-output-shape.md` from `pending` to `✓`.
@@ -251,3 +251,100 @@ The implementation follow-up section from the original ledger (per-skill Output 
 ### Ready for fresh-eyes review (third pass)?
 
 **Yes** — re-run `cohesive:validate-rewrite` if desired. The substrate-vs-implementation split is now structurally clean. The reviewer should focus on whether the move broke any normative claim or rendered any rule incoherent in its new location.
+
+---
+
+## Repair pass 3 (2026-05-04)
+
+User feedback after Repair pass 2: "wait wait — some of these still feel like implementation (ie references for the skills at hand): cohesion-rubric.md for example feels like something that would be referenced by the skills, no?" The user named the correct cut: **substrate is conventions for contributors or agents working on this codebase itself; references and skills are the implementation that other people will install to get the benefits of the cohesive workflow pattern**.
+
+This is a sharper definition than the AGENTS.md prose I had been using ("what the system claims about itself"). Repair pass 2 used the looser definition and over-pulled files into substrate.
+
+### What changed
+
+Six of the nine files moved in Repair pass 2 moved *back* to `references/` because they are runtime methodology — content cited by skills/agents at generation time when running the workflow on the user's codebase. They are the methodology Cohesive teaches and the workflow it ships, not rules about how this repo is built.
+
+Three files stayed in `docs/substrate/designs/` because they are contributor-facing — rules about *this codebase* that apply when someone authors or maintains this plugin's skills, agents, or layout.
+
+### Files moved back to `references/`
+
+| File | Why it's implementation |
+|---|---|
+| `cohesion-rubric.md` | 9-axis scorecard reviewer agents cite at runtime |
+| `design-pressure-testing.md` | 25-question battery `brainstorm-design` uses at runtime |
+| `locality-over-centralization.md` | Design principle reviewers cite at runtime to inform judgment |
+| `architecture-review-rubric.md` | Four-phase rubric `review-codebase` implements at runtime |
+| `substrate-model.md` | Foundational thesis cited by skills explaining the methodology |
+| `output-voice.md` | Voice rules cited at chat-generation time by every skill's Output format block |
+
+### Files staying in `docs/substrate/designs/`
+
+| File | Why it's substrate |
+|---|---|
+| `skill-conventions.md` | Rules for writing SKILL.md *in this repo*; contributor-facing |
+| `reviewer-agent-template.md` | Canonical reviewer-agent shape *for this repo's agents*; contributor-facing |
+| `substrate-layout.md` | Where *this repo's* artifacts live; contributor-facing |
+| `three-layer-architecture.md` (pre-existing) | Architectural decision about this plugin's structure |
+| `composition-with-superpowers.md` (pre-existing) | Design decision about how this plugin composes with Superpowers |
+| `agent-dispatch-protocol.md` (pre-existing) | Design contract for this plugin's reviewer-agent dispatch |
+
+### Test for the split (added to AGENTS.md)
+
+The test for which side a file belongs to: **who reads it, and when?**
+
+- A file read by a *contributor* writing or reviewing this repo → substrate.
+- A file read by a *skill or agent* at runtime as part of doing the workflow on the user's codebase → implementation.
+
+A file can be cited from both sides. When that happens, the file's home is determined by its *primary runtime role*: cited at generation time → implementation.
+
+### Citation sweep (reverse direction)
+
+The 6 files moved back required reversing roughly half of the Repair pass 2 sweep. Pattern: `docs/substrate/designs/<file>.md` → `references/<file>.md` for the 6 filenames listed above.
+
+Total sweep: ~140 path replacements across the same ~50 files.
+
+### Prose updates
+
+- **`AGENTS.md` §"Substrate vs implementation"** — rewrote with the contributor-vs-user-facing frame. Added the "who reads it, when?" test and the cited-from-both-sides rule. The new prose is the primary substrate change of this repair pass; it codifies the user's sharper definition so future contributors don't repeat the over-pull I just did.
+- **`ARCHITECTURE.md` §"Three-tier architecture"** — three implementation tiers (skills/, agents/, references/); substrate at `docs/substrate/**` is the fourth, contributor-facing layer. Updated v0.1 scope to: 8 skills, 5 agents, 6 runtime references in `references/`, 9 templates, 6 substrate design docs in `docs/substrate/designs/`, 2 scripts.
+- **`README.md` §"What's in the box"** — re-rendered. `references/` lists the 6 runtime methodology files plus `templates/`. `docs/substrate/designs/` lists only the 6 contributor-facing design docs.
+
+### Final structure
+
+```
+references/                                    (runtime methodology — implementation)
+  substrate-model.md
+  cohesion-rubric.md
+  design-pressure-testing.md
+  locality-over-centralization.md
+  architecture-review-rubric.md
+  output-voice.md
+  templates/
+    (9 fillable forms)
+
+docs/substrate/                                (contributor-facing — substrate)
+  designs/
+    skill-conventions.md
+    reviewer-agent-template.md
+    substrate-layout.md
+    three-layer-architecture.md
+    composition-with-superpowers.md
+    agent-dispatch-protocol.md
+  invariants/  (PLUGIN_ROOT_PATHS, VERDICT_BEFORE_EVIDENCE)
+  gotchas/     (soft-prereqs, discovery-vs-superpowers, wordy-output, style-guide-rot)
+  matrices/    (router, reviewer-output-shape, skill-section-presence, artifact-placement)
+```
+
+### Hard Constraint #3 reckoning, continued
+
+This repair pass also updates citations across both substrate and implementation in one commit, for the same reason as Repair pass 2: avoiding a window of broken state. The double-citation-sweep across passes 2 and 3 is roughly 400 path edits in total; the substrate-vs-implementation split is now correct in *both* the prose and the file layout.
+
+### Issues acknowledged but not closed in this pass
+
+- The validator still does not check link integrity. Future enhancement.
+- Historical docs in `docs/history/**` had their citations swept across passes 2 and 3. The prior-pass note about historical-docs path migration applies here too.
+- A `cohesive:review-diff` against this branch would be the right way to confirm no normative claim broke during the move-and-move-back. Recommended next step.
+
+### Ready for fresh-eyes review (fourth pass)?
+
+**Yes** — re-run `cohesive:validate-rewrite`, or run `cohesive:review-diff` against this branch. The contributor-vs-user-facing axis is now the documented split, and the file layout matches. Reviewer should confirm: (a) `references/<file>.md` files are all genuinely runtime-cited; (b) `docs/substrate/designs/<file>.md` files are all genuinely contributor-facing; (c) AGENTS.md prose accurately encodes the test ("who reads it, when?") so future contributors apply it consistently.

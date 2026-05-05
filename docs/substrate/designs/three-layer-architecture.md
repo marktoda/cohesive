@@ -32,7 +32,7 @@ Conflating any two of the three pushes content into the wrong tier and degrades 
 
 ## Concrete examples in v0.1
 
-- **Skills citing references** — `skills/review-codebase/SKILL.md` cites `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/architecture-review-rubric.md` for the four-phase rubric. The skill body says *what to do*; the rubric defines *what counts as good*. Splitting them lets the rubric be updated without touching the skill body.
+- **Skills citing references** — `skills/review-codebase/SKILL.md` cites `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md` for the four-phase rubric. The skill body says *what to do*; the rubric defines *what counts as good*. Splitting them lets the rubric be updated without touching the skill body.
 - **Skills dispatching agents** — `skills/review-codebase/SKILL.md` Phase 3 dispatches four reviewer agents in a single message via Task tool. The skill body knows the dispatch shape; each agent file knows its own review lens. The skill doesn't embed reviewer prompts; the agents don't embed orchestration.
 - **References as templates** — `references/templates/invariant.md` is filled in by `rewrite-specs` when a new invariant is named. The skill body knows when to fill the template; the template itself knows what the artifact must contain.
 
@@ -44,7 +44,7 @@ Conflating any two of the three pushes content into the wrong tier and degrades 
 
 ## What the separation does not require
 
-- **References cannot cite skills.** They can — and do, for canonical output formats (e.g., `docs/substrate/designs/design-pressure-testing.md` cites `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` as the canonical home of a particular output format). The dependency direction is "reference describes vocabulary; skill is the authoritative producer," and citing the skill from the reference acknowledges that. The self-review flagged one case of inverted citation direction, which should be flipped in a future cleanup.
+- **References cannot cite skills.** They can — and do, for canonical output formats (e.g., `references/design-pressure-testing.md` cites `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` as the canonical home of a particular output format). The dependency direction is "reference describes vocabulary; skill is the authoritative producer," and citing the skill from the reference acknowledges that. The self-review flagged one case of inverted citation direction, which should be flipped in a future cleanup.
 - **One-line content cannot live in a skill.** Tiny inline definitions are fine. The rule is about substantial content; small clarifications stay where they are most legible.
 
 ## Consequences for adding new components
@@ -95,5 +95,5 @@ None of these apply in v0.1.
 
 - [`docs/substrate/invariants/PLUGIN_ROOT_PATHS.md`](../invariants/PLUGIN_ROOT_PATHS.md) — every cross-tier reference uses `${CLAUDE_PLUGIN_ROOT}/`.
 - [`agent-dispatch-protocol.md`](agent-dispatch-protocol.md) — the cross-tier interface between skills and agents; describes fresh-eyes as a load-bearing property held by harness subprocess isolation plus convention reinforcement.
-- [`docs/substrate/designs/locality-over-centralization.md`](locality-over-centralization.md) — the principle this separation operationalizes.
+- [`references/locality-over-centralization.md`](locality-over-centralization.md) — the principle this separation operationalizes.
 - [`composition-with-superpowers.md`](composition-with-superpowers.md) — extends the same separation principle outward (Cohesive owns substrate; Superpowers owns implementation).

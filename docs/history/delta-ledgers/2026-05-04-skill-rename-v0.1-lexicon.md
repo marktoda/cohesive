@@ -95,7 +95,7 @@ The companion brainstorm output is in conversation; the immediate predecessor is
   - **Before:** Multiple references to `cohesive-review`, `review-spec-cohesion`. "Process when adding a new skill" step 6 instructed `cohesive:cohesive-review --scope diff`.
   - **After:** Updated throughout. Subskill list under "Canonical prereq-detection question" expanded to include the five subskills now using the pattern; cross-references the new "Dispatch prompt contract" section in the router.
 
-- `docs/substrate/designs/architecture-review-rubric.md`
+- `references/architecture-review-rubric.md`
   - **Before:** Header named `cohesive-review --scope codebase`; stop-conditions and "What this review is not" referenced old names.
   - **After:** Updated throughout.
 
@@ -103,15 +103,15 @@ The companion brainstorm output is in conversation; the immediate predecessor is
   - **Before:** "When adding a new reviewer agent" §step 4 cited `skills/cohesive-review/SKILL.md` as the canonical dispatch site.
   - **After:** Cites both `skills/review-codebase/SKILL.md` and `skills/review-diff/SKILL.md`.
 
-- `docs/substrate/designs/design-pressure-testing.md`
+- `references/design-pressure-testing.md`
   - **Before:** Multiple references to `review-spec-cohesion` as the rubric consumer.
   - **After:** All updated to `validate-rewrite`.
 
-- `docs/substrate/designs/locality-over-centralization.md`
+- `references/locality-over-centralization.md`
   - **Before:** Output integration named `cohesive-review`.
   - **After:** Names `review-codebase` and `review-diff`.
 
-- `docs/substrate/designs/cohesion-rubric.md`
+- `references/cohesion-rubric.md`
   - **Before:** "9-axis scorecard" framing and "Severity vocabulary" both referenced `cohesive-review`.
   - **After:** Updated to `review-codebase` for the scorecard and `review-codebase` / `review-diff` for the severity vocabulary.
 

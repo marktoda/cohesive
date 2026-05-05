@@ -27,7 +27,7 @@ Cohesive ships v0.1 looking healthy because one author wrote it in one sitting a
 - README.md
 - docs/initial_design.md (spec v0.1, 2026-05-04)
 - docs/implementation_plan.md (binding plan, 2026-05-04)
-- docs/substrate/designs/substrate-model.md, cohesion-rubric.md, architecture-review-rubric.md, design-pressure-testing.md, locality-over-centralization.md
+- references/substrate-model.md, cohesion-rubric.md, architecture-review-rubric.md, design-pressure-testing.md, locality-over-centralization.md
 
 ### Claimed architectural priors (from Phase 1 system-shape summary)
 - Three-layer seam: skills orchestrate, agents review fresh-context, references hold pure content
@@ -85,7 +85,7 @@ Each invariant goes in a new `docs/invariants/` directory (or under `references/
 ### 3. No tests; no CI; the validator green-lights skills that violate Plan §3
 **Severity:** High
 **Category:** Tests / Invariant
-**Why it matters:** `docs/substrate/designs/cohesion-rubric.md` axis 5 elevates test guarantees as a leverage tier. `docs/substrate/designs/substrate-model.md` puts tests in the leverage hierarchy. Cohesive ships zero tests. There is no `.github/workflows/`. The validator only checks structural shape: frontmatter exists, JSON parses, scripts executable. It does not check the rules that actually matter for substrate quality. A passing validator gives false confidence: an agent will read a green check and ship.
+**Why it matters:** `references/cohesion-rubric.md` axis 5 elevates test guarantees as a leverage tier. `references/substrate-model.md` puts tests in the leverage hierarchy. Cohesive ships zero tests. There is no `.github/workflows/`. The validator only checks structural shape: frontmatter exists, JSON parses, scripts executable. It does not check the rules that actually matter for substrate quality. A passing validator gives false confidence: an agent will read a green check and ship.
 **Evidence:** No `tests/`; no `.github/`; `scripts/validate_plugin.sh:1–127` (structure-only).
 **Recommended fix:** Add `tests/output_schema/` containing one canned skill output per skill plus a parser that asserts header presence and order. Add `.github/workflows/validate.yml` that runs `bash scripts/validate_plugin.sh` and the schema parser. Once Finding 1's invariants are named, extend the validator to enforce them.
 **Substrate artifact to add or update:** Test fixtures + CI workflow + extended validator.
@@ -103,7 +103,7 @@ Each invariant goes in a new `docs/invariants/` directory (or under `references/
 **Category:** Domain model / Seams
 **Why it matters:** The implementation plan justifies merging three review skills into `cohesive-review` with "same reviewers, only the input target differs." That's true for `--scope codebase` (4 phases, 4 parallel agents, synthesis) and `--scope diff` (lighter version of same). It's *false* for `--scope substrate`: zero agents dispatched, no synthesis, no spec-prior gate — just a single-pass scan that happens to share the `--scope` argument. ~40% of the SKILL.md is conditional branching against the three modes, the smell of a too-broad concept.
 **Evidence:** skills/cohesive-review/SKILL.md:37–105 (codebase, 4-phase), :107–157 (diff, 2 agents), :159–198 (substrate, 0 agents); :163 ("**No subagent dispatch.**"); docs/implementation_plan.md:16 (the justification).
-**Recommended fix:** Cheap path: keep `cohesive-review` for codebase + diff (which legitimately share machinery); restore a separate `substrate-audit` skill that internally calls `discover-substrate` and renders the audit. Update `docs/substrate/designs/architecture-review-rubric.md` title — currently it says "Architecture review" but the SKILL claims it covers all three modes.
+**Recommended fix:** Cheap path: keep `cohesive-review` for codebase + diff (which legitimately share machinery); restore a separate `substrate-audit` skill that internally calls `discover-substrate` and renders the audit. Update `references/architecture-review-rubric.md` title — currently it says "Architecture review" but the SKILL claims it covers all three modes.
 **Substrate artifact to add or update:** Split skill + rubric clarification.
 
 ### 6. Source-of-truth hierarchy is unclear; agents will update the wrong doc
@@ -118,7 +118,7 @@ Each invariant goes in a new `docs/invariants/` directory (or under `references/
 **Severity:** High
 **Category:** Substrate / Domain model
 **Why it matters:** `cohesively/SKILL.md` defines six routes plus a "routing decision logic" prose block at :99–106. Cohesion-rubric axis 4 (and behavior matrices generally) exist precisely for branchy behavior; the plugin teaches matrix-cell tests for cells of branchy behavior. The router has no matrix. A user request like "audit my PR for what's missing" is genuinely ambiguous (review/diff? review/substrate?), and the disambiguation lives only in prose ordered rules, with no test pinning any specific input → route mapping. Cohesive *teaches* this exact pattern but doesn't apply it to its own most-branchy artifact.
-**Evidence:** skills/cohesively/SKILL.md:14–79, :99–106; docs/substrate/designs/cohesion-rubric.md:54–58 (axis 4 vocabulary).
+**Evidence:** skills/cohesively/SKILL.md:14–79, :99–106; references/cohesion-rubric.md:54–58 (axis 4 vocabulary).
 **Recommended fix:** Add `docs/cohesive/router-matrix.md` with stable cell IDs (R001..R0NN) keyed on (verb tense × scope hint × explicit instruction × ambiguity). Each row: input shape, expected route, why. Eventually wire one acceptance test per cell.
 **Substrate artifact to add or update:** Router behavior matrix.
 
@@ -146,7 +146,7 @@ Add a unit test exercising `.github`, `.git`, `.cache`, `node_modules`, `docs`.
 ### 10. Templates referenced as not-yet-authoritative when they are
 **Severity:** Medium
 **Category:** Stale doc
-**Why it matters:** `rewrite-specs/SKILL.md:71` hedges: "Named invariant: `${CLAUDE_PLUGIN_ROOT}/references/templates/invariant.md` (V1 template — until then, use the spec format from `docs/substrate/designs/cohesion-rubric.md`)." But `references/templates/invariant.md` is a complete 78-line template today. The hedge would send a future agent to a non-existent fallback (cohesion-rubric.md doesn't define an invariant *format*, only rubric axis 4). Audit the other template references for similar staleness.
+**Why it matters:** `rewrite-specs/SKILL.md:71` hedges: "Named invariant: `${CLAUDE_PLUGIN_ROOT}/references/templates/invariant.md` (V1 template — until then, use the spec format from `references/cohesion-rubric.md`)." But `references/templates/invariant.md` is a complete 78-line template today. The hedge would send a future agent to a non-existent fallback (cohesion-rubric.md doesn't define an invariant *format*, only rubric axis 4). Audit the other template references for similar staleness.
 **Evidence:** skills/rewrite-specs/SKILL.md:71; references/templates/invariant.md (complete).
 **Recommended fix:** Drop the hedge in `rewrite-specs/SKILL.md:71`. Audit other "until then" hedges across all skills.
 **Substrate artifact to add or update:** Edit + sweep.
@@ -155,7 +155,7 @@ Add a unit test exercising `.github`, `.git`, `.cache`, `node_modules`, `docs`.
 **Severity:** Medium
 **Category:** Domain model (missing concept)
 **Why it matters:** Every codebase-mode review produces a "claimed system shape" summary in Phase 1. The four reviewer agents all receive it as their first input. It has a stable six-section structure. It's referenced in five files. It's exactly the kind of recurring-shape-with-stable-name that should be a template. Compare to `references/templates/substrate-map.md`, which is more verbose, less load-bearing, and *does* have a template.
-**Evidence:** docs/substrate/designs/architecture-review-rubric.md:24–46; skills/cohesive-review/SKILL.md:50; received-as-input by all four reviewer agents.
+**Evidence:** references/architecture-review-rubric.md:24–46; skills/cohesive-review/SKILL.md:50; received-as-input by all four reviewer agents.
 **Recommended fix:** Add `references/templates/claimed-system-shape.md` with the six sections (Product goal / Architectural priors / Intended seams / Named invariants / Testing philosophy / Future direction). Reference it from the rubric and from `cohesive-review` Phase 1.
 **Substrate artifact to add or update:** New template.
 
@@ -226,7 +226,7 @@ The three-layer separation (skills/agents/references) is the codebase's stronges
 
 The worktree-fallback inline duplication in `rewrite-specs` is similarly correct: Superpowers is the centralized abstraction, the inline fallback is local duplication for a real "the contract isn't always available" case. Don't refactor.
 
-The one minor seam violation: `docs/substrate/designs/design-pressure-testing.md:94` references `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` for the canonical output format. The dependency direction should run the other way — the skill cites the reference, not vice versa. Flip the direction in a future pass.
+The one minor seam violation: `references/design-pressure-testing.md:94` references `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` for the canonical output format. The dependency direction should run the other way — the skill cites the reference, not vice versa. Flip the direction in a future pass.
 
 ## Library-native alignment opportunities
 
@@ -237,7 +237,7 @@ Cohesive looks like a real Claude Code plugin, not a methodology PDF wedged into
 ### Specs to rewrite or annotate
 - `docs/implementation_plan.md` §0: source-of-truth hierarchy
 - `docs/initial_design.md` §5.1: pointer to plan §1 reconciliation
-- `docs/substrate/designs/architecture-review-rubric.md`: title or scope clarification (does the rubric cover all three review modes or just codebase?)
+- `references/architecture-review-rubric.md`: title or scope clarification (does the rubric cover all three review modes or just codebase?)
 - `skills/rewrite-specs/SKILL.md:71`: drop the "until V1" hedge
 
 ### Behavior matrices to add
@@ -289,7 +289,7 @@ Cohesive looks like a real Claude Code plugin, not a methodology PDF wedged into
 
 ### Phase 2: Simplify architecture (1 session)
 1. Split `cohesive-review` so `--scope substrate` becomes a separate `substrate-audit` skill (or document the structural difference clearly).
-2. Flip the `docs/substrate/designs/design-pressure-testing.md:94` reference direction.
+2. Flip the `references/design-pressure-testing.md:94` reference direction.
 3. Fix `scan_substrate.py:82` precedence bug + add unit test.
 4. Audit `plugin.json` (`$schema`, description length parity with marketplace).
 

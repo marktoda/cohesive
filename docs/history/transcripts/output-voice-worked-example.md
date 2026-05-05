@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-04
 **Source:** dogfood transcript captured during the `cut-anchor-pin` rewrite. Real user request, both renders authored to compare.
-**Companion:** `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md`
+**Companion:** `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`
 
 This is the load-bearing artifact for the voice guide. Rules describe shape; this transcript shows it. Read this when authoring or revising a skill's Output format block — examples teach voice, prose doesn't.
 
@@ -70,7 +70,7 @@ Both renders below assume `discover-substrate` and the two reviewer agents have 
 
 > # Change Cohesion Review
 >
-> > Voice and density: `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md`
+> > Voice and density: `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`
 >
 > **Verdict:** Pass with notes
 >
@@ -145,7 +145,7 @@ This task is queued substrate, not blocking. Track in the next dogfood pass.
 
 ## Related
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md` — the voice and density rules this transcript demonstrates
+- `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` — the voice and density rules this transcript demonstrates
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` — the rule that caught the wordy render's biggest sin
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/wordy-output.md` — the scar this transcript helps prevent
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` — why this transcript exists alongside the rules

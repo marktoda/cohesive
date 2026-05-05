@@ -65,7 +65,7 @@ In every `skills/*/SKILL.md` Output format block, the canonical render opens wit
 ```
 # <Skill output title>
 
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 ```
 
 Title-then-citation is the canonical layout (matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md)). The citation is what pulls [`output-voice.md`](output-voice.md) into context at generation time. Without it, voice rules drift silently — the failure mode documented in [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md). `validate_plugin.sh` greps for the literal blockquote line within the first three non-blank lines after the outermost `#` title.
@@ -87,7 +87,7 @@ The canonical chat-render shape for verdict-led, persisted-output skills:
 ```md
 # <Skill output title>
 
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Verdict:** <value from vocabulary>
 
@@ -216,7 +216,7 @@ These deviations are documented; new deviations require explicit discussion and 
 | Frontmatter `description` written in first person ("I help you...") | Breaks the third-person plugin-dev convention | Rewrite in third person beginning with "Use when" |
 | New skill not mentioned in `ARCHITECTURE.md` §"v0.1 scope" or README "What's in the box" | Source-of-truth disagreement | Update both in the same pass |
 | Router omits the canonical announcement before dispatching | User can't tell which workflow is running | Use the canonical opening sentence; name the route |
-| Output format block missing the voice citation line | Voice rules drift silently — see [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md) | Open every Output format block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md` |
+| Output format block missing the voice citation line | Voice rules drift silently — see [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md) | Open every Output format block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` |
 | Verdict-led skill buries the verdict under a setup paragraph | Violates `VERDICT_BEFORE_EVIDENCE`; reader can't scan the answer | Lead the Output format block with `**Verdict:**` within the first three non-blank lines |
 | Chat render duplicates the full persisted body | Defeats the chat-trailer model; ceremony without information | Render verdict + thesis + top findings + next step in chat; point at the persisted file |
 | Header nesting reaches `####` or `#####` in chat output | Header soup is the most common form of ceremony | Cap at `###`; use a bullet list or table for sub-structure |

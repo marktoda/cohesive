@@ -7,7 +7,7 @@ description: Use when reviewing a whole codebase or named subsystem for cohesion
 
 ## What this skill produces
 
-A full architecture review per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/architecture-review-rubric.md`. Output written to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` and rendered in chat.
+A full architecture review per `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`. Output written to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` and rendered in chat.
 
 For PR/branch/working-changes reviews, use [`cohesive:review-diff`](${CLAUDE_PLUGIN_ROOT}/skills/review-diff/SKILL.md). For "what memory is missing" inventories, use [`cohesive:audit-substrate`](${CLAUDE_PLUGIN_ROOT}/skills/audit-substrate/SKILL.md). Each of those skills produces a different output shape and uses different machinery.
 
@@ -25,7 +25,7 @@ For PR/branch/working-changes reviews, use [`cohesive:review-diff`](${CLAUDE_PLU
 
 ## Process
 
-Implements the four-phase architecture review from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/architecture-review-rubric.md`. Phase 0 below resolves where the output is written before any reading begins; Phases 1-5 are the rubric.
+Implements the four-phase architecture review from `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`. Phase 0 below resolves where the output is written before any reading begins; Phases 1-5 are the rubric.
 
 ### Phase 0: Resolve the artifact directory
 
@@ -109,7 +109,7 @@ Don't concatenate. Synthesize:
 1. **TL;DR** — verdict + 3-line thesis + top 3 findings + recommended next skill, in this order, as the very first content in chat. The TL;DR convention is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"TL;DR convention" and applies to every persisted skill output.
 2. **Thesis** — one paragraph naming the codebase's overall shape, the highest-leverage risk, and whether the system can scale development without founder memory. Concrete; specific to this codebase.
 3. **Verdict** — one of: Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk
-4. **Cohesion scorecard** — 9-axis ratings from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`
+4. **Cohesion scorecard** — 9-axis ratings from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`
 5. **Highest-leverage findings** — ranked by leverage × severity, format from rubric (canonical six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md`)
 6. **Substrate improvements** — specs to rewrite, matrices to add, semantic linters to add, gotchas to document
 7. **Phased roadmap** — first repair substrate, then simplify architecture, then strengthen enforcement

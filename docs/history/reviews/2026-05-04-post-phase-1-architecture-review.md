@@ -162,7 +162,7 @@ The prior self-review's locality verdict — "the preamble duplication is correc
 
 **Evidence:** `skills/cohesive-review/SKILL.md:37-105` (codebase, 4-phase), :107-157 (diff, 2 agents), :159-198 (substrate, 0 agents); `skills/cohesively/SKILL.md:52-58`.
 
-**Recommended fix:** Carve `skills/substrate-audit/SKILL.md` out. `cohesive-review` keeps codebase + diff. Update README §"What's in the box," ARCHITECTURE.md skill count, and `docs/substrate/designs/architecture-review-rubric.md` title scope.
+**Recommended fix:** Carve `skills/substrate-audit/SKILL.md` out. `cohesive-review` keeps codebase + diff. Update README §"What's in the box," ARCHITECTURE.md skill count, and `references/architecture-review-rubric.md` title scope.
 
 **Substrate artifact to add or update:** New skill + trim of existing skill + README/ARCHITECTURE updates.
 
@@ -256,9 +256,9 @@ Convergent with prior review's Finding #14, partially still applicable:
 
 **Severity:** Low
 **Category:** Seam direction
-**Why it matters:** Carry-over from prior review. `docs/substrate/designs/design-pressure-testing.md:94` cites `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` for the canonical output format. `docs/substrate/designs/three-layer-architecture.md:47` explicitly sanctions this case as "should be flipped in a future cleanup" — but that cleanup has now spanned the entire migration cycle. Exceptions accumulate.
+**Why it matters:** Carry-over from prior review. `references/design-pressure-testing.md:94` cites `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` for the canonical output format. `docs/substrate/designs/three-layer-architecture.md:47` explicitly sanctions this case as "should be flipped in a future cleanup" — but that cleanup has now spanned the entire migration cycle. Exceptions accumulate.
 
-**Evidence:** `docs/substrate/designs/design-pressure-testing.md:94`; `docs/substrate/designs/three-layer-architecture.md:47`.
+**Evidence:** `references/design-pressure-testing.md:94`; `docs/substrate/designs/three-layer-architecture.md:47`.
 
 **Recommended fix:** Move the canonical output-format spec into the reference; have the skill cite the reference.
 
@@ -311,7 +311,7 @@ Convergent with prior review's Finding #14, partially still applicable:
 ### Architecture simplification
 - Split `cohesive-review --scope substrate` into a separate `substrate-audit` skill (Finding #8).
 - Rename `docs/history/design-changes/` → `docs/history/delta-ledgers/` (Finding #6).
-- Flip `docs/substrate/designs/design-pressure-testing.md:94` reference direction (Finding #15).
+- Flip `references/design-pressure-testing.md:94` reference direction (Finding #15).
 
 ### Library-native polish (one PR)
 - Strip emoji from `validate_plugin.sh`.

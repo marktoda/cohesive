@@ -1,7 +1,7 @@
 # Output voice and density
 
 > Normative for chat-rendered output across every Cohesive skill and reviewer agent. Every `skills/*/SKILL.md` "Output format" block opens with the citation:
-> `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md`
+> `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`
 > The citation is the load-bearing line — it pulls this guide into context at generation time, which is the only moment the rules can take effect.
 
 Cohesive's substrate work is rigorous. Cohesive's chat output is not the place to demonstrate that rigor. Users see the chat. They open the persisted file when they want depth. This guide describes the shape of the chat — terse, verdict-led, scannable, joyful to read.

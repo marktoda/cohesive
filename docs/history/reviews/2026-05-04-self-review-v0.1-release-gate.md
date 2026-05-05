@@ -4,7 +4,7 @@
 **Scope:** `--scope codebase`, whole repo (Cohesive itself)
 **Substrate discovery:** in-conversation, see Phase 1 below
 **Reviewers dispatched:** substrate-alignment, structure, library-native, agent-readiness (4-way parallel)
-**Methodology:** four-phase rubric per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/architecture-review-rubric.md`
+**Methodology:** four-phase rubric per `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`
 
 ---
 
@@ -145,9 +145,9 @@ The rule is well-scoped; there's no reason to keep three docs claiming enforceme
 **Severity:** Medium
 **Category:** Seam
 
-**Why it matters:** The three-tier separation forbids references citing skills as canonical homes for output formats. `docs/substrate/designs/design-pressure-testing.md:94` cites `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` exactly that way. The `three-layer-architecture.md:47` design doc names this case as known debt. Every release that ships with the inversion weakens the rule by example — the reviewer the design doc names as the rule's enforcer (`structure-reviewer`) now has to make exceptions for the rule's home repo.
+**Why it matters:** The three-tier separation forbids references citing skills as canonical homes for output formats. `references/design-pressure-testing.md:94` cites `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` exactly that way. The `three-layer-architecture.md:47` design doc names this case as known debt. Every release that ships with the inversion weakens the rule by example — the reviewer the design doc names as the rule's enforcer (`structure-reviewer`) now has to make exceptions for the rule's home repo.
 
-**Evidence:** `docs/substrate/designs/design-pressure-testing.md:94`; `docs/substrate/designs/three-layer-architecture.md:47`.
+**Evidence:** `references/design-pressure-testing.md:94`; `docs/substrate/designs/three-layer-architecture.md:47`.
 
 **Recommended fix:** Move the canonical "Pressure test summary" output format from `brainstorm-design/SKILL.md` into `design-pressure-testing.md` (it's pure content, belongs in references); the skill cites the reference instead. ~10 lines.
 
@@ -222,7 +222,7 @@ By artifact type:
 - **Skill body (`cohesively/SKILL.md`):** add a "Dispatch prompt contract" section per route [finding 2]; revise frontmatter triggers [finding 8].
 - **Skill body (4 persisting skills):** add "Step 0: Resolve artifact directory" citing `docs/substrate/designs/substrate-layout.md` [finding 3].
 - **Skill split:** extract `cohesive-diff-review` from `cohesive-review` per the `substrate-audit` precedent [finding 5]; OR document the deviation in `skill-conventions.md`.
-- **Reference move:** hoist the "Pressure test summary" output format from `brainstorm-design/SKILL.md` into `docs/substrate/designs/design-pressure-testing.md` [finding 6].
+- **Reference move:** hoist the "Pressure test summary" output format from `brainstorm-design/SKILL.md` into `references/design-pressure-testing.md` [finding 6].
 - **Reference (`substrate-layout.md`):** add the external-repo detection rules [finding 3].
 - **Reference (`skill-conventions.md`):** rephrase step-5 validator-coverage claim once the validator catches up [finding 10e]; one-line clarifications for findings 10a, 10c.
 - **Doc edit (`AGENTS.md`):** link the substrate-collapse delta ledger [finding 9].
@@ -247,7 +247,7 @@ After Phase 1, the verdict moves from *Cohesive but under-enforced* to *Mostly h
 ### Phase 2: Simplify structure (skill quality / composability)
 
 6. Extract `cohesive-diff-review` per the substrate-audit precedent, OR document the scope-modal deviation explicitly (finding 5).
-7. Hoist the "Pressure test summary" output format into `docs/substrate/designs/design-pressure-testing.md` (finding 6); close the acknowledged inverted-citation debt.
+7. Hoist the "Pressure test summary" output format into `references/design-pressure-testing.md` (finding 6); close the acknowledged inverted-citation debt.
 8. Tighten Cohesive's description triggers vs Superpowers (finding 8).
 
 ### Phase 3: Strengthen enforcement (turn convention into automation)

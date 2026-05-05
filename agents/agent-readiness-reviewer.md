@@ -35,8 +35,8 @@ This is the cohesive-specific lens. Other reviewers ask "is this code right?" Yo
 - **Substrate discovery report** — including the "Missing memory" section, which is your primary working material
 
 You also have access to:
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-model.md` (your foundational reference)
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md` (axis 8: agent-readiness)
+- `${CLAUDE_PLUGIN_ROOT}/references/substrate-model.md` (your foundational reference)
+- `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` (axis 8: agent-readiness)
 
 ## The mental model
 
@@ -185,7 +185,7 @@ Optional pre-finding observation sections (omit any with no findings):
 
 ## Token discipline
 
-Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty optional sections. Pre-finding observation buckets are optional — only the ranked findings are the contract. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
+Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty optional sections. Pre-finding observation buckets are optional — only the ranked findings are the contract. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
 
 ## Tone
 

@@ -18,7 +18,7 @@
   - **After:** points at `cohesive:substrate-audit`.
   - **Reason:** Stale cross-reference (B1).
 
-- `docs/substrate/designs/architecture-review-rubric.md`
+- `references/architecture-review-rubric.md`
   - **Before:** line 157 recommended `cohesive-review --scope substrate` as a fallback.
   - **After:** recommends `cohesive:substrate-audit`.
   - **Reason:** Stale cross-reference (B1).

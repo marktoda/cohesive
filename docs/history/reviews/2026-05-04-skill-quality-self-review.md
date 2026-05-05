@@ -4,7 +4,7 @@
 **Scope:** `--scope codebase`, whole repo (Cohesive itself)
 **Substrate discovery:** in-conversation, see Phase 1 below
 **Reviewers dispatched:** substrate-alignment, structure, library-native, agent-readiness (4-way parallel)
-**Methodology:** four-phase rubric per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/architecture-review-rubric.md`
+**Methodology:** four-phase rubric per `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`
 **Prior art triaged:** the four review artifacts under `docs/history/reviews/` from earlier today, especially `2026-05-04-self-review-v0.1-release-gate.md`
 
 ---
