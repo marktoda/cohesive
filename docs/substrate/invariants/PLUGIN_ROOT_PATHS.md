@@ -31,7 +31,7 @@ This is a real correctness contract. Unlike v0.1's other rules (output-shape, pr
 
 ## Enforcement
 
-`scripts/validate_plugin.sh` greps `skills/`, `agents/`, and `references/` for hardcoded path patterns (`/home/`, `/Users/`, `/usr/local/`, `~/`) outside fenced code blocks and explicit anti-pattern lines. A violation is a hard fail; the failure message names this invariant by name. The grep is check 13 in the validator.
+`scripts/validate_plugin.sh` greps `skills/`, `agents/`, and `references/` for hardcoded path patterns (`/home/`, `/Users/`, `/usr/local/`, `~/`) outside fenced code blocks and explicit anti-pattern lines. A violation is a hard fail; the failure message names this invariant by name. The grep is Check 14 in the validator.
 
 ### Convention pins enforced alongside this invariant (canonical list)
 
