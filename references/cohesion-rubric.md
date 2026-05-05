@@ -92,12 +92,35 @@ Does the architecture create the right change surface for the *next* ten changes
 
 ## Severity vocabulary for findings
 
-When `review-codebase` or `review-diff` returns issues, use:
+When `review-codebase`, `review-diff`, or `validate-rewrite` returns issues, use:
 
-- **Blocking** — would produce or has produced a real defect; substrate must be repaired before further work in this area
+- **Blocker** — would produce or has produced a real defect; substrate must be repaired before further work in this area
 - **High** — high-leverage substrate gap; not yet a defect, but a predictable source of future defects
 - **Medium** — substrate improvement worth making in the next pass
 - **Low** — taste-level observation; useful context but not actionable on its own
+
+This is the canonical severity vocabulary; reviewer agents (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions") and chat-rendered review outputs cite this list rather than restate it.
+
+## Disposition rule for validation-review findings
+
+When `validate-rewrite` returns a verdict, the recommendation that follows is determined by the verdict and the highest severity present among the findings. The rule below picks; the agent does not render a menu of options.
+
+| Verdict | Highest severity present | Recommendation | Re-validate after repair? |
+|---|---|---|---|
+| Approved | none | Route to the implementation decision matrix in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format" | N/A |
+| Approved | Low | Close inline (≤2 lines per finding) **or** substrate-note in the ledger §"Remaining ambiguity" with rationale and a stable ID | No |
+| Approved | Medium | Close in the same worktree before merge | No, unless the repair changes scope (new files, renamed concepts, added invariants) — then yes |
+| Approved | High | Repair in the same worktree, then re-run `validate-rewrite` | Yes |
+| Issues Found | Blocker | Repair the Blockers, then re-run `validate-rewrite` | Yes |
+| Design Incoherent | — | Return to `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` with the reviewer's report | N/A (no repair pass at this verdict) |
+
+**Why this is a rule, not a menu.** The "Three options" pattern (offering the reader a choice between fix-and-merge, substrate-note-and-merge, and pause) emerges when the agent treats the disposition as a judgment call. It violates `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule #5 ("Recommend exactly one next move") by forcing the reader to re-derive what to do. The rule above eliminates the menu surface: the verdict + highest severity determine the recommendation, deterministically.
+
+**Substrate-note disposition.** When the rule recommends substrate-noting (Approved + Low only, when the user prefers documenting over inline closure), the finding lands in the design delta ledger's §"Remaining ambiguity" section with a stable ID, rationale, and a citation to the validation review that surfaced it. See `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Remaining ambiguity" for the contract. A finding that disappears into the chat transcript without landing in the ledger is a substrate violation — the next reviewer can't see it, and the same gap surfaces again in a future pass.
+
+**User override.** The user can override the rule's recommendation ("just merge — I don't care about the Medium"). The override is a deliberate move against a published default, not a derivation from a menu. Overrides do not require ledger annotation; the next `validate-rewrite` pass will surface the finding again if it still applies.
+
+**Citations.** `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format", `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md` §"How to structure your output", and `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Recommended next Cohesive skill" all cite this section rather than restate the table — single canonical home prevents the same multi-surface drift that pre-`design/cohesion-review-cleanup` §"Delta at a glance" exhibited.
 
 ## How findings become substrate
 

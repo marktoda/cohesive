@@ -84,6 +84,14 @@ Look for "should," "probably," "we will," "TODO," "TBD" in normative sections of
 2. <next>
 3. ...
 
+## Recommended next Cohesive skill
+
+The recommendation is determined by the disposition rule in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which maps `(verdict, highest-severity-present)` to a single recommendation. The reviewer commits to one phrase; alternative options are not rendered.
+
+**Disposition:** <one phrase from the rubric table — e.g., `Merge as-is — no findings`, `Close inline (≤2 lines per finding) → merge`, `Substrate-note in ledger §"Remaining ambiguity" → merge`, `Repair → re-validate`, `Return to brainstorm-design`>
+
+**Implementation route:** [render iff verdict is `Approved` and disposition does not require re-validation; otherwise omit] — the dispatching `validate-rewrite` skill renders the implementation decision matrix from `skills/validate-rewrite/SKILL.md` §"Output format". When the disposition requires re-validation or is `Return to brainstorm-design`, omit the matrix entirely.
+
 ## What looked right
 
 Brief — the few highest-quality moves in this rewrite. Not flattery; calibration for the next reviewer.

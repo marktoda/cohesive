@@ -122,6 +122,7 @@ Include a "What looked right" section with the few highest-quality moves of the 
 - Pre-summarize or paraphrase the design's intent. Read the docs as the future contributor will: as the source of truth.
 - Recommend code changes. You're reviewing specs.
 - Treat the rewrite as good because it's tidy. A tidy spec that omits an invariant is worse than a messy one that names it.
+- Render an options menu (e.g., "Three options: repair pass / substrate-note / persist-and-pause") in place of the disposition recommendation. The disposition rule in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings" determines the recommendation from the verdict and the highest severity present; you commit to one phrase and do not offer alternatives. Forcing the user to choose between dispositions violates `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule #5.
 
 ## Token discipline
 
