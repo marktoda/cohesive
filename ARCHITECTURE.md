@@ -46,7 +46,7 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 - **Path discipline** — every internal reference uses `${CLAUDE_PLUGIN_ROOT}/...`. Enforced by [`PLUGIN_ROOT_PATHS`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md).
 - **Source-of-truth hierarchy** — this doc is binding for current architecture. The README §"What's in the box" is derived from this doc and from on-disk reality. The historical plan at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md) is preserved as the dated artifact that drove v0.1; not authoritative for current state.
 - **Default artifact dir for Cohesive run against external repos:** `docs/cohesive/<x>/` with detection of existing repo conventions (`docs/design/`, `docs/specs/`, `docs/adr/`, `docs/invariants/`, `docs/gotchas/`, `docs/substrate/`, `docs/history/`) — prefer existing if present.
-- **Local validation only.** `scripts/validate_plugin.sh` runs locally. CI is out of scope for v0.1.
+- **Validation enforcement.** `scripts/validate_plugin.sh` runs locally and in CI on push/PR via [`.github/workflows/validate.yml`](.github/workflows/validate.yml). A red check blocks merge — this is the structural fence that promotes the validator's checks (frontmatter shape, expected skill set, vocabulary tokens, fresh-eyes preamble, recommended-next footer, `PLUGIN_ROOT_PATHS`) from "convention-with-script" to "convention-with-CI-enforcement."
 
 ## Where to look first
 

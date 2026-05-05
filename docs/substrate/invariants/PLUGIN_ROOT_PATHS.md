@@ -35,7 +35,7 @@ This is a real correctness contract. Unlike v0.1's other rules (output-shape, pr
 
 The validator also runs the convention-layer greps that pin related rules: canonical prereq-detection question in subskill bodies, fresh-eyes preamble bullet in reviewer agent files, "Recommended next Cohesive skill" footer in every persisting skill body, and a negative-trigger check on skill descriptions. None of those rules are named invariants — they remain conventions. They are mentioned here only because they share the same enforcement surface.
 
-The validator runs locally. CI is out of scope for v0.1.
+The validator runs locally and in CI on push/PR via `.github/workflows/validate.yml`. A red check blocks merge.
 
 ## Known bypass risks
 
