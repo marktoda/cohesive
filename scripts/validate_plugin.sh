@@ -55,11 +55,13 @@ if [ -f .claude-plugin/marketplace.json ]; then
 fi
 
 # 3. Component dirs are at plugin root, not inside .claude-plugin/
+errors_before=$errors
 for d in skills agents hooks commands references scripts; do
   if [ -d ".claude-plugin/$d" ]; then
     fail "Component dir .claude-plugin/$d should be at plugin root, not inside .claude-plugin/"
   fi
 done
+[ "$errors" -eq "$errors_before" ] && ok "component dirs at plugin root (not nested under .claude-plugin/)"
 
 # 4. Every skill directory has a SKILL.md with valid frontmatter (delegated to Python helper).
 if [ -d skills ]; then
@@ -94,23 +96,31 @@ fi
 
 # 6. Referenced files exist (basic check: scan SKILL.md bodies for references/ and templates/ paths)
 if [ -d skills ]; then
+  warnings_before=$warnings
+  ref_count=0
   while IFS= read -r ref; do
+    ref_count=$((ref_count + 1))
     # Strip surrounding chars commonly used in markdown
     ref_clean=$(echo "$ref" | sed -E 's/[`\)\]"\.,;:]+$//')
     if [ ! -e "$ref_clean" ]; then
       warn "skill references missing path: $ref_clean"
     fi
   done < <(grep -rhoE '(references|templates)/[A-Za-z0-9_./-]+\.md' skills/ 2>/dev/null | sort -u || true)
+  [ "$warnings" -eq "$warnings_before" ] && ok "all $ref_count references/ + templates/ paths cited from skills/ exist"
 fi
 
 # 7. Scripts are executable
 if [ -d scripts ]; then
+  warnings_before=$warnings
+  script_count=0
   for script in scripts/*.sh scripts/*.py; do
     [ -e "$script" ] || continue
+    script_count=$((script_count + 1))
     if [ ! -x "$script" ]; then
       warn "$script is not executable (chmod +x)"
     fi
   done
+  [ "$warnings" -eq "$warnings_before" ] && ok "all $script_count scripts/ files are executable"
 fi
 
 # 8. v0.1 skill set: the 8 expected skills are present.
@@ -126,11 +136,13 @@ expected_skills=(
   review-diff
   audit-substrate
 )
+errors_before=$errors
 for s in "${expected_skills[@]}"; do
   if [ ! -f "skills/$s/SKILL.md" ]; then
     fail "expected skill missing: skills/$s/SKILL.md"
   fi
 done
+[ "$errors" -eq "$errors_before" ] && ok "v0.1 skill set complete (${#expected_skills[@]}/${#expected_skills[@]} present: ${expected_skills[*]})"
 
 # Helper: extract the (multi-line) description value from a SKILL.md frontmatter
 # block as a single space-joined string.
@@ -149,6 +161,7 @@ extract_description() {
 # Mitigates the discovery-vs-superpowers gotcha at the trigger-string level: the verb-only
 # names lose Cohesive brand identity in the name alone, so the description must carry it.
 substrate_tokens='substrate|cohesion|cohesive|invariant|gotcha|behavior matrix|spec|rewrite'
+errors_before=$errors
 for s in "${expected_skills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
@@ -157,6 +170,7 @@ for s in "${expected_skills[@]}"; do
     fail "skills/$s/SKILL.md description lacks any substrate-vocabulary token ($substrate_tokens)"
   fi
 done
+[ "$errors" -eq "$errors_before" ] && ok "all ${#expected_skills[@]} skill descriptions carry a substrate-vocabulary token"
 
 # 9b. Negative-trigger discipline. Cohesive skill descriptions must not use bare quoted
 # generic-review trigger phrases that overlap with Superpowers' code-reviewer surface.
@@ -168,6 +182,7 @@ generic_triggers=(
   '"is this codebase healthy"'
   '"review the code"'
 )
+errors_before=$errors
 for s in "${expected_skills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
@@ -178,6 +193,7 @@ for s in "${expected_skills[@]}"; do
     fi
   done
 done
+[ "$errors" -eq "$errors_before" ] && ok "no skill description uses bare generic-review trigger phrases"
 
 # 10. Canonical prereq-detection question in subskills with a discover-substrate or
 # brainstorm-design prereq. Per docs/substrate/designs/skill-conventions.md §"Canonical prereq-detection
@@ -189,6 +205,7 @@ prereq_subskills=(
   review-diff
   audit-substrate
 )
+errors_before=$errors
 for s in "${prereq_subskills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
@@ -196,17 +213,22 @@ for s in "${prereq_subskills[@]}"; do
     fail "skills/$s/SKILL.md missing canonical prereq-detection question (per docs/substrate/designs/skill-conventions.md §Canonical prereq-detection question)"
   fi
 done
+[ "$errors" -eq "$errors_before" ] && ok "all ${#prereq_subskills[@]} prereq-bearing subskills have the canonical prereq-detection question"
 
 # 11. Fresh-eyes preamble bullet verbatim across reviewer agent files.
 # Per docs/substrate/designs/reviewer-agent-template.md §"The fresh-eyes preamble".
 fresh_eyes_bullet='Inherit conversation context from the calling skill. Treat your input prompt as the entire context.'
 if [ -d agents ]; then
+  errors_before=$errors
+  agent_count=0
   for agent_md in agents/*.md; do
     [ -e "$agent_md" ] || continue
+    agent_count=$((agent_count + 1))
     if ! grep -qF "$fresh_eyes_bullet" "$agent_md"; then
       fail "$agent_md missing fresh-eyes preamble bullet (per docs/substrate/designs/reviewer-agent-template.md §The fresh-eyes preamble)"
     fi
   done
+  [ "$errors" -eq "$errors_before" ] && ok "all $agent_count reviewer agents carry the fresh-eyes preamble bullet verbatim"
 fi
 
 # 12. "Recommended next Cohesive skill" footer in every persisting skill body.
@@ -221,6 +243,7 @@ persisting_skills=(
   review-diff
   audit-substrate
 )
+errors_before=$errors
 for s in "${persisting_skills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
@@ -228,6 +251,7 @@ for s in "${persisting_skills[@]}"; do
     fail "skills/$s/SKILL.md missing '### Recommended next Cohesive skill' footer (per docs/substrate/designs/skill-conventions.md §Recommended-next-skill footer)"
   fi
 done
+[ "$errors" -eq "$errors_before" ] && ok "all ${#persisting_skills[@]} persisting skills have the 'Recommended next Cohesive skill' footer"
 
 # 13a. VERDICT_BEFORE_EVIDENCE: verdict-led skills' Output format block opens with **Verdict:**
 # within the first 3 non-blank lines after the outermost # title in a code block.
@@ -238,6 +262,7 @@ verdict_led_skills=(
   validate-rewrite
   audit-substrate
 )
+errors_before=$errors
 for s in "${verdict_led_skills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
@@ -259,6 +284,7 @@ for s in "${verdict_led_skills[@]}"; do
     fail "$skill_md violates VERDICT_BEFORE_EVIDENCE: Output format code block must lead with '# <title>' then **Verdict:** within first 3 non-blank lines (per docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md)"
   fi
 done
+[ "$errors" -eq "$errors_before" ] && ok "VERDICT_BEFORE_EVIDENCE: all ${#verdict_led_skills[@]} verdict-led skills lead Output format with **Verdict:**"
 
 # 13b. Voice-citation grep: every skills/*/SKILL.md Output format block has the literal
 # voice citation within the first 3 non-blank lines after the outermost # title in a code
@@ -275,6 +301,7 @@ voice_citation_skills=(
   review-diff
   audit-substrate
 )
+errors_before=$errors
 for s in "${voice_citation_skills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
@@ -294,12 +321,16 @@ for s in "${voice_citation_skills[@]}"; do
     fail "$skill_md missing voice citation in Output format code block (per references/output-voice.md and docs/substrate/gotchas/style-guide-rot.md). Open the canonical code block with '# <title>' then '> Voice and density: \${CLAUDE_PLUGIN_ROOT}/references/output-voice.md' within first 3 non-blank lines."
   fi
 done
+[ "$errors" -eq "$errors_before" ] && ok "all ${#voice_citation_skills[@]} skill Output format blocks carry the voice-citation pin"
 
 # 13c. Voice-citation grep for reviewer agents: every agents/*.md has the literal voice
 # citation in its first code block.
 if [ -d agents ]; then
+  errors_before=$errors
+  agent_voice_count=0
   for agent_md in agents/*.md; do
     [ -e "$agent_md" ] || continue
+    agent_voice_count=$((agent_voice_count + 1))
     if awk '
       /^```/ { in_block = !in_block; if (in_block && !seen_first_block) { count=0; in_first_block=1; seen_first_block=1 } else if (!in_block) { in_first_block=0 }; next }
       in_block && in_first_block {
@@ -315,6 +346,7 @@ if [ -d agents ]; then
       fail "$agent_md missing voice citation in first code block (per references/output-voice.md). Open the canonical code block with '> Voice and density: \${CLAUDE_PLUGIN_ROOT}/references/output-voice.md' within first 3 non-blank lines."
     fi
   done
+  [ "$errors" -eq "$errors_before" ] && ok "all $agent_voice_count reviewer-agent first code blocks carry the voice-citation pin"
 fi
 
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
@@ -330,6 +362,8 @@ if [ -n "$violations" ]; then
   echo "$violations" | while IFS= read -r line; do
     fail "PLUGIN_ROOT_PATHS violation: $line"
   done
+else
+  ok "PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/"
 fi
 
 echo ""
