@@ -21,17 +21,21 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **An Approved validate-rewrite verdict is required.** Don't try to detect prior validation from session memory — per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, that detection silently degrades. The skill recognizes three structured input cases that supply the inputs without asking; otherwise, ask the canonical forced-choice question.
+1. **An Approved validate-rewrite verdict is required, declared as paths.** This skill's prereq is a file path, not session state — the canonical clarifying question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md` does not apply. Required inputs (validation review path + design delta ledger path + branch name) are declared in §"Step 0. Resolve inputs and confirm prereqs"; the dispatching context (the `cohesively` router, a prior `validate-rewrite` Approved render the user is acting on, or direct user invocation) supplies them explicitly.
 
-   **Recognized inputs (skip the question):**
+   **If any required input is missing,** stop with a directive error per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Path prereqs use directive errors, not the canonical question". The directive names the missing input and the upstream skill that produces it:
 
-   - **Router dispatch.** When the dispatching skill is the `cohesively` router (route `implement`), the router passes the validation review path and the design delta ledger path explicitly in its dispatch prompt per the contract in `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md` §"Dispatch prompt contract".
-   - **`validate-rewrite` Approved structured handoff.** When the prior turn's `validate-rewrite` output (or a cited persisted review under `docs/history/reviews/`) carries the canonical phrase `**Verdict:** Approved` *and* renders the implementation decision matrix that names `cohesive:implement-cohesively` per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format" (including the case where the matrix names `cohesive:implement-cohesively` as the recommended default), that artifact is the structured handoff. Both required inputs are carried by the artifact: the validation review path is the prior turn's output (or the cited file under `docs/history/reviews/`); the design delta ledger path is the path quoted in the review's `## Delta at a glance` section per the consumer rendering rules in `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md`. Read both before deriving phases. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)", `Approved` is the only verdict that unlocks this route — `Issues Found` and `Design Incoherent` route back to `rewrite-specs` or `brainstorm-design`, not here.
-   - **Direct user-named inputs.** The user names both the validation review path and the design delta ledger path inline in the invocation prompt ("implement the rewrite; ledger at `<path>`, validation review at `<path>`").
+   ```
+   Missing validation review for slug `<slug>`. Run cohesive:validate-rewrite first;
+   expected output at docs/history/reviews/<date>-<slug>-rewrite-validation.md.
+   ```
 
-   **If none of the above apply,** open the turn with the canonical forced-choice question:
+   ```
+   Missing design delta ledger for slug `<slug>`. Run cohesive:rewrite-specs first;
+   expected output at docs/history/delta-ledgers/<date>-<slug>.md.
+   ```
 
-   > "I see we're about to run implement-cohesively. Has validate-rewrite returned **Approved** for a spec rewrite (from a prior `validate-rewrite` turn, a cited persisted review, or named by you), or should I run the design route first?"
+   Do not ask the canonical forced-choice question and do not invent paths. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)", `Approved` is the only verdict that unlocks this route — verify the supplied review's verdict line is `**Verdict:** Approved` before proceeding; on any other verdict, refuse with a pointer to the appropriate upstream skill. The per-handoff input contract is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite → implement-cohesively (Approved branch)".
 
 2. **Compose with Superpowers; do not reinvent its execution discipline.** This skill invokes `superpowers:writing-plans` once per phase to author the plan and `superpowers:executing-plans` once per phase to execute it. The skill never authors a TDD-shaped plan directly and never writes code itself. If Superpowers is not installed, the skill stops with a hard error and recommends installation — the inline 5-line worktree fallback in `rewrite-specs` does not apply here, because plan-writing and TDD execution are not 5-line operations.
 3. **Per-phase cross-review is mandatory.** Every phase ends with a `delta-coverage-reviewer` dispatch (Task subprocess, paths-only inputs, fresh eyes). No phase advances without a Covered verdict. A Drift or Incomplete verdict gates the next phase until repaired.

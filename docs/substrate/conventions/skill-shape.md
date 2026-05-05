@@ -188,6 +188,19 @@ or should I run [prereq-skill] first?"
 
 This is a compliant forced-choice question (two specific options) and counts toward the at-most-one budget. The user answers in one or two words ("yes" / "run it"); the subskill proceeds with explicit knowledge. Subskills using this pattern as of v0.1: `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`. When the `cohesively` router invokes any of these, the router passes the prereq state explicitly in the dispatch prompt per the "Dispatch prompt contract" in `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md`, and the subskill skips the question.
 
+### Path prereqs use directive errors, not the canonical question
+
+The canonical question above applies only when the prereq is **substrate discovery in the current conversation** — there is no canonical artifact to point at, so the correct fallback is to ask. When a skill's prereq is a **file path** (an Approved validation review for `implement-cohesively`; a delta ledger for `validate-rewrite`), the skill declares the input explicitly in its body (typically in a `## Process` Step 0 or a dedicated `## Inputs` section) and produces a **directive error** when the input is missing. The directive error names the missing input and the upstream skill that produces it:
+
+```
+Missing validation review for slug `<slug>`. Run `cohesive:validate-rewrite` first;
+expected output at `docs/history/reviews/<date>-<slug>-rewrite-validation.md`.
+```
+
+This shape is correct because (a) the prereq is materially a file, not a session-memory claim, so a directive is actionable in one read; (b) the upstream skill is unambiguous (validate-rewrite produces the validation review; rewrite-specs produces the delta ledger), so naming it in the error is more useful than asking the user to choose; (c) the failure mode the canonical-question convention closes (silent degradation from session-memory introspection) does not arise, because the skill is checking whether a path was passed, not whether a discussion happened.
+
+Skills using this pattern as of v0.1: `validate-rewrite` (delta ledger path), `implement-cohesively` (validation review path + delta ledger path). The per-handoff input contract for each is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md`.
+
 Most skills have a pre-canned clarifying question per route or per ambiguity class. Document these in the skill body so reviewers can verify.
 
 ## Router conventions

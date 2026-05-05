@@ -132,23 +132,25 @@ Inherited sections may surface lens-2 (design-implementation agreement) and lens
 
 ### validate-rewrite
 
-**Purpose.** Fresh-eyes review of the rewrite produced by `rewrite-specs`. Judges whether the rewritten specs and delta ledger describe a coherent, behaviorally complete, enforceable system that aligns with the codebase's stated future direction.
+**Purpose.** Fresh-eyes review of the rewrite produced by `rewrite-specs`. Judges whether the rewritten specs and delta ledger describe a coherent, behaviorally complete, enforceable system that aligns with the codebase's stated future direction. On `Issues Found`, drives an internal repair loop with `rewrite-specs` until verdict converges (Approved), exits to design (Design Incoherent), or stalls at `MAX_REPAIR_PASSES`.
 
 **Owns.**
-- Dispatching `spec-cohesion-reviewer` in a Task subprocess with no inherited context.
+- Dispatching `spec-cohesion-reviewer` in a Task subprocess with no inherited context — once per pass, fresh eyes preserved across passes.
 - Returning one of three verdicts: **Approved**, **Issues Found**, **Design Incoherent**.
-- Rendering the per-verdict decision matrix (Approved → implementation options; Issues Found → remediation paths; Design Incoherent → re-brainstorm).
+- The internal repair loop: on Issues Found, dispatching `rewrite-specs` in repair mode via the Skill tool, persisting the per-pass review, and re-dispatching the reviewer for the next pass — up to `MAX_REPAIR_PASSES` (default 5).
+- Rendering the per-verdict decision matrix on terminal verdicts (Approved → implementation options; Design Incoherent → re-brainstorm; max-passes stall → user direction).
 
 **Does not own.**
 - Re-reading the brainstorm output. The reviewer reads only the rewritten specs and the delta ledger.
-- Proposing fixes. The reviewer surfaces issues; remediation is `rewrite-specs` again.
+- Proposing fixes. The reviewer surfaces issues; the loop's dispatched `rewrite-specs` produces the repairs.
 - Implementation. Approved gates `implement-cohesively`; the verdict does not itself produce code.
+- Loop-internal user prompts. The user does not invoke `rewrite-specs` themselves during the loop except after a max-passes stall or a Design Incoherent exit.
 
-**Inputs.** Design delta ledger path + rewritten spec paths.
+**Inputs.** Design delta ledger path + rewritten spec paths. Optional: `--max-passes=N` to override the default ceiling.
 
-**Outputs.** Validation review at `docs/history/reviews/<date>-<slug>-rewrite-validation.md` carrying one of {Approved, Issues Found, Design Incoherent}.
+**Outputs.** Per-pass validation reviews at `docs/history/reviews/<date>-<slug>-rewrite-validation[-pass-N].md`; the terminal-pass review is the one consumed by `implement-cohesively` (Approved) or surfaced for user direction (Design Incoherent / max-passes stall). Verdict vocabulary: {Approved, Issues Found, Design Incoherent}; "Issues Found" only escapes the loop on max-passes stall.
 
-**Why this shape.** Fresh-eyes is structurally load-bearing — collapsing review into the rewriting skill defeats the property. The three-verdict vocabulary maps to three downstream actions: Approved → implement; Issues Found → re-rewrite; Design Incoherent → re-brainstorm. Fewer verdicts would conflate "fix this" with "rethink the design"; more would produce verdict ceremony without distinct downstream paths.
+**Why this shape.** Fresh-eyes is structurally load-bearing — collapsing review into the rewriting skill defeats the property. The three-verdict vocabulary maps to three downstream actions: Approved → implement; Issues Found → re-rewrite (handled internally by the loop); Design Incoherent → re-brainstorm (user-driven, because design-shape problems aren't loop-repairable). The internal loop reflects how the skill is actually used in practice (Issues Found → repair → re-validate iterated manually until convergence); automating it removes ceremony without changing the workflow shape, and the `MAX_REPAIR_PASSES` ceiling prevents wack-a-mole on structurally unsolvable designs.
 
 ### implement-cohesively
 

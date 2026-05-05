@@ -19,17 +19,17 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **An approved direction is required.** Don't try to detect prior brainstorm output from session memory — per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, that detection silently degrades. The skill recognizes three structured input cases that supply a direction without asking; otherwise, ask the canonical forced-choice question.
+1. **An approved direction is required.** Don't try to detect prior brainstorm output from session memory — per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, that detection silently degrades. The skill takes a chosen direction explicitly from its dispatcher; if none was passed, ask.
 
-   **Recognized inputs (skip the question):**
+   **Explicit dispatch (skip the question).** Whenever this skill is invoked from another Cohesive skill via the Skill tool, the dispatch prompt names the chosen direction. Three dispatch shapes apply:
 
-   - **Router dispatch.** When the dispatching skill is the `cohesively` router, the router passes the chosen direction explicitly in its dispatch prompt per the contract in `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md` §"Dispatch prompt contract".
-   - **`validate-rewrite` repair-pass handoff.** When the prior turn's `validate-rewrite` output (or a cited persisted review under `docs/history/reviews/`) carries one of the canonical disposition phrases — `Repair → re-validate` (Issues Found) or `Close in same worktree → merge` (Approved + Medium) — *and* an enumerated `## Recommended repairs (ranked)` list, that artifact is the chosen direction. The "approved direction" for the rewrite is the *repair scope*: each finding's title, severity, location, and suggested repair. Read the review path before rewriting; treat the enumerated repair list as the rewrite's input. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", those are the only two dispositions that route back to `rewrite-specs` — Approved + Low closes inline, Approved + none merges, Design Incoherent routes to `brainstorm-design`.
-   - **Direct user-named direction.** The user names a direction inline in the invocation prompt ("rewrite specs for X; the chosen direction is Y").
+   - **Router dispatch from `cohesively`** — the router passes the brainstorm-approved direction per `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md` §"Dispatch prompt contract".
+   - **Repair-loop dispatch from `validate-rewrite`** — the dispatch prompt names a per-pass validation review path under `docs/history/reviews/` and instructs repair-mode operation. The "approved direction" is the *repair scope* per the loop contract in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)"; treat each ranked repair in the cited review as the rewrite's input. Process Step 1b governs repair-mode mechanics.
+   - **Direct user invocation with inline direction** — the user names a direction in the invocation prompt ("rewrite specs for X; the chosen direction is Y").
 
-   **If none of the above apply,** open the turn with the canonical forced-choice question:
+   **If no direction is passed,** open the turn with the canonical forced-choice question:
 
-   > "I see we're about to run rewrite-specs. Has a direction been chosen (from a prior `brainstorm-design`, an architecture review, a `validate-rewrite` repair pass, or named by you), or should I run `brainstorm-design` first to produce one?"
+   > "I see we're about to run rewrite-specs. Has a direction been chosen (from a prior `brainstorm-design`, an architecture review, or named by you), or should I run `brainstorm-design` first to produce one?"
 
 2. **Work in a worktree.** Spec rewrites can be invasive. Isolation lets the user review the rewrite as a coherent diff and discard if needed. See "Worktree handling" below.
 3. **No code changes.** Specs and docs only. If a doc claims behavior the implementation doesn't yet have, that's expected — implementation follows in a separate phase.
