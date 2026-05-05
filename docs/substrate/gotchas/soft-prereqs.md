@@ -46,6 +46,14 @@ Implementation outline (for the V1 enforcement pass):
 2. Update `skills/cohesively/SKILL.md` route definitions to pass an explicit "discovery already complete; report at <path>" instruction when the router has run discovery itself, codified in the "Dispatch prompt contract" section. (Done in v0.1.)
 3. Document the question form in `docs/substrate/designs/skill-conventions.md` under "Clarifying questions." (Done in v0.1.)
 
+## Structured-artifact handoff is not this failure mode
+
+A `validate-rewrite` output with a canonical disposition phrase (`Repair → re-validate` or `Close in same worktree → merge`) plus an enumerated `## Recommended repairs (ranked)` list IS a structured chosen-direction handoff — structurally equivalent to the router-passed direction case in the "Correct pattern" section above. The artifact carries the direction explicitly, the same way the router's dispatch prompt does.
+
+The detection rule for the repair-pass case is concrete and deterministic: the prior turn's tool output (or a cited persisted review file under `docs/history/reviews/`) literally contains the canonical phrase string and the ranked repair list. That's not "do I remember a direction earlier in this conversation?" — that's "is the named artifact present in the explicit input?" Don't conflate them.
+
+The implementation belongs in the consuming skill body (e.g., `rewrite-specs` Hard constraint #1, which enumerates the recognized structured inputs alongside the canonical question). This gotcha names the failure mode and the correct-pattern surface; it does not enumerate every legitimate structured-input shape — those live in each subskill's Hard constraint #1.
+
 ## Related conventions
 
 - **Clarifying-question convention** ([`docs/substrate/designs/skill-conventions.md`](../designs/skill-conventions.md) §"Clarifying questions") — the prereq detection question must be a forced choice, not a vague open prompt.
@@ -55,6 +63,7 @@ Implementation outline (for the V1 enforcement pass):
 
 - Manual scenario test (planned): invoke `cohesive:brainstorm-design` directly with no prior discovery; verify the subskill asks the canonical question.
 - Manual scenario test (planned): invoke `cohesive:rewrite-specs` directly with a chosen direction but no discovery; verify same.
+- Manual scenario test (planned): invoke `cohesive:rewrite-specs` directly when the prior turn is a `validate-rewrite` output with `Repair → re-validate` disposition + ranked repairs; verify the subskill picks up the repair list as the direction without asking the canonical question.
 - Lint check (V1): grep each subskill body for the canonical question text near the start of "Process."
 
 If this checks list is empty, the gotcha is enforced by reviewer memory only. The first concrete test should land in the next release pass.

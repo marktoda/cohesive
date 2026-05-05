@@ -19,11 +19,17 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **An approved direction is required.** Don't try to detect prior brainstorm output from session memory — per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, that detection silently degrades. Instead, open the turn with the canonical forced-choice question:
+1. **An approved direction is required.** Don't try to detect prior brainstorm output from session memory — per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, that detection silently degrades. The skill recognizes three structured input cases that supply a direction without asking; otherwise, ask the canonical forced-choice question.
 
-   > "I see we're about to run rewrite-specs. Has a direction been chosen (from a prior `brainstorm-design`, an architecture review, or named by you), or should I run `brainstorm-design` first to produce one?"
+   **Recognized inputs (skip the question):**
 
-   When the dispatching skill is the `cohesively` router, the router passes the chosen direction explicitly in its dispatch prompt, so this skill can skip the question.
+   - **Router dispatch.** When the dispatching skill is the `cohesively` router, the router passes the chosen direction explicitly in its dispatch prompt per the contract in `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md` §"Dispatch prompt contract".
+   - **`validate-rewrite` repair-pass handoff.** When the prior turn's `validate-rewrite` output (or a cited persisted review under `docs/history/reviews/`) carries one of the canonical disposition phrases — `Repair → re-validate` (Issues Found) or `Close in same worktree → merge` (Approved + Medium) — *and* an enumerated `## Recommended repairs (ranked)` list, that artifact is the chosen direction. The "approved direction" for the rewrite is the *repair scope*: each finding's title, severity, location, and suggested repair. Read the review path before rewriting; treat the enumerated repair list as the rewrite's input. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", those are the only two dispositions that route back to `rewrite-specs` — Approved + Low closes inline, Approved + none merges, Design Incoherent routes to `brainstorm-design`.
+   - **Direct user-named direction.** The user names a direction inline in the invocation prompt ("rewrite specs for X; the chosen direction is Y").
+
+   **If none of the above apply,** open the turn with the canonical forced-choice question:
+
+   > "I see we're about to run rewrite-specs. Has a direction been chosen (from a prior `brainstorm-design`, an architecture review, a `validate-rewrite` repair pass, or named by you), or should I run `brainstorm-design` first to produce one?"
 
 2. **Work in a worktree.** Spec rewrites can be invasive. Isolation lets the user review the rewrite as a coherent diff and discard if needed. See "Worktree handling" below.
 3. **No code changes.** Specs and docs only. If a doc claims behavior the implementation doesn't yet have, that's expected — implementation follows in a separate phase.
@@ -69,6 +75,10 @@ Inputs:
 - The recommended direction from `brainstorm-design` (option name, summary, main risk, structural mitigation)
 - The substrate discovery from `discover-substrate` (existing specs/matrices/invariants and what was missing)
 - Pressure-test answers (which docs change, which concepts get renamed, which invariants are added)
+
+### 1a. Repair-pass mode (if the input is a validate-rewrite review)
+
+When the input is a `validate-rewrite` review with a `Repair → re-validate` or `Close in same worktree → merge` disposition, "the recommended direction" is the enumerated repair list, not a brainstorm option. Skip Step 2's full doc-surface scan — the surface is already fixed by the review's findings. Each ranked repair already names a specific artifact (file:line, named invariant, gotcha, matrix); rewrite those surfaces to address the finding. The design delta ledger §"Per-file changes" entries cite the originating review finding by ID (e.g., `Closes B1`, `Closes I2`), and the §"Delta at a glance" preamble names the source review path so the next `validate-rewrite` reader sees this as a repair pass rather than a fresh rewrite.
 
 ### 2. Identify the doc surface to rewrite
 
