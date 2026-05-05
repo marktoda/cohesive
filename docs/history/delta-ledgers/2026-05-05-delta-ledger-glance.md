@@ -97,13 +97,25 @@ None.
 
 ## Remaining ambiguity
 
-- The cutoff date in `validate_plugin.sh` (`2026-05-05`) is encoded as a shell variable. If the convention's wording or shape changes in a future rewrite that historical post-cutoff ledgers cannot satisfy, the cutoff would need to advance, leaving a window of ledgers grandfathered by the new cutoff. This pattern (cutoff-date constants in validators) has not been used elsewhere in `validate_plugin.sh` and may need a broader convention if more cutoff-scoped checks are added.
+- The cutoff date in `validate_plugin.sh` (`2026-05-05`) is encoded as a shell variable. If the convention's wording or shape changes in a future rewrite that historical post-cutoff ledgers cannot satisfy, the cutoff would need to advance, leaving a window of ledgers grandfathered by the new cutoff. This pattern (cutoff-date constants in validators) has not been used elsewhere in `validate_plugin.sh` and may need a broader convention if more cutoff-scoped checks are added. Pass-1 review I3 surfaced this same gap and the convention was deliberately deferred — `docs/substrate/designs/skill-conventions.md` §"Cutoff-date checks" is the natural future home if a second cutoff-scoped check arrives.
 - The 8–15-line density target in the design-delta-ledger.md template is a guideline, not a validator-enforced count. A future tightening could promote it to a structural check (line-counting AWK in check 13h), but the brainstorm did not propose this and it would interact with the multi-line bullet possibility in the Conceptual changes / Behavior matrices categories.
 - The "What this rewrite did not do" section of the ledger is currently the only place "deferred" items are typically recorded; the new preamble's `Deferred` bullet introduces a second surface for the same information. Future ledgers may need explicit guidance on whether `Deferred` in the preamble should match `What this rewrite did not do` exactly, or whether they serve different scopes.
+- Pass-1 review I2: reviewer-side per-review consistency check (item 11 in `agents/spec-cohesion-reviewer.md`) lacks a captured worked-example transcript showing what counts as "divergence" between preamble and body. Two reviewer instances may calibrate "divergence" differently. Deferred to a future captured-not-authored transcript under `docs/history/transcripts/` once a real divergence is encountered in a session — authoring a hypothetical worked example up-front would risk modeling a divergence that doesn't reflect real failure modes.
+
+## Repair pass 1
+
+Triggered by the pass-1 validate-rewrite review (Approved verdict with three Important issues; persisted at `docs/history/reviews/2026-05-05-delta-ledger-glance-rewrite-validation.md`). Repair scope:
+
+- **I1 (Spec drift, Medium) — addressed.** The 8-category list previously appeared in four surfaces (template, rewrite-specs SKILL Acceptance, agent's "What you check" item 11, validate-rewrite Output format prose). The template at `references/templates/design-delta-ledger.md` §"Delta at a glance" is now the canonical home; the other three surfaces cite it by reference rather than re-enumerate. A future rewrite that adds or renames a category updates the template; the three citing surfaces stay correct without modification.
+- **Locality concern — addressed.** The agent's "Inputs you will receive" section now lists `references/templates/design-delta-ledger.md` alongside the four existing references, with a note pointing to "What you check" item 11. The dependency from "agent reads the rubric" to "agent reads the rubric AND the ledger template" is now declared in the inputs list.
+- **I2 (Enforcement, Medium) — deferred.** Substrate-noted in §"Remaining ambiguity" above. Authoring a hypothetical worked-example transcript up-front would risk modeling a divergence that doesn't reflect real failure modes; promotion happens when a real divergence is encountered.
+- **I3 (Future-fit, Low) — deferred.** Substrate-noted in §"Remaining ambiguity" above. The §"Cutoff-date checks" convention can be authored if and when a second cutoff-scoped check arrives in `validate_plugin.sh`; a one-off pattern doesn't yet warrant a substrate page.
+
+Files modified in repair pass 1: `skills/rewrite-specs/SKILL.md` (Acceptance bullet now cites the canonical category list); `agents/spec-cohesion-reviewer.md` (item 11 now cites the canonical category list; "Inputs you will receive" now lists the ledger template); `skills/validate-rewrite/SKILL.md` (Output format render-template prose now cites the canonical category list rather than enumerate). No body sections of this ledger required updates — file counts in §"Delta at a glance" are unchanged because repair pass 1 did not add, remove, or rename files; it tightened citations within the same files already enumerated under §"Files rewritten".
 
 ## Ready for fresh-eyes review?
 
-**Yes** — the rewrite is internally consistent, the new convention has both a presence fence (validator grep) and an accuracy fence (per-review reviewer consistency check), and the preamble in this very ledger is the worked example future authors can copy.
+**Yes** — repair pass 1 closed both pass-1 actionable findings (I1 + locality concern); I2 and I3 are deferred with substrate notes in §"Remaining ambiguity". The rewrite is internally consistent and the preamble in this very ledger remains the worked example future authors can copy.
 
 ## How to read this ledger
 

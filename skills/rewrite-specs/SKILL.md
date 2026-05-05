@@ -183,7 +183,7 @@ The skill's chat output (separate from the file changes) is short:
 - All affected docs are in end-state language; no "we will" / "should consider" in normative sections.
 - Obsolete concepts are removed, not annotated.
 - A design delta ledger exists at the canonical path.
-- The ledger's `## Delta at a glance` preamble is filled in (count-or-name list across Files / Conceptual changes / Named invariants / Behavior matrices / Gotchas / Semantic linters / Tests proposed / Deferred), accurately summarizes the body, and renders 8–15 lines of itemized content.
+- The ledger's `## Delta at a glance` preamble is filled in per the canonical category list and density target in `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Delta at a glance", and accurately summarizes the body.
 - Substrate map (if it exists) is updated.
 - The rewrite happens on a `design/<slug>` branch in a worktree.
 - A commit captures the rewrite atomically.
