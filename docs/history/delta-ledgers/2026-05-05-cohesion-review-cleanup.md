@@ -89,13 +89,22 @@ None.
 
 ## Remaining ambiguity
 
-- The annotation approach for "Delta at a glance" disambiguation (contract vs. slot) relies on a future contributor reading both annotated documents. If a contributor only reads cohesion-review.md (the render slot) without following the cite to design-delta-ledger.md (the canonical contract), the contract-vs-slot distinction may not register. A future tightening could rename one heading; this rewrite chose the lower-cost annotation route. The blur is reduced, not eliminated.
+- The annotation approach for "Delta at a glance" disambiguation (contract vs. slot) relies on a future contributor reading both annotated documents. If a contributor only reads cohesion-review.md (the render slot) without following the cite to design-delta-ledger.md (the canonical contract), the contract-vs-slot distinction may not register. A future tightening could rename one heading; this rewrite chose the lower-cost annotation route. Pass-1 review I1 narrowed this further by mirroring the bolded **canonical contract** term symmetrically across both surfaces, but the underlying need to read both pages persists. The blur is reduced, not eliminated.
 - The malformed-filename warn in check 13h is warn-level, not fail-level. A malformed-named ledger passes the validator with one warning per offender; merge is not blocked. If a malformed filename is observed in practice, future tightening could promote to fail-level once `substrate-layout.md` §Naming has a dedicated filename-validation check.
 - The IMPLEMENTATION_PLAN_COVERS_DELTA cross-reference in `design-delta-ledger.md` §"Authoring rules" is a one-line note. It surfaces the coupling but does not enforce it — a future rename of a preamble category that fails to update Phase 1's coverage shape produces silent drift between the two surfaces. The note is the convention; structural enforcement (a check that compares the category list to Phase 1's documented shape) is deferred until a real rename happens and exposes the pattern.
 
+## Repair pass 1
+
+Triggered by the pass-1 validate-rewrite review (Approved verdict with two Low Important issues; persisted at `docs/history/reviews/2026-05-05-cohesion-review-cleanup-rewrite-validation.md`). Both findings were new from this rewrite (not pre-existing) and had ~1-line fixes. Repair scope:
+
+- **Pass-1 I1 (Spec drift, Low) — addressed.** The render-slot label asymmetry between `references/templates/cohesion-review.md` §"Delta at a glance" and `references/templates/design-delta-ledger.md` §"Delta at a glance" is closed by mirroring the bolded **canonical contract** term symmetrically. The slot side now uses the same bolded form the contract side uses, with a one-clause note observing the mirroring so the relationship reads from either entry point. The underlying annotation-vs-rename trade-off is still substrate-noted in §"Remaining ambiguity" above.
+- **Pass-1 I2 (Enforcement, Low) — addressed.** Pin 8 in `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` now names the warn-level malformed-filename signal as an adjacent (not load-bearing) surface, citing `substrate-layout.md` §Naming as the source-of-truth and naming the promotion path (warn → fail when a dedicated filename-validation check ships under `substrate-layout.md` §Naming enforcement). The two-fence model (presence + accuracy) framing is preserved; the malformed-filename signal is described as adjacent rather than a third fence.
+
+Files modified in repair pass 1: `references/templates/cohesion-review.md` (one-line mirror addition); `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` (pin 8 expanded to name warn-level signal). No body sections of this ledger required updates beyond the §"Remaining ambiguity" annotation noting the I1 narrowing — file counts in §"Delta at a glance" are unchanged because repair pass 1 did not add, remove, or rename files.
+
 ## Ready for fresh-eyes review?
 
-**Yes** — the rewrite is internally consistent, four findings from the post-merge `review-diff` are closed structurally, one finding (Finding 2's heading reuse) is closed by annotation rather than rename, and the remaining-ambiguity entries are scoped with promotion targets named.
+**Yes** — repair pass 1 closed both pass-1 Important findings (I1 + I2). Five `review-diff` findings closed structurally; one (heading rename) closed by annotation; remaining ambiguities scoped with promotion targets and tightened by pass-1 I1.
 
 ## How to read this ledger
 

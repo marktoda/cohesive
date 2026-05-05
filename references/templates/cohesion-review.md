@@ -12,7 +12,7 @@ One paragraph. Could a future contributor — human or agent — read these rewr
 
 ## Delta at a glance
 
-This section is a **render slot** in the validation review document, not the canonical contract for the preamble. Quote the ledger's `## Delta at a glance` section verbatim here. The canonical contract — category list, authoring rules, and consumer rendering rules (missing-preamble handling and divergence-from-body handling) — lives at `references/templates/design-delta-ledger.md` §"Delta at a glance".
+This section is a **render slot** in the validation review document, not the canonical contract for the preamble. Quote the ledger's `## Delta at a glance` section verbatim here. The **canonical contract** — category list, authoring rules, and consumer rendering rules (missing-preamble handling and divergence-from-body handling) — lives at `references/templates/design-delta-ledger.md` §"Delta at a glance"; that section names itself as canonical-contract using the same bolded term, so the contract/slot relationship is symmetric whichever document a reader opens first.
 
 ## Blocking issues
 
