@@ -8,7 +8,7 @@ This ledger records a substrate change to close the **Three options** failure mo
 
 ## Delta at a glance
 
-- **Files:** 6 rewritten, 0 added, 0 removed/deprecated (file counts unchanged across repair pass 1; only intra-file content tightened)
+- **Files:** 6 rewritten, 0 added, 0 removed/deprecated (file counts unchanged across all repair passes; only intra-file content tightened)
 - **Conceptual changes:** disposition rule promoted to canonical home of validation-review-finding recommendation; "Three options" menu pattern explicitly forbidden; verdict-floor mapping pinned (`Approved` ⇔ highest-severity ≤ Medium; `Issues Found` ⇔ highest-severity ≥ High); `Approved + Low` row made deterministic with substrate-note as user override; severity vocabulary aligned (`Blocking` → `Blocker` in rubric, matching reviewer-agent template); cohesion-review template section headers (`Blocking issues` / `Important issues`) glossed against severity vocabulary
 - **Named invariants:** none added (disposition rule lives as convention in cohesion-rubric.md; promotion criteria deferred — see Remaining ambiguity)
 - **Behavior matrices:** disposition table embedded in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings" (5-row mapping of `(verdict, highest-severity)` → `(recommendation, re-validate?)`, total over the verdict-floor mapping); not a standalone matrix file
@@ -129,9 +129,16 @@ Pass-3 validation review at `docs/history/reviews/2026-05-05-disposition-rule-re
 
 The "incomplete propagation across citing surfaces" pattern has now appeared and been caught in three consecutive passes (pass 1 set up the surfaces; pass 2 caught template drift; pass 3 caught skill-conventions drift). The pass-3 §"Substrate gaps" entry substrate-notes this as a candidate for a future semantic linter ("disposition rule citation surfaces" grep), parallel to the substrate-noted "Three options" grep already deferred. Not landed this pass; promotion criteria need one more cycle of dogfooding.
 
+## Repair pass 4 (post pass-4 validation)
+
+Pass-4 validation review at `docs/history/reviews/2026-05-05-disposition-rule-rewrite-validation-pass-4.md` returned **Approved** with 1 Medium (I1) + 1 Low (I2). Per the disposition rule, `Approved + Medium` → `Close in same worktree → merge`; the repair is non-scope-changing (column addition + ledger preamble copy-edit), so re-validation is not required per the Approved+Medium row's `Re-validate?` conditional ("Yes if the repair adds a new file or named invariant; otherwise no"). Both findings closed in this repair pass.
+
+- **pass-4 I1 closed** — Added a fifth column `Canonical Disposition phrase` to the rubric table at `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", carrying the literal phrase string per row. The rubric is now the single source of truth for both the recommendation logic AND the canonical phrase strings. Updated `skills/validate-rewrite/SKILL.md:153` and `references/templates/cohesion-review.md:91` to cite the column rather than restate the five phrase literals — closing the multi-surface drift surface the rewrite was designed to eliminate. Updated rubric §"Citations" paragraph to add `skill-conventions.md` deviation entry as a fourth citing surface.
+- **pass-4 I2 closed** — Ledger preamble file-count parenthetical updated from "across repair pass 1" to "across all repair passes". One-line copy-edit.
+
 ## Ready for fresh-eyes review?
 
-**Yes** — substrate change is internally complete; validator passes (`bash scripts/validate_plugin.sh` returns 0 errors, 0 warnings); all five citing surfaces of the disposition rule (rubric, SKILL.md, agent, cohesion-review template, skill-conventions deviation entry) agree. Hand off to `cohesive:validate-rewrite` for pass 4 fresh-eyes review.
+**Yes** — substrate change is internally complete; validator passes (`bash scripts/validate_plugin.sh` returns 0 errors, 0 warnings); all five citing surfaces of the disposition rule agree, and the rubric now holds the literal canonical phrase strings (single source of truth across the entire rule). Pass-4 verdict was Approved with non-scope-changing repairs; per the rule, no further validation is required. Branch is ready to merge.
 
 ## How to read this ledger
 

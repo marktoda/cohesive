@@ -115,15 +115,15 @@ This pin is normative: an agent that returns `Issues Found` with no `High` or `B
 
 When `validate-rewrite` returns a verdict, the recommendation that follows is determined by the verdict and the highest severity present among the findings. The rule below picks; the agent does not render a menu of options.
 
-| Verdict | Highest severity present | Recommendation | Re-validate after repair? |
-|---|---|---|---|
-| Approved | none | Route to the implementation decision matrix in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format" | N/A |
-| Approved | Low | Close inline (≤2 lines per finding) | No |
-| Approved | Medium | Close in the same worktree before merge | Yes if the repair adds a new file or named invariant; otherwise no |
-| Issues Found | High or Blocker | Repair, then re-run `validate-rewrite` | Yes |
-| Design Incoherent | — | Return to `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` with the reviewer's report | N/A (no repair pass at this verdict) |
+| Verdict | Highest severity present | Recommendation | Re-validate after repair? | Canonical Disposition phrase |
+|---|---|---|---|---|
+| Approved | none | Route to the implementation decision matrix in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format" | N/A | `Merge as-is — no findings` |
+| Approved | Low | Close inline (≤2 lines per finding) | No | `Close inline (≤2 lines per finding) → merge` |
+| Approved | Medium | Close in the same worktree before merge | Yes if the repair adds a new file or named invariant; otherwise no | `Close in same worktree → merge` |
+| Issues Found | High or Blocker | Repair, then re-run `validate-rewrite` | Yes | `Repair → re-validate` |
+| Design Incoherent | — | Return to `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` with the reviewer's report | N/A (no repair pass at this verdict) | `Return to brainstorm-design` |
 
-The 5-row table is total over the verdict→severity-floor mapping above: every legitimate `(verdict, highest-severity)` pair maps to exactly one row. Combinations the verdict-floor mapping forbids (e.g., `Approved + High`, `Issues Found + Medium`) are contract violations on the agent's verdict choice, not gaps in the disposition rule.
+The 5-row table is total over the verdict→severity-floor mapping above: every legitimate `(verdict, highest-severity)` pair maps to exactly one row. Combinations the verdict-floor mapping forbids (e.g., `Approved + High`, `Issues Found + Medium`) are contract violations on the agent's verdict choice, not gaps in the disposition rule. The **Canonical Disposition phrase** column is the literal string the dispatching skill and the cohesion-review template render in the validation review's `## Recommended next Cohesive skill` section; citing surfaces (`${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format", `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Recommended next Cohesive skill") cite this column rather than restate the strings.
 
 **Why this is a rule, not a menu.** The "Three options" pattern (offering the reader a choice between fix-and-merge, substrate-note-and-merge, and pause) emerges when the agent treats the disposition as a judgment call. It violates `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule #5 ("Recommend exactly one next move") by forcing the reader to re-derive what to do. The rule above eliminates the menu surface: the verdict + highest severity determine the recommendation, deterministically.
 
@@ -131,7 +131,7 @@ The 5-row table is total over the verdict→severity-floor mapping above: every 
 
 **User override.** The user can override the rule's recommendation ("just merge — I don't care about the Medium", or substrate-note the Low instead of close-inline). The override is a deliberate move against a published default, not a derivation from a menu. Overrides do not require general ledger annotation in v0.1, *except* substrate-note overrides per the section above (which use the ledger §"Remaining ambiguity" residue the rule already provides). The cost of unannotated overrides is observability: the team cannot count silent overrides per release cycle. Re-evaluation trigger: if more than 3 `validate-rewrite` passes in a single release cycle reveal the same finding repeatedly because it was silently overridden, promote a first-class override-residue surface (a §"Overrides applied" section in the ledger) in the next pass and update this clause.
 
-**Citations.** `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format", `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md` §"How to structure your output", and `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Recommended next Cohesive skill" all cite this section rather than restate the table — single canonical home prevents the same multi-surface drift that pre-`design/cohesion-review-cleanup` §"Delta at a glance" exhibited.
+**Citations.** `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format", `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md` §"How to structure your output", `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Recommended next Cohesive skill", and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"When sections may differ" (the `validate-rewrite` deviation entry) all cite this section — including the `Canonical Disposition phrase` column for the literal phrase strings — rather than restate the table. Single canonical home prevents the same multi-surface drift that pre-`design/cohesion-review-cleanup` §"Delta at a glance" exhibited.
 
 ## How findings become substrate
 
