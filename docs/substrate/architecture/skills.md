@@ -13,9 +13,9 @@
 | `validate-rewrite` | Fresh-eyes review of the rewrite | Coherence, completeness, enforceability check | Approved / Issues Found / Design Incoherent |
 | `implement-cohesively` | Land code that makes the rewrite true | Phase derivation; per-phase cross-review | Implemented / Phase Drift / Substrate Drift / Aborted |
 | **Off-chain** | | | |
-| `review-codebase` | Architecture-altitude cohesion review | Multi-reviewer dispatch + synthesis | Healthy / Drifting / Incoherent |
-| `review-diff` | Cohesion review of a PR or working changes | Two-reviewer dispatch on bounded surface | Cohesion-Safe / Drifting / Cohesion-Breaking |
-| `audit-substrate` | Find missing memory | Single-pass scan; no reviewer dispatch | Substrate-Healthy / Gaps Found / Substrate-Missing |
+| `review-codebase` | Architecture-altitude cohesion review | Multi-reviewer dispatch + synthesis | Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk |
+| `review-diff` | Cohesion review of a PR or working changes | Two-reviewer dispatch on bounded surface | Pass / Pass with notes / Needs substrate / Risky / Block |
+| `audit-substrate` | Find missing memory | Single-pass scan; no reviewer dispatch | Substrate sound / Substrate gaps / Substrate sparse |
 | **Router** | | | |
 | `cohesively` | Convert intent into the right route | Route selection; prereq-state passing | _none (announces, dispatches)_ |
 
@@ -189,7 +189,7 @@ Inherited sections may surface lens-2 (design-implementation agreement) and lens
 
 **Inputs.** Codebase or subsystem scope.
 
-**Outputs.** Persisted architecture review carrying one of {Healthy, Drifting, Incoherent}.
+**Outputs.** Persisted architecture review carrying one of {Healthy, Mostly healthy, Cohesive but under-enforced, Spec drift risk, Architecture risk}.
 
 **Why this shape.** Whole-codebase review needs the four-reviewer panel to cover the lenses (alignment, structure, library-native, agent-readiness) without a single reviewer's blind spot dominating. The four-phase structure (claimed shape → spec-prior gate → reviewer dispatch → synthesis) makes each phase legible and stoppable.
 
@@ -209,7 +209,7 @@ Inherited sections may surface lens-2 (design-implementation agreement) and lens
 
 **Inputs.** PR number, branch name, or working changes.
 
-**Outputs.** Chat-only verdict-led output: {Cohesion-Safe, Drifting, Cohesion-Breaking}.
+**Outputs.** Chat-only verdict-led output: {Pass, Pass with notes, Needs substrate, Risky, Block}.
 
 **Why this shape.** Diff review is high-frequency (every PR); persistence would create review noise. Two reviewers cover most diffs cleanly; the four-reviewer panel is reserved for diffs that warrant whole-codebase reasoning.
 
@@ -229,7 +229,7 @@ Inherited sections may surface lens-2 (design-implementation agreement) and lens
 
 **Inputs.** Codebase or subsystem scope.
 
-**Outputs.** Persisted audit report carrying one of {Substrate-Healthy, Gaps Found, Substrate-Missing}.
+**Outputs.** Persisted audit report carrying one of {Substrate sound, Substrate gaps, Substrate sparse}.
 
 **Why this shape.** Audit is lighter than `review-codebase` because it doesn't need the four-reviewer panel — gap-finding is a single-lens question ("is the memory there?"). Keeping it separate from `discover-substrate` lets discovery stay no-verdict.
 

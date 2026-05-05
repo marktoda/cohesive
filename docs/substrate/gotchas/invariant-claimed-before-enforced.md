@@ -36,7 +36,7 @@ When graduating a rule to invariant on day one with deferred check implementatio
 ## Tests / checks that preserve this
 
 - `cohesive:review-codebase` Phase 2 (spec-prior gate) reads the invariant docs and the validator script side-by-side. A graduated invariant whose §"Enforcement" claims present-tense check existence without a matching ordinal in the script is a Blocking Issue under the substrate-alignment-reviewer lens.
-- `cohesive:validate-rewrite` lens 13 (per the architecture-refactor repair) explicitly notes: "for an invariant whose §Enforcement claims a validator ordinal, verify the script contains a matching `# <N>.` comment block and the ordinal's name matches a documented invariant."
+- `cohesive:validate-rewrite` lens 13 (design-implementation agreement) catches design-implementation disagreement broadly, including present-tense vs reserved-ordinal mismatches when an invariant doc is part of the rewrite scope: an §"Enforcement" section that claims `Check N` enforces the invariant must agree with `scripts/validate_plugin.sh` actually containing `Check N`. The lens does not run a dedicated ordinal-grep; it surfaces the disagreement as a Purpose/Owns content-alignment finding when the reviewer reads both surfaces side-by-side.
 - The canonical-pin-list in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` uses an explicit Reserved-vs-Running status column when entries are mid-graduation; a Reserved entry without a deadline or named milestone is a Medium finding under reviewer judgment.
 
 ## Notes for future contributors
