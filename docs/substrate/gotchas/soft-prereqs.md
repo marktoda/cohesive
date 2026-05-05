@@ -46,13 +46,13 @@ Implementation outline (for the V1 enforcement pass):
 2. Update `skills/cohesively/SKILL.md` route definitions to pass an explicit "discovery already complete; report at <path>" instruction when the router has run discovery itself, codified in the "Dispatch prompt contract" section. (Done in v0.1.)
 3. Document the question form in `docs/substrate/conventions/skill-shape.md` under "Clarifying questions." (Done in v0.1.)
 
-## Structured-artifact handoff is not this failure mode
+## What this gotcha does not cover
 
-A `validate-rewrite` output with a canonical disposition phrase (`Repair → re-validate` or `Close in same worktree → merge`) plus an enumerated `## Recommended repairs (ranked)` list IS a structured chosen-direction handoff — structurally equivalent to the router-passed direction case in the "Correct pattern" section above. The artifact carries the direction explicitly, the same way the router's dispatch prompt does.
+This gotcha covers only the case where the prereq is *substrate discovery in the current conversation*. For prereqs that are file paths — an Approved validation review for `implement-cohesively`, a delta ledger for `validate-rewrite`, a chosen-direction summary passed by a dispatching skill — the correct pattern is **inputs declared explicitly in the skill body and directive errors when missing**, not a forced-choice question. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` for per-handoff input contracts.
 
-The detection rule for the repair-pass case is concrete and deterministic: the prior turn's tool output (or a cited persisted review file under `docs/history/reviews/`) literally contains the canonical phrase string and the ranked repair list. That's not "do I remember a direction earlier in this conversation?" — that's "is the named artifact present in the explicit input?" Don't conflate them.
+The session-memory failure mode this gotcha names applies specifically to "did discovery happen in this conversation?" because that prereq has no canonical artifact to point at. A path prereq has a canonical artifact (`docs/history/<kind>/<date>-<slug>*.md`); the correct response to a missing path prereq is `"Missing <input>. Run cohesive:<upstream-skill> first; expected output at <path>."` — not the canonical clarifying question.
 
-The implementation belongs in the consuming skill body (e.g., `rewrite-specs` Hard constraint #1, which enumerates the recognized structured inputs alongside the canonical question). This gotcha names the failure mode and the correct-pattern surface; it does not enumerate every legitimate structured-input shape — those live in each subskill's Hard constraint #1.
+The previous draft of this gotcha enumerated "structured-artifact handoff" as a third recognized-input shape that downstream skill bodies should detect alongside the canonical question. That enumeration retired in the 2026-05-05 validate-rewrite-internal-loop refactor: `validate-rewrite`'s Issues Found repair pass became an internal loop (no longer a user-driven handoff to detect — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)"), and `implement-cohesively`'s Approved-verdict input became a directive-error path prereq (no clarifying question at all). The structural-handoff middle ground turned out to be solving a problem the simpler "explicit inputs + directive errors" shape doesn't have.
 
 ## Related conventions
 
@@ -62,10 +62,10 @@ The implementation belongs in the consuming skill body (e.g., `rewrite-specs` Ha
 ## Tests / checks that preserve this
 
 - Manual scenario test (planned): invoke `cohesive:brainstorm-design` directly with no prior discovery; verify the subskill asks the canonical question.
-- Manual scenario test (planned): invoke `cohesive:rewrite-specs` directly with a chosen direction but no discovery; verify same.
-- Manual scenario test (planned): invoke `cohesive:rewrite-specs` directly when the prior turn is a `validate-rewrite` output with `Repair → re-validate` disposition + ranked repairs; verify the subskill picks up the repair list as the direction without asking the canonical question.
-- Manual scenario test (planned): invoke `cohesive:implement-cohesively` directly when the prior turn is a `validate-rewrite` output with `**Verdict:** Approved` and the implementation decision matrix naming `cohesive:implement-cohesively`; verify the subskill picks up the validation review path and the delta ledger path from the artifact without asking the canonical question.
-- Lint check (V1): grep each subskill body for the canonical question text near the start of "Process."
+- Manual scenario test (planned): invoke `cohesive:rewrite-specs` directly with no chosen direction and no discovery; verify the subskill asks the canonical question.
+- Manual scenario test (planned): invoke `cohesive:implement-cohesively` directly with no validation review path; verify the subskill **stops with a directive error** naming `cohesive:validate-rewrite` as the upstream — it does *not* ask the canonical question because its prereq is a file path, not session state.
+- Manual scenario test (planned): invoke `cohesive:validate-rewrite` directly with no delta ledger path; verify the subskill **stops with a directive error** naming `cohesive:rewrite-specs` as the upstream — it does *not* ask the canonical question because its prereq is a file path, not session state.
+- Lint check (V1): grep each substrate-discovery-prereq subskill body (`brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`) for the canonical question text near the start of "Process." Validator Check 10b symmetrically lints path-prereq subskills (`validate-rewrite`, `implement-cohesively`) for a directive-error template plus an upstream `cohesive:` skill citation.
 
 If this checks list is empty, the gotcha is enforced by reviewer memory only. The first concrete test should land in the next release pass.
 

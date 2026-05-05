@@ -198,26 +198,65 @@ for s in "${expected_skills[@]}"; do
 done
 [ "$errors" -eq "$errors_before" ] && ok "no skill description uses bare generic-review trigger phrases"
 
-# 10. Canonical prereq-detection question in subskills with a discover-substrate or
-# brainstorm-design prereq. Per docs/substrate/conventions/skill-shape.md §"Canonical prereq-detection
-# question". Stable opening: a blockquote line beginning `> "I see we're about to run <skill>.`
-prereq_subskills=(
+# 10. Canonical prereq-detection question in subskills with a substrate-discovery prereq.
+# Per docs/substrate/conventions/skill-shape.md §"Canonical prereq-detection question". Stable
+# opening: a blockquote line beginning `> "I see we're about to run <skill>.`
+# Path-prereq subskills (implement-cohesively, validate-rewrite) are excluded — their prereq is
+# a file path, not session state, so they use directive errors per skill-shape.md §"Path prereqs
+# use directive errors, not the canonical question". See check 10b below.
+discovery_prereq_subskills=(
   brainstorm-design
   rewrite-specs
-  implement-cohesively
   review-codebase
   review-diff
   audit-substrate
 )
 errors_before=$errors
-for s in "${prereq_subskills[@]}"; do
+for s in "${discovery_prereq_subskills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
   if ! grep -qE "^[[:space:]]*> \"I see we're about to run $s\." "$skill_md"; then
     fail "skills/$s/SKILL.md missing canonical prereq-detection question (per docs/substrate/conventions/skill-shape.md §Canonical prereq-detection question)"
   fi
 done
-[ "$errors" -eq "$errors_before" ] && ok "all ${#prereq_subskills[@]} prereq-bearing subskills have the canonical prereq-detection question"
+[ "$errors" -eq "$errors_before" ] && ok "all ${#discovery_prereq_subskills[@]} discovery-prereq subskills have the canonical prereq-detection question"
+
+# 10b. Path-prereq subskills carry a directive-error template instead of the canonical question.
+# Per docs/substrate/conventions/skill-shape.md §"Path prereqs use directive errors, not the
+# canonical question". Three checks, all required:
+#   (a) positive: a "directive error" phrase appears in the body;
+#   (b) positive: an upstream "Run cohesive:<skill>" instruction appears in the body;
+#   (c) negative: neither the canonical-question literal nor the legacy "stop and ask" phrasing
+#       appears anywhere in the body — the canonical question and the directive error are
+#       mutually exclusive prereq-handling shapes, so any path-prereq subskill carrying both
+#       is internally incoherent. The negative check exists to catch the regression class
+#       where Hard constraint #1 prescribes the directive error but Step 0 (or any other
+#       section) silently re-introduces the session-prereq fallback.
+path_prereq_subskills=(
+  validate-rewrite
+  implement-cohesively
+)
+errors_before=$errors
+for s in "${path_prereq_subskills[@]}"; do
+  skill_md="skills/$s/SKILL.md"
+  [ -f "$skill_md" ] || continue
+  if ! grep -qE "directive error" "$skill_md"; then
+    fail "skills/$s/SKILL.md missing directive-error template (per docs/substrate/conventions/skill-shape.md §Path prereqs use directive errors, not the canonical question)"
+    continue
+  fi
+  if ! grep -qE "Run \`?cohesive:" "$skill_md"; then
+    fail "skills/$s/SKILL.md directive-error template does not name an upstream cohesive: skill"
+    continue
+  fi
+  if grep -qE "^[[:space:]]*> \"I see we're about to run $s\." "$skill_md"; then
+    fail "skills/$s/SKILL.md carries the canonical clarifying question alongside the directive-error template (path-prereq subskills must not have both — see skill-shape.md §Path prereqs use directive errors)"
+    continue
+  fi
+  if grep -qE "stop and ask" "$skill_md"; then
+    fail "skills/$s/SKILL.md carries 'stop and ask' phrasing alongside the directive-error template (path-prereq subskills must use directive errors only — see skill-shape.md §Path prereqs use directive errors)"
+  fi
+done
+[ "$errors" -eq "$errors_before" ] && ok "all ${#path_prereq_subskills[@]} path-prereq subskills carry directive-error templates"
 
 # 11. Fresh-eyes preamble bullet verbatim across reviewer agent files.
 # Per docs/substrate/conventions/reviewer-agent-shape.md §"The fresh-eyes preamble".

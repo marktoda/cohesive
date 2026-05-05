@@ -4,21 +4,24 @@
 
 ## The three transition shapes
 
-**1. Chain transition.** A skill produces an artifact carrying a verdict (or no verdict, in which case user approval gates the transition). The downstream skill consumes that artifact and runs. Five forward chain transitions form the linear chain; one transition (Issues Found) is a backward edge from `validate-rewrite` to `rewrite-specs`.
+**1. Chain transition.** A skill produces an artifact carrying a verdict (or no verdict, in which case user approval gates the transition). The downstream skill consumes that artifact and runs. Four forward chain transitions form the linear chain.
 
 **2. Router dispatch.** `cohesively` selects a route and dispatches the first subskill of that route, passing prereq state and chosen-direction state explicitly per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` §"Dispatch prompt contract". The router does not own the chain; it owns the entry point.
 
 **3. Off-chain re-entry.** A diagnostic skill (`review-codebase`, `review-diff`, `audit-substrate`) produces findings that re-enter the chain at the appropriate skill. Re-entry is user-driven — the diagnostic recommends a next Cohesive skill in its output footer; the user invokes it. The Design Incoherent verdict from `validate-rewrite` is also treated as off-chain re-entry because it returns further back than the immediate predecessor (to `brainstorm-design`, not to `rewrite-specs`).
 
+**4. Internal repair loop.** A skill dispatches another Cohesive skill via the Skill tool *within its own Process*, consumes that skill's output, and re-dispatches a reviewer agent for the next pass. The loop is invisible to the user as a chain edge — the user sees pass-by-pass progress in chat but does not invoke the dispatched skill themselves. Currently there is one such loop: `validate-rewrite`'s Issues Found repair loop with `rewrite-specs` (see §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)" below).
+
 ## The chain
 
 ```
 discover-substrate ──▶ brainstorm-design ──▶ rewrite-specs ──▶ validate-rewrite ──▶ implement-cohesively
-                                                       ▲                      │
-                                                       └──── Issues Found ────┘
+                                                                       │
+                                                                       └─ internal repair loop
+                                                                          (Issues Found → rewrite-specs)
 ```
 
-Forward chain: four edges. Backward edge: Issues Found returns to `rewrite-specs` for repair. Design Incoherent returns further back to `brainstorm-design` (treated as off-chain re-entry — see §"Off-chain re-entry").
+Forward chain: four edges. The Issues Found verdict from `validate-rewrite` is **not** a public chain edge — it drives an internal repair loop within `validate-rewrite` that dispatches `rewrite-specs` and re-dispatches the reviewer until verdict converges (Approved), exits to design (Design Incoherent), or stalls at `MAX_REPAIR_PASSES`. See §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)" below. Design Incoherent returns further back to `brainstorm-design` (treated as off-chain re-entry — see §"Off-chain re-entry").
 
 ## Per-handoff contracts
 
@@ -72,17 +75,25 @@ Each handoff specifies: artifact crossing the seam, persistence shape, verdict g
 
 **Failure mode if the contract drifts.** Implementation falls into freeform code; phases stop being delta-derived; `IMPLEMENTATION_PLAN_COVERS_DELTA` is violated; `delta-coverage-reviewer` returns Drift or Incomplete. The named invariant exists precisely because this is the most expensive failure of the implementation phase.
 
-### validate-rewrite → rewrite-specs (Issues Found backward edge)
+### validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)
 
-**Artifact crossing.** Validation review carrying Issues Found verdict + the specific blocking issues named in the review body.
+**Transition shape.** Internal repair loop within `validate-rewrite`, not user-driven re-entry. When the `spec-cohesion-reviewer` agent returns `Issues Found`, `validate-rewrite` dispatches `rewrite-specs` in repair mode via the Skill tool, then re-dispatches the reviewer for the next pass. The user sees pass-by-pass progress in chat but does not invoke `rewrite-specs` themselves except after a max-passes stall or a Design Incoherent exit.
 
-**Persistence.** Validation review persisted; the specific issues are body content.
+**Artifact crossing.** Per-pass validation review (`<date>-<slug>-rewrite-validation[-pass-N].md`) carrying `Issues Found` verdict and the enumerated `## Recommended repairs (ranked)` list. The Skill-tool dispatch prompt to `rewrite-specs` names this review path as the source and instructs repair-mode operation per `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` §"Process Step 1b. Repair-pass mode".
 
-**Verdict gate.** **Issues Found** required. The repair pass `rewrite-specs` consumes the issue list as its rewrite scope.
+**Persistence.** Each pass's review persists for audit trail. Repair commits land on the same `design/<slug>` branch in pass order; commit messages cite the pass number and the closed finding IDs.
 
-**What the repair `rewrite-specs` must not re-derive.** The brainstormed direction. The repair fixes specs against a still-approved direction; if the direction itself is unsound, that's Design Incoherent, not Issues Found.
+**Verdict gate.** **Issues Found** drives the loop forward. Three exits terminate the loop:
 
-**Failure mode if the contract drifts.** Repair pass widens beyond the named issues and re-litigates the rewrite as a whole; subsequent `validate-rewrite` has nothing to anchor against; the repair loop consumes turns without converging.
+- **Approved** — verdict converged. `validate-rewrite` renders disposition + (if applicable) implementation decision matrix; the loop exits to `validate-rewrite → implement-cohesively (Approved branch)` per the next section.
+- **Design Incoherent** — the chosen direction is unsound. `validate-rewrite` renders disposition recommending `brainstorm-design`; the loop cannot fix design-shape problems and exits to off-chain re-entry per `validate-rewrite → brainstorm-design (Design Incoherent re-entry)`.
+- **Max passes reached** — the loop's pass count hits `MAX_REPAIR_PASSES` (default 5; configurable per-invocation via `--max-passes=N`) without converging. `validate-rewrite` surfaces the latest review with a stall banner naming the latest verdict and findings; the recommendation is `cohesive:brainstorm-design` (the design itself may be unsound) or manual repair followed by re-invocation.
+
+**What the dispatched `rewrite-specs` must not re-derive.** The brainstormed direction. The repair fixes specs against a still-approved direction; if the direction itself is unsound, the *next* pass's reviewer should return Design Incoherent (which exits the loop). The Skill-tool dispatch prompt to `rewrite-specs` states this constraint inline in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Step 4. Repair loop" substep 2, alongside the repair-scope and commit-template constraints. (The reviewer-agent dispatch protocol in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/dispatch-protocol.md` covers skill→agent dispatches only; skill→skill dispatches like this loop's are constrained by the dispatching skill body itself.)
+
+**What `validate-rewrite` must not do across passes.** Pass conversation context to the next pass's reviewer agent. Each pass dispatches a fresh `spec-cohesion-reviewer` Task subprocess with paths-only input — the fresh-eyes property in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/fresh-eyes-review.md` applies per pass, not just on the first pass.
+
+**Failure mode if the contract drifts.** (a) The reviewer for pass N is given the prior pass's review or the loop's conversation context, contaminating fresh-eyes — caught by the dispatch-protocol convention and reviewer-agent paths-only invariant. (b) The dispatched `rewrite-specs` widens beyond the named findings and re-litigates the rewrite as a whole — caught by the next pass's reviewer flagging scope creep. (c) The loop runs without a max-passes ceiling and consumes turns indefinitely on a structurally unsolvable design — prevented by `MAX_REPAIR_PASSES` per the loop body in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Repair loop".
 
 ## Off-chain re-entry
 

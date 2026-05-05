@@ -7,9 +7,9 @@ description: Use after rewrite-specs has produced a spec rewrite and a design de
 
 ## What this skill produces
 
-A **rewrite validation report** in chat, written by default to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md` (use `--no-write` to suppress persistence), with a verdict of **Approved**, **Issues Found**, or **Design Incoherent**, plus blocking issues, important issues, substrate gaps, locality concerns, future-fit concerns, enforcement concerns, and ranked recommended repairs.
+A **rewrite validation report** in chat, written by default to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md` (use `--no-write` to suppress persistence). The verdict vocabulary is {**Approved**, **Issues Found**, **Design Incoherent**} — the same three verdicts each pass's reviewer returns. On `Issues Found`, the skill drives an internal repair loop with `cohesive:rewrite-specs` and re-dispatches the reviewer until verdict converges (Approved), exits to design (Design Incoherent), or hits a **max-passes stall** — a *loop-exit shape* that surfaces the latest pass's Issues Found verdict to the user with a stall banner, after `MAX_REPAIR_PASSES` iterations without convergence. The stall is not a fourth verdict; it is the only legible surface through which Issues Found reaches the user, since the loop normally drives Issues Found internally. The user does not invoke `rewrite-specs` themselves during the loop. Each pass's review is persisted independently for audit trail.
 
-The review's defining property is **fresh eyes**: this skill always dispatches the `spec-cohesion-reviewer` agent via the Task tool, which runs in an isolated subprocess with no inherited conversation context. The structural fence is the harness's Task-subprocess isolation — that's what gives the review the power to flag things the original designer can no longer see, regardless of whether this skill is invoked from the same conversation that produced the rewrite.
+The review's defining property is **fresh eyes**: this skill always dispatches the `spec-cohesion-reviewer` agent via the Task tool, which runs in an isolated subprocess with no inherited conversation context. The structural fence is the harness's Task-subprocess isolation — that's what gives the review the power to flag things the original designer can no longer see, regardless of whether this skill is invoked from the same conversation that produced the rewrite. The fresh-eyes property holds **per pass** of the repair loop; pass-N's reviewer is dispatched with paths only and never inherits pass-(N-1)'s review or the loop's conversation context.
 
 ## Voice
 
@@ -17,9 +17,10 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **Always dispatch the `spec-cohesion-reviewer` agent via Task tool.** The skill itself never renders the verdict from in-conversation reading — it dispatches and surfaces the agent's report. The Task subprocess provides the structural fresh-eyes fence; this skill's job is the dispatch and the synthesis.
-2. **Inputs must be paths, not summaries.** Pass the agent file paths to read; don't pre-summarize the design for it. The dispatch prompt's content is the entire context the agent has, so any summary the dispatching skill writes into it bypasses fresh-eyes — the harness fence prevents conversation inheritance, but it can't prevent prompt contamination.
-3. **The review can block implementation.** Verdicts gate implementation per the verdict→severity-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)": `Issues Found` (highest severity High or Blocker) and `Design Incoherent` block implementation and route back to `rewrite-specs` or `brainstorm-design` respectively. `Approved` (highest severity Medium, Low, or none) unlocks the implementation route and the user picks among the rows of the implementation decision matrix in the Output format block; the disposition rule in the rubric specifies what (if anything) to close before merge.
+1. **Always dispatch the `spec-cohesion-reviewer` agent via Task tool.** The skill itself never renders the verdict from in-conversation reading — it dispatches and surfaces the agent's report. The Task subprocess provides the structural fresh-eyes fence; this skill's job is the dispatch and the synthesis. This applies **per pass** of the repair loop, not just on the first pass.
+2. **Inputs must be paths, not summaries.** Pass the agent file paths to read; don't pre-summarize the design for it. The dispatch prompt's content is the entire context the agent has, so any summary the dispatching skill writes into it bypasses fresh-eyes — the harness fence prevents conversation inheritance, but it can't prevent prompt contamination. This applies per pass: the pass-N reviewer is dispatched with paths only, never with the pass-(N-1) review as context.
+3. **The review can block implementation.** Verdicts gate implementation per the verdict→severity-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)": `Issues Found` (highest severity High or Blocker) drives the internal repair loop (Hard constraint #4), and `Design Incoherent` exits the loop and routes to `brainstorm-design`. `Approved` (highest severity Medium, Low, or none) terminates the loop and unlocks the implementation route; the user picks among the rows of the implementation decision matrix in the Output format block, and the disposition rule in the rubric specifies what (if anything) to close before merge.
+4. **The Issues Found repair loop runs internally.** When the reviewer returns `Issues Found`, the skill dispatches `cohesive:rewrite-specs` in repair mode via the Skill tool, then re-dispatches `spec-cohesion-reviewer` for the next pass — up to `MAX_REPAIR_PASSES` (default 5). The user does not invoke `rewrite-specs` themselves except after a max-passes stall or a Design Incoherent exit. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)", the loop terminates on Approved, Design Incoherent, or max-passes; do not loop past the ceiling, and do not auto-pivot to `brainstorm-design` on max-passes (that is a user decision).
 
 ## Process
 
@@ -36,14 +37,21 @@ Announce the resolved path in chat before the dispatch. If `--no-write` is set, 
 
 ### 1. Locate the inputs
 
-Required inputs the calling user or skill must provide (or that this skill should locate):
+Required inputs the calling user or skill must provide:
 
-- **Design delta ledger path** — usually `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md`
-- **Rewritten spec paths** — extracted from the design delta ledger's "Files rewritten" / "Files added" sections
-- **Substrate discovery report path** (optional) — if `discover-substrate` ran earlier, pass its output path so the reviewer can compare what existed before to what now exists
-- **Approved direction summary** — one or two sentences from `brainstorm-design`
+- **Design delta ledger path** — usually `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md`. **Required path prereq.**
+- **Rewritten spec paths** — derived from the delta ledger's "Files rewritten" / "Files added" sections. Not a separate input; the ledger is the source.
+- **Approved direction summary** — one or two sentences carried in the dispatch prompt (router or repair-loop) or in the user's invocation. Optional in repair-loop dispatches, where the source review's `## Delta at a glance` preamble carries the equivalent.
+- **Substrate discovery report path** (optional) — if `discover-substrate` ran earlier, pass its output path so the reviewer can compare what existed before to what now exists.
 
-If any required input is missing, stop and ask. Do not invent inputs.
+This skill's required prereq is a file path (the delta ledger), not session state — the canonical clarifying question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md` does not apply. If the delta ledger path is missing, **stop with a directive error** per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Path prereqs use directive errors, not the canonical question":
+
+```
+Missing design delta ledger for slug `<slug>`. Run cohesive:rewrite-specs first;
+expected output at docs/history/delta-ledgers/<date>-<slug>.md.
+```
+
+Do not invent paths and do not ask the canonical question. The per-handoff input contract is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"rewrite-specs → validate-rewrite".
 
 ### 2. Dispatch the spec-cohesion-reviewer agent
 
@@ -77,22 +85,55 @@ Do not read any file not listed above unless the design delta ledger explicitly 
 
 Run the agent in the foreground — its result is what this skill returns.
 
-### 3. Render the verdict and persist
+### 3. Persist the per-pass review and branch on verdict
 
-When the agent returns, surface its report in chat. By default, also write it to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md`. Reviews are append-only history per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` — commit them.
+When the agent returns, persist its report at `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md` (omit `-pass-N` for pass 1; subsequent passes carry `-pass-2`, `-pass-3`, etc.). Reviews are append-only history per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` — commit each pass with a message of the form `review: persist pass-N review (<verdict>)`.
 
 If the user passed `--no-write`, render in chat only and skip persistence. The router's dispatch prompt for the `design` route step 4 and the `rewrite-only` route step 2 includes the ledger path; persistence is the default in both router-driven and direct-invocation cases.
 
-### 4. Recommend the next step
+Then branch on verdict:
 
-The recommendation is determined by the **disposition rule** in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which is the canonical home — this skill cites it rather than restate the table. The rule maps `(verdict, highest-severity-present)` to a single recommendation; the skill does not render a menu of options for the user to pick from.
+- **Approved** → proceed to Step 5 (terminal render). The loop terminates here.
+- **Issues Found** → proceed to Step 4 (repair loop). Do not render the terminal disposition yet.
+- **Design Incoherent** → proceed to Step 5 (terminal render). The loop terminates here; the design itself needs to be reconsidered.
+
+### 4. Repair loop (Issues Found only)
+
+The repair loop runs internally per Hard constraint #4. Default ceiling: `MAX_REPAIR_PASSES = 5` (override via `--max-passes=N`). The loop body:
+
+1. **Render pass progress in chat.** One sentence: `Pass <N>/<MAX>: Issues Found — <count> findings (Blocker: <b>, High: <h>, Medium: <m>). Dispatching repair…`. This is the only progress line per pass; the user can interrupt at any point and the worktree state is whatever the last completed pass committed.
+2. **Dispatch `cohesive:rewrite-specs` in repair mode** via the Skill tool. The dispatch prompt names the just-persisted pass-N review path as the repair source and instructs repair-mode operation per `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` §"Process Step 1b. Repair-pass mode". The dispatch prompt **must** state, explicitly: (a) the repair scope is the enumerated repairs in the cited review, not a fresh design pass; (b) the chosen direction must not be re-derived — if the dispatched skill concludes the design itself is unsound, that is a Design Incoherent signal that the next pass's reviewer should surface, not a verdict the dispatched `rewrite-specs` renders directly; (c) repair commits land on the same `design/<slug>` branch and follow the repair-mode commit template in `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` §"Step 6. Commit the rewrite". The reviewer-agent dispatch protocol in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/dispatch-protocol.md` covers skill→agent dispatches; it does not cover the skill→skill dispatch this substep performs, so the constraints above are stated inline. Wait for `rewrite-specs` to return — it will land repair commits on the `design/<slug>` branch.
+3. **Increment the pass counter and re-dispatch `spec-cohesion-reviewer`** per Step 2. The dispatch is a fresh Task subprocess with paths-only input — never pass the prior pass's review or the loop's conversation context to the new reviewer (Hard constraints #1 and #2 apply per pass).
+4. **Persist the new pass's review** per Step 3 and re-branch on verdict:
+   - Approved → exit loop; proceed to Step 5.
+   - Design Incoherent → exit loop; proceed to Step 5.
+   - Issues Found and pass count `< MAX_REPAIR_PASSES` → return to substep 1 (next pass).
+   - Issues Found and pass count `== MAX_REPAIR_PASSES` → exit loop with **max-passes stall**; proceed to Step 5 with the stall banner.
+
+The loop never auto-pivots from Issues Found to `brainstorm-design`. That decision is the user's, surfaced after a max-passes stall.
+
+### 5. Render the terminal verdict and recommend the next step
+
+Render the latest persisted review in chat per the Output format below. The recommendation is determined by the **disposition rule** in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which is the canonical home — this skill cites it rather than restate the table. The rule maps `(verdict, highest-severity-present)` to a single recommendation; the skill does not render a menu of options for the user to pick from.
 
 Two-step render for the **Approved** branch (which the rubric's verdict-floor mapping guarantees is merge-ready):
 
 1. **Disposition recommendation** — one phrase derived from the rubric table: `Merge as-is — no findings` (Approved + none), `Close inline (≤2 lines per finding) → merge` (Approved + Low), or `Close in same worktree → merge` (Approved + Medium).
 2. **Implementation decision matrix** — render unconditionally for Approved. The verdict-floor mapping ensures `High` and `Blocker` findings produce `Issues Found`, not `Approved`, so an Approved verdict always reaches the matrix.
 
-For **Issues Found** and **Design Incoherent**, the disposition rule's recommendation is the entire next step — no implementation matrix renders. Issues Found → `Repair → re-validate`. Design Incoherent → `Return to brainstorm-design`.
+For **Design Incoherent**, the disposition rule's recommendation is the entire next step — no implementation matrix renders. `Return to brainstorm-design`.
+
+For **max-passes stall** (terminal verdict is still Issues Found), render the latest pass's findings followed by a stall banner:
+
+```
+Reached max repair passes (<N>); latest verdict: Issues Found.
+Latest pass review: <path>
+The rewrite has not converged — the underlying design may be unsound.
+Recommended next: cohesive:brainstorm-design (revisit the chosen direction),
+or manual repair followed by re-invocation of cohesive:validate-rewrite.
+```
+
+The stall banner is the only verdict-output shape that surfaces `Issues Found` to the user, because the loop normally drives Issues Found internally to convergence.
 
 ## Output format
 
@@ -111,9 +152,7 @@ The skill's chat output (the agent's report, surfaced):
 
 ## Blocking issues
 ### B1. <title>
-- Risk: ...
-- Substrate artifact: ...
-- Suggested repair: ...
+<canonical six-field finding shape per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Blocking issues" and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions": Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact to add or update>
 
 ## Important issues
 ...
@@ -130,11 +169,18 @@ The skill's chat output (the agent's report, surfaced):
 ## Enforcement concerns
 ...
 
+## Behavior knowable outside implementation?
+<one paragraph: yes / partially / no, with the surfaces that fall short>
+
 ## Vague language to tighten
 - <file>:<line> — "<phrase>"
 
 ## Recommended repairs (ranked)
 1. ...
+
+## What looked right
+- <calibration bullet — what the reviewer found load-bearing and well-shaped>
+- ...
 
 ### Recommended next Cohesive skill
 
@@ -164,16 +210,21 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 
 ## Acceptance criteria
 
-- The dispatched agent receives only file paths, not pre-digested summaries.
-- The agent's input does not include the brainstorm or rewrite conversation history.
-- The verdict is one of Approved / Issues Found / Design Incoherent — never an unstructured prose conclusion.
-- Every issue in the report names the **substrate artifact** to repair (spec, matrix, invariant, gotcha, linter, test, type boundary).
+- Each pass's dispatched agent receives only file paths, not pre-digested summaries.
+- The pass-N agent's input does not include the pass-(N-1) review, the brainstorm output, or the loop's conversation history.
+- The verdict vocabulary is {Approved, Issues Found, Design Incoherent}. The max-passes stall is a *loop-exit shape* that surfaces the latest pass's Issues Found verdict to the user with a stall banner; Issues Found does not surface to the user except via that banner (the loop normally drives it internally to convergence).
+- The Issues Found repair loop terminates within `MAX_REPAIR_PASSES` iterations (default 5; configurable via `--max-passes=N`) regardless of repair convergence.
+- The loop never auto-pivots from Issues Found to `brainstorm-design`; that decision is the user's, surfaced after a max-passes stall or a Design Incoherent verdict.
+- Every issue in each pass's report names the **substrate artifact** to repair (spec, matrix, invariant, gotcha, linter, test, type boundary).
 - Vague language ("should," "may," "TBD") in normative sections is enumerated with file:line references.
 
 ## Red flags
 
 - Calling the agent with a long contextual preamble that summarizes the design. That bypasses fresh-eyes by smuggling the calling skill's mental model into the agent's prompt — the harness fence can't prevent prompt contamination, only conversation inheritance.
+- Passing the prior pass's review (or the loop's conversation context) to the next pass's reviewer. Each pass is fresh eyes; contaminating across passes defeats the property the loop relies on.
 - Rendering the verdict from in-conversation reading instead of dispatching the agent. The skill always dispatches; that's the structural fence.
+- Auto-looping past `MAX_REPAIR_PASSES` because "the next pass might converge." The ceiling exists because non-convergent designs are usually structural; surface and let the user decide.
+- Auto-pivoting to `brainstorm-design` on max-passes stall instead of recommending it. The user owns the decision to revisit the chosen direction.
 - Verdict of "Approved" with no positive observations about what looked right. Calibration matters.
 - Verdict of "Issues Found" with all issues marked blocking. If everything is blocking, the prioritization is failing.
 - The reviewer reading implementation files. Specs only.
@@ -181,8 +232,9 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 
 ## Composition
 
-- **Always preceded by:** `rewrite-specs`
-- **Followed by:** the disposition rule's recommendation per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings". For Approved with merge-ready disposition, the implementation decision matrix in §"Output format" picks among `cohesive:implement-cohesively` / `superpowers:writing-plans` / land-specs-first / schedule-for-later. For Approved with repair-required disposition, `rewrite-specs` again (in the same worktree). For Issues Found, `rewrite-specs` again. For Design Incoherent, `brainstorm-design`.
+- **Always preceded by:** `rewrite-specs` (forward chain) or invoked by the user against an existing `design/<slug>` worktree.
+- **Internally dispatches:** `cohesive:rewrite-specs` (in repair mode) per pass of the Issues Found repair loop, until verdict converges or the loop terminates per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)".
+- **Followed by:** the disposition rule's recommendation per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings". For Approved with merge-ready disposition, the implementation decision matrix in §"Output format" picks among `cohesive:implement-cohesively` / `superpowers:writing-plans` / land-specs-first / schedule-for-later. For Design Incoherent, `brainstorm-design`. For max-passes stall, `brainstorm-design` or manual repair.
 
 ## What this skill is *not*
 
