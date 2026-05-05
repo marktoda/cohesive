@@ -145,4 +145,96 @@ None.
 1. Read the "Approved direction" line and "Why this rewrite exists" — that's the destination and the reason.
 2. Skim "Conceptual changes" to see the seven swaps the pivot performs.
 3. Read "Files rewritten" with the before/after framing to verify each change makes sense as a delta.
-4. Use "Remaining ambiguity" as the focused review punch list — empirical proof of load, the new `## Voice` section, and reviewer-agent imperative placement.
+4. Use "Remaining ambiguity" as the focused review punch list — empirical proof of load, the new `## Voice` section, and reviewer-agent imperative placement. (Pass-1 review found three additional blockers — see "Repair pass 1" below.)
+
+---
+
+## Repair pass 1 (post validation)
+
+**Date:** 2026-05-04
+**Predecessor:** [`docs/history/reviews/2026-05-04-voice-citation-imperative-rewrite-validation.md`](../reviews/2026-05-04-voice-citation-imperative-rewrite-validation.md) (verdict: Issues Found, 3 blockers + 4 important issues).
+
+This pass closes all 3 blockers and all 4 important issues from the validation review. Same worktree, same approved direction. No re-brainstorm; the design itself was sound, but the rewrite-pass-1 file list was incomplete and three docs carried internally inconsistent line-position prose.
+
+### Blockers repaired
+
+#### B1. `docs/substrate/designs/reviewer-agent-template.md` migrated to imperative-in-body
+
+- **Before:** §"Output format conventions" rule 1 prescribed the citation literal as the first non-blank line of every reviewer agent's "How to structure your output" code block. Anti-pattern table told contributors to add the citation literal.
+- **After:** Rule 1 rewritten to require the imperative as the opening prose paragraph of "How to structure your output" (above the code block, outside any fence). Code block becomes pure render template with the canonical six-field finding shape and no instructions. New paragraph in rule 1 documents the asymmetry with skills (skills use a top-level `## Voice` section; agents use a "How to structure your output"-internal placement) and points at the reviewer-output-shape matrix's per-agent compliance columns and validator Checks 13c/13d. Anti-pattern table swapped one row ("missing the voice citation") for two rows mirroring `skill-conventions.md`: one for "missing the voice imperative in body prose" and one for "voice citation literal placed inside the code block."
+- **Why this finding existed:** This doc is cited as canonical from `output-voice.md:104`, `skill-conventions.md:147`, and `reviewer-output-shape.md:9`. A future contributor adding a sixth reviewer agent would have copied this template verbatim and shipped the citation in the render template — the validator would catch it (Check 13d), but only after the contributor had already done the work the substrate told them to do.
+
+#### B2. `AGENTS.md` and `ARCHITECTURE.md` updated to match the new substrate
+
+- **AGENTS.md:**
+  - Line 47: "voice-citation pin" → "voice-imperative pin (body prose), anti-citation lint (render templates)" in the v0.1 conventions list.
+  - Line 53: "(which now include the voice-citation pin and the verdict-leads invariant)" → "(which include the body-level voice imperative, the anti-citation lint on render templates, and the verdict-leads invariant)" in the §"Convention references" entry for skill-conventions.md.
+  - Line 64: "The Output format block must open with the `# <title>` then the voice citation then `**Verdict:**`" → "The Output format block opens with the `# <title>` followed by `**Verdict:**` within the first three non-blank lines (verdict-led skills) per `VERDICT_BEFORE_EVIDENCE`. The voice imperative — `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` — lives in the skill body's `## Voice` section, **not** inside the Output format render template; instructions placed inside render templates leak verbatim into user-facing output."
+- **ARCHITECTURE.md:**
+  - Line 48: "Runtime methodology cited from every Output format block" → "Loaded at chat-render time via a body-level imperative in each non-router skill and reviewer agent (the imperative literal lives in body prose, never in render templates — see [`docs/substrate/gotchas/style-guide-rot.md`](docs/substrate/gotchas/style-guide-rot.md) §'Correct pattern')."
+  - Line 53: "voice-citation pin" → "voice-imperative pin in body prose, anti-citation lint on render templates" in the validator-checks enumeration.
+- **Why this finding existed:** AGENTS.md and ARCHITECTURE.md are the contributor-orientation entry points. Reading them post-pivot taught the broken pattern; new contributors would follow the pre-pivot recipe and produce drift the validator catches only after the fact.
+
+#### B3. Verdict line-position prose reconciled to a single frame
+
+The post-pivot canonical layout is `# title` / blank / `**Verdict:**` (rendered with one blank between title and verdict). Three docs carried inconsistent counts of where verdict lands:
+
+- `VERDICT_BEFORE_EVIDENCE.md:12`: "lands on line 1 after the title (or line 2 after a blank)"
+- `VERDICT_BEFORE_EVIDENCE.md:19`: "the same line-2 verdict rule applies"
+- `VERDICT_BEFORE_EVIDENCE.md:58`: "places title on line 1 and `**Verdict:**` on line 2 (after a blank)"
+- `output-voice-worked-example.md:97`: "Verdict appears on line 3 (after the title and a blank)"
+- `skill-conventions.md:106`: "the verdict appears in lines 1–3 after the `#` title" (ambiguous between counting raw lines and non-blank lines)
+
+Unified frame: **first three non-blank lines after the outermost `#` title** — what the validator actually checks. All five sites rewritten to use this frame. The blank between title and verdict is a rendering choice, not a positional constraint; counting raw lines made the prose contradict itself across docs because different authors counted differently.
+
+- **Why this finding existed:** The pivot pass swept the citation out of the canonical layout but left behind line-number prose that referenced the citation's old position (line 2). The result was three docs each describing the same render with different line numbers — exactly the rot `style-guide-rot.md:75` warns about ("the worked transcript and the spec must agree byte-for-byte").
+
+### Important issues repaired
+
+#### I1. `## Voice` section added to skill-section-presence matrix
+
+- `docs/substrate/matrices/skill-section-presence.md` Cells: required sections grew a `Voice` column. Cells: 7 of 8 skills `✓` (all non-router), router `~` with the documented exemption ("router exempt; render budget too small to need imperative"). New paragraph below the matrix names what the column tracks (presence + placement between specific neighbors), points at validator Check 13b for the literal grep, and notes that placement is a *stricter* rule than the validator enforces — drift in placement passes Check 13b silently and is caught only at review time. History entry added.
+- **Why this finding existed:** The pivot mandated a `## Voice` section in 7 of 8 skills. The matrix that exists for tracking required-section presence had not been updated. The validator pinned the *literal* but not the *section* — leaving the placement rule unenforced and undocumented in the matrix that should track it.
+
+#### I2. Reviewer-agent imperative placement encoded as convention
+
+- `docs/substrate/matrices/reviewer-output-shape.md` gained a new prose section, "Imperative placement (convention, not column)," before §"Verdict-leads is tracked elsewhere." The section names the convention (imperative as opening prose paragraph of "How to structure your output," above the code block), references the asymmetry with skills, and flags that Check 13c does not verify placement — only presence. All five reviewer agents currently comply per the template; drift is a review-time finding rather than a validator failure.
+- `reviewer-agent-template.md` §"Output format conventions" rule 1 (rewritten under B1) already names the placement explicitly. The matrix and the template now agree.
+- **Why this finding existed:** Skills place the imperative in a top-level `## Voice` section; agents place it inside "How to structure your output." The asymmetry was documented only in this ledger's §"Remaining ambiguity" item 3 — no spec or matrix encoded the agent placement, so a contributor adding a sixth reviewer could place the imperative anywhere in the body and still pass Check 13c.
+
+#### I3. Captured-transcript acceptance criteria specified
+
+- `docs/history/transcripts/output-voice-worked-example.md` §"Captured transcripts" gained a new subsection: "Acceptance criteria for the captured transcript" — four criteria a real capture must meet: (1) source from a real, user-invoked verdict-led skill run, not authored or simulated; (2) tool-call evidence of the Read on `output-voice.md` between invocation and render; (3) voice-rule reflection in the rendered output (at least 3 of the 5 voice rules observably applied, OR absence of forbidden phrasings); (4) persistence at the canonical path with frontmatter naming source skill, date, runtime context. Disqualifying conditions named: partial captures (no tool-call log), reconstructed captures, simulated captures.
+- **Why this finding existed:** Four docs converged on "captured-not-authored worked transcript" as the gating artifact for invariant promotion (`output-voice.md`, `style-guide-rot.md`, `output-voice-worked-example.md`, this ledger), but none defined what "shows the Read call happening" required. Without acceptance criteria, the gate was wishful — readers would disagree about whether a given capture counted.
+
+#### I4 + minor polish on `output-voice.md`
+
+- **Top-of-file shape.** The opening blockquote (5-sentence normative paragraph) was downgraded to plain prose. The change is structural: the imperative form skills and agents copy is a single line of plain prose, never a multi-line blockquote. A new "Note on this doc's own form" paragraph immediately after the opener explains why the doc-introduction blockquote was retired. Flagged in I4 as a substrate-modeling concern (the doc that prescribes the imperative should model the form it prescribes).
+- **Promotion criterion 4 reworded.** "No further rewording of the imperative line is anticipated" (unfalsifiable as written) → "The imperative wording has not been reworded in the past two release cycles" (a checkable past-tense claim). This is structurally redundant with criterion 1 ("Two release cycles pass without the imperative wording changing") but stated as a different lens — criterion 1 is the cycle-count gate, criterion 4 is the same observation framed as the no-anticipated-rewording check. Both retained because together they make the gate self-evident: an unverifiable forward prediction becomes two checkable past-tense claims.
+- **Canonical home named.** A new paragraph after the opener explicitly names `output-voice.md` as the canonical home of the imperative literal — the wording every skill body, every reviewer agent body, and every validator grep target must match byte-for-byte. If the wording evolves, this doc updates first; the validator and 12 enforcement targets follow in the same pass.
+- **Captured-transcript pointer added** to promotion criterion 3, naming the four acceptance criteria added under I3 as the gating definition.
+
+### What this repair pass *did not* do
+
+- **No new gotcha for "instructions in render templates leak."** The reviewer's "Substrate gaps" finding noted this meta-lesson is broader than voice and worth a dedicated gotcha doc. The pass-1 ledger §"What this rewrite *did not* do" already deferred this; the deferral stands. The lesson is captured in the rewritten `style-guide-rot.md` §"Tempting wrong fix" (third entry) and §"Notes for future contributors" (the "imperatives go in body, never in render templates" rule). A standalone gotcha would duplicate without adding enforcement; defer until a second instance of the same mistake appears in a different domain.
+- **No matrix column for reviewer-agent imperative placement.** I2 was resolved by prose convention rather than a new column. The matrix already grew two columns in the pivot pass; a third tracking placement would add column count without adding enforcement (Check 13c doesn't verify placement either). Convention-with-review is the right tier for now.
+- **No further rewording of the imperative literal.** The literal remains `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` byte-for-byte. The validator's Check 13b/13c grep target is unchanged.
+
+### Files touched in repair pass 1
+
+- `docs/substrate/designs/reviewer-agent-template.md` — B1
+- `AGENTS.md` — B2
+- `ARCHITECTURE.md` — B2
+- `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` — B3
+- `docs/substrate/designs/skill-conventions.md` — B3
+- `docs/history/transcripts/output-voice-worked-example.md` — B3 + I3
+- `docs/substrate/matrices/skill-section-presence.md` — I1
+- `docs/substrate/matrices/reviewer-output-shape.md` — I2
+- `references/output-voice.md` — I4 + minor (top-of-file shape, promotion criterion 4, canonical home, captured-transcript pointer)
+- `docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md` — this ledger entry
+
+10 files. Validator green. Persisted review at [`docs/history/reviews/2026-05-04-voice-citation-imperative-rewrite-validation.md`](../reviews/2026-05-04-voice-citation-imperative-rewrite-validation.md) is the predecessor record of issues this pass addresses.
+
+### Ready for fresh-eyes review (pass 2)?
+
+**Yes.** All 3 blockers and all 4 important issues from pass 1's validation report have concrete repairs landed in the same worktree. The repair pass introduced no new design decisions — every change is either (a) extending an existing migration to a doc the pass-1 file list missed, (b) reconciling line-position prose to a single frame, or (c) tightening promotion criteria to be checkable. The reviewer should focus on whether any *new* drift was introduced by these repairs (especially the line-position reconciliation, which touched three docs) and whether the repaired AGENTS.md / ARCHITECTURE.md prose is now coherent with the rewritten `skill-conventions.md` and `output-voice.md`.

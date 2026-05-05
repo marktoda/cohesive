@@ -9,14 +9,16 @@ For every Cohesive skill in the **verdict-led** scope below, the canonical "Outp
 1. The outermost `#` title naming the rendered output (e.g. `# Change Cohesion Review`)
 2. The literal string `**Verdict:**` followed by a value drawn from the skill's verdict vocabulary
 
-`**Verdict:**` appears within the **first three non-blank lines after the outermost `#` title**. With the canonical title-then-verdict layout, `**Verdict:**` lands on line 1 after the title (or line 2 after a blank). The three-line allowance accommodates skills that introduce a thesis before the verdict in unusual cases; the canonical shape uses lines 1–2.
+`**Verdict:**` appears within the **first three non-blank lines after the outermost `#` title**. The canonical layout places `**Verdict:**` on the very next non-blank line — separated from the title by one blank line in the rendered output, so a reader sees title, blank, verdict in that order. The three-line allowance accommodates skills that introduce a thesis before the verdict in unusual cases; the canonical shape uses the immediately-next non-blank line.
+
+The frame is **non-blank lines**, counted from the line after the outermost `#` title. The validator and the worked transcript at `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md` both use this frame; counting raw lines (including blanks) is not normative because the blank between title and verdict is a rendering choice, not a positional constraint.
 
 The voice guide (`${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`) is loaded via a body-level imperative in the skill prose (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions" rule 1), not via a citation in the Output format block — the Output format block is a render template, and instructions placed inside it leak verbatim into user-facing output.
 
 The rule applies to:
 
 - The rendered chat output the skill produces
-- Any persisted artifact the skill writes (architecture review, brainstorm, audit report, change cohesion review, spec cohesion review). The persisted artifact's first `#` heading is the same title as the chat output's, and the same line-2 verdict rule applies.
+- Any persisted artifact the skill writes (architecture review, brainstorm, audit report, change cohesion review, spec cohesion review). The persisted artifact's first `#` heading is the same title as the chat output's, and the same first-three-non-blank-lines window applies.
 
 Both surfaces are enforced by the validator grep (see "Enforcement" below) — the grep reads SKILL.md Output format blocks, which are the source of truth for both surfaces.
 
@@ -55,7 +57,7 @@ This is the second named invariant Cohesive ships, joining `${CLAUDE_PLUGIN_ROOT
 3. **Voice-imperative check, agents (13c).** Every `agents/*-reviewer.md` body (outside fenced code blocks) contains the same imperative literal.
 4. **Anti-citation check, render templates (13d).** No `skills/*/SKILL.md` Output format code block and no `agents/*-reviewer.md` "How to structure your output" code block contains the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. Citation literals in render templates leak verbatim into user-facing output — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` §"Correct pattern" for why the imperative belongs in body prose, not in the render template. Failure message names this gotcha by path.
 
-Check 13a anchors on the outermost `#` title inside the Output format code block; the canonical layout (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions") places title on line 1 and `**Verdict:**` on line 2 (after a blank). Checks 13b/13c grep the SKILL.md/agent body outside code blocks for the imperative literal. Check 13d greps inside Output format / "How to structure your output" code blocks for absence of the citation literal — the inverse of the pre-pivot 13b/13c.
+Check 13a anchors on the outermost `#` title inside the Output format code block and verifies `**Verdict:**` appears within the first three non-blank lines after that title — the same frame the rule statement uses. Checks 13b/13c grep the SKILL.md/agent body outside code blocks for the imperative literal. Check 13d greps inside Output format / "How to structure your output" code blocks for absence of the citation literal — the inverse of the pre-pivot 13b/13c.
 
 Persisted artifacts inherit the verdict-leads rule because the SKILL.md Output format block is the source of truth for both chat render and persisted file. The validator runs locally and in CI on push/PR via [`.github/workflows/validate.yml`](../../../.github/workflows/validate.yml). A red check blocks merge — checks 13a/13b/13c/13d are part of the structural fence that promotes this invariant from "convention-with-script" to "convention-with-CI-enforcement."
 
