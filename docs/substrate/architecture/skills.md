@@ -11,7 +11,7 @@
 | `brainstorm-design` | Convert intent into chosen direction | Pressure-testing options against substrate | _none (user approves)_ |
 | `rewrite-specs` | Hard-rewrite docs to end state | Spec rewrite + delta ledger | _none (validate-rewrite verdicts)_ |
 | `validate-rewrite` | Fresh-eyes review of the rewrite | Coherence, completeness, enforceability check | Approved / Issues Found / Design Incoherent |
-| `implement-cohesively` | Land code that makes the rewrite true | Phase derivation; per-phase cross-review | Implemented / Drift / Incomplete |
+| `implement-cohesively` | Land code that makes the rewrite true | Phase derivation; per-phase cross-review | Implemented / Phase Drift / Substrate Drift / Aborted |
 | **Off-chain** | | | |
 | `review-codebase` | Architecture-altitude cohesion review | Multi-reviewer dispatch + synthesis | Healthy / Drifting / Incoherent |
 | `review-diff` | Cohesion review of a PR or working changes | Two-reviewer dispatch on bounded surface | Cohesion-Safe / Drifting / Cohesion-Breaking |
@@ -48,6 +48,24 @@ The skill set is the answer to several deliberate cuts. Each entry below explain
 ## Per-skill sections
 
 Each section follows the same shape: Purpose, Owns, Does not own, Inputs, Outputs, Why this shape. Sections are ordered by chain position, then off-chain, then router. The section heading is `### <skill-name>` matching the directory name under `${CLAUDE_PLUGIN_ROOT}/skills/`; this is the regex target for the named invariant `SKILL_DESIGN_DOC_SECTION` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md`).
+
+### Bootstrap status
+
+The per-skill design layer was authored retroactively against existing SKILL.md bodies during the 2026-05-05 architecture refactor. Every section in this doc started life as a *claim* about what the SKILL.md said, not a *spec* the SKILL.md was authored against. Sections earn **validated** status when a `cohesive:rewrite-specs` pass on that skill's purpose, ownership, or seams has run *with the design layer as prior substrate* — confirming that the skills.md claim and the SKILL.md body agree under fresh-eyes review.
+
+| Section | Status | Notes |
+|---|---|---|
+| `discover-substrate` | inherited | not yet validated against a forward rewrite |
+| `brainstorm-design` | inherited | not yet validated against a forward rewrite |
+| `rewrite-specs` | **validated** | the architecture refactor itself touched its SKILL.md (Step 1a addition); spec-cohesion-reviewer lens 13 confirmed parity through repair-pass-3 |
+| `validate-rewrite` | inherited | not yet validated; verdict vocabulary verified verbatim during repair pass 1 (B2) |
+| `implement-cohesively` | **validated** | validated by the 2026-05-05 review-diff repair pass; verdict vocabulary reconciled to four terminals (`Implemented / Phase Drift / Substrate Drift / Aborted`) |
+| `review-codebase` | inherited | not yet validated against a forward rewrite |
+| `review-diff` | inherited | not yet validated against a forward rewrite |
+| `audit-substrate` | inherited | not yet validated against a forward rewrite |
+| `cohesively` | inherited | not yet validated against a forward rewrite |
+
+Inherited sections may surface lens-2 (design-implementation agreement) and lens-14 (handoff contract consistency) drift on the first forward rewrite that touches them — this is the predicted bootstrap drift, not a defect of the inherited section. `spec-cohesion-reviewer` reads this table during dispatch (the agent's input set includes this doc) and applies extra skepticism to inherited-status sections. When a section earns validated status, update the row in the same delta ledger that triggered the validation.
 
 ### discover-substrate
 
@@ -139,7 +157,7 @@ Each section follows the same shape: Purpose, Owns, Does not own, Inputs, Output
 **Owns.**
 - Deriving phases from the design delta ledger per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/phase-derivation.md`.
 - Per-phase composition: `superpowers:writing-plans` (plan) → `superpowers:executing-plans` (TDD execution) → `delta-coverage-reviewer` (cross-review).
-- Returning a final verdict: **Implemented**, **Drift**, or **Incomplete**.
+- Returning one of four terminal verdicts: **Implemented** (substrate and code agree; hand off to `superpowers:finishing-a-development-branch`), **Phase Drift** (a per-phase cross-review failed after one repair cycle; resume `implement-cohesively`), **Substrate Drift** (final `cohesive:review-diff` flagged drift; route to `cohesive:rewrite-specs` to extend or revert), **Aborted** (user stopped before completion; no downstream skill).
 - Running `cohesive:review-diff` against the branch as the final substrate check.
 
 **Does not own.**

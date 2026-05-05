@@ -29,9 +29,19 @@ The graduation criterion that makes this rule a v0.1 invariant rather than a con
 
 ## Enforcement
 
-Reserved ordinal: **Check 15** in `scripts/validate_plugin.sh` (slot reserved during the architecture refactor; sits after Check 14 `PLUGIN_ROOT_PATHS`). Implementation lands during `implement-cohesively`; this invariant is graduated on day one because the regex is mechanical and the failure mode binary, but the bash check itself is not yet in `validate_plugin.sh` as of the architecture refactor commit. Until the check is implemented, the invariant is asserted by structural-fence claim plus reviewer judgment in `cohesive:review-codebase` and `cohesive:review-diff`; once implemented, the check enforces presence mechanically and CI blocks merge.
+**Check 15** in `scripts/validate_plugin.sh` enforces this invariant. The check sits after Check 14 (`PLUGIN_ROOT_PATHS`); CI blocks merge on a missing section.
 
-The check shape:
+This invariant is part of a two-fence model with `spec-cohesion-reviewer` lens 13. The fences own different concerns:
+
+| Fence | Owns | Triggered by | Site |
+|---|---|---|---|
+| Presence (this invariant) | "every skill dir has a `### <name>` section in skills.md" | every CI run on every push/PR | `scripts/validate_plugin.sh` Check 15 |
+| Content alignment (lens 13 in `spec-cohesion-reviewer`) | "design-doc and SKILL.md agree on Purpose / Owns / Inputs / Outputs / verdict vocabulary" | `cohesive:validate-rewrite` dispatches with classification Design or Mixed | `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md` lens 13 |
+| Section shape (governed by `skill-shape.md` §"Per-skill section shape") | "the six-slot shape is honored: Purpose / Owns / Does not own / Inputs / Outputs / Why this shape" | reviewer judgment during `cohesive:review-codebase` / `cohesive:review-diff` | reviewer-judged convention; no mechanical fence |
+
+Each fence states what it does *not* check via this table; a future contributor adding a sibling check picks the row whose concern matches and adds enforcement on that surface.
+
+The bash check shape:
 
 ```bash
 # 15. SKILL_DESIGN_DOC_SECTION: every directory under skills/ has a `### <name>`
@@ -53,6 +63,8 @@ The validator runs locally and in CI on push/PR via `.github/workflows/validate.
 - **Section nesting changes.** If a future revision of skills.md groups skills under h3 banners (e.g., `### Chain skills` / `#### discover-substrate`), the regex breaks. Mitigation: skills.md §"Section growth policy" documents the per-section anchor as the regex target; any restructuring updates the validator regex in the same pass.
 - **Section-with-no-skill-dir.** A section for a planned skill exists in skills.md but the directory hasn't been created. The check is one-direction; this is allowed. Spec-cohesion-reviewer flags during validate-rewrite if a planned section drifts beyond what's reasonable.
 - **Skill renamed without section rename.** Renaming `skills/foo/` to `skills/bar/` requires also renaming the section heading. The validator catches this on the next CI run; the rename pass must update both surfaces.
+- **First per-skill extraction silently breaks Check 15.** When a per-skill section grows past ~80 lines and earns its own file at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills/<name>.md` (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` §"Section growth policy"), the regex target shifts from `^### <name>$` in `skills.md` to file existence at the extracted path. The current Check 15 hardcodes `skills.md`; the first extraction breaks the validator until the regex is updated. Mitigation: the first-extraction checklist row below pairs the migration with a validator update in the same commit.
+- **Bootstrap-inherited section drift.** Sections marked `inherited` in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` §"Bootstrap status" were authored retroactively against existing SKILL.md bodies; lens 13 (design-implementation agreement) and lens 14 (handoff contract consistency) may surface drift on the first forward rewrite that touches them. This is predicted bootstrap drift, not a defect of the inherited section. Mitigation: `spec-cohesion-reviewer` reads the bootstrap-status table during dispatch and applies extra skepticism to inherited-status sections; sections earn validated status when a forward `cohesive:rewrite-specs` pass uses the design layer as prior substrate.
 
 ## Review checklist
 
@@ -63,7 +75,15 @@ When adding or renaming a skill:
 - [ ] Is the at-a-glance table at the top of skills.md updated with a row for the new/renamed skill?
 - [ ] Are inbound and outbound handoffs added to `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` (if chain or re-entry)?
 - [ ] If router-dispatchable, is a cell added to `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`?
+- [ ] Is the §"Bootstrap status" table in `skills.md` updated with the new section (status: `inherited` until the first forward rewrite validates it)?
 - [ ] Does `bash scripts/validate_plugin.sh` pass?
+
+When extracting a section to its own file (per `skills.md` §"Section growth policy"):
+
+- [ ] Does `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills/<name>.md` exist with the extracted content?
+- [ ] Is the parent section in `skills.md` replaced with a one-paragraph stub linking out?
+- [ ] Is `scripts/validate_plugin.sh` Check 15 updated so the regex accepts either `^### <name>$` in `skills.md` *or* file existence at `architecture/skills/<name>.md`?
+- [ ] Does `bash scripts/validate_plugin.sh` pass after the extraction?
 
 ## Related
 
@@ -75,3 +95,5 @@ When adding or renaming a skill:
 ## History
 
 - 2026-05-05 — Created during the architecture refactor (see `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-05-architecture-refactor.md`). Graduated to invariant on day one because the regex is mechanical and the failure mode is binary; promotion criteria met by structural simplicity rather than accumulated dogfood evidence.
+- 2026-05-05 — `implement-cohesively` Phase 1 landed Check 15 in `scripts/validate_plugin.sh` (commit `6cdae42`). The §"Enforcement" section's "claim-before-implementation" caveat is retired; the check is now structurally enforced via CI. This pattern (invariant doc claims enforcement before the check ships) is documented as a scar in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/invariant-claimed-before-enforced.md`.
+- 2026-05-05 — Architecture refactor review-diff repair pass: added the two-fence model table to §"Enforcement" naming the boundary between this invariant (presence) and `spec-cohesion-reviewer` lens 13 (content alignment); added the first-per-skill-extraction bypass risk and matching review-checklist rows; added the bootstrap-inherited section drift bypass risk; cited the §"Bootstrap status" table in skills.md.

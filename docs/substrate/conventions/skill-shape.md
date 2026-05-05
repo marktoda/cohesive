@@ -27,6 +27,8 @@ Design changes update [`docs/substrate/architecture/skills.md`](../architecture/
 
 Default to **Mixed** when the classification is ambiguous. The cost of over-classifying is one additional doc edit; the cost of under-classifying is a substrate-implementation collapse. The `SKILL_DESIGN_DOC_SECTION` named invariant (see [`docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md`](../invariants/SKILL_DESIGN_DOC_SECTION.md)) ensures the design layer exists for every skill; this rule is what keeps it load-bearing rather than aspirational.
 
+**Design layer is canonical for ownership text.** When the same ownership claim could appear in both `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` (a per-skill section's Owns/Does-not-own bullets) and the SKILL.md body (Hard constraints, "What this skill is *not*" bullets, frontmatter description), the design layer is canonical. The SKILL.md body should reference rather than duplicate ("see `architecture/skills.md` §`<name>` Owns") — verbatim copies in two places drift across release cycles. `spec-cohesion-reviewer` lens 13 checks both directions: design-layer claims must appear in SKILL.md (or be referenced); SKILL.md ownership claims must appear in the design layer (or be removed as duplication).
+
 ## Frontmatter
 
 Every `skills/<name>/SKILL.md` opens with YAML frontmatter:

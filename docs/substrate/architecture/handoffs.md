@@ -108,6 +108,50 @@ When `validate-rewrite` returns **Design Incoherent**, the rewrite cannot be rep
 
 `review-diff` operates on a PR or working changes. Its findings re-enter the user's git workflow (fix the PR), not the Cohesive chain. The footer recommends specific fixes; the user makes them.
 
+## Chain exits (implement-cohesively terminal verdicts)
+
+`implement-cohesively` is the chain's terminal skill. It returns one of four verdicts; each routes to a different downstream action. These are not chain transitions (no Cohesive skill consumes them as a prereq verdict) but they are part of the chain-edge contract that `spec-cohesion-reviewer` lens 14 verifies for parity with the SKILL.md vocabulary.
+
+### implement-cohesively → finishing-a-development-branch (Implemented)
+
+**Verdict gate.** **Implemented** — every phase's `delta-coverage-reviewer` returned Covered, the final `cohesive:review-diff` returned Pass or Pass with notes, and the branch is ready to merge.
+
+**Downstream skill.** `superpowers:finishing-a-development-branch` (recommended, not invoked — branch finishing is a user action per the Cohesive↔Superpowers seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`).
+
+**What the downstream must not re-derive.** The implementation's substrate alignment. The Implemented verdict is the substrate-side check; finishing-a-development-branch handles merge mechanics.
+
+**Failure mode if the contract drifts.** `implement-cohesively` auto-invokes branch finishing instead of recommending it; user loses the explicit hand-off and the branch merges without their final approval. Detection: structure-reviewer flags auto-invocation as a Cohesive↔Superpowers seam violation.
+
+### implement-cohesively → implement-cohesively resume (Phase Drift)
+
+**Verdict gate.** **Phase Drift** — a per-phase `delta-coverage-reviewer` returned Drift or Incomplete after one repair cycle (the Phase 2c escalation rule per `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md`).
+
+**Downstream skill.** `cohesive:implement-cohesively` (resume) — the user repairs the flagged phase by hand or via a focused `superpowers:writing-plans` repair plan, then re-invokes `implement-cohesively` which picks up at the failed phase.
+
+**What the downstream must not re-derive.** The phase derivation table from Phase 1. Resuming does not re-derive phases; it picks up from the recorded coverage state.
+
+**Failure mode if the contract drifts.** Resumption re-derives phases from scratch and produces a different phase ordering, decoupling commit history from the per-phase plans. Detection: per-phase commit messages cite plan paths and stable IDs (`IMPLEMENTATION_PLAN_COVERS_DELTA`); a re-derivation that breaks that grep auditing is the symptom.
+
+### implement-cohesively → rewrite-specs (Substrate Drift)
+
+**Verdict gate.** **Substrate Drift** — the final `cohesive:review-diff` returned Needs substrate, Risky, or Block; the implementation introduced behavior not covered by the rewrite, or invariant violations that aren't repairable in code alone.
+
+**Downstream skill.** `cohesive:rewrite-specs` — extend the rewrite to cover the implementation that landed (and re-validate), or revert the divergent code (and re-implement).
+
+**What the downstream must not re-derive.** The original approved direction. The Substrate Drift verdict means the rewrite was incomplete, not that the chosen direction was wrong; the repair extends scope rather than reopening design.
+
+**Failure mode if the contract drifts.** User reverts the implementation without extending the rewrite, leaving the substrate gap that produced the drift unaddressed; the next implementation pass repeats the drift. Detection: validate-rewrite on the repaired rewrite shows the drifted entries are now covered by the ledger; `delta-coverage-reviewer` on the next implementation pass returns Covered.
+
+### implement-cohesively → out of chain (Aborted)
+
+**Verdict gate.** **Aborted** — the user stopped the implementation pass before completion (e.g., scope reassessment, external blocker). No downstream Cohesive skill applies.
+
+**Downstream skill.** None. The branch state is whatever the last successful phase committed; the user decides whether to discard the worktree, leave it for later, or invoke `cohesive:rewrite-specs` to reduce scope before resuming.
+
+**What the downstream must not re-derive.** N/a — Aborted is a leave-the-state-as-is verdict.
+
+**Failure mode if the contract drifts.** The skill auto-recovers (resumes phases unsolicited) when the user explicitly stopped. Detection: implement-cohesively's Phase 2c escalation rule explicitly stops at Phase Drift; Aborted is a user action surfaced to the user, not an internal recovery state.
+
 ## What this doc does not cover
 
 - **Router dispatches** (user input → first chain skill). See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`.
@@ -118,14 +162,15 @@ When `validate-rewrite` returns **Design Incoherent**, the rewrite cannot be rep
 
 ## Adding a new chain skill or re-entry edge
 
-When the brainstorm pressure surfaces a new chain skill or re-entry edge:
+The canonical entry point for adding a new skill is `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` §"Adding a new skill" — its sequence drives all four substrate updates. This section's steps are subsumed by that sequence; follow the skills.md sequence and return here only when the skill genuinely is *not* a new chain participant (e.g., a new diagnostic skill that produces its own re-entry edges without new chain transitions).
 
-1. Add a per-handoff contract section here (artifact, persistence, verdict gate, must-not-re-derive, failure mode).
+For pure handoff-contract changes that don't add a skill (e.g., adding a re-entry edge, adjusting a verdict gate, refining a must-not-re-derive clause):
+
+1. Add or modify the per-handoff contract section here (artifact, persistence, verdict gate, must-not-re-derive, failure mode).
 2. Update the chain diagram in §"The chain" if topology changes.
-3. Update `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` per its §"Adding a new skill".
-4. Update `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` if the skill is router-dispatchable.
+3. Update `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` if the change touches router-dispatched verdicts.
 
-The contract sections are normative. Drift between this doc and SKILL.md bodies is what `spec-cohesion-reviewer` watches for during `validate-rewrite` — specifically lens 3 (handoff contract consistency), which verifies the named verdict gate appears identically in the upstream SKILL.md's verdict vocabulary, the downstream SKILL.md's prereq check, and `router.md`'s dispatch contract row if router-dispatchable.
+The contract sections are normative. Drift between this doc and SKILL.md bodies is what `spec-cohesion-reviewer` watches for during `validate-rewrite` — specifically lens 14 (handoff contract consistency), which verifies the named verdict gate appears identically in the upstream SKILL.md's verdict vocabulary, the downstream SKILL.md's prereq check, and `router.md`'s dispatch contract row if router-dispatchable. Lens 14 covers gate verdicts only; non-gating terminal verdicts (the `Aborted` shape) are covered by lens 13 in `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md`.
 
 ## Related substrate
 
