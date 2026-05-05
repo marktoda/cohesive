@@ -55,7 +55,7 @@ This is the second named invariant Cohesive ships, joining `${CLAUDE_PLUGIN_ROOT
 
 All three checks anchor on the **outermost `#` title inside a fenced code block**. The canonical layout (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions") places title on line 1 of the rendered output, citation on line 2 (after a blank), and verdict on line 3 (after a blank). The greps verify *citation present in lines 1–3 after title* and *verdict present in lines 1–3 after title* — they do not enforce the line-by-line ordering between citation and verdict; that ordering is the worked-transcript exemplar (`${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md`), not a structural check. A skill author who writes `# title` / `**Verdict:**` / `> Voice and density: …` (verdict before citation) passes the grep; a future tightening could require strict ordering once the worked-transcript shape has been dogfooded across enough real renders.
 
-Persisted artifacts inherit the rule because the SKILL.md Output format block is the source of truth for both chat render and persisted file. The validator runs locally. CI is out of scope for v0.1.
+Persisted artifacts inherit the rule because the SKILL.md Output format block is the source of truth for both chat render and persisted file. The validator runs locally and in CI on push/PR via [`.github/workflows/validate.yml`](../../../.github/workflows/validate.yml). A red check blocks merge — checks 13a/13b/13c are part of the structural fence that promotes this invariant from "convention-with-script" to "convention-with-CI-enforcement."
 
 ## Known bypass risks
 
