@@ -382,3 +382,34 @@ These three are filed in this ledger so the next reviewer doesn't re-find them a
 ### Ready for fresh-eyes review (fifth pass)?
 
 **Yes** — re-run `cohesive:validate-rewrite`. All four pass-4 findings are closed; the substrate gaps are filed as deferred work. The verdict on pass 5 should be Approved unless the reviewer surfaces something the pass-4 review missed.
+
+---
+
+## Repair pass 5 (2026-05-04)
+
+The fifth `cohesive:validate-rewrite` run returned **Issues Found** with one blocker (B1) and two minor issues (I1, I2). The validation report is at [`../reviews/2026-05-04-cut-anchor-pin-rewrite-validation-pass5.md`](../reviews/2026-05-04-cut-anchor-pin-rewrite-validation-pass5.md). Pass-5 was the cleanest review yet — three single-line edits plus one substrate-gap closure.
+
+### Issues closed
+
+- **B1 (Blocker) — Worked transcript renders non-canonical voice-citation literal.** `output-voice-worked-example.md:73` wrapped the citation path in backticks: `` > Voice and density: `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` ``. Every spec doc (VERDICT_BEFORE_EVIDENCE.md, skill-conventions.md, output-voice.md, style-guide-rot.md) and the planned validator grep all key on the bare form without backticks. Dropped the backticks. The worked transcript now demonstrates the byte-exact literal the grep verifies. This was the textbook failure mode `style-guide-rot.md` was authored to prevent — a rewrite warning against drift while drifting in its own demonstration.
+- **I1 (Medium) — Worked transcript provenance contradicted itself.** Line 4 said "captured during the cut-anchor-pin rewrite," lines 127/142 said "authored, not captured." Reconciled line 4 to "authored side-by-side example for the cut-anchor-pin rewrite. Real user-request shape; both renders authored to compare. A real capture is queued — see §Captured transcripts (queued) below." The frontmatter now matches the body.
+- **I2 (Low) — PLUGIN_ROOT_PATHS canonical-pins list didn't cross-note shared ownership.** Pins 5 (verdict-leads grep) and 6 (voice-citation grep) are the surface-level enforcement of `VERDICT_BEFORE_EVIDENCE` and the voice-citation convention respectively. Added a "Shared ownership" paragraph after the canonical pin enumeration explaining that drift between PLUGIN_ROOT_PATHS.md's list and VERDICT_BEFORE_EVIDENCE.md's §Enforcement is a substrate failure, and naming the update protocol (update both together when scope changes).
+
+### Substrate gap closed
+
+- **Worked-example literal must match validator grep target.** Pass-5 review surfaced the gap: nothing in the substrate said "the form a worked example demonstrates must be byte-exact with the form a validator grep verifies." Closed by adding a new bullet to `style-guide-rot.md` §"Notes for future contributors" naming the rule and citing pass-5 as the worked example of the regression. Future contributors editing either side (worked example or spec) now have explicit substrate guidance to check literal-form parity.
+
+### Files touched in repair pass 5
+
+- `docs/history/transcripts/output-voice-worked-example.md` — line 4 (provenance reconciled), line 73 (backticks dropped)
+- `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` — added "Shared ownership" paragraph after the canonical pin enumeration
+- `docs/substrate/gotchas/style-guide-rot.md` — added the "Worked-example literal must match the validator grep" bullet in §"Notes for future contributors"
+
+### Issues acknowledged but not closed in this pass
+
+- (The three deferred gaps from pass 4 — captured-transcripts task, "who reads it, when?" worked example, output-voice/gotchas coupling note — remain explicitly deferred per the ledger.)
+- No new substrate gaps surfaced by pass 5.
+
+### Ready for fresh-eyes review (sixth pass)?
+
+**Yes** — re-run `cohesive:validate-rewrite`. With B1, I1, and I2 closed plus the substrate-gap closure that names the lesson, the verdict on pass 6 should be **Approved**. If not, the issue surfaces will be sixth-order — the kind of finding that justifies merging to main and addressing in a separate substrate iteration.

@@ -51,6 +51,8 @@ This is a real correctness contract. Unlike v0.1's other rules (output-shape, pr
 
 None of the convention pins above (1–4, 6) are named invariants — they remain conventions. They share the same enforcement surface (`validate_plugin.sh`) as the two named invariants (this one, and `VERDICT_BEFORE_EVIDENCE`).
 
+**Shared ownership:** pins 5 and 6 are the surface-level enforcement of `VERDICT_BEFORE_EVIDENCE` (verdict-leads grep) and the voice-citation convention (the literal-citation grep) respectively. If `VERDICT_BEFORE_EVIDENCE`'s scope changes (e.g. a new verdict-led skill is added or removed), update its own §"Enforcement" *and* this canonical list together — both docs describe the same grep but from different angles, and drift between them is a substrate failure.
+
 The validator runs locally. CI is out of scope for v0.1.
 
 ## Known bypass risks

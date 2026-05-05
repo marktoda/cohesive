@@ -1,7 +1,7 @@
 # Output voice — worked example
 
 **Date:** 2026-05-04
-**Source:** dogfood transcript captured during the `cut-anchor-pin` rewrite. Real user request, both renders authored to compare.
+**Source:** authored side-by-side example for the `cut-anchor-pin` rewrite. Real user-request shape; both renders authored to compare. A real capture is queued — see §"Captured transcripts (queued)" below.
 **Companion:** `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`
 
 This is the load-bearing artifact for the voice guide. Rules describe shape; this transcript shows it. Read this when authoring or revising a skill's Output format block — examples teach voice, prose doesn't.
@@ -70,7 +70,7 @@ Both renders below assume `discover-substrate` and the two reviewer agents have 
 
 > # Change Cohesion Review
 >
-> > Voice and density: `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`
+> > Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 >
 > **Verdict:** Pass with notes
 >
