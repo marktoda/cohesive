@@ -238,3 +238,63 @@ Unified frame: **first three non-blank lines after the outermost `#` title** —
 ### Ready for fresh-eyes review (pass 2)?
 
 **Yes.** All 3 blockers and all 4 important issues from pass 1's validation report have concrete repairs landed in the same worktree. The repair pass introduced no new design decisions — every change is either (a) extending an existing migration to a doc the pass-1 file list missed, (b) reconciling line-position prose to a single frame, or (c) tightening promotion criteria to be checkable. The reviewer should focus on whether any *new* drift was introduced by these repairs (especially the line-position reconciliation, which touched three docs) and whether the repaired AGENTS.md / ARCHITECTURE.md prose is now coherent with the rewritten `skill-conventions.md` and `output-voice.md`.
+
+---
+
+## Repair pass 2 (post pass-2 validation)
+
+**Date:** 2026-05-05
+**Predecessor:** [`docs/history/reviews/2026-05-05-voice-citation-imperative-rewrite-validation-pass2.md`](../reviews/2026-05-05-voice-citation-imperative-rewrite-validation-pass2.md) (verdict: Issues Found, 3 blockers + 2 important issues, all localized prose edits).
+
+The pass-2 review found that repair pass 1 closed 6 of 7 predecessor findings concretely but missed one co-resident reference (`PLUGIN_ROOT_PATHS.md:9`), failed to fully unify B3 at one of the five sites it enumerated (`output-voice-worked-example.md:97`), and introduced a new placement contradiction by adopting one canonical agent-placement statement in the new specs without aligning the existing gotcha (`style-guide-rot.md:37`). Plus two important issues: criteria 1 and 4 in `output-voice.md` had collapsed into near-duplicates, and the `Voice` matrix column's exemption pointer didn't resolve cleanly in `skill-conventions.md` §"When sections may differ".
+
+This pass closes all 5. No new design decisions; every change is either a localized prose alignment to an existing canonical wording or a structural cleanup of redundancy the pass-2 review surfaced.
+
+### Blockers repaired
+
+#### B1-residual-r2. `PLUGIN_ROOT_PATHS.md:9` aligned to AGENTS.md:47 phrasing
+
+- **Before:** Line 9's enumeration of demoted v0.1 conventions read "Other v0.1 rules (chat-render header-depth cap, density budgets, forbidden phrasings, **voice-citation pin**, fresh-eyes preamble…)" — the pre-pivot phrase that B2 of pass-1 already retired in AGENTS.md and ARCHITECTURE.md.
+- **After:** Line 9 reads "voice-imperative pin (body prose), anti-citation lint (render templates)" — byte-for-byte aligned with AGENTS.md:47 and ARCHITECTURE.md:53.
+- **Why this finding existed:** Pass 1 correctly migrated the body of `PLUGIN_ROOT_PATHS.md` (lines 47–48 became "Voice-imperative check" + "Anti-citation check") but missed the intro paragraph at line 9 in the same doc — same drift class as B2, missed because the file list keyed on the convention-pin enumeration (lines 36–53), not on the intro.
+
+#### B3-residual-r2. `output-voice-worked-example.md:97` reframed to separate render-position from validator-frame
+
+- **Before:** "Verdict appears on the first non-blank line after the title (the canonical frame the validator and `VERDICT_BEFORE_EVIDENCE.md` use…)" — a category error attributing "first non-blank line" (this render's specific position) to the validator (which actually uses "first three").
+- **After:** "Verdict appears within the first three non-blank lines after the title (the frame the validator and `VERDICT_BEFORE_EVIDENCE.md` use…). In this render it lands on the first non-blank line — the canonical shape; the three-line allowance accommodates skills that introduce a thesis line before the verdict." Separates the concrete observation from the normative frame.
+- **Why this finding existed:** Pass 1's repair of B3 reconciled four of five sites but tightened the worked-transcript line in the wrong direction — collapsed the validator's window to the render's specific position, which made the doc say the validator counts narrower than it does.
+
+#### Drift-1-r2. `style-guide-rot.md:37` aligned to canonical agent-placement wording
+
+- **Before:** "in agents, in a 'Voice' subsection of the system prompt" — a phrasing that suggests agents carry a `## Voice` heading parallel to skills.
+- **After:** "in agents, as the opening prose paragraph of the 'How to structure your output' section, above the code block." Plus a new sentence naming the canonical homes: skill-side placement in `skill-conventions.md` §"Output format conventions" rule 1; agent-side placement in `reviewer-agent-template.md` §"Output format conventions" rule 1, with per-agent compliance tracked at `reviewer-output-shape.md`. style-guide-rot.md no longer claims to be the canonical home of placement; it links to where the canonical home lives.
+- **Why this finding existed:** Pass 1 introduced this drift by adopting one canonical placement statement in `reviewer-agent-template.md` and `reviewer-output-shape.md` without aligning `style-guide-rot.md`, which the pass-1 file list had not flagged as needing edits in the placement direction (it was in the file list for §"Correct pattern" rewrites, but the imperative-placement paragraph at line 37 was authored fresh in pass 1 with the wrong shape). The validator's failure messages link to style-guide-rot.md, so a contributor following a Check 13c failure would have read the wrong placement.
+
+### Important issues repaired
+
+#### I-new-1. `output-voice.md` promotion criteria collapsed from 4 to 3
+
+- **Before:** Four criteria. Criterion 1 ("Two release cycles pass without the imperative wording changing") and criterion 4 ("The imperative wording has not been reworded in the past two release cycles") tested nearly the same thing. The pass-1 ledger acknowledged the redundancy but retained both as different lenses.
+- **After:** Three criteria — wording stability, caught regression, captured-not-authored worked transcript — each named with a bold lead-in and a checkable definition. The retained "wording stability" criterion absorbs both pass-1 criteria 1 and 4 into one bullet that names the dating mechanism (the imperative literal's last edit) explicitly.
+- **Why this finding existed:** Pass 1's I4 repair tightened criterion 4 from unfalsifiable to checkable, but the repair produced two near-identical past-tense criteria. Three gates dressed as four was the rot the pass-2 review flagged.
+
+#### I-new-2. `skill-conventions.md` §"When sections may differ" gains the Voice-section exemption
+
+- **Before:** §"When sections may differ" enumerated three deviations (router's Process replacement, discover-substrate's When-to-invoke replacement, optional Token discipline). The new `## Voice` exemption for the router was documented in §"Output format conventions" rule 1 but not in this section, which is where the matrix legend at `skill-section-presence.md:11` directs readers to verify exemptions.
+- **After:** A new bullet lists the router's Voice-section omission: "The router (`cohesively`) omits the `## Voice` section. Its render budget is 1–2 sentences and its dispatched subskills carry the voice load on its behalf — see §'Output format conventions' rule 1." A reader following the matrix legend's pointer now finds the exemption named alongside the other documented section deviations.
+- **Why this finding existed:** Pass 1's I1 repair added the matrix column and documented the exemption rationale in rule 1 — but the matrix legend's pointer anchored on §"When sections may differ", a different section. The exemption existed but the pointer didn't resolve cleanly.
+
+### Files touched in repair pass 2
+
+- `docs/substrate/gotchas/style-guide-rot.md:37` — Drift-1-r2 (agent placement)
+- `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md:9` — B1-residual-r2 (intro phrasing)
+- `docs/history/transcripts/output-voice-worked-example.md:97` — B3-residual-r2 (render-frame separation)
+- `references/output-voice.md` — I-new-1 (promotion criteria collapsed 4→3)
+- `docs/substrate/designs/skill-conventions.md` — I-new-2 (Voice-section exemption added to §"When sections may differ")
+- `docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md` — this ledger entry
+
+6 files. Validator green. Persisted review at [`docs/history/reviews/2026-05-05-voice-citation-imperative-rewrite-validation-pass2.md`](../reviews/2026-05-05-voice-citation-imperative-rewrite-validation-pass2.md) is the predecessor record.
+
+### Ready for fresh-eyes review (pass 3)?
+
+**Yes.** All 3 blockers and all 2 important issues from pass-2's validation report have concrete repairs. No new specs introduced; every change aligns existing prose to a canonical wording that already existed elsewhere in the substrate. The repair surface was 5 prose edits across 5 files plus the ledger entry. The reviewer should focus on whether the canonical-home claim now resolves consistently across all docs (style-guide-rot.md → reviewer-agent-template.md → reviewer-output-shape.md for agent placement; skill-conventions.md §"When sections may differ" → matrix legend for the router's Voice exemption) and whether the trimmed promotion criteria in `output-voice.md` are checkable as written.

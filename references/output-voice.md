@@ -87,12 +87,11 @@ The voice-imperative requirement is grep-pinned by `validate_plugin.sh` (Checks 
 
 Promotion criteria (per [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md)):
 
-- Two release cycles pass without the imperative wording changing (checkable: the literal in this doc and in `validate_plugin.sh` Checks 13b/13c is unchanged across the dated boundary of two releases)
-- A real regression occurs (a skill ships without the imperative, validator catches it, the catch is judged valuable)
-- A captured-not-authored worked transcript exists demonstrating the model executes the Read call at render time, meeting the four acceptance criteria in [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md) §"Acceptance criteria for the captured transcript"
-- The imperative wording has not been reworded in the past two release cycles (the same observation as criterion 1, stated as a checkable past-tense claim rather than a forward prediction — promotion forecloses *future* rewording, but the gate observes *past* stability)
+- **Wording stability.** The imperative wording in this doc and in `validate_plugin.sh` Checks 13b/13c is unchanged across two release cycles, dated by the imperative literal's last edit in this file.
+- **Caught regression.** A real regression has occurred — a skill or agent shipped without the imperative (or with the citation literal in a render template), the validator caught it via Check 13b/13c/13d, and the catch was judged valuable.
+- **Captured-not-authored worked transcript.** A real-session transcript meeting the four acceptance criteria in [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md) §"Acceptance criteria for the captured transcript" demonstrates the model executes the Read call at render time.
 
-When all four hold, promote. Until then, the rule lives as convention-with-grep — the grep enforces *current* wording while the substrate retains the option to evolve it. This is the pattern AGENTS.md §"The named invariants" describes as "convention-with-enforcement, distinct from named-invariant status."
+When all three hold, promote. Until then, the rule lives as convention-with-grep — the grep enforces *current* wording while the substrate retains the option to evolve it. This is the pattern AGENTS.md §"The named invariants" describes as "convention-with-enforcement, distinct from named-invariant status."
 
 ## How this guide is used
 

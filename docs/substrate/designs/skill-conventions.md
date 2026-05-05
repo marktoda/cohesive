@@ -197,6 +197,7 @@ For chat-rendered output: read [`output-voice.md`](../../../references/output-vo
 These deviations are observed and accepted in v0.1:
 
 - The router (`cohesively`) replaces "Process" with "Routes" and adds a "Routing decision logic" section. Routers route; they don't have a single linear process. The router may also use "Required behavior" instead of "Hard constraints" given its different shape.
+- The router (`cohesively`) omits the `## Voice` section. Its render budget is 1–2 sentences and its dispatched subskills carry the voice load on its behalf — see §"Output format conventions" rule 1. The matrix at [`docs/substrate/matrices/skill-section-presence.md`](../matrices/skill-section-presence.md) records this exemption with a `~` cell in the `Voice` column.
 - The substrate-discovery skill (`discover-substrate`) uses "When to invoke" + "Inputs" + "Process" instead of "Hard constraints" + "Process." It is a no-dispatch utility skill that has prereq-shaped guidance to give rather than process-internal constraints to enforce. The "When to invoke" section is the load-bearing one for callers.
 - A skill may add a "## Token discipline" section if its outputs can grow large.
 

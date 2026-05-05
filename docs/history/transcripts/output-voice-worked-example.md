@@ -94,7 +94,7 @@ Both renders below assume `discover-substrate` and the two reviewer agents have 
 
 **Why this works:**
 
-- Verdict appears on the first non-blank line after the title (the canonical frame the validator and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` use — counting non-blank lines, not raw line numbers, because the blank between title and verdict is a rendering choice). Reader knows the answer immediately.
+- Verdict appears within the first three non-blank lines after the title (the frame the validator and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` use — counting non-blank lines, not raw line numbers, because the blank between title and verdict is a rendering choice). In this render it lands on the first non-blank line — the canonical shape; the three-line allowance accommodates skills that introduce a thesis line before the verdict. Reader knows the answer immediately.
 - No instruction lines in user-facing output. The voice guide that shaped this render was loaded from a body-level imperative in the skill — `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` — not from a citation inside the render template. Citations in render templates leak verbatim to users (the v0.1 pre-pivot mistake; see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` §"Correct pattern").
 - 3 levels of header nesting maximum, all `##` or `###`.
 - Findings are a table — `Severity / Area / Finding / Suggested substrate` per row, ranked by leverage. Reader scans the column they care about.
