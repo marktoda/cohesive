@@ -30,19 +30,21 @@ This distinction matters most for `cohesive:rewrite-specs`. Per its Hard Constra
 
 The same line applies to `cohesive:review-codebase` and `cohesive:review-diff`: substrate findings recommend substrate repairs (a new invariant, a missing matrix, a gotcha to write); implementation findings recommend `superpowers:writing-plans` to bring runtime artifacts into alignment.
 
-## The one named invariant
+## The named invariants
 
-Cohesive ships v0.1 with a single named invariant:
+Cohesive ships v0.1 with two named invariants:
 
-- **`PLUGIN_ROOT_PATHS`** — every internal path reference uses `${CLAUDE_PLUGIN_ROOT}`. Never a hardcoded `/home/...` or other absolute path. Doc: [`docs/substrate/invariants/PLUGIN_ROOT_PATHS.md`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md). Enforced by `scripts/validate_plugin.sh`.
+- **`PLUGIN_ROOT_PATHS`** — every internal path reference uses `${CLAUDE_PLUGIN_ROOT}`. Never a hardcoded `/home/...` or other absolute path. Doc: [`docs/substrate/invariants/PLUGIN_ROOT_PATHS.md`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md). Enforced by `scripts/validate_plugin.sh`. Failure mode: the plugin breaks for users who aren't the author.
+- **`VERDICT_BEFORE_EVIDENCE`** — every verdict-led skill (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`) opens its Output format block with `**Verdict:**` within the first three non-blank lines after the section header. Doc: [`docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`](docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md). Enforced by `scripts/validate_plugin.sh`. Failure mode: chat outputs bury the verdict, the user-reported wordiness scar — see [`docs/substrate/gotchas/wordy-output.md`](docs/substrate/gotchas/wordy-output.md).
 
-This is the one rule with a real runtime failure mode (a violation breaks the plugin for users who aren't the author). Other v0.1 rules — skill-output shape, fresh-eyes preamble, router announcement form, clarifying-question discipline — live as conventions in [`references/skill-conventions.md`](references/skill-conventions.md) and [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md). They are real rules, but they are not yet structurally enforced and may shift as the methodology accumulates real institutional knowledge from running on real codebases. Promoting one to a named invariant is a deliberate act, not a reflex.
+These two are the rules with concrete failure modes that justify mechanical enforcement. Other v0.1 rules — chat-render header-depth cap, density budgets, forbidden phrasings, voice-citation pin, fresh-eyes preamble, router announcement form, clarifying-question discipline — live as conventions in [`references/skill-conventions.md`](references/skill-conventions.md), [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md), and [`references/output-voice.md`](references/output-voice.md). Several of those conventions are still grep-pinned by `validate_plugin.sh` (the voice citation, the recommended-next footer, the fresh-eyes preamble, the canonical prereq question) — pin status is convention-with-enforcement, distinct from named-invariant status. Promoting a convention to a named invariant is a deliberate act, not a reflex; it requires both a clean grep and a real failure mode.
 
 ## Convention references
 
 Before writing or modifying components, read the relevant convention doc:
 
-- **New or modified skill (SKILL.md)** → [`references/skill-conventions.md`](references/skill-conventions.md). Names the required body sections, frontmatter shape, output format conventions, and red flags. Carries the v0.1 conventions for clarifying questions, router announcements, and recommended-next-skill output blocks.
+- **New or modified skill (SKILL.md)** → [`references/skill-conventions.md`](references/skill-conventions.md). Names the required body sections, frontmatter shape, output format conventions (which now include the voice-citation pin and the verdict-leads invariant), and red flags. Carries the v0.1 conventions for clarifying questions, router announcements, and recommended-next-skill output blocks.
+- **Authoring or revising any chat-rendered output (Output format block, reviewer-agent finding shape, router announcement)** → [`references/output-voice.md`](references/output-voice.md) and the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](docs/history/transcripts/output-voice-worked-example.md). Voice rules without a worked example decay; read both before editing.
 - **New or modified reviewer agent (`agents/*.md`)** → [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md). The canonical fresh-eyes review agent shape, including the load-bearing "What you must not do" preamble.
 - **New "claimed system shape" produced by `review-codebase` Phase 1** → [`references/templates/claimed-system-shape.md`](references/templates/claimed-system-shape.md).
 - **Other artifacts (invariants, gotchas, behavior matrices, design delta ledgers, etc.)** → `references/templates/<name>.md`.
@@ -55,7 +57,7 @@ Before writing or modifying components, read the relevant convention doc:
 - **Update the router (`cohesively`)** → read [`references/skill-conventions.md`](references/skill-conventions.md) §"Router conventions" for the announcement form and clarifying-question rule. If you add a route, add a row to [`docs/substrate/matrices/router.md`](docs/substrate/matrices/router.md).
 - **Make a cross-cutting design decision** → write or extend a doc in [`docs/substrate/designs/`](docs/substrate/designs/). Add a hook line to `ARCHITECTURE.md` if the decision is broad enough to belong on the map.
 - **Run cohesive against the cohesive repo itself** → save the artifact (review or transcript) under `docs/history/reviews/` or `docs/history/transcripts/`. v0.1 ships one architecture-review artifact; further dogfood is welcome but not gating.
-- **Change `validate_plugin.sh`** → it should enforce a *named invariant* (currently `PLUGIN_ROOT_PATHS`) or a structural shape check. Reference the rule by name in any failure message.
+- **Change `validate_plugin.sh`** → it should enforce a *named invariant* (currently `PLUGIN_ROOT_PATHS` or `VERDICT_BEFORE_EVIDENCE`) or a structural shape check. Reference the rule by name in any failure message.
 
 ## Default substrate locations (in this repo)
 

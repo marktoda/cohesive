@@ -14,15 +14,21 @@ When the matrix shows divergence, the synthesizer must hand-merge — exactly th
 
 ## Cells
 
-| Agent | Severity | Category | Why it matters | Evidence | Recommended fix | Substrate artifact |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|
-| substrate-alignment-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| structure-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| library-native-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| agent-readiness-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| spec-cohesion-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Agent | Severity | Category | Why it matters | Evidence | Recommended fix | Substrate artifact | Voice citation |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| substrate-alignment-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
+| structure-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
+| library-native-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
+| agent-readiness-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
+| spec-cohesion-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
 
-This matrix's cells reflect the state *after* the 2026-05-04 skill-architecture repair pass. Prior state showed drift: `substrate-alignment-reviewer` dropped Evidence; `library-native-reviewer` and `agent-readiness-reviewer` dropped Category; `spec-cohesion-reviewer` used a different shape entirely (Risk / Substrate artifact / Suggested repair). The repair pass swept all five to canonical.
+The first six columns reflect the state *after* the 2026-05-04 skill-architecture repair pass. Prior state showed drift: `substrate-alignment-reviewer` dropped Evidence; `library-native-reviewer` and `agent-readiness-reviewer` dropped Category; `spec-cohesion-reviewer` used a different shape entirely (Risk / Substrate artifact / Suggested repair). That repair pass swept all five to canonical.
+
+The "Voice citation" column was added in the 2026-05-04 `cut-anchor-pin` substrate rewrite. Each agent's "How to structure your output" code block must open with the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. All five cells are `pending` until the implementation follow-up pass (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`) adds the citation line to each agent file. After implementation, all five must be `✓`; `validate_plugin.sh` greps for the citation line as a convention pin.
+
+### Verdict-leads is tracked elsewhere
+
+Reviewer agents produce findings, not verdicts. The named invariant `VERDICT_BEFORE_EVIDENCE` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`) applies to the *synthesizing skills* (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`) that render the user-facing chat output. The truth-table of verdict-led skills lives in that invariant doc's "Applies to" / "Does not apply to" sections — not in this matrix. This matrix scopes to agent-finding shape; verdict shape is a skill-level concern.
 
 ## Rules
 
@@ -69,3 +75,4 @@ Per `references/cohesion-rubric.md`, agents do not mark every finding Blocker. I
 ## History
 
 - 2026-05-04 — Created during the skill-architecture repair pass. Promoted from drift identified in `docs/history/reviews/2026-05-04-skill-architecture-review.md` Finding #9 to a tracked behavior matrix.
+- 2026-05-04 — `cut-anchor-pin` substrate rewrite: added the "Voice citation" column tracking the new convention pin (each agent's output block opens with the voice citation line). All cells `pending`; implementation follow-up adds the citations and flips them to `✓`. Cross-referenced `VERDICT_BEFORE_EVIDENCE` as the named invariant covering the synthesizing-skill side, which is out of scope for this matrix.

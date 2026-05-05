@@ -84,7 +84,15 @@ All references to skills, references, templates, scripts use `${CLAUDE_PLUGIN_RO
 
 ## Output format conventions
 
-The agent's output uses this finding shape:
+Reviewer-agent findings are consumed by a synthesizing skill (`review-codebase`, `review-diff`, `validate-rewrite`) which renders the user-facing chat output. The agent itself does not render to the user directly. Two rules apply:
+
+1. **Voice citation.** The first non-blank line of the agent's "How to structure your output" code block is:
+   ```
+   > Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+   ```
+   Reviewer findings flow through a synthesizing skill that renders to chat, so voice rules apply transitively. The citation pulls the voice guide into context at finding-generation time. Reviewer agents do not render verdicts — verdicts are the synthesizing skill's job — so `VERDICT_BEFORE_EVIDENCE` does not apply directly to agent findings; it applies to the skill's render of those findings.
+
+2. **Canonical six-field finding shape.** Every finding uses these six fields, in this order:
 
 ```md
 ### <Finding title>
@@ -92,20 +100,16 @@ The agent's output uses this finding shape:
 **Severity:** Blocker / High / Medium / Low
 **Category:** <category specific to this agent's lens>
 
-**Why it matters:**
-<concrete consequence — not "could lead to bugs">
+**Why it matters:** <one or two sentences — concrete consequence, not "could lead to bugs">
 
-**Evidence:**
-<file:line references; quoted snippets when illustrative>
+**Evidence:** <file:line references; quoted snippets when illustrative>
 
-**Recommended fix:**
-<specific next step>
+**Recommended fix:** <specific next step>
 
-**Substrate artifact to add or update:**
-Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boundary
+**Substrate artifact to add or update:** Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boundary
 ```
 
-Findings are ranked by leverage × severity, not by file location.
+Findings are ranked by leverage × severity, not by file location. Cap finding nesting at `###`. The six-field shape is tracked across all five reviewer agents in the [reviewer-output-shape behavior matrix](../docs/substrate/matrices/reviewer-output-shape.md); drift in any agent file is a regression against that matrix.
 
 ## Severity rules
 
@@ -147,3 +151,6 @@ The five existing reviewer agents have minor section-order drift (some put "How 
 | Output without "Substrate artifact to add or update" lines | Findings without targets aren't actionable | Every finding maps to an artifact |
 | Marking every finding "Blocker" | Prioritization signal lost | At most ~10–20% of findings should be Blocker |
 | First-person framing ("I'll review...") | Convention is third-person agent description | "You are the X reviewer..." in agent body, third-person in description frontmatter |
+| "How to structure your output" missing the voice citation | Voice rules drift transitively through the synthesizing skill | Open the output block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` |
+| Finding render with `####` or `#####` headers | Header soup propagates to the synthesized chat output | Cap finding nesting at `###`; use bullets for sub-structure |
+| Narrative paragraphs instead of the six-field finding shape | Synthesizer can't merge non-canonical findings | Use the six-field block verbatim per [reviewer-output-shape matrix](../docs/substrate/matrices/reviewer-output-shape.md) |
