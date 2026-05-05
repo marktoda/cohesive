@@ -378,6 +378,21 @@ if [ -d agents ]; then
 fi
 [ "$errors" -eq "$errors_before" ] && ok "no citation literals inside render templates across $template_check_count files (anti-citation lint)"
 
+# 13e. Decision-matrix presence in validate-rewrite Approved footer.
+# Per docs/substrate/gotchas/no-implementation-handoff.md and the validate-rewrite
+# Output format. The Approved verdict footer must render the four-row decision
+# matrix; without it, the user has no canonical choice between implementation
+# paths and Cohesive falls back to freeform code-writing.
+errors_before=$errors
+if grep -qF '| Implement now with delta-coverage discipline (default) | `cohesive:implement-cohesively` |' skills/validate-rewrite/SKILL.md \
+   && grep -qF '| Land specs first; implement separately later |' skills/validate-rewrite/SKILL.md \
+   && grep -qF '| Hand off to Superpowers without delta-coverage discipline | `superpowers:writing-plans` |' skills/validate-rewrite/SKILL.md \
+   && grep -qF '| Schedule for later | (no immediate action) |' skills/validate-rewrite/SKILL.md; then
+  ok "validate-rewrite Approved footer carries the four-row decision matrix"
+else
+  fail "skills/validate-rewrite/SKILL.md missing one or more rows of the implementation decision matrix (per docs/substrate/gotchas/no-implementation-handoff.md). All four canonical rows must be present: implement-now, land-specs-first, hand-off-to-Superpowers, schedule-for-later."
+fi
+
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
 # Per docs/substrate/invariants/PLUGIN_ROOT_PATHS.md. Excludes lines inside fenced code
 # blocks and lines marked as anti-pattern examples (so the rule's own anti-pattern
