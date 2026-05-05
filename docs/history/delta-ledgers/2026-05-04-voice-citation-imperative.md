@@ -298,3 +298,49 @@ This pass closes all 5. No new design decisions; every change is either a locali
 ### Ready for fresh-eyes review (pass 3)?
 
 **Yes.** All 3 blockers and all 2 important issues from pass-2's validation report have concrete repairs. No new specs introduced; every change aligns existing prose to a canonical wording that already existed elsewhere in the substrate. The repair surface was 5 prose edits across 5 files plus the ledger entry. The reviewer should focus on whether the canonical-home claim now resolves consistently across all docs (style-guide-rot.md → reviewer-agent-template.md → reviewer-output-shape.md for agent placement; skill-conventions.md §"When sections may differ" → matrix legend for the router's Voice exemption) and whether the trimmed promotion criteria in `output-voice.md` are checkable as written.
+
+---
+
+## Repair pass 3 (post pass-3 validation)
+
+**Date:** 2026-05-05
+**Predecessor:** [`docs/history/reviews/2026-05-05-voice-citation-imperative-rewrite-validation-pass3.md`](../reviews/2026-05-05-voice-citation-imperative-rewrite-validation-pass3.md) (verdict: Issues Found, 1 Blocker + 2 Low-severity polish items).
+
+The pass-3 review found that repair pass 2 closed all 5 of its predecessor findings concretely and structurally — every byte-for-byte parity claim held when checked at the line level. One new drift was introduced by the criteria-collapse itself (a downstream count pointer in `wordy-output.md` not following the upstream count change), and two low-severity meta-inconsistencies were noted as polish.
+
+This pass closes all three. No new design decisions; every change is a localized prose edit aligning a downstream pointer to its upstream canonical home, or improving the doc's modeling of its own claims.
+
+### Blocker repaired
+
+#### B1 (pass-3). `wordy-output.md:70` count pointer made durable
+
+- **Before:** "See `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §'Why the voice imperative is convention-with-grep, not a named invariant' for the four promotion criteria." Pass-2's I-new-1 collapse from 4 → 3 criteria left this downstream pointer at a stale count.
+- **After:** "...for the promotion criteria." (no count). The pointer no longer duplicates an enumerable fact that lives at the canonical home; future criterion-count changes do not require this pointer to update.
+- **Why this finding existed:** Pass 2's collapse touched the canonical home (`output-voice.md`) and the count there ("When all three hold, promote") but did not include `wordy-output.md` in its file list. Same drift class as B1-residual from pass-2 (downstream count pointers not following upstream count changes), reintroduced by pass 2 itself. The fix removes the count entirely rather than mirroring it — the more durable shape per the pass-3 reviewer's recommended fix.
+
+### Polish repaired
+
+#### I1 (pass-3). `output-voice.md:5` "Note on this doc's own form" de-blockquoted
+
+- **Before:** Line 5 began with `> *Note on this doc's own form:*` — a blockquote that asserted "the imperative form skills and agents copy is a single line of plain prose, never a multi-line blockquote." The note about retiring blockquotes was itself rendered as a blockquote.
+- **After:** The `>` prefix is removed; the note is plain prose with italicized lead. A trailing sentence makes the meta-modeling explicit ("This note itself is rendered as plain prose for the same reason — the doc models the form it prescribes.") so a contributor reading the note finds the doc's form matching its claim at the moment the note draws attention to its own form.
+- **Why this finding existed:** Pass 1's I4 made a deliberate point of having the doc model its own form. The repair correctly retired the original opening blockquote (line 1–5 in pre-pivot shape) but reintroduced a blockquote in the meta-note explaining the retirement. Cosmetic but worth fixing because the doc's load-bearing claim is exactly that contributors should read this doc as a model of the imperative shape.
+
+#### I2 (pass-3). `VERDICT_BEFORE_EVIDENCE.md:96` history entry supersede-marked
+
+- **Before:** History entry preserved the pre-pivot phrasing "greps verify *citation/verdict present in lines 1–3 after title*" — the older frame B3 retired (which now uses "first three non-blank lines"). The entry also referred to "voice-citation" greps that the pivot retargeted to "voice-imperative" greps.
+- **After:** Trailing supersede-mark added inline: "*(Superseded by the voice-imperative pivot entry below: the citation grep was retargeted to body-prose-imperative; the line-window frame is now stated as 'first three non-blank lines after the outermost `#` title' — see `:12,14,55,60`.)*". The entry remains as historical record of the polish pass it documents; readers carrying the old frame back into a future edit are caught by the supersede pointer to the lines using the new frame.
+- **Why this finding existed:** Pass-1's B3 reconciled normative prose across five sites but did not touch non-normative history blocks. The history entry is acceptable as a dated record of a prior pass; the polish makes it self-evident that the entry's frame is superseded without rewriting history.
+
+### Files touched in repair pass 3
+
+- `docs/substrate/gotchas/wordy-output.md:70` — B1 (count → no count)
+- `references/output-voice.md:5` — I1 (de-blockquote)
+- `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md:96` — I2 (supersede-mark)
+- `docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md` — this ledger entry
+
+3 files (plus ledger). Validator green. Persisted review at [`docs/history/reviews/2026-05-05-voice-citation-imperative-rewrite-validation-pass3.md`](../reviews/2026-05-05-voice-citation-imperative-rewrite-validation-pass3.md) is the predecessor record.
+
+### Ready for fresh-eyes review (pass 4)?
+
+**Yes.** The pass-3 reviewer noted explicitly: "After the wordy-output.md fix, the pivot is structurally coherent enough to ship." The blocker is closed plus the two polish items, with no new specs introduced. The reviewer should verify (a) no new drift was reintroduced by the count-removal in wordy-output.md, (b) the de-blockquoted note in `output-voice.md:5` reads as the doc-introduction prose it claims to be, and (c) the supersede-mark in `VERDICT_BEFORE_EVIDENCE.md:96` resolves cleanly when read sequentially from the history block. If these all hold, the verdict should be Approved and the rewrite is ready for implementation discipline (Superpowers' `writing-plans` or the V1 `plan-implementation` skill).
