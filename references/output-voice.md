@@ -10,7 +10,9 @@ Cohesive's substrate work is rigorous. Cohesive's chat output is not the place t
 
 1. **Verdict before evidence.** Every chat-rendered output that has a verdict opens with the verdict line. Pinned as the named invariant `VERDICT_BEFORE_EVIDENCE` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`).
 
-2. **The chat render may be a faithful subset of the persisted file.** Persisted artifacts (architecture reviews, brainstorms, delta ledgers) carry the full body. Chat shows the verdict, the thesis, the top findings, and the next step. The persisted file is canonical; the chat render is its trailer.
+2. **The chat render is a faithful subset of the persisted file.** Persisted artifacts (architecture reviews, brainstorms, delta ledgers) carry the full body. Chat shows the verdict, the thesis, the top findings, and the next step. The persisted file is canonical; the chat render is its trailer.
+
+   "Faithful subset" is testable: (a) the verdict matches; (b) every claim in the chat render appears in the persisted file; (c) the chat render does not introduce findings, recommendations, or facts absent from the persisted file. A reviewer applying these three tests can answer "is this a faithful subset?" without judgment calls.
 
 3. **Cap header depth at `###` in chat-rendered output.** No `####`, no `#####`. If a section needs sub-structure, use a bulleted list or a small table. Header soup is the most common form of ceremony.
 
@@ -52,7 +54,7 @@ These produce wordiness without information:
 
 ## Density budgets (guideline, not invariant)
 
-These are guidelines, not enforced limits — `OUTPUT_DENSITY` is intentionally not promoted to invariant in v0.1 (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/wordy-output.md`). Use them as a sanity check on chat output:
+These are guidelines, not enforced limits. A density invariant would require a chosen proxy (word count, paragraph count, header count, line count) and every proxy is flawed individually. `wordy-output.md` discusses why density stays convention rather than promoting to a named invariant. Use the budgets below as a sanity check on chat output:
 
 | Skill / output type | Chat-render budget (rough) |
 |---|---|
@@ -73,6 +75,21 @@ If a chat render exceeds the budget, the right move is usually one of:
 ## The worked transcript
 
 The load-bearing artifact for this guide is the side-by-side wordy-vs-punchy worked example at `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md`. Read it before authoring or revising any skill's Output format block. The transcript is dated, append-only — when voice evolves, add a new dated transcript rather than editing the old one.
+
+## Why voice-citation is convention-with-grep, not a named invariant
+
+The voice-citation requirement is grep-pinned by `validate_plugin.sh` (planned) and has a real failure mode (`style-guide-rot.md`). On those criteria it meets the bar that promoted `VERDICT_BEFORE_EVIDENCE` to a named invariant. It is deliberately *not* promoted in v0.1, for two reasons:
+
+1. **Wording is the youngest part of this rewrite.** Named-invariant promotion freezes the literal blockquote line (`> Voice and density: ...`) into the substrate's most-load-bearing layer. The wording was authored in this single rewrite pass; it has not been dogfooded across multiple skill additions yet. Promoting too early makes the next contributor's small wording change ("Voice + density:" instead of "Voice and density:") into an invariant violation rather than a convention update.
+2. **The verdict-leads invariant earns more from promotion.** `VERDICT_BEFORE_EVIDENCE` defines a *behavior* (lead with the verdict) that has many surface forms; only a few of them satisfy the grep, and the grep ratifies a behavior the substrate already cared about. The voice-citation requirement defines a *literal string*; pinning it as invariant ratifies the string itself, which is a thinner promotion.
+
+Promotion criteria (per [`docs/substrate/gotchas/style-guide-rot.md`](../docs/substrate/gotchas/style-guide-rot.md)):
+
+- Two release cycles pass without the citation wording changing
+- A real regression occurs (a skill ships without the citation, validator catches it, the catch is judged valuable)
+- No further rewording of the citation line is anticipated
+
+When all three hold, promote. Until then, the rule lives as convention-with-grep — the grep enforces *current* wording while the substrate retains the option to evolve it. This is the pattern AGENTS.md §"The named invariants" describes as "convention-with-enforcement, distinct from named-invariant status."
 
 ## How this guide is used
 

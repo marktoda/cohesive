@@ -125,3 +125,52 @@ Things the rewrite couldn't fully resolve and that the fresh-eyes reviewer shoul
 3. Read "Files added" and "Files rewritten" — the five new substrate artifacts plus five edited references / docs / matrices are the body of the rewrite.
 4. Use "Remaining ambiguity" as the focused review punch list.
 5. Read "Implementation follow-up" to understand what is intentionally *not* in this rewrite.
+
+---
+
+## Repair pass 1 (2026-05-04)
+
+After the first `cohesive:validate-rewrite` run, the `spec-cohesion-reviewer` returned **Issues Found** with two blockers and four important issues. The validation report at [`../reviews/2026-05-04-cut-anchor-pin-rewrite-validation.md`](../reviews/2026-05-04-cut-anchor-pin-rewrite-validation.md) lists all findings; this section records which ones the repair pass closed.
+
+### Issues closed
+
+- **B1 (Blocker) — Canonical chat-render layout disagreement.** Picked **title-then-citation-then-verdict** as the canonical layout (matching the worked transcript). Updated `references/skill-conventions.md` §"Output format conventions" rule 1 and the canonical chat-render shape to put the outermost `#` title first, then the voice-citation blockquote, then `**Verdict:**`. Updated `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` to enumerate the three lines explicitly (title on line 1, citation on line 2, verdict on line 3) and re-spec the validator grep against the new anchor (the outermost `#` title inside the Output format code block, not the section header above it). Worked transcript was already in the chosen layout, so no change there.
+- **B2 (Blocker) — `PLUGIN_ROOT_PATHS.md:8` claimed "the one named invariant".** Updated to "one of two named invariants" with cross-link to `VERDICT_BEFORE_EVIDENCE.md`. Also extended the doc's prose about other rules to acknowledge they live in `references/output-voice.md` alongside the existing references. Added a 2026-05-04 history line on the file.
+- **I3 (Medium) — "Faithful subset" undefined.** Added a testable three-part definition to `references/output-voice.md` rule 2: (a) verdict matches; (b) every chat claim appears in the persisted file; (c) chat does not introduce findings/recommendations/facts absent from the persisted file. `references/skill-conventions.md` rule 3 now points at the definition rather than restating it.
+- **I2 (Medium) — Voice-citation pin status named-but-unranked.** Added §"Why voice-citation is convention-with-grep, not a named invariant" to `references/output-voice.md` with two stated reasons (wording is the youngest part of this rewrite; the verdict-leads invariant earns more from promotion because it ratifies a behavior, while voice-citation pinning would ratify a literal string). Promotion criteria spelled out: two release cycles without wording change, a real regression caught by the grep, no further rewording anticipated. Until then, convention-with-grep.
+- **I1 (High) — Matrix Voice-citation column doesn't self-explain.** Added a cell legend to `docs/substrate/matrices/reviewer-output-shape.md` immediately above the table: `✓` = spec required and agent compliant; `pending` = spec required, agent file queued; `✗` = regression. The legend resolves the "queued vs broken" ambiguity at the table itself rather than only in the explanatory note below.
+- **I4 (Medium) — Worked transcript is authored, not captured.** Added §"Captured transcripts (queued)" to `docs/history/transcripts/output-voice-worked-example.md` naming the next substrate task: capture a real `cohesive:review-codebase` or `cohesive:review-diff` transcript from an external-repo dogfood run, persist as `docs/history/transcripts/output-voice-captured-YYYY-MM-DD-<slug>.md`. When a real capture lands, the captured file becomes canonical and this authored file is preserved as the original pedagogical reference.
+
+### Vague language tightened
+
+- `references/output-voice.md` rule 2: "may be a faithful subset" → "is a faithful subset" (with the testable definition above).
+- `references/skill-conventions.md` rule 3: "may be a faithful subset of the persisted file" → "is a faithful subset of the persisted file."
+- `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`: "and to any persisted artifact the skill writes" expanded into an explicit two-bullet "Applies to" sub-list (chat output; persisted artifact) with the line that both surfaces are enforced through the SKILL.md Output format block as the single source of truth.
+- `references/output-voice.md` density-budgets section: dropped the unreserved `OUTPUT_DENSITY` reference; replaced with prose explaining why density stays convention (every word/paragraph/header proxy is flawed individually).
+
+### Files touched in repair pass 1
+
+- `references/skill-conventions.md` — Output format rule 1 layout; canonical chat-render shape title-first; rule 3 references the testable definition; "may" → "is"
+- `references/output-voice.md` — rule 2 with testable definition; "may" → "is"; new §"Why voice-citation is convention-with-grep, not a named invariant"; density-budgets prose updated
+- `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` — rule statement enumerates the three lines; enforcement section anchors greps on the outermost `#` title; persisted-artifact scope clarified; new history entry
+- `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` — "one named invariant" → "one of two"; new history entry
+- `docs/substrate/matrices/reviewer-output-shape.md` — cell legend added above the table
+- `docs/history/transcripts/output-voice-worked-example.md` — new §"Captured transcripts (queued)"
+
+### Issues acknowledged but not closed in this pass
+
+- **Cross-skill question budget** (substrate gap) — still acknowledged in `wordy-output.md` Notes; deferred to a future substrate pass per the original ledger §"Remaining ambiguity."
+- **Density-budget locality** (substrate gap) — the per-skill table in `output-voice.md` still creates a maintenance dependency when adding a new skill; deferred. The dependency is now slightly more visible because density-budgets prose explicitly names the per-skill grid as a guideline.
+- **Reviewer-output-shape matrix Voice-citation cells still `pending`** — the cells flip to `✓` when the implementation pass adds the citation lines to each `agents/*.md` "How to structure your output" code block. The legend now distinguishes "queued" from "broken," so the matrix is self-explanatory until then.
+
+### Implementation follow-up — sharpened
+
+The original "Implementation follow-up" section above remains the canonical handoff. The grep specifications it describes are now slightly more concrete after this repair pass:
+
+- The verdict-leads grep anchors on the **outermost `#` title inside the Output format code block** and verifies `**Verdict:**` appears in lines 1–3 after that title.
+- The voice-citation grep verifies `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` appears within the same window.
+- Both greps share the same anchor, so a single parser pass can check both.
+
+### Ready for fresh-eyes review (second pass)?
+
+**Yes** — re-run `cohesive:validate-rewrite`. The two blockers and the four important issues are closed; the remaining ambiguity is the explicitly-deferred set above.

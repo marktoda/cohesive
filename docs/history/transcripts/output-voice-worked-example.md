@@ -122,6 +122,20 @@ The cuts are not about saying less. They are about saying the same thing in a re
 
 ---
 
+## Captured transcripts (queued)
+
+This file is an *authored* contrast — both renders were written for pedagogy. Every anti-pattern in the wordy render has been observed in real Cohesive runs, but the side-by-side itself is constructed.
+
+The next substrate task in this area is to capture a *real* transcript from a dogfood `cohesive:review-codebase` or `cohesive:review-diff` run on an external repo and persist it here as a sibling file:
+
+```
+docs/history/transcripts/output-voice-captured-YYYY-MM-DD-<slug>.md
+```
+
+A real capture carries more anchoring weight than an authored example because the anti-patterns it shows are observed-not-imagined, and the rationale-for-cuts can quote the actual generated output. Until a real capture lands, this authored transcript is the canonical reference; once a capture exists, the captured file becomes canonical and this authored file is preserved as the original pedagogical reference.
+
+This task is queued substrate, not blocking. Track in the next dogfood pass.
+
 ## Notes for future contributors
 
 - When voice evolves and a new transcript is needed, **add a new dated transcript file** rather than editing this one. This file is the substrate record of what voice meant on 2026-05-04. The next iteration is `output-voice-worked-example-YYYY-MM-DD.md`.

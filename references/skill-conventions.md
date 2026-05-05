@@ -58,15 +58,17 @@ Use these when relevant; omit the heading when not:
 
 The "Output format" section shows the canonical chat output the skill produces. Five rules apply, in priority order.
 
-### 1. The voice citation opens every Output format block
+### 1. The voice citation appears immediately under the outermost output title
 
-The first non-blank line of every `skills/*/SKILL.md` Output format block is:
+In every `skills/*/SKILL.md` Output format block, the canonical render opens with the outermost `#` title (the name of the rendered output), followed by the voice-citation blockquote:
 
 ```
+# <Skill output title>
+
 > Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 ```
 
-The citation is what pulls [`output-voice.md`](output-voice.md) into context at generation time. Without it, voice rules drift silently — the failure mode documented in [`docs/substrate/gotchas/style-guide-rot.md`](../docs/substrate/gotchas/style-guide-rot.md). `validate_plugin.sh` greps for the literal line.
+Title-then-citation is the canonical layout (matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md)). The citation is what pulls [`output-voice.md`](output-voice.md) into context at generation time. Without it, voice rules drift silently — the failure mode documented in [`docs/substrate/gotchas/style-guide-rot.md`](../docs/substrate/gotchas/style-guide-rot.md). `validate_plugin.sh` greps for the literal blockquote line within the first three non-blank lines after the outermost `#` title.
 
 ### 2. Verdict-led skills lead with the verdict
 
@@ -74,16 +76,18 @@ For skills whose output names a verdict (`review-codebase`, `review-diff`, `vali
 
 Skills without a controlled-vocabulary verdict (`cohesively`, `discover-substrate`, `brainstorm-design`, `rewrite-specs`) are out of scope for this rule but still carry the voice citation.
 
-### 3. The chat render may be a faithful subset of the persisted file
+### 3. The chat render is a faithful subset of the persisted file
 
 Skills that write a persisted artifact (architecture review, brainstorm, audit report, change cohesion review) render only the trailer in chat: verdict, thesis, top findings, next step. The persisted file is canonical and carries the full body. The chat render does not duplicate the persisted body — it points at it.
+
+"Faithful subset" is defined in [`output-voice.md`](output-voice.md) §"The five rules" rule 2: the verdict matches; every claim in chat appears in the persisted file; the chat render does not introduce findings, recommendations, or facts absent from the persisted file.
 
 The canonical chat-render shape for verdict-led, persisted-output skills:
 
 ```md
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
-
 # <Skill output title>
+
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Verdict:** <value from vocabulary>
 
@@ -100,6 +104,8 @@ The canonical chat-render shape for verdict-led, persisted-output skills:
 ### Recommended next Cohesive skill
 `cohesive:<skill-name>` — <one-clause reason>
 ```
+
+The order is fixed: outermost `#` title, then the voice-citation blockquote, then `**Verdict:**`. Counting non-blank lines after the `#` title: the citation is line 1, `**Verdict:**` is line 2 — well within the three-line budget the `VERDICT_BEFORE_EVIDENCE` grep allows.
 
 Skills with chat-only output (`review-diff`) render this shape as their entire output, with no separate persisted file.
 

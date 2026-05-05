@@ -4,9 +4,20 @@
 
 ## Rule
 
-For every Cohesive skill in the **verdict-led** scope below, the canonical "Output format" block in `skills/<name>/SKILL.md` opens — within the first three non-blank lines after the format's outermost header — with the literal string `**Verdict:**` followed by a value drawn from the skill's verdict vocabulary.
+For every Cohesive skill in the **verdict-led** scope below, the canonical "Output format" block in `skills/<name>/SKILL.md` renders, in order:
 
-The same rule applies to the rendered chat output and to any persisted artifact the skill writes (architecture review, brainstorm, audit report, change cohesion review, spec cohesion review).
+1. The outermost `#` title naming the rendered output (e.g. `# Change Cohesion Review`)
+2. The voice-citation blockquote (per `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"Output format conventions" rule 1)
+3. The literal string `**Verdict:**` followed by a value drawn from the skill's verdict vocabulary
+
+`**Verdict:**` appears within the **first three non-blank lines after the outermost `#` title**. With the canonical title-then-citation layout, the citation is line 1 and `**Verdict:**` is line 2 — well inside the budget. The three-line allowance accommodates skills that introduce a thesis before the verdict in unusual cases; the canonical shape uses lines 1–2.
+
+The rule applies to:
+
+- The rendered chat output the skill produces
+- Any persisted artifact the skill writes (architecture review, brainstorm, audit report, change cohesion review, spec cohesion review). The persisted artifact's first `#` heading is the same title as the chat output's, and the same line-2 verdict rule applies.
+
+Both surfaces are enforced by the validator grep (see "Enforcement" below) — the grep reads SKILL.md Output format blocks, which are the source of truth for both surfaces.
 
 ## Scope
 
@@ -38,8 +49,10 @@ This is the second named invariant Cohesive ships, joining `${CLAUDE_PLUGIN_ROOT
 
 `scripts/validate_plugin.sh` enforces the invariant via two grep checks (planned for the implementation pass — see `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md` for the implementation handoff):
 
-1. **Verdict-leads check.** For each skill listed under "Applies to" above, grep the SKILL.md "Output format" block. The first three non-blank lines after the block's outermost header must include the literal string `**Verdict:**`. A violation is a hard fail; the failure message names this invariant.
-2. **Voice citation check.** Every `skills/*/SKILL.md` Output format block must contain the line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` (or the same path under whatever the harness expands `${CLAUDE_PLUGIN_ROOT}` to). This check is broader than the verdict rule — it applies to every skill, including those out-of-scope for the verdict invariant — because the voice citation is what pulls the voice guide into context at generation time, which is where every chat-render rule (verdict-leads or otherwise) actually takes effect. The check pins the citation as convention; the invariant is the verdict rule itself.
+1. **Verdict-leads check.** For each skill listed under "Applies to" above, grep the SKILL.md "Output format" block. Within the canonical layout, the outermost `#` title is followed (within the first three non-blank lines) by the voice-citation blockquote and then by `**Verdict:**`. The grep verifies that `**Verdict:**` appears in lines 1–3 after the outermost `#` title in the Output format code block. A violation is a hard fail; the failure message names this invariant.
+2. **Voice citation check.** Every `skills/*/SKILL.md` Output format block must contain the line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` (or the same path under whatever the harness expands `${CLAUDE_PLUGIN_ROOT}` to) within the first three non-blank lines after the outermost `#` title. This check is broader than the verdict rule — it applies to every skill, including those out-of-scope for the verdict invariant — because the voice citation is what pulls the voice guide into context at generation time. The check pins the citation as convention; the invariant is the verdict rule itself. The same grep applies to every `agents/*.md` "How to structure your output" code block.
+
+Both grep checks anchor on the **outermost `#` title inside the Output format code block**. The canonical layout places title on line 1, citation on line 2 (after a blank), and verdict on line 3 (after a blank). Persisted artifacts inherit the rule because the SKILL.md Output format block is the source of truth for both chat render and persisted file — both render the shape the SKILL.md specifies.
 
 The validator runs locally. CI is out of scope for v0.1.
 
@@ -74,3 +87,4 @@ When reviewing a change to a verdict-led skill (or adding one):
 ## History
 
 - 2026-05-04 — Created during the `cut-anchor-pin` UX/conciseness rewrite, as the one rule from `references/output-voice.md` promoted to invariant. Validator enforcement (the two grep rules) is queued for the implementation follow-up phase.
+- 2026-05-04 — Repair pass 1: pinned the canonical layout as title-then-citation-then-verdict (matching the worked transcript), tightened the rule statement to enumerate the three lines explicitly, and clarified that persisted artifacts inherit the rule because the SKILL.md Output format block is the single source of truth for both chat and persisted shape.

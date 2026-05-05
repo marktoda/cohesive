@@ -6,7 +6,7 @@
 
 Every reference to a file inside this plugin (skill, agent, reference, template, script) — whether in a SKILL.md body, an agent system prompt, a script, or a generated artifact — uses the `${CLAUDE_PLUGIN_ROOT}/` prefix. Hardcoded paths like `/home/<user>/...`, `~/...`, or bare relative paths to plugin-internal files are forbidden.
 
-This is the one named invariant Cohesive ships at v0.1. Other v0.1 rules (skill-output shape, fresh-eyes preamble, router announcement form, clarifying-question discipline) live as conventions in [`references/skill-conventions.md`](../../../references/skill-conventions.md) and [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md). They earn invariant status only when their wording has settled and their failure modes are concrete enough to grep for.
+This is one of two named invariants Cohesive ships at v0.1, alongside [`VERDICT_BEFORE_EVIDENCE`](VERDICT_BEFORE_EVIDENCE.md) (every verdict-led skill leads its Output format block with `**Verdict:**`). Other v0.1 rules (chat-render header-depth cap, density budgets, forbidden phrasings, voice-citation pin, fresh-eyes preamble, router announcement form, clarifying-question discipline) live as conventions in [`references/skill-conventions.md`](../../../references/skill-conventions.md), [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md), and [`references/output-voice.md`](../../../references/output-voice.md). Conventions earn invariant status only when their wording has settled *and* their failure modes are concrete enough to grep for — both bars matter.
 
 ## Scope
 
@@ -61,3 +61,4 @@ When reviewing a change to any Cohesive-internal file:
 
 - 2026-05-04 — Created from plan §3 prose during the Phase 1 substrate pass.
 - 2026-05-04 — Substrate collapse: the four other v0.1 invariants demoted to conventions; this rule kept because it is the one with a real runtime failure mode. Doc simplified: dropped the elaborate Tests/Types/Constraints/Semantic-linters/Runtime-wrappers/CI-checks enforcement schema in favor of a single-paragraph statement of what's actually enforced.
+- 2026-05-04 — `cut-anchor-pin` rewrite (repair pass 1): updated to reflect that v0.1 now ships two named invariants (this one plus `VERDICT_BEFORE_EVIDENCE`). The substrate-collapse-era prose claiming "the one named invariant" was contradicting the new substrate.

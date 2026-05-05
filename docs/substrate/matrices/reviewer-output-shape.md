@@ -14,6 +14,11 @@ When the matrix shows divergence, the synthesizer must hand-merge — exactly th
 
 ## Cells
 
+Cell legend:
+- `✓` — both spec required and agent file complies
+- `pending` — spec required (substrate has been updated) but agent file does not yet carry the line; queued for implementation follow-up per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`
+- `✗` — spec required and agent file is non-compliant (regression; should not appear in a clean release)
+
 | Agent | Severity | Category | Why it matters | Evidence | Recommended fix | Substrate artifact | Voice citation |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | substrate-alignment-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | pending |
