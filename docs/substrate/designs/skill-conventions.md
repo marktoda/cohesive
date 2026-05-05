@@ -1,8 +1,8 @@
 # Skill conventions
 
-The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces the named invariants — `PLUGIN_ROOT_PATHS` and `VERDICT_BEFORE_EVIDENCE` (see [`docs/substrate/invariants/`](../invariants/)) — structural plugin shape, and a small set of convention pins: the canonical prereq-detection question in subskills with a discover-substrate prereq, the fresh-eyes preamble bullet across reviewer agents, the `### Recommended next Cohesive skill` footer in every persisting skill, the voice-citation line in every Output format block, and a negative-trigger check on skill descriptions. The rest of the rules below — section order, body prose tone, anti-pattern table shape — remain convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Convention status is deliberate where wording is still settling; promotion to enforcement happens when a rule earns it.
+The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces the named invariants — `PLUGIN_ROOT_PATHS` and `VERDICT_BEFORE_EVIDENCE` (see [`docs/substrate/invariants/`](../invariants/)) — structural plugin shape, and a small set of convention pins. The canonical enumeration of pinned conventions (currently enforced versus planned) lives in [`PLUGIN_ROOT_PATHS.md`](../invariants/PLUGIN_ROOT_PATHS.md) §"Convention pins enforced alongside this invariant"; this doc cites that list rather than restating it. The rest of the rules below — section order, body prose tone, anti-pattern table shape — remain convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Convention status is deliberate where wording is still settling; promotion to enforcement happens when a rule earns it.
 
-This document specifies the SKILL.md *shape*. Chat-rendered output follows [`output-voice.md`](output-voice.md), which is normative for every user-facing render — verdict-leads, header-depth cap, density budgets, forbidden phrasings, the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md). Every Output format block in this repo opens with a one-line citation pulling that guide into context at generation time.
+This document specifies the SKILL.md *shape*. Chat-rendered output follows [`output-voice.md`](../../../references/output-voice.md), which is normative for every user-facing render — verdict-leads, header-depth cap, density budgets, forbidden phrasings, the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). Every Output format block in this repo opens with a one-line citation pulling that guide into context at generation time.
 
 ## Frontmatter
 
@@ -68,7 +68,7 @@ In every `skills/*/SKILL.md` Output format block, the canonical render opens wit
 > Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 ```
 
-Title-then-citation is the canonical layout (matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md)). The citation is what pulls [`output-voice.md`](output-voice.md) into context at generation time. Without it, voice rules drift silently — the failure mode documented in [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md). `validate_plugin.sh` greps for the literal blockquote line within the first three non-blank lines after the outermost `#` title.
+Title-then-citation is the canonical layout (matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md)). The citation is what pulls [`output-voice.md`](../../../references/output-voice.md) into context at generation time. Without it, voice rules drift silently — the failure mode documented in [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md). `validate_plugin.sh` greps for the literal blockquote line within the first three non-blank lines after the outermost `#` title.
 
 ### 2. Verdict-led skills lead with the verdict
 
@@ -80,7 +80,7 @@ Skills without a controlled-vocabulary verdict (`cohesively`, `discover-substrat
 
 Skills that write a persisted artifact (architecture review, brainstorm, audit report, change cohesion review) render only the trailer in chat: verdict, thesis, top findings, next step. The persisted file is canonical and carries the full body. The chat render does not duplicate the persisted body — it points at it.
 
-"Faithful subset" is defined in [`output-voice.md`](output-voice.md) §"The five rules" rule 2: the verdict matches; every claim in chat appears in the persisted file; the chat render does not introduce findings, recommendations, or facts absent from the persisted file.
+"Faithful subset" is defined in [`output-voice.md`](../../../references/output-voice.md) §"The five rules" rule 2: the verdict matches; every claim in chat appears in the persisted file; the chat render does not introduce findings, recommendations, or facts absent from the persisted file.
 
 The canonical chat-render shape for verdict-led, persisted-output skills:
 
@@ -183,7 +183,7 @@ The router (`cohesively`) follows two extra rules:
 
 ## Tone
 
-This section governs the SKILL.md *body prose* — the instructions, descriptions, and rules in the skill file itself. The skill's user-facing chat output follows [`output-voice.md`](output-voice.md), which is normative for every render.
+This section governs the SKILL.md *body prose* — the instructions, descriptions, and rules in the skill file itself. The skill's user-facing chat output follows [`output-voice.md`](../../../references/output-voice.md), which is normative for every render.
 
 For SKILL.md body prose:
 
@@ -192,7 +192,7 @@ For SKILL.md body prose:
 - Avoid hedge words ("usually", "typically", "perhaps") in normative sections. If a rule has exceptions, name them; don't soften the rule.
 - No emojis in skill bodies.
 
-For chat-rendered output: read [`output-voice.md`](output-voice.md). Read [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md) before authoring or revising an Output format block. Examples teach voice; rules alone don't.
+For chat-rendered output: read [`output-voice.md`](../../../references/output-voice.md). Read [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md) before authoring or revising an Output format block. Examples teach voice; rules alone don't.
 
 ## When sections may differ
 

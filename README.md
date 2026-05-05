@@ -136,8 +136,12 @@ docs/substrate/                     Contributor-facing rules about THIS repo:
     agent-dispatch-protocol.md      Reviewer-agent dispatch contract
   invariants/                       Named global rules: PLUGIN_ROOT_PATHS,
                                     VERDICT_BEFORE_EVIDENCE
-  gotchas/                          Documented scars
-  matrices/                         Branchy behavior with stable IDs
+  gotchas/                          Documented scars: soft-prereqs,
+                                    discovery-vs-superpowers,
+                                    wordy-output, style-guide-rot
+  matrices/                         Branchy behavior with stable IDs:
+                                    router, reviewer-output-shape,
+                                    skill-section-presence, artifact-placement
 
 docs/history/
   reviews/                          Persisted architecture / cohesion / validation reviews

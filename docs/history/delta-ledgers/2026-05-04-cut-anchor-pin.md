@@ -348,3 +348,37 @@ This repair pass also updates citations across both substrate and implementation
 ### Ready for fresh-eyes review (fourth pass)?
 
 **Yes** — re-run `cohesive:validate-rewrite`, or run `cohesive:review-diff` against this branch. The contributor-vs-user-facing axis is now the documented split, and the file layout matches. Reviewer should confirm: (a) `references/<file>.md` files are all genuinely runtime-cited; (b) `docs/substrate/designs/<file>.md` files are all genuinely contributor-facing; (c) AGENTS.md prose accurately encodes the test ("who reads it, when?") so future contributors apply it consistently.
+
+---
+
+## Repair pass 4 (2026-05-04)
+
+The fourth `cohesive:validate-rewrite` run (post repair pass 3) returned **Issues Found** with one blocker (B1) and four important issues (I1–I4) — all of them mechanical edits exposed by the move-and-move-back of `output-voice.md`. The validation report is at [`../reviews/2026-05-04-cut-anchor-pin-rewrite-validation-pass4.md`](../reviews/2026-05-04-cut-anchor-pin-rewrite-validation-pass4.md).
+
+### Issues closed
+
+- **B1 (Blocker) — Broken link in `PLUGIN_ROOT_PATHS.md:9`.** The link target `../designs/output-voice.md` resolved nowhere after pass 3 moved `output-voice.md` back to `references/`. Fixed to `../../../references/output-voice.md`.
+- **I1 (High) — Bare-relative `[output-voice.md](output-voice.md)` links inside `docs/substrate/designs/*.md`.** Five instances in `skill-conventions.md` (lines 5, 71, 83, 186, 195) plus a related broken `../docs/history/...` pattern that resolved nowhere. Swept all bare `output-voice.md` link targets to `../../../references/output-voice.md` and all `../docs/history/...` to `../../history/...`. The exact failure mode `style-guide-rot.md` warns about — citation correct, prose link broken — is now closed.
+- **I2 (Medium) — Convention-pin enumeration disagreement across three docs.** Resolved by picking `PLUGIN_ROOT_PATHS.md` as the canonical home (it lives next to the validator). Added a new section §"Convention pins enforced alongside this invariant (canonical list)" that distinguishes currently-enforced (1–4) from planned (5–6, queued in this ledger's implementation follow-up). Updated `AGENTS.md` and `docs/substrate/designs/skill-conventions.md` to cite the canonical list rather than restating, eliminating the drift surface.
+- **I3 (Medium) — README/ARCHITECTURE didn't enumerate gotchas or matrices.** Updated `README.md` "What's in the box" to enumerate all four gotchas (`soft-prereqs`, `discovery-vs-superpowers`, `wordy-output`, `style-guide-rot`) and all four matrices (`router`, `reviewer-output-shape`, `skill-section-presence`, `artifact-placement`). Treatment now consistent with the explicit invariants enumeration that already existed.
+- **I4 (Medium) — AGENTS.md "When you are about to..." missing Output-format authoring bullet.** Added a new bullet (between "Update a skill body" and "Update the router") pointing at `references/output-voice.md` and the worked transcript, with the explicit reminder that the Output format block opens with title-then-citation-then-verdict per `VERDICT_BEFORE_EVIDENCE`. AGENTS.md and ARCHITECTURE.md "Where to look first" now list the same set of contributor scenarios.
+
+### Substrate gaps from pass 4 — acknowledged, not closed
+
+- **Captured-transcripts task** still named only in `output-voice-worked-example.md:125`. Filing it as ARCHITECTURE.md §"Risks the design accepts" remains future substrate work. Not blocking.
+- **"Who reads it, when?" test has no worked example.** Adding 1–2 cited classifications would harden the test for edge cases (templates, scripts, the validator). Not blocking.
+- **Coupling between `output-voice.md` (implementation) and its companion gotchas (substrate) is undocumented.** A contributor changing voice rules must update both sides of the line; the obligation is real but unstated. Not blocking.
+
+These three are filed in this ledger so the next reviewer doesn't re-find them as new findings — they are deferred substrate work, not undiscovered gaps.
+
+### Files touched in repair pass 4
+
+- `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` — fixed the broken link (B1); added §"Convention pins enforced alongside this invariant (canonical list)" enumerating the six pins with current/planned status (I2 canonical home).
+- `docs/substrate/designs/skill-conventions.md` — swept bare-relative `output-voice.md` link targets to `../../../references/output-voice.md` (I1); replaced inline restatement with citation to PLUGIN_ROOT_PATHS.md canonical list (I2).
+- `docs/substrate/designs/*.md` (other files) — swept the `../docs/history/...` broken-by-move pattern to `../../history/...` where present.
+- `AGENTS.md` — replaced inline convention-pin enumeration with citation to PLUGIN_ROOT_PATHS.md canonical list (I2); added Output-format authoring bullet to "When you are about to..." (I4).
+- `README.md` — enumerated gotchas and matrices (I3).
+
+### Ready for fresh-eyes review (fifth pass)?
+
+**Yes** — re-run `cohesive:validate-rewrite`. All four pass-4 findings are closed; the substrate gaps are filed as deferred work. The verdict on pass 5 should be Approved unless the reviewer surfaces something the pass-4 review missed.

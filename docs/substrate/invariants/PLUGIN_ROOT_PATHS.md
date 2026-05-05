@@ -6,7 +6,7 @@
 
 Every reference to a file inside this plugin (skill, agent, reference, template, script) — whether in a SKILL.md body, an agent system prompt, a script, or a generated artifact — uses the `${CLAUDE_PLUGIN_ROOT}/` prefix. Hardcoded paths like `/home/<user>/...`, `~/...`, or bare relative paths to plugin-internal files are forbidden.
 
-This is one of two named invariants Cohesive ships at v0.1, alongside [`VERDICT_BEFORE_EVIDENCE`](VERDICT_BEFORE_EVIDENCE.md) (every verdict-led skill leads its Output format block with `**Verdict:**`). Other v0.1 rules (chat-render header-depth cap, density budgets, forbidden phrasings, voice-citation pin, fresh-eyes preamble, router announcement form, clarifying-question discipline) live as conventions in [`docs/substrate/designs/skill-conventions.md`](../designs/skill-conventions.md), [`docs/substrate/designs/reviewer-agent-template.md`](../designs/reviewer-agent-template.md), and [`references/output-voice.md`](../designs/output-voice.md). Conventions earn invariant status only when their wording has settled *and* their failure modes are concrete enough to grep for — both bars matter.
+This is one of two named invariants Cohesive ships at v0.1, alongside [`VERDICT_BEFORE_EVIDENCE`](VERDICT_BEFORE_EVIDENCE.md) (every verdict-led skill leads its Output format block with `**Verdict:**`). Other v0.1 rules (chat-render header-depth cap, density budgets, forbidden phrasings, voice-citation pin, fresh-eyes preamble, router announcement form, clarifying-question discipline) live as conventions in [`docs/substrate/designs/skill-conventions.md`](../designs/skill-conventions.md), [`docs/substrate/designs/reviewer-agent-template.md`](../designs/reviewer-agent-template.md), and [`references/output-voice.md`](../../../references/output-voice.md). Conventions earn invariant status only when their wording has settled *and* their failure modes are concrete enough to grep for — both bars matter.
 
 ## Scope
 
@@ -33,7 +33,23 @@ This is a real correctness contract. Unlike v0.1's other rules (output-shape, pr
 
 `scripts/validate_plugin.sh` greps `skills/`, `agents/`, and `references/` for hardcoded path patterns (`/home/`, `/Users/`, `/usr/local/`, `~/`) outside fenced code blocks and explicit anti-pattern lines. A violation is a hard fail; the failure message names this invariant by name. The grep is check 13 in the validator.
 
-The validator also runs the convention-layer greps that pin related rules: canonical prereq-detection question in subskill bodies, fresh-eyes preamble bullet in reviewer agent files, "Recommended next Cohesive skill" footer in every persisting skill body, and a negative-trigger check on skill descriptions. None of those rules are named invariants — they remain conventions. They are mentioned here only because they share the same enforcement surface.
+### Convention pins enforced alongside this invariant (canonical list)
+
+`validate_plugin.sh` runs convention-layer greps that pin related rules. This is the canonical enumeration — AGENTS.md and `docs/substrate/designs/skill-conventions.md` link here rather than restating, so the three docs cannot drift.
+
+**Currently enforced (v0.1):**
+
+1. **Canonical prereq-detection question** in subskill bodies (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`). The forced-choice question prevents soft-prereqs degradation.
+2. **Fresh-eyes preamble bullet** in every `agents/*.md` file (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"The fresh-eyes preamble").
+3. **"Recommended next Cohesive skill" footer** in every persisting skill body.
+4. **Negative-trigger check** on skill descriptions (`description` frontmatter must not contain forbidden trigger phrases).
+
+**Planned (queued for the implementation follow-up of the 2026-05-04 `cut-anchor-pin` rewrite — see `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`):**
+
+5. **Verdict-leads check** for verdict-led skills (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`). This is the second named invariant; it is *planned* in the validator script but not yet wired in.
+6. **Voice-citation check** in every `skills/*/SKILL.md` Output format block and every `agents/*.md` "How to structure your output" block (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md`). Convention-with-grep status, not invariant.
+
+None of the convention pins above (1–4, 6) are named invariants — they remain conventions. They share the same enforcement surface (`validate_plugin.sh`) as the two named invariants (this one, and `VERDICT_BEFORE_EVIDENCE`).
 
 The validator runs locally. CI is out of scope for v0.1.
 
