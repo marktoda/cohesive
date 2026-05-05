@@ -36,7 +36,7 @@ This matrix is the substrate-shaped seam between the design delta ledger (substr
 ## Rules
 
 - Every cell has a stable ID (P001..P0NN). Once assigned, an ID is never reused even if the cell is removed.
-- Phase order obeys the predecessor relationships in the table. When two phases have no inter-dependency, the implementer may interleave or order by code-locality concerns; the matrix does not enforce a single global order.
+- Phase order obeys the predecessor relationships in the table. When two phases have no inter-dependency, the implementer may interleave or order by code-locality concerns; the matrix does not enforce a single global order. Within each predecessor-respecting tier, phase order is stable per run but not guaranteed identical across runs of `implement-cohesively` against the same delta. Reviewers comparing two runs should compare by delta-entry stable IDs, not phase numbers — phase numbers are run-local; delta-entry IDs are global. `delta-coverage-reviewer`'s "What you must not do" reflects this rule.
 - A delta-ledger entry may produce more than one phase (rare; e.g., a Files-rewritten entry that also adds a new invariant — but typically the invariant gets its own P005 phase and the file change becomes P001 dependent on P005).
 - Coalescing phases is allowed when their delta entries are tightly coupled (same subsystem, same file set, same TDD plan would result). The Phase 1 coverage table must still list every individual delta entry with its phase number.
 - When a delta-ledger entry could match more than one cell (e.g., a Files-added that is itself a behavior matrix), the more-specific cell wins (P004 over P002).

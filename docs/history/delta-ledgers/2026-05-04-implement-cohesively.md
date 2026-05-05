@@ -228,3 +228,61 @@ The original "Remaining ambiguity" punch list is reduced:
 ### Ready for second fresh-eyes review?
 
 **Yes** — proceeding to `cohesive:validate-rewrite` (pass 2).
+
+## Repair pass 2 — 2026-05-05
+
+The second `cohesive:validate-rewrite` returned **Approved** with four non-blocking notes (I1–I4 from validation pass 2 at `docs/history/reviews/2026-05-05-implement-cohesively-rewrite-validation-pass2.md`). Repair pass 2 closes all four in place before the implementation pass begins, so the implementation pass's coverage table reflects only code work and the substrate is internally consistent before any code lands.
+
+### Files rewritten in repair pass 2
+
+- `docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`
+  - **I1 (bypass-acknowledgment surface contradiction).** §Review checklist's bypass row rewritten to ask whether the literal acknowledgment line was rendered in the conversation transcript before `superpowers:writing-plans` was invoked. The line explicitly notes that commit-history landing of the acknowledgment is a future tightening, not a v0.1 expectation. The contradiction with §Known bypass risks is removed; both surfaces now agree that v0.1 enforcement is transcript-only.
+
+- `docs/substrate/matrices/phase-derivation.md`
+  - **I2 (cross-run reproducibility).** §Rules' "the implementer may interleave" line extends to name the consequence: within each predecessor-respecting tier, phase order is stable per run but not guaranteed identical across runs. Reviewers comparing two runs compare by delta-entry stable IDs, not phase numbers. Cites `delta-coverage-reviewer` for the parallel rule.
+
+- `agents/delta-coverage-reviewer.md`
+  - **I2 (cross-run reproducibility).** §"What you must not do" gains a new rule: do not identify phases by phase number across runs. Phase numbers are run-local because of the matrix's non-determinism rule; the delta-entry stable IDs are the cross-run-invariant identifiers.
+
+- `skills/implement-cohesively/SKILL.md`
+  - **I3 (dispatch budget surfacing).** Phase 1 gains a new paragraph after the coverage-table description: surface the phase count and `delta-coverage-reviewer` dispatch count to the user; pause for confirmation when the count exceeds 8. The threshold is a tunable v0.1 default. New acceptance criterion mirrors the rule.
+
+- `docs/substrate/gotchas/no-implementation-handoff.md`
+  - **I4 (bypass-acknowledgment pin missing from gotcha).** §"Tests / checks that preserve this" gains a fourth bullet naming the bypass-acknowledgment pin: the literal acknowledgment string must render in the transcript before `superpowers:writing-plans` is invoked from the validate-rewrite decision matrix's bypass row. Cross-references the SKILL.md and invariant doc that carry the rule. Deferred V1 lint check: grep `validate-rewrite/SKILL.md` for the literal string.
+
+### Files added in repair pass 2
+
+None.
+
+### Files removed or deprecated in repair pass 2
+
+None.
+
+### Conceptual changes in repair pass 2
+
+| Old concept | New concept | Status |
+|---|---|---|
+| §Review checklist asks for commit-history evidence of bypass; §Known bypass risks says transcript-only | Both surfaces agree: transcript-only in v0.1; commit-history is a future tightening | Reconciled |
+| Cross-run phase ordering is "intentional flexibility" with no consequence named | Cross-run phase numbers are run-local; delta-entry stable IDs are the cross-run-invariant identifiers (matrix + reviewer agent agree) | Tightened |
+| `implement-cohesively` Phase 1 has no dispatch-budget surface | Phase 1 announces phase count + `delta-coverage-reviewer` dispatch count; pauses past the v0.1 default threshold of 8 phases | Added |
+| `no-implementation-handoff` gotcha's pin list omits the bypass-acknowledgment pin | Pin list includes the bypass-acknowledgment pin with literal-string reference and deferred lint check | Tightened |
+
+### Substrate updated in repair pass 2
+
+- Specs: 2 (`implement-cohesively/SKILL.md`, `delta-coverage-reviewer.md`)
+- Behavior matrices: 1 (`phase-derivation.md`)
+- Named invariants: 1 (`IMPLEMENTATION_PLAN_COVERS_DELTA.md`)
+- Gotchas: 1 (`no-implementation-handoff.md`)
+- Semantic linter specs (proposed): 1 new (deferred V1 grep for literal bypass-acknowledgment string)
+
+### Tests / checks proposed (not yet implemented) in repair pass 2
+
+- `validate_plugin.sh` (deferred to implementation pass): grep `skills/validate-rewrite/SKILL.md` for the literal bypass-acknowledgment string.
+
+### Remaining ambiguity after repair pass 2
+
+None. All five pass-1 ambiguities and all four pass-2 notes are now closed in substrate.
+
+### Ready for implementation?
+
+**Yes** — proceeding to `superpowers:writing-plans` against the polished delta. The implementation pass's surface is small (validator updates + manual scenarios + branch finishing) because the substrate-shaped artifacts (SKILLs, agent, matrices, gotchas, invariant) are read by Claude at invocation time and are already in place on this branch.

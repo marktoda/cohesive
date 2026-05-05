@@ -61,6 +61,8 @@ Phase ordering rules:
 
 Render the phase list as a **coverage table**. The Phase 1 coverage table uses the same column shape as the final Phases table in §Output format: `# | Intent (one clause) | Delta entries | Plan | Cross-review`. At Phase 1 the `Plan` and `Cross-review` columns are filled with the literal value `pending`; they update as each phase completes. The Phase 1 coverage table and the final Phases table are the same table at two points in time, not two artifacts. If any delta-ledger entry is uncovered, stop and surface the gap. Do not advance until coverage is complete.
 
+After rendering the coverage table, **surface the dispatch budget** to the user: announce the phase count and the corresponding `delta-coverage-reviewer` dispatch count (one per phase, plus one final `cohesive:review-diff` at Phase 3). When the phase count exceeds **8**, pause and confirm before proceeding to Phase 2. Format the announcement in chat as: `Phase 1 derived <N> phases. Phase 2 will dispatch <N> delta-coverage-reviewer agents plus one cohesive:review-diff at Phase 3. Proceeding…` (or `…Confirm before continuing.` when over the threshold). The threshold is a tunable v0.1 default; tighten or relax in a follow-up substrate change as real-world phase-counts inform the budget.
+
 ### Phase 2. For each phase, run the loop
 
 For phase N in order:
@@ -185,6 +187,7 @@ The implementation lands on the same `design/<slug>` branch the rewrite produced
 
 - An Approved validate-rewrite verdict path is in the inputs.
 - Phase 1 produces a coverage table that uses the same column shape as the final Phases table in §Output format, with `Plan` and `Cross-review` columns initialized to `pending`; the skill refuses to advance with uncovered delta entries.
+- Phase 1 surfaces the dispatch budget (phase count + `delta-coverage-reviewer` dispatch count + one final `review-diff`) and pauses for user confirmation when the phase count exceeds 8.
 - Each phase invokes `superpowers:writing-plans`, then `superpowers:executing-plans`, then `delta-coverage-reviewer` — in that order.
 - The cross-review agent receives only paths and a quoted ledger excerpt; never a pre-summarized design narrative.
 - Each phase commit cites the plan path and the delta-entry stable IDs.

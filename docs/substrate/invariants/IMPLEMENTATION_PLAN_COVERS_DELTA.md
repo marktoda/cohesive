@@ -80,7 +80,7 @@ When reviewing a change to `implement-cohesively`, the phase-derivation matrix, 
 - [ ] Does every phase commit cite the plan path and the delta-entry stable IDs?
 - [ ] Did `delta-coverage-reviewer` return Covered for every phase before the next phase started?
 - [ ] Did `cohesive:review-diff` run at the end of the pass and return Pass / Pass with notes?
-- [ ] If the rule was bypassed (user chose direct `superpowers:writing-plans`), was the bypass documented in the branch's commit history?
+- [ ] If the rule was bypassed (user chose direct `superpowers:writing-plans` from the validate-rewrite Approved decision matrix), was the literal acknowledgment line `Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.` rendered in the conversation transcript before `superpowers:writing-plans` was invoked? (Commit-history landing of the acknowledgment is a future tightening, not a v0.1 expectation — see §Known bypass risks.)
 
 ## Related
 

@@ -112,6 +112,7 @@ Don't mark every finding Blocker. If you do, prioritization is failing.
 - Pre-summarize the rewrite's intent. Read the delta-ledger excerpt as the source of truth for what the phase claims.
 - Recommend specific code changes. You're checking coverage and agreement, not authoring repairs. Recommended fixes are directional ("re-plan to include T2's missing branch handling"), not implemented.
 - Treat absence of negative findings as "good." A phase that landed nothing has nothing to find. Verify the delta entries are genuinely covered before issuing Covered.
+- Identify phases by phase number across runs. Phase numbers are run-local because `phase-derivation.md` §Rules allows non-deterministic ordering within predecessor-respecting tiers. When citing a phase or comparing across runs, use the delta-entry stable IDs the phase covers, not the phase number. "Phase 3" in this run may correspond to "Phase 5" in another run against the same delta; the delta-entry ID is what's invariant.
 
 ## Token discipline
 
