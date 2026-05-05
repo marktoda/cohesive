@@ -57,7 +57,7 @@ The user picks; Cohesive does not improvise.
 
 ## Related conventions
 
-- **Composition with Superpowers** ([`docs/substrate/designs/composition-with-superpowers.md`](../designs/composition-with-superpowers.md)) — the seam now includes `implement-cohesively` as Cohesive's substrate-shaped implementation orchestrator.
+- **Composition with Superpowers** ([`docs/substrate/architecture/composition-with-superpowers.md`](../architecture/composition-with-superpowers.md)) — the seam now includes `implement-cohesively` as Cohesive's substrate-shaped implementation orchestrator.
 - **Phase derivation** ([`docs/substrate/matrices/phase-derivation.md`](../matrices/phase-derivation.md)) — the substrate-shape seam between delta ledger and `writing-plans`.
 - **Implementation plan coverage** ([`docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`](../invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md)) — the structural rule that every delta entry maps to a phase.
 - **Soft-prereqs gotcha** ([`soft-prereqs.md`](soft-prereqs.md)) — the analogous failure mode at the front of the workflow chain. Both gotchas share a fix shape: encode the prevention as substrate, don't rely on Claude's heuristic improvisation.

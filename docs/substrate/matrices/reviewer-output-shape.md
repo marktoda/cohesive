@@ -6,7 +6,7 @@
 
 ## Purpose
 
-The five reviewer agents under `agents/` each produce findings. The canonical finding shape is defined in `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions": six fields per finding (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact). The synthesizing skills (`review-codebase` Phase 4, `review-diff`, or `validate-rewrite`) merge findings from one or more agents into a unified report — a merge that only works if the agents produce findings in the same shape.
+The five reviewer agents under `agents/` each produce findings. The canonical finding shape is defined in `docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions": six fields per finding (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact). The synthesizing skills (`review-codebase` Phase 4, `review-diff`, or `validate-rewrite`) merge findings from one or more agents into a unified report — a merge that only works if the agents produce findings in the same shape.
 
 This matrix tracks which agent file teaches which fields. A cell of `✓` means the agent's "How to structure your output" section explicitly lists the field. A cell of `✗` means the field is absent. A cell of `~` means the field is renamed (cell text names the rename).
 
@@ -32,7 +32,7 @@ The last two columns track the voice-imperative convention. The "Voice imperativ
 
 ### Imperative placement (convention, not column)
 
-The voice imperative lives in body prose at a specific place in each agent: as the opening prose paragraph of the "How to structure your output" section, immediately above the canonical six-field finding-shape code block. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" rule 1, this is the agent-side analog of the skill-side `## Voice` section: skills carry the imperative in a top-level section between `## What this skill produces` and `## Hard constraints`; agents (which are system prompts, not SKILL.md files with the same section structure) carry it inside their render-shaping section.
+The voice imperative lives in body prose at a specific place in each agent: as the opening prose paragraph of the "How to structure your output" section, immediately above the canonical six-field finding-shape code block. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions" rule 1, this is the agent-side analog of the skill-side `## Voice` section: skills carry the imperative in a top-level section between `## What this skill produces` and `## Hard constraints`; agents (which are system prompts, not SKILL.md files with the same section structure) carry it inside their render-shaping section.
 
 Validator Check 13c greps each agent body (outside fenced code blocks) for the imperative literal — it does **not** verify the placement (above the code block, in the "How to structure your output" section). Placement is convention reinforced by this matrix and the reviewer-agent template; drift in placement passes Check 13c silently and is caught only at review time. All five reviewer agents currently place the imperative correctly per the template; if a future contributor places it elsewhere (a "Tone" subsection, a "What you check" section, frontmatter), the synthesizer's chat render still works but the placement convention has drifted and a `cohesive:review-codebase` or `cohesive:review-diff` finding should fix it.
 
@@ -43,7 +43,7 @@ Reviewer agents produce findings, not verdicts. The named invariant `VERDICT_BEF
 ## Rules
 
 - The canonical six fields are mandatory in every reviewer agent's "How to structure your output" section, in the order shown above.
-- When adding a new reviewer agent, copy the output-format block from `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" verbatim. Do not invent new fields.
+- When adding a new reviewer agent, copy the output-format block from `docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions" verbatim. Do not invent new fields.
 - When adding a new field (e.g., "Confidence" in some V1 setting), update this matrix and all five agent files in the same pass — partial drift breaks synthesis.
 - `review-codebase` Phase 4, `review-diff`, and `validate-rewrite` synthesis can assume canonical shape from any reviewer agent dispatched. If a finding arrives in a different shape, that's a regression to be filed against this matrix.
 
@@ -67,8 +67,8 @@ Per `references/cohesion-rubric.md`, agents do not mark every finding Blocker. I
 ## Out of scope
 
 - The agent's *internal* analysis structure (the "How to scope your reading" section, the "What you check" section). Different agents have different lenses; only the *output* must be uniform.
-- The dispatch protocol shape (claimed-system-shape, normative-doc paths, scope, discovery report). That's defined in `docs/substrate/designs/agent-dispatch-protocol.md`.
-- The canonical fresh-eyes preamble bullet. That's a convention in `docs/substrate/designs/reviewer-agent-template.md`; not a finding-shape concern.
+- The dispatch protocol shape (claimed-system-shape, normative-doc paths, scope, discovery report). That's defined in `docs/substrate/conventions/dispatch-protocol.md`.
+- The canonical fresh-eyes preamble bullet. That's a convention in `docs/substrate/conventions/reviewer-agent-shape.md`; not a finding-shape concern.
 
 ## Notes
 
@@ -77,8 +77,9 @@ Per `references/cohesion-rubric.md`, agents do not mark every finding Blocker. I
 
 ## Related substrate
 
-- `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" — the canonical shape definition.
-- `docs/substrate/designs/agent-dispatch-protocol.md` — dispatch protocol the synthesizer relies on.
+- `docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions" — the canonical shape definition.
+- `docs/substrate/conventions/dispatch-protocol.md` — dispatch protocol the synthesizer relies on.
+- `docs/substrate/architecture/fresh-eyes-review.md` — the load-bearing property the dispatch protocol enforces.
 - `skills/review-codebase/SKILL.md` Phase 4 and `skills/review-diff/SKILL.md` — synthesis steps that require shape uniformity.
 - `skills/validate-rewrite/SKILL.md` — single-agent dispatch; same canonical shape required.
 

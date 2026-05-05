@@ -74,7 +74,7 @@ Every reviewer agent's "What you must not do" section includes a bullet that nam
 
 Copying this verbatim is the safest default — divergence in wording produces drift across agent files that the structural fence (the harness's Task-subprocess isolation) doesn't catch.
 
-The structural fence does the heavy lifting: calling Task tool with `subagent_type` creates an isolated subprocess with no inherited conversation. The agent-file bullet is convention reinforcement on top of that fence. See [`docs/substrate/designs/agent-dispatch-protocol.md`](agent-dispatch-protocol.md) for the full property and why both halves matter.
+The structural fence does the heavy lifting: calling Task tool with `subagent_type` creates an isolated subprocess with no inherited conversation. The agent-file bullet is convention reinforcement on top of that fence. See [`docs/substrate/architecture/fresh-eyes-review.md`](../architecture/fresh-eyes-review.md) for the property; [`docs/substrate/conventions/dispatch-protocol.md`](dispatch-protocol.md) for the prescriptive contract.
 
 If the agent reads any reference docs as part of its job, list them under "Inputs you will receive" with explicit `${CLAUDE_PLUGIN_ROOT}/...` paths. The agent must not glob.
 

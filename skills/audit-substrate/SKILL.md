@@ -31,7 +31,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ### 0. Resolve the artifact directory
 
-Before scanning, resolve where the audit report will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
+Before scanning, resolve where the audit report will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
 
 1. If `docs/history/reviews/` exists, write there.
 2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `reviews/` subdir alongside it.
@@ -115,7 +115,7 @@ Walk each axis from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`. For e
 
 ### 4. Persist
 
-Write the report to `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md`. Reviews and audits are append-only history per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` — commit them.
+Write the report to `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md`. Reviews and audits are append-only history per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` — commit them.
 
 If the user passes `--no-write`, render in chat only.
 

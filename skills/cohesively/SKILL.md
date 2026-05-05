@@ -123,18 +123,18 @@ Consumers:
 - **Prereq-state consumers** (subskills with a `discover-substrate` prereq): `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`. Each Hard Constraint #1 in those skill bodies states that when the router passes the prereq fragment, the canonical clarifying question is skipped.
 - **Chosen-direction / ledger-path consumers**: `rewrite-specs` (chosen direction), `validate-rewrite` (ledger path only — no prereq state; this is the documented exception), `implement-cohesively` (validation review path + ledger path; both required), V1 artifact skills.
 
-Direct (non-router) invocation: the subskill asks its canonical question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Clarifying questions". The contract is router-side only.
+Direct (non-router) invocation: the subskill asks its canonical question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions". The contract is router-side only.
 
 ## Required behavior
 
 1. **Announce the route.** One sentence in chat before dispatching, in the canonical form:
    > "I'm treating this as a Cohesive **<route>** workflow: <chain>. Reason: <one short clause>."
 
-   The form is the convention named in [`docs/substrate/designs/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`.
+   The form is the convention named in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`.
 
 2. **Process skills run before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives implementation against the design delta ledger via the phase loop. Freeform code-writing from this skill body is forbidden.
 
-3. **At most one clarifying question.** Per route (above). The question is a specific forced choice, never a vague "what do you want?" prompt — convention defined in [`docs/substrate/designs/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md) §"Clarifying questions".
+3. **At most one clarifying question.** Per route (above). The question is a specific forced choice, never a vague "what do you want?" prompt — convention defined in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Clarifying questions".
 
 4. **Do not implement code from the router itself.** The router routes; subskills work. Implementation is delegated to the `implement` route, which dispatches `implement-cohesively`. That skill in turn composes `superpowers:writing-plans` and `superpowers:executing-plans` per phase — it does not write code itself either. Cohesive's only code-producing surface is `superpowers:executing-plans` invoked from inside `implement-cohesively`'s phase loop.
 

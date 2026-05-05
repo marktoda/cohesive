@@ -15,11 +15,11 @@ The user's experience: invoking Cohesive feels heavy. The substrate work is rigo
 
 ## Why it happened
 
-Through v0.1, every UX rule that shapes chat output — TL;DR-first, recommended-next-skill footer, forced-choice clarifying questions, verdict vocabularies — lived as convention in `docs/substrate/designs/skill-conventions.md`. The conventions are correct in spec. They are not enforced where the model actually generates output (the per-skill Output format blocks), and several of them have no grep-pinable form.
+Through v0.1, every UX rule that shapes chat output — TL;DR-first, recommended-next-skill footer, forced-choice clarifying questions, verdict vocabularies — lived as convention in `docs/substrate/conventions/skill-shape.md`. The conventions are correct in spec. They are not enforced where the model actually generates output (the per-skill Output format blocks), and several of them have no grep-pinable form.
 
 Specific contributing factors:
 
-- **No central voice guide.** `skill-conventions.md` §"Tone" was about the SKILL.md body's prose (imperative, declarative, no hedging) — not about the chat the skill renders to the user. There was no normative artifact saying "the chat render should look like X."
+- **No central voice guide.** `skill-shape.md` §"Tone" was about the SKILL.md body's prose (imperative, declarative, no hedging) — not about the chat the skill renders to the user. There was no normative artifact saying "the chat render should look like X."
 - **No worked example.** Style guides without examples decay (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md`). Cohesive had voice rules without a side-by-side wordy-vs-punchy example showing them in action.
 - **Per-skill Output format blocks restated similar shapes inconsistently.** Each skill's Output format invented its own block instead of citing a shared one. Drift was the default.
 - **No invariant on verdict-leads.** The most-regressed rule (chat opens with verdict) had no grep enforcement. It was repeated in skill bodies as "Output discipline: Verdict first, then evidence" — but missing from the router and inconsistently applied across reviewer outputs.
@@ -37,7 +37,7 @@ A second tempting wrong fix: invent a "verbose mode" toggle so the default can b
 
 Three layers, each handling what the others can't:
 
-1. **Tighten the canonical shape itself.** `docs/substrate/designs/skill-conventions.md` §"Output format conventions" and `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" cap header depth at `###`, declare that chat renders may be a faithful subset of persisted files, and require branchy content to render as bullets/tables rather than narrative phases. The shape is the rule; future skill authors copy a tight shape, not a wordy one.
+1. **Tighten the canonical shape itself.** `docs/substrate/conventions/skill-shape.md` §"Output format conventions" and `docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions" cap header depth at `###`, declare that chat renders may be a faithful subset of persisted files, and require branchy content to render as bullets/tables rather than narrative phases. The shape is the rule; future skill authors copy a tight shape, not a wordy one.
 
 2. **Anchor with a voice guide and a worked transcript.** `references/output-voice.md` carries the do/don't rules, density budgets, and forbidden phrasings. `docs/history/transcripts/output-voice-worked-example.md` carries the side-by-side wordy-vs-punchy render with each cut justified inline. Every non-router `skills/*/SKILL.md` and every `agents/*-reviewer.md` carries a body-level imperative — `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` — that directs the model to load the voice guide via a Read tool call before producing user-facing output. The Output format / "How to structure your output" code block stays a pure render template (no instructions, no citation literal). Examples teach voice; prose alone doesn't; instructions placed in render templates leak into user-facing output, so instructions live in body prose.
 

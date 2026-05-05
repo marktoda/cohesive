@@ -8,10 +8,11 @@ The directory structure Cohesive's skills default to when creating or finding su
 ARCHITECTURE.md           # top-level canonical architecture; replace-on-update
 docs/
 ├── substrate/            # CURRENT canonical truth — replace-on-update
+│   ├── architecture/     # kebab-case.md (cross-cutting architecture decisions)
+│   ├── conventions/      # kebab-case.md (prescriptive component rules)
 │   ├── invariants/       # SHOUTY_NAME.md
 │   ├── matrices/         # kebab-case.md
 │   ├── gotchas/          # kebab-case.md
-│   ├── designs/          # kebab-case.md (cross-cutting design decisions)
 │   └── SUBSTRATE-MAP.md  # index of the above (optional until ≥3 artifacts)
 └── history/              # DATED append-only — workflow outputs and retired docs
     ├── plans/            # YYYY-MM-DD-<slug>.md
@@ -37,7 +38,8 @@ Mixing canonical and historical content in one directory produces the pain Cohes
 | Invariant | `SHOUTY_CASE.md` | `AUDIT_EXTERNAL_MUTATION.md` | (V1 `create-invariant`) |
 | Behavior matrix | `kebab-case.md` | `intake-decision-kernel.md` | (V1 `create-matrix`) |
 | Gotcha | `kebab-case.md` | `slack-thread-truncation.md` | (manually authored) |
-| Design | `kebab-case.md` | `three-layer-architecture.md` | (manually authored) |
+| Architecture (cross-cutting decisions) | `kebab-case.md` | `three-tier-architecture.md` | (manually authored) |
+| Convention (prescriptive component rules) | `kebab-case.md` | `skill-shape.md` | (manually authored) |
 | Plan | `YYYY-MM-DD-<slug>.md` | `2026-05-04-mvp-implementation.md` | (manually authored) |
 | Architecture review | `YYYY-MM-DD-<slug>-architecture-review.md` | `2026-05-04-codebase-architecture-review.md` | `review-codebase` |
 | Substrate audit | `YYYY-MM-DD-<slug>-audit-substrate.md` | `2026-05-04-codebase-audit-substrate.md` | `audit-substrate` |
@@ -54,7 +56,7 @@ Don't create empty directories preemptively. Grow as needed:
 
 1. **Phase 0** — A repo with a `CLAUDE.md` or `README.md` is fine. No substrate dirs yet.
 2. **Phase 1** — First named invariant or behavior matrix → create `docs/substrate/<category>/` and put it there.
-3. **Phase 2** — First cross-cutting design decision worth pulling out of `ARCHITECTURE.md` → create `docs/substrate/designs/` and put it there.
+3. **Phase 2** — First cross-cutting architecture decision worth pulling out of `ARCHITECTURE.md` → create `docs/substrate/architecture/` and put it there. First prescriptive component rule worth pulling out of `ARCHITECTURE.md` → create `docs/substrate/conventions/` and put it there.
 4. **Phase 3** — First Cohesive workflow output → create `docs/history/<category>/` and put it there.
 5. **Phase 4** — Mature: most subdirs populated; `docs/substrate/SUBSTRATE-MAP.md` indexes them.
 

@@ -4,7 +4,7 @@
 **Scope:** <whole repo / subsystem name>
 **Reviewer:** `cohesive:review-codebase`
 
-> Output starts with the TL;DR block per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"TL;DR convention" — verdict + 2-3 sentence thesis + top 3 findings + recommended next skill — rendered before any longer body.
+> Output starts with the TL;DR block per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"TL;DR convention" — verdict + 2-3 sentence thesis + top 3 findings + recommended next skill — rendered before any longer body.
 
 ## Verdict
 

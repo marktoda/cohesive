@@ -1,8 +1,31 @@
-# Skill conventions
+# Skill shape
 
-The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces the named invariants — `PLUGIN_ROOT_PATHS` and `VERDICT_BEFORE_EVIDENCE` (see [`docs/substrate/invariants/`](../invariants/)) — structural plugin shape, and a small set of convention pins. The canonical enumeration of pinned conventions (currently enforced versus planned) lives in [`PLUGIN_ROOT_PATHS.md`](../invariants/PLUGIN_ROOT_PATHS.md) §"Convention pins enforced alongside this invariant"; this doc cites that list rather than restating it. The rest of the rules below — section order, body prose tone, anti-pattern table shape — remain convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Convention status is deliberate where wording is still settling; promotion to enforcement happens when a rule earns it.
+The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces the named invariants — `PLUGIN_ROOT_PATHS`, `VERDICT_BEFORE_EVIDENCE`, `IMPLEMENTATION_PLAN_COVERS_DELTA`, and `SKILL_DESIGN_DOC_SECTION` (see [`docs/substrate/invariants/`](../invariants/)) — structural plugin shape, and a small set of convention pins. The canonical enumeration of pinned conventions (currently enforced versus planned) lives in [`PLUGIN_ROOT_PATHS.md`](../invariants/PLUGIN_ROOT_PATHS.md) §"Convention pins enforced alongside this invariant"; this doc cites that list rather than restating it. The rest of the rules below — section order, body prose tone, anti-pattern table shape — remain convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Convention status is deliberate where wording is still settling; promotion to enforcement happens when a rule earns it.
 
-This document specifies the SKILL.md *shape*. Chat-rendered output follows [`output-voice.md`](../../../references/output-voice.md), which is normative for every user-facing render — verdict-leads, header-depth cap, density budgets, forbidden phrasings, the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). Every non-router skill body and every reviewer-agent body carries a one-line imperative directing the model to Read that guide before rendering chat output; the imperative is the load-bearing line, and the Output format / "How to structure your output" code block is a pure render template that contains no instructions to the model.
+This document specifies the SKILL.md *shape*. The substrate above the SKILL.md — what the skill is *for*, what it owns, what crosses its seams — lives in [`docs/substrate/architecture/skills.md`](../architecture/skills.md) (per-skill design layer) and [`docs/substrate/architecture/handoffs.md`](../architecture/handoffs.md) (chain transition contracts). The §"When to edit SKILL.md alone, and when to edit the design layer first" section below distinguishes implementation-shape edits (this doc governs) from design-shape edits (the design layer governs). Chat-rendered output follows [`output-voice.md`](../../../references/output-voice.md), which is normative for every user-facing render — verdict-leads, header-depth cap, density budgets, forbidden phrasings, the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). Every non-router skill body and every reviewer-agent body carries a one-line imperative directing the model to Read that guide before rendering chat output; the imperative is the load-bearing line, and the Output format / "How to structure your output" code block is a pure render template that contains no instructions to the model.
+
+## When to edit SKILL.md alone, and when to edit the design layer first
+
+A SKILL.md change is **implementation** if it:
+
+- Refines the wording of an existing process step.
+- Adds or tightens a Hard constraint that's already in scope per the skill's section in [`docs/substrate/architecture/skills.md`](../architecture/skills.md).
+- Updates the Output format block to match [`output-voice.md`](../../../references/output-voice.md).
+- Tightens an anti-pattern.
+- Adds a path discipline citation.
+
+A SKILL.md change is **design** if it:
+
+- Changes what the skill is for (Purpose paragraph in skills.md).
+- Changes what the skill owns or doesn't own (Owns / Does not own bullets).
+- Changes what artifact the skill consumes or produces (Inputs / Outputs).
+- Changes which skill produces the input or consumes the output (a seam change).
+- Adds or removes a verdict from the skill's vocabulary.
+- Adds, removes, or renames the skill itself.
+
+Design changes update [`docs/substrate/architecture/skills.md`](../architecture/skills.md) (purpose, ownership, seams) and/or [`docs/substrate/architecture/handoffs.md`](../architecture/handoffs.md) (artifact contracts, verdict gates) **before** the SKILL.md body changes. The substrate-first discipline is structural here: the SKILL.md is the implementation prompt; the design layer is what the prompt is implementing. `cohesive:rewrite-specs` Process Step 1a classifies every rewrite as Pure implementation / Design / Mixed and records the classification in the delta ledger's `## Delta at a glance` preamble; `spec-cohesion-reviewer` reads the classification during `validate-rewrite` to verify the rewrite touched the right layer first.
+
+Default to **Mixed** when the classification is ambiguous. The cost of over-classifying is one additional doc edit; the cost of under-classifying is a substrate-implementation collapse. The `SKILL_DESIGN_DOC_SECTION` named invariant (see [`docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md`](../invariants/SKILL_DESIGN_DOC_SECTION.md)) ensures the design layer exists for every skill; this rule is what keeps it load-bearing rather than aspirational.
 
 ## Frontmatter
 
@@ -144,7 +167,7 @@ This is one of two named invariants (`PLUGIN_ROOT_PATHS` and `VERDICT_BEFORE_EVI
 
 ## Dispatch discipline
 
-Skills that dispatch to reviewer agents via the Task tool include a fresh-eyes preamble in the dispatch prompt. The preamble's job is to state — in some compatible form — that the agent does not inherit conversation context, reads only the paths passed to it, and does not pre-summarize or pre-rank findings. The canonical wording is in [`reviewer-agent-template.md`](reviewer-agent-template.md); copying it verbatim is the safest default.
+Skills that dispatch to reviewer agents via the Task tool include a fresh-eyes preamble in the dispatch prompt. The preamble's job is to state — in some compatible form — that the agent does not inherit conversation context, reads only the paths passed to it, and does not pre-summarize or pre-rank findings. The canonical wording is in [`reviewer-agent-shape.md`](reviewer-agent-shape.md); copying it verbatim is the safest default.
 
 The dispatching skill body explicitly states, in prose, that the reviewer reads only paths passed to it, not the conversation. The structural fence is the harness's Task-subprocess isolation; the prose preamble is convention reinforcement.
 
@@ -209,7 +232,7 @@ These deviations are documented; new deviations require explicit discussion and 
 
 A general convention reads "Cohesive skills do not produce code." That convention is true for every Cohesive skill *body*. The exception is `implement-cohesively`, which orchestrates a phase loop where `superpowers:executing-plans` produces code inside each phase. The skill body itself never writes code; it dispatches `superpowers:executing-plans` (which writes code with TDD discipline) per phase.
 
-The distinction matters for skill authors: a future Cohesive skill that wants to write code directly (without going through `superpowers:executing-plans`) crosses a seam the v0.1 design rejected. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/composition-with-superpowers.md` §"What Cohesive deliberately does not do." If a future skill genuinely needs to write substrate-shaped code (e.g., a behavior-matrix-to-test-stub generator), the seam needs explicit revisiting in the composition design doc.
+The distinction matters for skill authors: a future Cohesive skill that wants to write code directly (without going through `superpowers:executing-plans`) crosses a seam the v0.1 design rejected. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md` §"What Cohesive deliberately does not do." If a future skill genuinely needs to write substrate-shaped code (e.g., a behavior-matrix-to-test-stub generator), the seam needs explicit revisiting in the composition design doc.
 
 ## Anti-patterns to avoid
 

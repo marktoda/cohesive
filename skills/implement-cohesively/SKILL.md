@@ -170,7 +170,7 @@ Per verdict:
 | Auto-looping repair cycles past the first | Hides design defects behind reviewer fatigue; the second-failure case usually means the delta entry itself is wrong, not the code | Per Phase 2c escalation rule: stop at `Phase Drift` after one repair cycle; surface findings to user |
 | Skipping the final substrate review (Phase 3) | The branch may pass per-phase reviews and still drift in aggregate | Hard constraint #5 — `cohesive:review-diff` is mandatory before handoff |
 | Auto-invoking `superpowers:finishing-a-development-branch` | Branch finishing is a user action per Cohesive↔Superpowers seam | Recommend; do not invoke |
-| Pre-summarizing the design for the cross-review agent | Bypasses fresh-eyes per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/agent-dispatch-protocol.md` | Pass paths only; never summarize the rewrite for the agent |
+| Pre-summarizing the design for the cross-review agent | Bypasses fresh-eyes per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/fresh-eyes-review.md` | Pass paths only; never summarize the rewrite for the agent |
 
 ## Branch shape
 

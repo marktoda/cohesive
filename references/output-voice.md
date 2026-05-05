@@ -44,7 +44,7 @@ These produce wordiness without information:
 - "There are several things to consider here..."
 - "It's worth noting that..." / "It's important to mention that..."
 - "I hope this helps!" / "Let me know if you have any questions!"
-- "What do you want to focus on?" / "Tell me more about your goals." / "Anything else I should know?" (these violate the forced-choice clarifying-question rule in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Clarifying questions")
+- "What do you want to focus on?" / "Tell me more about your goals." / "Anything else I should know?" (these violate the forced-choice clarifying-question rule in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions")
 
 ## Tone
 
@@ -103,8 +103,8 @@ If this guide changes, update the worked transcript in the same pass. Rules with
 
 ## What this guide is *not*
 
-- Not a guide for normative-doc prose (specs, invariants, gotchas, matrices). Those follow `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Tone" — imperative for instructions, declarative for descriptions, no hedging.
-- Not a guide for review-finding shape. Reviewer findings follow the six-field canonical shape in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions".
+- Not a guide for normative-doc prose (specs, invariants, gotchas, matrices). Those follow `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Tone" — imperative for instructions, declarative for descriptions, no hedging.
+- Not a guide for review-finding shape. Reviewer findings follow the six-field canonical shape in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions".
 - Not a guide for what to *say* — what content goes into a review or a brainstorm — only how to render it in chat.
 
 ## Related substrate
@@ -113,5 +113,5 @@ If this guide changes, update the worked transcript in the same pass. Rules with
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/wordy-output.md` — the scar this guide retires
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` — the trap this guide must avoid
 - `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md` — the worked example
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions" — canonical Output format shape (cites this guide)
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" — canonical reviewer-agent shape (cites this guide)
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" — canonical Output format shape (cites this guide)
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions" — canonical reviewer-agent shape (cites this guide)

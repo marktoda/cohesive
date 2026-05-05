@@ -197,7 +197,7 @@ done
 [ "$errors" -eq "$errors_before" ] && ok "no skill description uses bare generic-review trigger phrases"
 
 # 10. Canonical prereq-detection question in subskills with a discover-substrate or
-# brainstorm-design prereq. Per docs/substrate/designs/skill-conventions.md §"Canonical prereq-detection
+# brainstorm-design prereq. Per docs/substrate/conventions/skill-shape.md §"Canonical prereq-detection
 # question". Stable opening: a blockquote line beginning `> "I see we're about to run <skill>.`
 prereq_subskills=(
   brainstorm-design
@@ -212,13 +212,13 @@ for s in "${prereq_subskills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
   if ! grep -qE "^[[:space:]]*> \"I see we're about to run $s\." "$skill_md"; then
-    fail "skills/$s/SKILL.md missing canonical prereq-detection question (per docs/substrate/designs/skill-conventions.md §Canonical prereq-detection question)"
+    fail "skills/$s/SKILL.md missing canonical prereq-detection question (per docs/substrate/conventions/skill-shape.md §Canonical prereq-detection question)"
   fi
 done
 [ "$errors" -eq "$errors_before" ] && ok "all ${#prereq_subskills[@]} prereq-bearing subskills have the canonical prereq-detection question"
 
 # 11. Fresh-eyes preamble bullet verbatim across reviewer agent files.
-# Per docs/substrate/designs/reviewer-agent-template.md §"The fresh-eyes preamble".
+# Per docs/substrate/conventions/reviewer-agent-shape.md §"The fresh-eyes preamble".
 fresh_eyes_bullet='Inherit conversation context from the calling skill. Treat your input prompt as the entire context.'
 if [ -d agents ]; then
   errors_before=$errors
@@ -227,14 +227,14 @@ if [ -d agents ]; then
     [ -e "$agent_md" ] || continue
     agent_count=$((agent_count + 1))
     if ! grep -qF "$fresh_eyes_bullet" "$agent_md"; then
-      fail "$agent_md missing fresh-eyes preamble bullet (per docs/substrate/designs/reviewer-agent-template.md §The fresh-eyes preamble)"
+      fail "$agent_md missing fresh-eyes preamble bullet (per docs/substrate/conventions/reviewer-agent-shape.md §The fresh-eyes preamble)"
     fi
   done
   [ "$errors" -eq "$errors_before" ] && ok "all $agent_count reviewer agents carry the fresh-eyes preamble bullet verbatim"
 fi
 
 # 12. "Recommended next Cohesive skill" footer in every persisting skill body.
-# Per docs/substrate/designs/skill-conventions.md §"Recommended-next-skill footer".
+# Per docs/substrate/conventions/skill-shape.md §"Recommended-next-skill footer".
 # The router (cohesively) is exempt: its output is a one-sentence announcement.
 persisting_skills=(
   discover-substrate
@@ -251,7 +251,7 @@ for s in "${persisting_skills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
   if ! grep -qE '^### Recommended next Cohesive skill' "$skill_md"; then
-    fail "skills/$s/SKILL.md missing '### Recommended next Cohesive skill' footer (per docs/substrate/designs/skill-conventions.md §Recommended-next-skill footer)"
+    fail "skills/$s/SKILL.md missing '### Recommended next Cohesive skill' footer (per docs/substrate/conventions/skill-shape.md §Recommended-next-skill footer)"
   fi
 done
 [ "$errors" -eq "$errors_before" ] && ok "all ${#persisting_skills[@]} persisting skills have the 'Recommended next Cohesive skill' footer"
@@ -437,7 +437,7 @@ if [ -d docs/history/delta-ledgers ]; then
     date_prefix=${base:0:10}
     if [[ ! "$date_prefix" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
       preamble_malformed_count=$((preamble_malformed_count + 1))
-      warn "$ledger has malformed filename (no leading YYYY-MM-DD prefix per docs/substrate/designs/substrate-layout.md §Naming); skipped from preamble check"
+      warn "$ledger has malformed filename (no leading YYYY-MM-DD prefix per docs/substrate/conventions/substrate-layout.md §Naming); skipped from preamble check"
       continue
     fi
     if [[ "$date_prefix" < "$preamble_cutoff" ]]; then

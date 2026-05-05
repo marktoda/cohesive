@@ -50,7 +50,7 @@ In this order, if present:
 1. `CLAUDE.md` and `AGENTS.md` (highest priority — these often contain rules the codebase depends on)
 2. `architecture.md` and `README.md`
 3. `docs/design/**`, `docs/specs/**`, `docs/adr/**`
-4. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md`)
+4. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md`)
 
 If the user named a subsystem, prefer docs whose path or title contains the subsystem name. Read normative docs *before* reading implementation files — they tell you what the system is supposed to do, which is more important than what it currently does.
 

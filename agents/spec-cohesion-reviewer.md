@@ -62,6 +62,12 @@ For every rewritten and added spec, evaluate against the cohesion rubric:
 10. **Vague language.** Hunt for "should," "may," "could," "we will," "TBD," "TODO," "consider" in normative sections. Each occurrence needs to be tightened or moved to a non-normative section.
 11. **`## Delta at a glance` preamble matches the body.** The ledger's preamble is what the dispatching `validate-rewrite` skill quotes verbatim into the validation review at decision time. Read the preamble's count-or-name list and compare each category bullet to the corresponding body section of the same ledger (e.g., the preamble's "Named invariants" bullet to the body's `### Named invariants` section; the preamble's file counts to the actual entries under `## Files rewritten` and `## Files added`). The canonical category list, authoring rules, and consumer rendering rules — including how to render missing preambles and how to handle preambles inconsistent with the body — live in `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Delta at a glance"; apply those rules. A divergence is a Blocking Issue against the same canonical reference; a missing preamble is also a Blocking Issue.
 
+The next three checks (12-14) are **design-layer lenses**. They apply only when the rewrite touches the per-skill design layer or chain-handoff contracts. Read the delta ledger's `## Delta at a glance` preamble for the classification line ("This rewrite is [Pure implementation / Design / Mixed]"); apply lenses 12-14 only when classification is **Design** or **Mixed**. If classification is **Pure implementation**, skip 12-14 and note their absence in your token discipline budget.
+
+12. **Substrate-first compliance** *(triggered by Design or Mixed)*. If the delta ledger's preamble lists design-layer changes (skill purpose, ownership, seams, verdicts, or chain topology), do those changes appear in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` and/or `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md`? If listed but the design-layer files are untouched, raise a Blocking Issue against `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"When to edit SKILL.md alone, and when to edit the design layer first" — the rewrite has performed an implementation-shape edit on what should have been a design-shape edit. The named invariant `SKILL_DESIGN_DOC_SECTION` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md`) ensures presence of per-skill sections; this check ensures the rewrite *used* the layer when it should have.
+13. **Design-implementation agreement** *(per modified skill section)*. For every skill whose `### <name>` section in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` was modified, does the corresponding `${CLAUDE_PLUGIN_ROOT}/skills/<name>/SKILL.md` body agree on (a) Purpose — skill's role in the chain matches what skills.md says; (b) Owns / Does not own — Hard constraints in SKILL.md don't contradict the boundaries in skills.md; (c) Inputs / Outputs — artifact names and verdict vocabulary match between the design doc and the skill body. A divergence is a Blocking Issue: design-doc and SKILL.md must agree, and disagreement means the rewrite was incomplete.
+14. **Handoff contract consistency** *(per modified handoff)*. For every chain edge or re-entry edge in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` whose contract was modified, verify the named verdict gate appears identically in three sites: (a) the upstream SKILL.md's verdict vocabulary; (b) the downstream SKILL.md's prereq check; (c) `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`'s dispatch contract row, if router-dispatchable. A handoff that says "Approved" gate but the upstream skill returns "OK" or the router dispatches on "Ready" is a Blocking Issue — chain-edge drift across multiple sites is the most expensive failure of the implementation phase.
+
 ## How to structure your output
 
 Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the render template below — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
@@ -81,7 +87,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 ### B1. <title>
 - Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact
 
-(Each finding uses the canonical six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions".)
+(Each finding uses the canonical six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions".)
 ```
 
 Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`. Your verdict must be one of, gated on the verdict→severity-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)":
@@ -94,7 +100,7 @@ Returning `Approved` with a `High` or `Blocker` finding, or `Issues Found` with 
 
 ## Issue format (canonical six-field shape)
 
-Every issue you raise uses the canonical reviewer-finding shape from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions":
+Every issue you raise uses the canonical reviewer-finding shape from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions":
 
 - **Severity** — Blocker / High / Medium / Low
 - **Category** — Spec drift / Locality / Invariant / Test / Domain model / Vague language / Future-fit / Enforcement
@@ -126,7 +132,7 @@ Include a "What looked right" section with the few highest-quality moves of the 
 
 ## Token discipline
 
-Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty sections. Long discussion goes in linked appendix files only if explicitly requested by the dispatching skill. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
+Output ≤500 words / ≤8 ranked findings for **Pure implementation** rewrites. For **Design** or **Mixed** rewrites, the working set expands to include lenses 12-14: budget an additional ~150 words / ~3 findings, capping output at ≤650 words / ≤11 ranked findings total. Reading expands too — lens 13 reads each modified skill's SKILL.md body; lens 14 reads upstream + downstream SKILL.md bodies plus router.md per modified handoff. Stop when bounded; do not fill empty sections. Long discussion goes in linked appendix files only if explicitly requested by the dispatching skill. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
 
 ## Tone
 
