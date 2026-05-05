@@ -64,6 +64,7 @@ The implementation belongs in the consuming skill body (e.g., `rewrite-specs` Ha
 - Manual scenario test (planned): invoke `cohesive:brainstorm-design` directly with no prior discovery; verify the subskill asks the canonical question.
 - Manual scenario test (planned): invoke `cohesive:rewrite-specs` directly with a chosen direction but no discovery; verify same.
 - Manual scenario test (planned): invoke `cohesive:rewrite-specs` directly when the prior turn is a `validate-rewrite` output with `Repair → re-validate` disposition + ranked repairs; verify the subskill picks up the repair list as the direction without asking the canonical question.
+- Manual scenario test (planned): invoke `cohesive:implement-cohesively` directly when the prior turn is a `validate-rewrite` output with `**Verdict:** Approved` and the implementation decision matrix naming `cohesive:implement-cohesively`; verify the subskill picks up the validation review path and the delta ledger path from the artifact without asking the canonical question.
 - Lint check (V1): grep each subskill body for the canonical question text near the start of "Process."
 
 If this checks list is empty, the gotcha is enforced by reviewer memory only. The first concrete test should land in the next release pass.
