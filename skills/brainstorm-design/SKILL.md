@@ -16,6 +16,10 @@ A combined **design options + pressure-test report** that:
 
 The output is the input to either `rewrite-specs` (if a direction is approved) or another round of brainstorming (if no option survives pressure-testing).
 
+## Voice
+
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+
 ## Hard constraints
 
 1. **Never produce code from this skill.** Not a snippet, not a function signature. Brainstorming ends at "here's the recommended direction."
@@ -99,8 +103,6 @@ Recommend exactly one option, or a named hybrid. The recommendation must:
 
 ```md
 # Brainstorm — <topic>
-
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 ### Current scope
 - ...

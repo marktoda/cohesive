@@ -18,17 +18,17 @@ Cell legend:
 - `✓` — both spec required and agent file complies (the steady-state value)
 - `✗` — spec required and agent file is non-compliant (regression; should not appear in a clean release)
 
-| Agent | Severity | Category | Why it matters | Evidence | Recommended fix | Substrate artifact | Voice citation |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| substrate-alignment-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| structure-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| library-native-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| agent-readiness-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| spec-cohesion-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Agent | Severity | Category | Why it matters | Evidence | Recommended fix | Substrate artifact | Voice imperative in body | Citation absent from output template |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| substrate-alignment-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| structure-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| library-native-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| agent-readiness-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| spec-cohesion-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The first six columns reflect the state *after* the 2026-05-04 skill-architecture repair pass. Prior state showed drift: `substrate-alignment-reviewer` dropped Evidence; `library-native-reviewer` and `agent-readiness-reviewer` dropped Category; `spec-cohesion-reviewer` used a different shape entirely (Risk / Substrate artifact / Suggested repair). That repair pass swept all five to canonical.
 
-The "Voice citation" column was added in the 2026-05-04 `cut-anchor-pin` substrate rewrite. Each agent's "How to structure your output" code block opens with the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. All five cells are `✓` after the cut-anchor-pin implementation pass (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md` §"Implementation pass") added the citation line to each agent file and the validator grep that pins it.
+The last two columns track the voice-imperative convention. The "Voice imperative in body" column verifies each agent's system-prompt body carries the literal `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` outside fenced code blocks (validator Check 13c). The "Citation absent from output template" column verifies the literal `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` does **not** appear inside the agent's "How to structure your output" code block (validator Check 13d). Both columns landed `✓` after the 2026-05-04 voice-citation-imperative pivot (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md`), which retargeted Check 13c from "citation present in output template" to "imperative present in body" and added the new anti-citation Check 13d. The pre-pivot single "Voice citation" column tracked a different artifact (citation in the output template) and is retired.
 
 ### Verdict-leads is tracked elsewhere
 

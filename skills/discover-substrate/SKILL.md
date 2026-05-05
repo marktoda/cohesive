@@ -9,6 +9,10 @@ description: Use when starting substrate-first Cohesive work — before brainsto
 
 A structured **substrate discovery report** that names the docs, tests, invariants, matrices, gotchas, semantic linters, and CI checks the codebase already has — and explicitly calls out what is *missing* in the area the user is about to change. Every other Cohesive skill leans on this output. Run it once per session per change surface; later skills can re-use the report rather than re-scanning.
 
+## Voice
+
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+
 ## When to invoke
 
 Always invoke this skill (or compose its output) before:
@@ -119,8 +123,6 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 
 ```md
 # Substrate Discovery — <scope>
-
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 ## Substrate discovered
 

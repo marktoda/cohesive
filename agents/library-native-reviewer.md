@@ -108,11 +108,11 @@ You do **not** read every file. Sample heavily.
 
 ## How to structure your output
 
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the render template below — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+
 The ranked findings list is the contract. The pre-finding sections are *optional* observation buckets — write "none observed" or omit a section entirely if you have nothing leverage-bearing for it.
 
 ```md
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
-
 ## High-leverage findings (ranked)
 
 ### 1. <title>

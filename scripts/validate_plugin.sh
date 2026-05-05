@@ -286,13 +286,14 @@ for s in "${verdict_led_skills[@]}"; do
 done
 [ "$errors" -eq "$errors_before" ] && ok "VERDICT_BEFORE_EVIDENCE: all ${#verdict_led_skills[@]} verdict-led skills lead Output format with **Verdict:**"
 
-# 13b. Voice-citation grep: every skills/*/SKILL.md Output format block has the literal
-# voice citation within the first 3 non-blank lines after the outermost # title in a code
-# block. Same check for every agents/*.md "How to structure your output" code block.
-# Per references/output-voice.md and docs/substrate/gotchas/style-guide-rot.md.
-# Cohesively router is exempt (its render is a 1-2 sentence announcement with no # title;
-# documented in docs/substrate/invariants/PLUGIN_ROOT_PATHS.md §"Convention pins...").
-voice_citation_skills=(
+# 13b. Voice-imperative grep, skills: every non-router skills/*/SKILL.md body (outside
+# fenced code blocks) contains the literal imperative directing the model to load the
+# voice guide before rendering chat output. Per references/output-voice.md and
+# docs/substrate/gotchas/style-guide-rot.md §"Correct pattern". Cohesively router is
+# exempt (its dispatched subskills carry the voice load; documented in
+# docs/substrate/invariants/PLUGIN_ROOT_PATHS.md §"Convention pins...").
+voice_imperative_literal='Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.'
+voice_imperative_skills=(
   discover-substrate
   brainstorm-design
   rewrite-specs
@@ -302,52 +303,75 @@ voice_citation_skills=(
   audit-substrate
 )
 errors_before=$errors
-for s in "${voice_citation_skills[@]}"; do
+for s in "${voice_imperative_skills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
-  if awk '
-    /^```/ { in_block = !in_block; if (!in_block) { found_title=0; count=0 }; next }
-    in_block && !found_title && /^# / { found_title=1; count=0; next }
-    in_block && found_title {
-      if (/^[[:space:]]*$/) next
-      count++
-      if (count > 3) { found_title=0; next }
-      if (index($0, "> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md") > 0) { found_voice=1; exit 0 }
-    }
-    END { exit found_voice ? 0 : 1 }
+  if awk -v lit="$voice_imperative_literal" '
+    /^```/ { in_block = !in_block; next }
+    !in_block && index($0, lit) > 0 { found=1; exit 0 }
+    END { exit found ? 0 : 1 }
   ' "$skill_md"; then
     : # ok
   else
-    fail "$skill_md missing voice citation in Output format code block (per references/output-voice.md and docs/substrate/gotchas/style-guide-rot.md). Open the canonical code block with '# <title>' then '> Voice and density: \${CLAUDE_PLUGIN_ROOT}/references/output-voice.md' within first 3 non-blank lines."
+    fail "$skill_md missing voice imperative in body prose (outside fenced code blocks). Add the literal line 'Read \${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.' in a ## Voice section. Per references/output-voice.md and docs/substrate/gotchas/style-guide-rot.md §\"Correct pattern\"."
   fi
 done
-[ "$errors" -eq "$errors_before" ] && ok "all ${#voice_citation_skills[@]} skill Output format blocks carry the voice-citation pin"
+[ "$errors" -eq "$errors_before" ] && ok "all ${#voice_imperative_skills[@]} non-router skill bodies carry the voice imperative"
 
-# 13c. Voice-citation grep for reviewer agents: every agents/*.md has the literal voice
-# citation in its first code block.
+# 13c. Voice-imperative grep, reviewer agents: every agents/*-reviewer.md body (outside
+# fenced code blocks) contains the same imperative literal.
 if [ -d agents ]; then
   errors_before=$errors
-  agent_voice_count=0
+  agent_imperative_count=0
   for agent_md in agents/*.md; do
     [ -e "$agent_md" ] || continue
-    agent_voice_count=$((agent_voice_count + 1))
-    if awk '
-      /^```/ { in_block = !in_block; if (in_block && !seen_first_block) { count=0; in_first_block=1; seen_first_block=1 } else if (!in_block) { in_first_block=0 }; next }
-      in_block && in_first_block {
-        if (/^[[:space:]]*$/) next
-        count++
-        if (count > 3) { in_first_block=0; next }
-        if (index($0, "> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md") > 0) { found_voice=1; exit 0 }
-      }
-      END { exit found_voice ? 0 : 1 }
+    agent_imperative_count=$((agent_imperative_count + 1))
+    if awk -v lit="$voice_imperative_literal" '
+      /^```/ { in_block = !in_block; next }
+      !in_block && index($0, lit) > 0 { found=1; exit 0 }
+      END { exit found ? 0 : 1 }
     ' "$agent_md"; then
       : # ok
     else
-      fail "$agent_md missing voice citation in first code block (per references/output-voice.md). Open the canonical code block with '> Voice and density: \${CLAUDE_PLUGIN_ROOT}/references/output-voice.md' within first 3 non-blank lines."
+      fail "$agent_md missing voice imperative in body prose (outside fenced code blocks). Add the literal line 'Read \${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.' Per references/output-voice.md and docs/substrate/gotchas/style-guide-rot.md §\"Correct pattern\"."
     fi
   done
-  [ "$errors" -eq "$errors_before" ] && ok "all $agent_voice_count reviewer-agent first code blocks carry the voice-citation pin"
+  [ "$errors" -eq "$errors_before" ] && ok "all $agent_imperative_count reviewer-agent bodies carry the voice imperative"
 fi
+
+# 13d. Anti-citation lint: no Output format / "How to structure your output" code block
+# in any non-router skills/*/SKILL.md or agents/*-reviewer.md contains the literal
+# citation line. Citations placed in render templates leak verbatim into user-facing
+# output. Per docs/substrate/gotchas/style-guide-rot.md §"Correct pattern".
+voice_citation_literal='> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md'
+errors_before=$errors
+template_check_count=0
+for s in "${voice_imperative_skills[@]}"; do
+  skill_md="skills/$s/SKILL.md"
+  [ -f "$skill_md" ] || continue
+  template_check_count=$((template_check_count + 1))
+  if awk -v lit="$voice_citation_literal" '
+    /^```/ { in_block = !in_block; next }
+    in_block && index($0, lit) > 0 { found=1; exit 0 }
+    END { exit found ? 0 : 1 }
+  ' "$skill_md"; then
+    fail "$skill_md contains voice-citation literal inside a fenced code block (render template). Citations in render templates leak verbatim to users. Move the load directive to body prose as an imperative. Per docs/substrate/gotchas/style-guide-rot.md §\"Correct pattern\"."
+  fi
+done
+if [ -d agents ]; then
+  for agent_md in agents/*.md; do
+    [ -e "$agent_md" ] || continue
+    template_check_count=$((template_check_count + 1))
+    if awk -v lit="$voice_citation_literal" '
+      /^```/ { in_block = !in_block; next }
+      in_block && index($0, lit) > 0 { found=1; exit 0 }
+      END { exit found ? 0 : 1 }
+    ' "$agent_md"; then
+      fail "$agent_md contains voice-citation literal inside a fenced code block (render template). Citations in render templates leak verbatim to users. Move the load directive to body prose as an imperative. Per docs/substrate/gotchas/style-guide-rot.md §\"Correct pattern\"."
+    fi
+  done
+fi
+[ "$errors" -eq "$errors_before" ] && ok "no citation literals inside render templates across $template_check_count files (anti-citation lint)"
 
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
 # Per docs/substrate/invariants/PLUGIN_ROOT_PATHS.md. Excludes lines inside fenced code

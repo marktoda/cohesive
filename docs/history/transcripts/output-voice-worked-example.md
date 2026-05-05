@@ -70,8 +70,6 @@ Both renders below assume `discover-substrate` and the two reviewer agents have 
 
 > # Change Cohesion Review
 >
-> > Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
->
 > **Verdict:** Pass with notes
 >
 > ## Main concern
@@ -96,13 +94,14 @@ Both renders below assume `discover-substrate` and the two reviewer agents have 
 
 **Why this works:**
 
-- Verdict appears in line 5 (after the title and the voice citation). Reader knows the answer immediately.
+- Verdict appears on line 3 (after the title and a blank). Reader knows the answer immediately.
+- No instruction lines in user-facing output. The voice guide that shaped this render was loaded from a body-level imperative in the skill — `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` — not from a citation inside the render template. Citations in render templates leak verbatim to users (the v0.1 pre-pivot mistake; see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` §"Correct pattern").
 - 3 levels of header nesting maximum, all `##` or `###`.
 - Findings are a table — `Severity / Area / Finding / Suggested substrate` per row, ranked by leverage. Reader scans the column they care about.
 - Single next-step recommendation, picked by verdict.
 - No reviewer attribution. The findings stand on their own.
 - No methodology recap. No hedge words. No pleasantries.
-- ~25 lines of chat render vs ~80 in the wordy version. Same information; different render.
+- ~22 lines of chat render vs ~80 in the wordy version. Same information; different render.
 
 ---
 
@@ -122,7 +121,7 @@ The cuts are not about saying less. They are about saying the same thing in a re
 
 ---
 
-## Captured transcripts (queued)
+## Captured transcripts (required before promoting voice-imperative to invariant)
 
 This file is an *authored* contrast — both renders were written for pedagogy. Every anti-pattern in the wordy render has been observed in real Cohesive runs, but the side-by-side itself is constructed.
 
@@ -132,9 +131,9 @@ The next substrate task in this area is to capture a *real* transcript from a do
 docs/history/transcripts/output-voice-captured-YYYY-MM-DD-<slug>.md
 ```
 
-A real capture carries more anchoring weight than an authored example because the anti-patterns it shows are observed-not-imagined, and the rationale-for-cuts can quote the actual generated output. Until a real capture lands, this authored transcript is the canonical reference; once a capture exists, the captured file becomes canonical and this authored file is preserved as the original pedagogical reference.
+A real capture carries two kinds of weight. **Pedagogical:** the anti-patterns it shows are observed-not-imagined, and the rationale-for-cuts can quote the actual generated output. **Empirical:** the capture is the gating artifact for the voice-imperative load-bearing claim. The post-pivot pattern (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` §"Correct pattern") rests on the assumption that a body-level `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` imperative actually triggers a Read tool call at chat-render time. Until a captured transcript shows the Read call happening, the assumption is reasoned-but-unverified. The capture is one of the four promotion criteria documented in `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Why the voice imperative is convention-with-grep, not a named invariant"; without it, promotion is blocked.
 
-This task is queued substrate, not blocking. Track in the next dogfood pass.
+Until a real capture lands, this authored transcript is the canonical reference; once a capture exists, the captured file becomes canonical and this authored file is preserved as the original pedagogical reference.
 
 ## Notes for future contributors
 

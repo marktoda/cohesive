@@ -2,7 +2,7 @@
 
 The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces the named invariants — `PLUGIN_ROOT_PATHS` and `VERDICT_BEFORE_EVIDENCE` (see [`docs/substrate/invariants/`](../invariants/)) — structural plugin shape, and a small set of convention pins. The canonical enumeration of pinned conventions (currently enforced versus planned) lives in [`PLUGIN_ROOT_PATHS.md`](../invariants/PLUGIN_ROOT_PATHS.md) §"Convention pins enforced alongside this invariant"; this doc cites that list rather than restating it. The rest of the rules below — section order, body prose tone, anti-pattern table shape — remain convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Convention status is deliberate where wording is still settling; promotion to enforcement happens when a rule earns it.
 
-This document specifies the SKILL.md *shape*. Chat-rendered output follows [`output-voice.md`](../../../references/output-voice.md), which is normative for every user-facing render — verdict-leads, header-depth cap, density budgets, forbidden phrasings, the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). Every Output format block in this repo opens with a one-line citation pulling that guide into context at generation time.
+This document specifies the SKILL.md *shape*. Chat-rendered output follows [`output-voice.md`](../../../references/output-voice.md), which is normative for every user-facing render — verdict-leads, header-depth cap, density budgets, forbidden phrasings, the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). Every non-router skill body and every reviewer-agent body carries a one-line imperative directing the model to Read that guide before rendering chat output; the imperative is the load-bearing line, and the Output format / "How to structure your output" code block is a pure render template that contains no instructions to the model.
 
 ## Frontmatter
 
@@ -58,23 +58,23 @@ Use these when relevant; omit the heading when not:
 
 The "Output format" section shows the canonical chat output the skill produces. Five rules apply, in priority order.
 
-### 1. The voice citation appears immediately under the outermost output title
+### 1. The voice imperative lives in the skill body; the Output format block is a pure render template
 
-In every `skills/*/SKILL.md` Output format block, the canonical render opens with the outermost `#` title (the name of the rendered output), followed by the voice-citation blockquote:
+Every non-router `skills/*/SKILL.md` carries, in its body prose, a single-line imperative directing the model to load the voice guide before rendering chat output:
 
 ```
-# <Skill output title>
-
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.
 ```
 
-Title-then-citation is the canonical layout (matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md)). The citation is what pulls [`output-voice.md`](../../../references/output-voice.md) into context at generation time. Without it, voice rules drift silently — the failure mode documented in [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md). `validate_plugin.sh` greps for the literal blockquote line within the first three non-blank lines after the outermost `#` title.
+The imperative appears in a `## Voice` section placed between `## What this skill produces` and `## Hard constraints` (or between `## What this skill produces` and `## When to invoke` for `discover-substrate`). The Output format block immediately below stays a pure render template — title, verdict, content — and contains **no instructions to the model** and **no citation literal**. Instructions placed inside an Output format block leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents post-rewrite). The imperative is what triggers the model to invoke `Read` on `output-voice.md`; the Read tool call is the loading mechanism. `validate_plugin.sh` Check 13b greps every non-router SKILL.md body for the imperative literal; Check 13d greps every Output format code block to confirm the citation literal does **not** appear there. Reviewer agents follow the same shape — Check 13c greps each `agents/*-reviewer.md` body for the imperative.
+
+The router (`cohesively`) is exempt from the imperative requirement: its render budget is 1–2 sentences with no `#` title, and its dispatched subskills carry the voice load on its behalf.
 
 ### 2. Verdict-led skills lead with the verdict
 
 For skills whose output names a verdict (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`, plus future verdict-led skills), the Output format block opens — within the first three non-blank lines after the outermost header — with the literal string `**Verdict:**` followed by a value from the skill's verdict vocabulary. This is the named invariant `VERDICT_BEFORE_EVIDENCE` (see [`docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`](../invariants/VERDICT_BEFORE_EVIDENCE.md)).
 
-Skills without a controlled-vocabulary verdict (`cohesively`, `discover-substrate`, `brainstorm-design`, `rewrite-specs`) are out of scope for this rule but still carry the voice citation.
+Skills without a controlled-vocabulary verdict (`cohesively`, `discover-substrate`, `brainstorm-design`, `rewrite-specs`) are out of scope for this rule but still carry the voice imperative in their body (the router is exempt per rule 1).
 
 ### 3. The chat render is a faithful subset of the persisted file
 
@@ -86,8 +86,6 @@ The canonical chat-render shape for verdict-led, persisted-output skills:
 
 ```md
 # <Skill output title>
-
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Verdict:** <value from vocabulary>
 
@@ -105,7 +103,7 @@ The canonical chat-render shape for verdict-led, persisted-output skills:
 `cohesive:<skill-name>` — <one-clause reason>
 ```
 
-The exemplar order is: outermost `#` title, then the voice-citation blockquote, then `**Verdict:**` — matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). The `VERDICT_BEFORE_EVIDENCE` grep verifies citation and verdict are *each present in lines 1–3 after the `#` title* but does not enforce their order relative to each other; that ordering is the worked-transcript convention, not a structural check (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` §"Enforcement"). Authors of new skills should match the exemplar; reviewers comparing two compliant skills should accept either order while it remains convention.
+The render opens with the outermost `#` title, then `**Verdict:**` on the next non-blank line — matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). The `VERDICT_BEFORE_EVIDENCE` grep verifies the verdict appears in lines 1–3 after the `#` title (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` §"Enforcement"). The voice-citation literal does not appear in the template — it would render to the user. The voice guide is loaded via the body-level imperative (rule 1).
 
 Skills with chat-only output (`review-diff`) render this shape as their entire output, with no separate persisted file.
 
@@ -132,7 +130,7 @@ If the skill has multiple verdict-branches (e.g. `validate-rewrite` returns Appr
 `<next non-Cohesive action>` — <reason>
 ```
 
-The router (`cohesively`) is exempt: its output is a one-sentence announcement, not a workflow output. It still carries the voice citation in its Output section per rule 1.
+The router (`cohesively`) is exempt: its output is a one-sentence announcement, not a workflow output. It is also exempt from the voice imperative per rule 1 — its dispatched subskills carry the voice load.
 
 ## Path discipline
 
@@ -216,7 +214,8 @@ These deviations are documented; new deviations require explicit discussion and 
 | Frontmatter `description` written in first person ("I help you...") | Breaks the third-person plugin-dev convention | Rewrite in third person beginning with "Use when" |
 | New skill not mentioned in `ARCHITECTURE.md` §"v0.1 scope" or README "What's in the box" | Source-of-truth disagreement | Update both in the same pass |
 | Router omits the canonical announcement before dispatching | User can't tell which workflow is running | Use the canonical opening sentence; name the route |
-| Output format block missing the voice citation line | Voice rules drift silently — see [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md) | Open every Output format block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` |
+| Skill body missing the voice imperative | Voice guide is not loaded at render time; voice rules drift silently — see [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md) | Add `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` to a `## Voice` section in the skill body |
+| Voice citation literal placed inside the Output format code block | Instructions in render templates leak into user-facing output; users see `> Voice and density: ...` rendered verbatim | Remove the citation from the Output format block; the imperative belongs in the body, not the template |
 | Verdict-led skill buries the verdict under a setup paragraph | Violates `VERDICT_BEFORE_EVIDENCE`; reader can't scan the answer | Lead the Output format block with `**Verdict:**` within the first three non-blank lines |
 | Chat render duplicates the full persisted body | Defeats the chat-trailer model; ceremony without information | Render verdict + thesis + top findings + next step in chat; point at the persisted file |
 | Header nesting reaches `####` or `#####` in chat output | Header soup is the most common form of ceremony | Cap at `###`; use a bullet list or table for sub-structure |
