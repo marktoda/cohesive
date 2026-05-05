@@ -123,7 +123,7 @@ if [ -d scripts ]; then
   [ "$warnings" -eq "$warnings_before" ] && ok "all $script_count scripts/ files are executable"
 fi
 
-# 8. v0.1 skill set: the 8 expected skills are present.
+# 8. v0.1 skill set: the 9 expected skills are present.
 # Locks in the verb-noun lexicon `discover-substrate -> brainstorm-design -> rewrite-specs -> validate-rewrite`
 # plus standalone diagnostics `review-codebase`, `review-diff`, `audit-substrate`, and the router `cohesively`.
 expected_skills=(
