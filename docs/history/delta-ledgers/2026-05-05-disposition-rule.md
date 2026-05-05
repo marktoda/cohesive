@@ -121,9 +121,17 @@ Pass-2 validation review at `docs/history/reviews/2026-05-05-disposition-rule-re
 - **pass-2 B1 closed** — `references/templates/cohesion-review.md:91` Disposition phrase list reconciled with `skills/validate-rewrite/SKILL.md:153`. The template now lists the same 5 canonical phrases and explicitly notes that substrate-noting is a user override per rubric §"Substrate-note as user override", not a phrase the agent renders. The Implementation route conditional simplified from "iff verdict is Approved and disposition does not require re-validation" to "iff verdict is Approved" — the verdict-floor mapping makes the re-validation gate redundant for Approved.
 - **pass-2 I1 closed** — Ledger §"New or updated substrate" → §"Behavior matrices" line corrected from "6-row" to "5-row". Preamble was already correct; body now matches.
 
+## Repair pass 3 (post pass-3 validation)
+
+Pass-3 validation review at `docs/history/reviews/2026-05-05-disposition-rule-rewrite-validation-pass-3.md` returned `Issues Found` with 1 High Blocker (no Important findings). The finding was the same shape class as pass-2 B1 (citing-surface drift from incomplete repair-pass propagation) — caught one substrate layer deeper at a fifth citing surface. Closed in this repair pass.
+
+- **pass-3 B1 closed** — `docs/substrate/designs/skill-conventions.md:204` deviation entry updated: implementation-route conditional simplified from "iff verdict is `Approved` and disposition does not require re-validation" to "iff verdict is `Approved`", with inline citation of the verdict-floor mapping rationale. The deviation entry now matches the four other citing surfaces (rubric, SKILL.md, agent, cohesion-review template). All five citing surfaces of the disposition rule's render shape now agree.
+
+The "incomplete propagation across citing surfaces" pattern has now appeared and been caught in three consecutive passes (pass 1 set up the surfaces; pass 2 caught template drift; pass 3 caught skill-conventions drift). The pass-3 §"Substrate gaps" entry substrate-notes this as a candidate for a future semantic linter ("disposition rule citation surfaces" grep), parallel to the substrate-noted "Three options" grep already deferred. Not landed this pass; promotion criteria need one more cycle of dogfooding.
+
 ## Ready for fresh-eyes review?
 
-**Yes** — substrate change is internally complete; validator passes (`bash scripts/validate_plugin.sh` returns 0 errors, 0 warnings); the disposition rule has a single canonical home with three citing surfaces; verdict-floor mapping is pinned and cited from the agent's verdict definitions; cohesion-review template phrase list now matches the SKILL.md derivation list. Hand off to `cohesive:validate-rewrite` for pass 3 fresh-eyes review.
+**Yes** — substrate change is internally complete; validator passes (`bash scripts/validate_plugin.sh` returns 0 errors, 0 warnings); all five citing surfaces of the disposition rule (rubric, SKILL.md, agent, cohesion-review template, skill-conventions deviation entry) agree. Hand off to `cohesive:validate-rewrite` for pass 4 fresh-eyes review.
 
 ## How to read this ledger
 
