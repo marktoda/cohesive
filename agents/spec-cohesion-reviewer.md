@@ -11,7 +11,7 @@ description: |
   </example>
 
   <example>
-  Context: The Cohesive `review-spec-cohesion` skill is invoking this agent automatically.
+  Context: The Cohesive `validate-rewrite` skill is invoking this agent automatically.
   user: (skill invocation passes the agent a list of rewritten spec paths and a design delta ledger path)
   assistant: "Reviewing the listed specs in fresh context per the cohesion rubric..."
   <commentary>The agent must NOT read prior conversation. Only the explicitly-passed file paths plus the cohesion rubric and substrate model references are in scope.</commentary>
@@ -109,7 +109,7 @@ Every issue you raise uses the canonical reviewer-finding shape from `${CLAUDE_P
 - **Recommended fix** — concrete next step the rewriter can act on
 - **Substrate artifact to add or update** — spec / behavior matrix / named invariant / gotcha / semantic linter / test / type boundary
 
-This shape is tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` and is the same shape every other reviewer agent produces, so the synthesizing skill (`review-spec-cohesion`, `cohesive-review` Phase 4) can merge findings uniformly.
+This shape is tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` and is the same shape every other reviewer agent produces, so the synthesizing skill (`validate-rewrite`, `cohesive:review-codebase` Phase 4) can merge findings uniformly.
 
 ## Severity rules
 

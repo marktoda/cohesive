@@ -29,15 +29,20 @@ The graduation criterion that makes this rule a v0.1 invariant rather than a con
 
 ## Enforcement
 
-`scripts/validate_plugin.sh` runs Check N:
+Reserved ordinal: **Check 15** in `scripts/validate_plugin.sh` (slot reserved during the architecture refactor; sits after Check 14 `PLUGIN_ROOT_PATHS`). Implementation lands during `implement-cohesively`; this invariant is graduated on day one because the regex is mechanical and the failure mode binary, but the bash check itself is not yet in `validate_plugin.sh` as of the architecture refactor commit. Until the check is implemented, the invariant is asserted by structural-fence claim plus reviewer judgment in `cohesive:review-codebase` and `cohesive:review-diff`; once implemented, the check enforces presence mechanically and CI blocks merge.
+
+The check shape:
 
 ```bash
+# 15. SKILL_DESIGN_DOC_SECTION: every directory under skills/ has a `### <name>`
+# section in docs/substrate/architecture/skills.md. Per
+# docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md.
 SKILLS_DOC="docs/substrate/architecture/skills.md"
-[ -f "$SKILLS_DOC" ] || { echo "FAIL: $SKILLS_DOC missing"; EXIT_CODE=1; }
+[ -f "$SKILLS_DOC" ] || { fail "$SKILLS_DOC missing (per SKILL_DESIGN_DOC_SECTION)"; }
 for skill_dir in skills/*/; do
   skill_name=$(basename "$skill_dir")
   grep -q "^### ${skill_name}$" "$SKILLS_DOC" \
-    || { echo "FAIL: skills/${skill_name}/ has no '### ${skill_name}' section in $SKILLS_DOC"; EXIT_CODE=1; }
+    || fail "skills/${skill_name}/ has no '### ${skill_name}' section in $SKILLS_DOC (per SKILL_DESIGN_DOC_SECTION)"
 done
 ```
 

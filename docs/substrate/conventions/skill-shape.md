@@ -163,7 +163,7 @@ Every reference to another skill, agent, reference, template, or script in the b
 - `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md`
 - `${CLAUDE_PLUGIN_ROOT}/skills/discover-substrate/SKILL.md`
 
-This is one of two named invariants (`PLUGIN_ROOT_PATHS` and `VERDICT_BEFORE_EVIDENCE`), both enforced by `scripts/validate_plugin.sh`.
+This is one of four named invariants (`PLUGIN_ROOT_PATHS`, `VERDICT_BEFORE_EVIDENCE`, `IMPLEMENTATION_PLAN_COVERS_DELTA`, `SKILL_DESIGN_DOC_SECTION`). Three are mechanically enforced by `scripts/validate_plugin.sh` (`PLUGIN_ROOT_PATHS` Check 14; `VERDICT_BEFORE_EVIDENCE` Check 13a; `SKILL_DESIGN_DOC_SECTION` Check 15); `IMPLEMENTATION_PLAN_COVERS_DELTA` is enforced by `implement-cohesively`'s acceptance criteria plus `delta-coverage-reviewer`'s verdict.
 
 ## Dispatch discipline
 
