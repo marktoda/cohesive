@@ -135,6 +135,8 @@ The ledger's `## Delta at a glance` preamble is required and load-bearing. `vali
 
 ### 6. Commit the rewrite
 
+For a **forward** rewrite (initial pass against an approved direction):
+
 ```bash
 git add -A
 git commit -m "design: rewrite specs for <topic>
@@ -143,6 +145,21 @@ Approved direction: <option name>
 See: docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md
 "
 ```
+
+For a **repair-pass** rewrite (Step 1b — invoked from `validate-rewrite`'s repair loop or by the user against a disposition that routed back here), the commit message cites the pass number and the closed finding IDs so `git log --grep "pass-"` over the `design/<slug>` branch yields the per-handoff auditing surface the loop contract in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)" promises:
+
+```bash
+git add -A
+git commit -m "design: repair pass-<N> — closes <finding IDs>
+
+Pass: <N>
+Closes: <comma-separated finding IDs, e.g., B1, I2, I3>
+Source review: docs/history/reviews/<YYYY-MM-DD>-<slug>-rewrite-validation[-pass-<N-1>].md
+See: docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md
+"
+```
+
+The commit message is the auditing surface for repair sequences; the ledger's `## Repair pass <N>` section is the substrate-shape record. Both are required for repair commits; only the forward-rewrite template is required for forward commits.
 
 ### 7. Hand off to review
 

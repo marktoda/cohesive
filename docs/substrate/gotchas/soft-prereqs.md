@@ -64,7 +64,8 @@ The previous draft of this gotcha enumerated "structured-artifact handoff" as a 
 - Manual scenario test (planned): invoke `cohesive:brainstorm-design` directly with no prior discovery; verify the subskill asks the canonical question.
 - Manual scenario test (planned): invoke `cohesive:rewrite-specs` directly with no chosen direction and no discovery; verify the subskill asks the canonical question.
 - Manual scenario test (planned): invoke `cohesive:implement-cohesively` directly with no validation review path; verify the subskill **stops with a directive error** naming `cohesive:validate-rewrite` as the upstream — it does *not* ask the canonical question because its prereq is a file path, not session state.
-- Lint check (V1): grep each substrate-discovery-prereq subskill body (`brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`) for the canonical question text near the start of "Process."
+- Manual scenario test (planned): invoke `cohesive:validate-rewrite` directly with no delta ledger path; verify the subskill **stops with a directive error** naming `cohesive:rewrite-specs` as the upstream — it does *not* ask the canonical question because its prereq is a file path, not session state.
+- Lint check (V1): grep each substrate-discovery-prereq subskill body (`brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`) for the canonical question text near the start of "Process." Validator Check 10b symmetrically lints path-prereq subskills (`validate-rewrite`, `implement-cohesively`) for a directive-error template plus an upstream `cohesive:` skill citation.
 
 If this checks list is empty, the gotcha is enforced by reviewer memory only. The first concrete test should land in the next release pass.
 

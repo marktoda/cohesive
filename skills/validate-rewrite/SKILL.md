@@ -7,7 +7,7 @@ description: Use after rewrite-specs has produced a spec rewrite and a design de
 
 ## What this skill produces
 
-A **rewrite validation report** in chat, written by default to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md` (use `--no-write` to suppress persistence), with a terminal verdict of **Approved**, **Design Incoherent**, or a **max-passes stall** (latest pass still Issues Found after `MAX_REPAIR_PASSES`). On Issues Found, the skill drives an internal repair loop with `cohesive:rewrite-specs` until verdict converges (Approved), exits to design (Design Incoherent), or stalls at the ceiling — the user does not invoke `rewrite-specs` themselves during the loop. Each pass's review is persisted independently for audit trail.
+A **rewrite validation report** in chat, written by default to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md` (use `--no-write` to suppress persistence). The verdict vocabulary is {**Approved**, **Issues Found**, **Design Incoherent**} — the same three verdicts each pass's reviewer returns. On `Issues Found`, the skill drives an internal repair loop with `cohesive:rewrite-specs` and re-dispatches the reviewer until verdict converges (Approved), exits to design (Design Incoherent), or hits a **max-passes stall** — a *loop-exit shape* that surfaces the latest pass's Issues Found verdict to the user with a stall banner, after `MAX_REPAIR_PASSES` iterations without convergence. The stall is not a fourth verdict; it is the only legible surface through which Issues Found reaches the user, since the loop normally drives Issues Found internally. The user does not invoke `rewrite-specs` themselves during the loop. Each pass's review is persisted independently for audit trail.
 
 The review's defining property is **fresh eyes**: this skill always dispatches the `spec-cohesion-reviewer` agent via the Task tool, which runs in an isolated subprocess with no inherited conversation context. The structural fence is the harness's Task-subprocess isolation — that's what gives the review the power to flag things the original designer can no longer see, regardless of whether this skill is invoked from the same conversation that produced the rewrite. The fresh-eyes property holds **per pass** of the repair loop; pass-N's reviewer is dispatched with paths only and never inherits pass-(N-1)'s review or the loop's conversation context.
 
@@ -37,14 +37,21 @@ Announce the resolved path in chat before the dispatch. If `--no-write` is set, 
 
 ### 1. Locate the inputs
 
-Required inputs the calling user or skill must provide (or that this skill should locate):
+Required inputs the calling user or skill must provide:
 
-- **Design delta ledger path** — usually `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md`
-- **Rewritten spec paths** — extracted from the design delta ledger's "Files rewritten" / "Files added" sections
-- **Substrate discovery report path** (optional) — if `discover-substrate` ran earlier, pass its output path so the reviewer can compare what existed before to what now exists
-- **Approved direction summary** — one or two sentences from `brainstorm-design`
+- **Design delta ledger path** — usually `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md`. **Required path prereq.**
+- **Rewritten spec paths** — derived from the delta ledger's "Files rewritten" / "Files added" sections. Not a separate input; the ledger is the source.
+- **Approved direction summary** — one or two sentences carried in the dispatch prompt (router or repair-loop) or in the user's invocation. Optional in repair-loop dispatches, where the source review's `## Delta at a glance` preamble carries the equivalent.
+- **Substrate discovery report path** (optional) — if `discover-substrate` ran earlier, pass its output path so the reviewer can compare what existed before to what now exists.
 
-If any required input is missing, stop and ask. Do not invent inputs.
+This skill's required prereq is a file path (the delta ledger), not session state — the canonical clarifying question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md` does not apply. If the delta ledger path is missing, **stop with a directive error** per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Path prereqs use directive errors, not the canonical question":
+
+```
+Missing design delta ledger for slug `<slug>`. Run cohesive:rewrite-specs first;
+expected output at docs/history/delta-ledgers/<date>-<slug>.md.
+```
+
+Do not invent paths and do not ask the canonical question. The per-handoff input contract is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"rewrite-specs → validate-rewrite".
 
 ### 2. Dispatch the spec-cohesion-reviewer agent
 
@@ -95,7 +102,7 @@ Then branch on verdict:
 The repair loop runs internally per Hard constraint #4. Default ceiling: `MAX_REPAIR_PASSES = 5` (override via `--max-passes=N`). The loop body:
 
 1. **Render pass progress in chat.** One sentence: `Pass <N>/<MAX>: Issues Found — <count> findings (Blocker: <b>, High: <h>, Medium: <m>). Dispatching repair…`. This is the only progress line per pass; the user can interrupt at any point and the worktree state is whatever the last completed pass committed.
-2. **Dispatch `cohesive:rewrite-specs` in repair mode** via the Skill tool. The dispatch prompt names the just-persisted pass-N review path as the repair source and instructs repair-mode operation per `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` §"Process Step 1b. Repair-pass mode". Wait for `rewrite-specs` to return — it will land repair commits on the `design/<slug>` branch.
+2. **Dispatch `cohesive:rewrite-specs` in repair mode** via the Skill tool. The dispatch prompt names the just-persisted pass-N review path as the repair source and instructs repair-mode operation per `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` §"Process Step 1b. Repair-pass mode". The dispatch prompt **must** state, explicitly: (a) the repair scope is the enumerated repairs in the cited review, not a fresh design pass; (b) the chosen direction must not be re-derived — if the dispatched skill concludes the design itself is unsound, that is a Design Incoherent signal that the next pass's reviewer should surface, not a verdict the dispatched `rewrite-specs` renders directly; (c) repair commits land on the same `design/<slug>` branch and follow the repair-mode commit template in `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` §"Step 6. Commit the rewrite". The reviewer-agent dispatch protocol in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/dispatch-protocol.md` covers skill→agent dispatches; it does not cover the skill→skill dispatch this substep performs, so the constraints above are stated inline. Wait for `rewrite-specs` to return — it will land repair commits on the `design/<slug>` branch.
 3. **Increment the pass counter and re-dispatch `spec-cohesion-reviewer`** per Step 2. The dispatch is a fresh Task subprocess with paths-only input — never pass the prior pass's review or the loop's conversation context to the new reviewer (Hard constraints #1 and #2 apply per pass).
 4. **Persist the new pass's review** per Step 3 and re-branch on verdict:
    - Approved → exit loop; proceed to Step 5.
@@ -200,7 +207,7 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 
 - Each pass's dispatched agent receives only file paths, not pre-digested summaries.
 - The pass-N agent's input does not include the pass-(N-1) review, the brainstorm output, or the loop's conversation history.
-- The terminal verdict surfaced to the user is one of Approved / Design Incoherent / max-passes stall — Issues Found never surfaces as a terminal verdict except inside the stall banner.
+- The verdict vocabulary is {Approved, Issues Found, Design Incoherent}. The max-passes stall is a *loop-exit shape* that surfaces the latest pass's Issues Found verdict to the user with a stall banner; Issues Found does not surface to the user except via that banner (the loop normally drives it internally to convergence).
 - The Issues Found repair loop terminates within `MAX_REPAIR_PASSES` iterations (default 5; configurable via `--max-passes=N`) regardless of repair convergence.
 - The loop never auto-pivots from Issues Found to `brainstorm-design`; that decision is the user's, surfaced after a max-passes stall or a Design Incoherent verdict.
 - Every issue in each pass's report names the **substrate artifact** to repair (spec, matrix, invariant, gotcha, linter, test, type boundary).

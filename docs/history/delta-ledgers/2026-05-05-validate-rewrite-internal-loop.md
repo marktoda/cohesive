@@ -81,3 +81,26 @@ The two pressures interact: making `validate-rewrite`'s Issues Found loop intern
 - A future `cohesive:status` skill for resume hints in mature worktrees. Deferred.
 - Default chat-only persistence for off-chain reviews (`review-codebase`, `review-diff`, `audit-substrate`). Separate scope.
 - Detection of "same finding ID across N consecutive passes" for sharper stall-warning. Convention works without it; v0.1 ships with the simple count ceiling.
+
+## Repair pass 1 (2026-05-05)
+
+**Source review:** `docs/history/reviews/2026-05-05-validate-rewrite-internal-loop-rewrite-validation.md` (Verdict: Issues Found; 1 Blocker, 3 Medium).
+
+**Closed findings:** B1, I1, I2, I3.
+
+**Per-file changes:**
+
+| File | Change | Closes |
+|---|---|---|
+| `skills/validate-rewrite/SKILL.md` Step 1 | Replaced "stop and ask" with directive-error template (`Missing design delta ledger for slug …`); refactored Inputs prose to clarify the delta ledger is the required path prereq, other inputs derive from it; cited `architecture/handoffs.md` §"rewrite-specs → validate-rewrite" | B1 |
+| `scripts/validate_plugin.sh` Check 10b | Added `validate-rewrite` to `path_prereq_subskills` array | B1 |
+| `docs/substrate/gotchas/soft-prereqs.md` Tests/checks list | Added planned scenario test for `validate-rewrite` directive-error case; updated lint check description to symmetrically cover Check 10b | B1 |
+| `skills/rewrite-specs/SKILL.md` Step 6 | Added repair-mode commit template (`design: repair pass-<N> — closes <findings>` with `Pass:` and `Closes:` body lines, plus `Source review:` reference); preserved forward-rewrite template as the default | I1 |
+| `skills/validate-rewrite/SKILL.md` §"What this skill produces" | Reframed max-passes stall as a *loop-exit shape* surfacing the latest pass's Issues Found verdict, not a fourth verdict; verdict vocabulary explicitly named as {Approved, Issues Found, Design Incoherent} | I2 |
+| `skills/validate-rewrite/SKILL.md` Acceptance criteria | Reframed terminal-verdict criterion to match: verdict vocabulary stays {Approved, Issues Found, Design Incoherent}; max-passes stall is a loop-exit shape | I2 |
+| `skills/validate-rewrite/SKILL.md` Step 4 substep 2 | Inlined the must-not-re-derive constraint plus repair-scope and commit-template constraints; clarified that `dispatch-protocol.md` covers skill→agent dispatches only, so skill→skill constraints are stated inline | I3 |
+| `docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs" must-not-re-derive paragraph | Corrected the misleading citation: pointer now goes to `validate-rewrite/SKILL.md` Step 4 substep 2 as the inline-constraint home; clarified dispatch-protocol.md scope (skill→agent only) | I3 |
+
+**Out of scope for this pass:** No design-layer rewrite. The original design (validate-rewrite drives the loop internally; path-prereq vs. session-prereq distinction with directive errors) is preserved unchanged. Repair pass 1 is **Pure implementation** by the Step 1a classification — every change is a textual fix against a named finding, with no skill purpose / ownership / seam / verdict change.
+
+**Validator state after pass:** `bash scripts/validate_plugin.sh` passes 0 errors, 0 warnings.

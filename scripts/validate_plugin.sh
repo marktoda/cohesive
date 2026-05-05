@@ -226,6 +226,7 @@ done
 # canonical question". Stable target: a "directive error" phrase plus a "Run cohesive:<upstream>"
 # instruction in the body.
 path_prereq_subskills=(
+  validate-rewrite
   implement-cohesively
 )
 errors_before=$errors
