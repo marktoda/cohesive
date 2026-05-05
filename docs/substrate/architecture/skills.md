@@ -1,6 +1,6 @@
 # Skills
 
-> Cohesive ships nine skills. They form one chain (`discover-substrate → brainstorm-design → rewrite-specs → validate-rewrite → implement-cohesively`), three off-chain diagnostics (`review-codebase`, `review-diff`, `audit-substrate`), and one router (`cohesively`). This doc is the per-skill design layer: what each skill is for, why the set has these skills and not others, and what each owns versus delegates. The SKILL.md body under `${CLAUDE_PLUGIN_ROOT}/skills/<name>/` is the implementation prompt; the section here is the substrate above it.
+> Cohesive ships ten skills. They form one chain (`discover-substrate → brainstorm-design → rewrite-specs → validate-rewrite → implement-cohesively`), three off-chain diagnostics (`review-codebase`, `review-diff`, `audit-substrate`), one router (`cohesively`), and one session-start orientation skill (`using-cohesive`) that sits upstream of the router. This doc is the per-skill design layer: what each skill is for, why the set has these skills and not others, and what each owns versus delegates. The SKILL.md body under `${CLAUDE_PLUGIN_ROOT}/skills/<name>/` is the implementation prompt; the section here is the substrate above it.
 
 ## Skill set at a glance
 
@@ -18,6 +18,8 @@
 | `audit-substrate` | Find missing memory | Single-pass scan; no reviewer dispatch | Substrate sound / Substrate gaps / Substrate sparse |
 | **Router** | | | |
 | `cohesively` | Convert intent into the right route | Route selection; prereq-state passing | _none (announces, dispatches)_ |
+| **Session-start orientation** | | | |
+| `using-cohesive` | Advise Claude when Cohesive applies | When-to-enter-Cohesive decision; advisory routing to `cohesively` | _none (advisory)_ |
 
 ## What every Cohesive skill is
 
@@ -45,9 +47,11 @@ The skill set is the answer to several deliberate cuts. Each entry below explain
 
 **Why `review-codebase` and `review-diff` are two skills, not one with a `--scope` flag.** Different reviewer panels (4 reviewers vs 2), different rubrics (architecture-review-rubric vs cohesion-rubric), different output shapes (persisted report vs chat-only verdict). The shared concept is "fresh-eyes review against substrate"; the executions diverge enough that one skill body would be a configuration-laden mess.
 
+**Why `using-cohesive` is separate from `cohesively`.** `using-cohesive` teaches Claude *when Cohesive applies* — it fires at session start (or whenever its frontmatter trigger matches a substrate-shaped user request) and orients Claude toward the methodology vs Superpowers' implementation-discipline framing. `cohesively` *routes within Cohesive* once the user has signaled Cohesive-shaped work — it picks among the seven canonical routes and dispatches the first subskill. Collapsing them into one skill would force a single body to do both jobs at two different altitudes (orientation vs route selection), which is the failure shape the seam between the bootstrap and the router exists to prevent. The split is also the structural mitigation for `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` — without `using-cohesive`, first-time users with both plugins installed land in trigger competition between Cohesive's `discover-substrate`/`audit-substrate` and Superpowers' research/exploration skills.
+
 ## Per-skill sections
 
-Each section follows the same shape: Purpose, Owns, Does not own, Inputs, Outputs, Why this shape. Sections are ordered by chain position, then off-chain, then router. The section heading is `### <skill-name>` matching the directory name under `${CLAUDE_PLUGIN_ROOT}/skills/`; this is the regex target for the named invariant `SKILL_DESIGN_DOC_SECTION` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md`).
+Each section follows the same shape: Purpose, Owns, Does not own, Inputs, Outputs, Why this shape. Sections are ordered by chain position, then off-chain, then router, then session-start orientation. The section heading is `### <skill-name>` matching the directory name under `${CLAUDE_PLUGIN_ROOT}/skills/`; this is the regex target for the named invariant `SKILL_DESIGN_DOC_SECTION` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md`).
 
 ### Bootstrap status
 
@@ -64,6 +68,7 @@ The per-skill design layer was authored retroactively against existing SKILL.md 
 | `review-diff` | inherited | not yet validated against a forward rewrite |
 | `audit-substrate` | inherited | not yet validated against a forward rewrite |
 | `cohesively` | inherited | not yet validated against a forward rewrite |
+| `using-cohesive` | inherited | newly authored 2026-05-05 in the skill-pack-flow-tightening rewrite; not yet validated against a forward rewrite |
 
 Inherited sections may surface lens-2 (design-implementation agreement) and lens-14 (handoff contract consistency) drift on the first forward rewrite that touches them — this is the predicted bootstrap drift, not a defect of the inherited section. `spec-cohesion-reviewer` reads this table during dispatch (the agent's input set includes this doc) and applies extra skepticism to inherited-status sections. When a section earns validated status, update the row in the same delta ledger that triggered the validation.
 
@@ -255,15 +260,38 @@ Inherited sections may surface lens-2 (design-implementation agreement) and lens
 
 **Why this shape.** A router rather than a workflow, because phase transitions are user-driven by design. A workflow router would hide what's running and remove the user's ability to re-enter the chain at any point. The canonical announcement makes the routing decision legible; the prereq-passing closes `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`.
 
+### using-cohesive
+
+**Purpose.** Advise Claude when Cohesive-shaped work is the right framing for the user's request, and route the user to `cohesively` for route selection. Fires at session start (or whenever its frontmatter trigger matches) so Cohesive competes natively with `superpowers:using-superpowers` for the harness's bootstrap loading slot.
+
+**Owns.**
+- Carrying the substrate-narrowed trigger phrases that distinguish Cohesive's framing (substrate-first, durable-judgment) from Superpowers' (implementation-discipline).
+- Producing a 1–2 sentence orientation message in chat when its trigger fires, naming `cohesively` as the canonical entry point.
+- Documenting the seam between Cohesive and Superpowers as the structural mitigation for `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md`.
+
+**Does not own.**
+- Route selection — that's `cohesively`. `using-cohesive` advises *whether* to enter Cohesive; `cohesively` advises *which Cohesive workflow* to run.
+- Workflow execution — every chain skill, every diagnostic, every reviewer-dispatching skill is downstream.
+- Discovery, audit, brainstorm, rewrite, validate, implement, review — `using-cohesive` does not produce substrate work itself; it points at the skills that do.
+- Maintaining conversation state — its only effect is the orientation message; it does not persist a file or carry state across turns.
+
+**Inputs.** User intent (any natural-language request). The session-start trigger fires when the request's natural-language shape matches Cohesive's substrate-first framing.
+
+**Outputs.** A 1–2 sentence orientation message in chat (rendered when the trigger fires) + an internal advisory to invoke `cohesively` on the user's next substrate-shaped request. No persisted artifact, no verdict, no per-route dispatch — `cohesively` handles dispatch.
+
+**Why this shape.** Cohesive needs a session-start surface that competes natively with Superpowers' bootstrap (`using-superpowers`) for the harness's session-start loading slot. Without it, the only canonical entry point is `cohesively`, which fires only when the user explicitly types its name or one of its router-trigger phrases — leaving first-time users to land in the trigger competition described in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md`. Splitting bootstrap orientation (this skill) from route selection (`cohesively`) is the structural fix: the bootstrap is upstream of the router, and the router is upstream of every workflow. Three altitudes, three skills.
+
 ## Adding a new skill
 
-When the brainstorm pressure surfaces a new skill, the change touches three docs *before* the SKILL.md is authored:
+When the brainstorm pressure surfaces a new skill, the change touches the design layer first, then the implementation layer, then the validator. Five steps in order:
 
-1. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md`** (this doc) — add the per-skill section, add a row in the at-a-glance table, add the "why this skill, not a mode of X" entry under §"Why these skills, not others".
-2. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md`** — add the inbound and outbound handoff contracts.
-3. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`** — if the skill is router-dispatchable, add a cell with stable ID and update the dispatch-prompt-contract grid.
+1. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md`** (this doc) — add the per-skill section, add a row in the at-a-glance table, add the "why this skill, not a mode of X" entry under §"Why these skills, not others", add a row to the §"Bootstrap status" table with status `inherited` (newly authored sections are not yet validated against a forward rewrite).
+2. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md`** — add the inbound and outbound handoff contracts. For non-chain skills (router, session-start orientation), add a brief contract section naming the transition shape (per §"The five transition shapes") even when no chain edge is involved.
+3. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`** — if the skill is router-dispatchable, add a cell with stable ID and update the dispatch-prompt-contract grid. If the skill is upstream of the router (session-start orientation) or otherwise outside route selection, no router-matrix change is needed.
+4. **`${CLAUDE_PLUGIN_ROOT}/skills/<name>/SKILL.md`** — author the skill body per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md`. The named invariant `SKILL_DESIGN_DOC_SECTION` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md`) enforces that every directory under `skills/` has a `### <name>` section in this doc; the validator's mechanical grep catches a missing section.
+5. **`${CLAUDE_PLUGIN_ROOT}/scripts/validate_plugin.sh`** + **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/skill-section-presence.md`** — update the validator's six skill-set arrays (add the new skill to whichever apply per its shape: `expected_skills` always; `discovery_prereq_subskills`, `path_prereq_subskills`, `persisting_skills`, `verdict_led_skills`, `voice_imperative_skills` per the skill's body sections and prereq shape) and add a row to `skill-section-presence.md` with the appropriate `~` / `✓` / `–` cells. Run `bash scripts/validate_plugin.sh` and confirm clean before commit. The mapping from skill-body shape to which arrays apply is documented inline at the array definitions in `validate_plugin.sh`; consult those comments rather than guessing.
 
-Only after all three are updated does `skills/<name>/SKILL.md` get authored. The named invariant `SKILL_DESIGN_DOC_SECTION` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md`) enforces that every directory under `skills/` has a `### <name>` section here, mechanically greppable by `scripts/validate_plugin.sh`.
+Steps 1–3 are the design layer; step 4 is the implementation layer; step 5 is the enforcement layer. Skipping step 5 is the failure mode the agent-readiness review of 2026-05-05 surfaced — a future agent following only steps 1–4 ships a "clean" skill that the validator immediately rejects.
 
 ## Section growth policy
 

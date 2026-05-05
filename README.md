@@ -111,7 +111,8 @@ Single-pass scan. Inventories missing memory: implicit rules, branchy behavior w
 .claude-plugin/marketplace.json     Single-plugin marketplace
 
 skills/
-  cohesively/                       Router
+  using-cohesive/                   Session-start orientation — when does Cohesive apply?
+  cohesively/                       Router — picks the right Cohesive workflow
   discover-substrate/               Substrate inventory
   brainstorm-design/                Options + pressure-test
   rewrite-specs/                    Hard spec rewrite (in worktree)
@@ -155,7 +156,8 @@ docs/substrate/                     Contributor-facing rules about THIS repo:
   conventions/                      Prescriptive component rules (read when authoring):
     skill-shape.md                  Canonical SKILL.md shape + when-to-edit-which-layer rule
     reviewer-agent-shape.md         Canonical reviewer-agent shape
-    dispatch-protocol.md            Reviewer-agent dispatch-prompt contract
+    dispatch-protocol.md            Task-tool reviewer-agent dispatch-prompt contract
+    skill-tool-dispatch.md          Skill-tool (skill→skill) dispatch contract
     substrate-layout.md             Where this repo's artifacts live
   invariants/                       Named global rules: PLUGIN_ROOT_PATHS,
                                     VERDICT_BEFORE_EVIDENCE,
