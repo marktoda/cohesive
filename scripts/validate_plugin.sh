@@ -3,6 +3,8 @@
 #
 # Enforces:
 #   - Named invariant PLUGIN_ROOT_PATHS (no hardcoded absolute paths)
+#   - Named invariant SKILL_DESIGN_DOC_SECTION (every skill dir has a `### <name>`
+#     section in docs/substrate/architecture/skills.md)
 #   - Plugin-manifest shape (plugin.json / marketplace.json validity)
 #   - Skill / agent frontmatter shape (delegated to scripts/_frontmatter_check.py)
 #   - The v0.1 expected skill set
@@ -473,6 +475,26 @@ if [ -n "$violations" ]; then
   done
 else
   ok "PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/"
+fi
+
+# 15. SKILL_DESIGN_DOC_SECTION: every directory under skills/ has a `### <name>`
+# section in docs/substrate/architecture/skills.md.
+# Per docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md.
+SKILLS_DESIGN_DOC="docs/substrate/architecture/skills.md"
+if [ ! -f "$SKILLS_DESIGN_DOC" ]; then
+  fail "$SKILLS_DESIGN_DOC missing (per SKILL_DESIGN_DOC_SECTION)"
+else
+  errors_before=$errors
+  skill_section_count=0
+  for skill_dir in skills/*/; do
+    [ -d "$skill_dir" ] || continue
+    skill_name=$(basename "$skill_dir")
+    skill_section_count=$((skill_section_count + 1))
+    if ! grep -qE "^### ${skill_name}\$" "$SKILLS_DESIGN_DOC"; then
+      fail "skills/${skill_name}/ has no '### ${skill_name}' section in $SKILLS_DESIGN_DOC (per SKILL_DESIGN_DOC_SECTION)"
+    fi
+  done
+  [ "$errors" -eq "$errors_before" ] && ok "SKILL_DESIGN_DOC_SECTION: all $skill_section_count skills have '### <name>' sections in architecture/skills.md"
 fi
 
 echo ""
