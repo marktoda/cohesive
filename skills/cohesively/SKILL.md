@@ -13,7 +13,7 @@ Cohesive distinguishes itself from Superpowers: **Superpowers optimizes for disc
 
 ## The user-facing skill set
 
-The flagship workflow chain reads as four imperatives — **discover → brainstorm → rewrite → validate** — paralleling Superpowers' `brainstorm → plan → execute`. Three standalone diagnostics sit off-chain.
+The flagship workflow chain reads as five imperatives — **discover → brainstorm → rewrite → validate → implement** — paralleling and extending Superpowers' `brainstorm → plan → execute`. Three standalone diagnostics sit off-chain.
 
 | | Skill | Role |
 |---|---|---|
@@ -21,6 +21,7 @@ The flagship workflow chain reads as four imperatives — **discover → brainst
 | 2 | `brainstorm-design` | Propose 2–4 options grounded in substrate; pressure-test |
 | 3 | `rewrite-specs` | Hard-rewrite docs to chosen end state in a worktree |
 | 4 | `validate-rewrite` | Fresh-eyes review of the rewritten specs |
+| 5 | `implement-cohesively` | Drive implementation phase-by-phase against the delta ledger; per-phase cross-review; final substrate review |
 | | `review-codebase` | Full architecture review |
 | | `review-diff` | PR / branch / working-changes review |
 | | `audit-substrate` | What memory is missing? |
@@ -39,9 +40,20 @@ Read the user's request and map to one of these workflows. Use the trigger phras
 3. (only if user approves a direction and the change is substantial enough to warrant a spec rewrite) `rewrite-specs` — hard-rewrite docs to chosen end state in a worktree
 4. (only if step 3 ran) `validate-rewrite` — fresh-eyes review of the rewritten specs
 
-**Default behavior:** Run steps 1–2. Pause for user approval before step 3. Many design conversations end at step 2 with a recommendation — don't escalate to spec rewrite unless the user wants it.
+**Default behavior:** Run steps 1–2. Pause for user approval before step 3. Many design conversations end at step 2 with a recommendation — don't escalate to spec rewrite unless the user wants it. Implementation is a separate route (`implement`); the design route does not auto-chain into implementation.
 
 **Clarifying question (optional, max one):** "Which future pressure should this design optimize for most: <option A>, <option B>, <option C>?"
+
+### Route: implement
+
+**When:** A spec rewrite has been validated (Approved verdict from `validate-rewrite`) and the user wants to land code that makes the rewrite true. "Implement the approved rewrite", "land docs with implementation", "implement-cohesively", "drive implementation against the delta", "ship the rewrite".
+
+**Chain:**
+1. `implement-cohesively` — derive phases from the design delta ledger; per-phase invocation of `superpowers:writing-plans` and `superpowers:executing-plans`; per-phase `delta-coverage-reviewer` cross-review; final `cohesive:review-diff` against the branch.
+
+**Clarifying question (required if the validation review path is not in the user's request):** "I see we're about to run implement. Has validate-rewrite returned **Approved** for a spec rewrite, or should I run the design route first?"
+
+The user can decline the implement route in favor of `superpowers:writing-plans` directly — this bypasses delta-coverage discipline (an option named in the `validate-rewrite` Approved footer's decision matrix), and the user accepts that the implementation may drift from the rewrite.
 
 ### Route: review (codebase)
 
@@ -96,19 +108,20 @@ ${CLAUDE_PLUGIN_ROOT}/references/templates/<template>.md. I can fill it out with
 
 Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, the router-driven case requires explicit prereq-state passing — without it, subskills ask the canonical clarifying question on top of an already-routed turn. The table below is the per-route content the dispatch prompt must include. The matrix-side mirror (with the `validate-rewrite` exception) lives at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` §"Dispatch prompt contract"; update both in the same pass.
 
-| Route | Prereq state to pass | Chosen-direction state to pass |
+| Route | Prereq state to pass | Chosen-direction / artifact state to pass |
 |---|---|---|
 | `design` | n/a (discover-substrate has no prereq) | n/a until step 3; then "approved direction: <option name + summary>"; ledger path passed to step 4 |
 | `review (codebase)` | "Discovery already complete; report at <path or 'inline above'>." | n/a |
 | `review (diff)` | "Discovery already complete (scoped to <changed-files>); report at <path or 'inline above'>." | n/a |
 | `audit (substrate)` | "Discovery already complete; report at <path or 'inline above'>." | n/a |
 | `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first); ledger path passed to step 2 once `rewrite-specs` has produced it |
+| `implement` | "Validate-rewrite returned **Approved**; review at <path>." | "Design delta ledger at <path>. Branch: design/<slug>." Validation review path and ledger path are both required. |
 | `artifact` | n/a | "Artifact requested: <invariant / matrix / gotcha>" |
 
 Consumers:
 
 - **Prereq-state consumers** (subskills with a `discover-substrate` prereq): `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`. Each Hard Constraint #1 in those skill bodies states that when the router passes the prereq fragment, the canonical clarifying question is skipped.
-- **Chosen-direction / ledger-path consumers**: `rewrite-specs` (chosen direction), `validate-rewrite` (ledger path only — no prereq state; this is the documented exception), V1 artifact skills.
+- **Chosen-direction / ledger-path consumers**: `rewrite-specs` (chosen direction), `validate-rewrite` (ledger path only — no prereq state; this is the documented exception), `implement-cohesively` (validation review path + ledger path; both required), V1 artifact skills.
 
 Direct (non-router) invocation: the subskill asks its canonical question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Clarifying questions". The contract is router-side only.
 
@@ -117,20 +130,20 @@ Direct (non-router) invocation: the subskill asks its canonical question per `${
 1. **Announce the route.** One sentence in chat before dispatching, in the canonical form:
    > "I'm treating this as a Cohesive **<route>** workflow: <chain>. Reason: <one short clause>."
 
-   The form is the convention named in [`docs/substrate/designs/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `artifact`.
+   The form is the convention named in [`docs/substrate/designs/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`.
 
-2. **Process skills run before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code.
+2. **Process skills run before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives implementation against the design delta ledger via the phase loop. Freeform code-writing from this skill body is forbidden.
 
 3. **At most one clarifying question.** Per route (above). The question is a specific forced choice, never a vague "what do you want?" prompt — convention defined in [`docs/substrate/designs/skill-conventions.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md) §"Clarifying questions".
 
-4. **Do not implement code.** Cohesive is design/review/audit. If the user wants implementation, recommend Superpowers' workflow after Cohesive's substrate work is done.
+4. **Do not implement code from the router itself.** The router routes; subskills work. Implementation is delegated to the `implement` route, which dispatches `implement-cohesively`. That skill in turn composes `superpowers:writing-plans` and `superpowers:executing-plans` per phase — it does not write code itself either. Cohesive's only code-producing surface is `superpowers:executing-plans` invoked from inside `implement-cohesively`'s phase loop.
 
 5. **Honor the dispatch prompt contract.** When invoking a subskill, include the relevant fragment from the table above. Subskills depend on this; omitting it produces a duplicate clarifying question on top of an already-routed turn.
 
 6. **Compose with Superpowers when present.** Specifically:
    - Worktrees: `superpowers:using-git-worktrees` (used by `rewrite-specs`)
-   - Implementation discipline: `superpowers:test-driven-development`, `superpowers:writing-plans`, `superpowers:executing-plans`
-   - Branch finishing: `superpowers:finishing-a-development-branch`
+   - Implementation discipline: `superpowers:writing-plans` and `superpowers:executing-plans` (used per-phase by `implement-cohesively`); `superpowers:test-driven-development` is consumed indirectly via `executing-plans`
+   - Branch finishing: `superpowers:finishing-a-development-branch` (recommended after `implement-cohesively` Implemented verdict; user-invoked, never auto-invoked from the router)
 
 7. **Track progress with TodoWrite** when chaining 3+ subskills. The user should see the chain as it executes.
 
@@ -139,7 +152,7 @@ Direct (non-router) invocation: the subskill asks its canonical question per `${
 When the request is ambiguous, prefer this resolution order:
 
 1. **Explicit user instruction** ("review the codebase" → review/codebase). Always wins.
-2. **Verb tense.** Forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
+2. **Verb tense and implementation cue.** Imperative implementation verbs against an existing approved rewrite ("implement", "land", "ship") → implement. Other forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
 3. **Scope hints.** Whole-repo / subsystem / "the codebase" → review (codebase). Diff / PR / branch / changes → review (diff). Missing / gaps / what's-not-there → audit (substrate).
 4. **Default.** When truly stuck, default to `audit (substrate)` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
 

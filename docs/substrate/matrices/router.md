@@ -28,6 +28,8 @@ The matrix is normative. When a user request matches a row, the router must sele
 | R012 | Ambiguous "review X" with X being whole repo | "review the project" / "review the system" | `review (codebase)` | Default per resolution rule 3 (whole-repo scope) | _none_ |
 | R013 | Ambiguous retrospective | "look at the auth code" with no scope hint | `audit (substrate)` | Default per resolution rule 4 (retrospective + ambiguous) | _none_ |
 | R014 | Ambiguous forward-looking | "thinking about how to handle Slack" | `design` | Default per resolution rule 4 (forward-looking + ambiguous) | _none_ |
+| R015 | Implement after approved rewrite | "implement the approved rewrite" / "land docs with implementation" / "implement-cohesively" / "drive implementation against the delta" / "ship the rewrite" | `implement` | Requires existing `validate-rewrite` Approved verdict + design delta ledger; dispatches `cohesive:implement-cohesively` (which composes `superpowers:writing-plans` + `superpowers:executing-plans` per phase). Closes the failure mode in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md`. | _none_ |
+| R016 | Implement-shaped request without approved rewrite | "implement now" / "let's ship this" / "land it" with no recent `validate-rewrite` Approved verdict | `implement` (with question) | Asks the canonical clarifying question per the clarifying-question convention in `docs/substrate/designs/skill-conventions.md`; user can answer "run the design route first" or pass an Approved verdict path. | _none_ |
 
 ## Default cells (used when no specific row matches)
 
@@ -55,11 +57,13 @@ When the router dispatches a subskill, the dispatch prompt carries explicit prer
 | `review (diff)` | `discover-substrate` (scoped to changed files) | "Discovery already complete (scoped to <changed-files>); report at <path>" passed to `review-diff` | n/a | Same shape, narrower scope. |
 | `audit (substrate)` | `discover-substrate` (or skip if reused) | "Discovery already complete; report at <path>" passed to `audit-substrate` | n/a | Single subskill consumer; no synthesis. |
 | `rewrite-only` | `rewrite-specs` | n/a (no discovery prereq for rewrite-specs) | "Approved direction: <option name + summary>" passed to `rewrite-specs`; ledger path passed to `validate-rewrite` once rewrite produces it | If user has not chosen a direction, route to `design` first. |
+| `implement` | `implement-cohesively` | "Validate-rewrite returned **Approved**; review at <path>." passed to `implement-cohesively` | "Design delta ledger at <path>. Branch: design/<slug>." passed to `implement-cohesively` | Both prereq state and ledger path are required. If either is missing, the router asks cell R016's clarifying question. |
 | `artifact` (V1) | template return + offer | n/a | "Artifact requested: <invariant / matrix / gotcha>" | V1: dedicated artifact skills will replace the template-return shape. |
 
 ### Dispatch contract exceptions
 
 - **`validate-rewrite` does not consume prereq state.** It has no `discover-substrate` prereq. Its router-passed input is always the design delta ledger path produced by an earlier `rewrite-specs` step (in the `design` or `rewrite-only` route). Treating `validate-rewrite` as a prereq-state consumer is the predictable extension footgun this row exists to prevent.
+- **`implement-cohesively` consumes a non-discovery prereq state: a validate-rewrite Approved verdict.** This is the second documented exception to the "prereq = discover-substrate" pattern. The structural reason is the same in both cases — the prereq is a *workflow* prereq, not a *substrate-discovery* prereq. The router passes the validation review path explicitly so the skill skips its canonical clarifying question per the soft-prereqs gotcha.
 
 This grid is normative. Adding a route or subskill requires updating this section *and* `cohesively/SKILL.md` §"Dispatch prompt contract" in the same pass. Drift between the two surfaces produces the exact "soft-prereqs" failure mode the contract closes.
 
@@ -91,3 +95,4 @@ This grid is normative. Adding a route or subskill requires updating this sectio
 - 2026-05-04 — Created. Promoted from prose-only routing decision logic in `cohesively/SKILL.md:99-106` to a behavior matrix with stable cell IDs.
 - 2026-05-04 — Substrate collapse: cell R007's chain switched from `cohesive-review --scope substrate` to the standalone `substrate-audit` skill. References to demoted invariants (`ROUTER_ANNOUNCES_BEFORE_DISPATCH`, `ONE_PRECISE_QUESTION`) replaced with pointers to the conventions doc that now carries those rules.
 - 2026-05-04 — v0.1 release-lexicon rename: route `review (substrate audit)` renamed to `audit (substrate)` for parallel verb-noun shape; cell R007's standalone skill renamed `substrate-audit` → `audit-substrate`; `cohesive-review` split into `review-codebase` and `review-diff`; `review-spec-cohesion` renamed `validate-rewrite`. Cell IDs preserved per immutability rule.
+- 2026-05-04 — `implement` route added: cells R015 (explicit "implement the approved rewrite") and R016 (implement-shaped request without prerequisites) added. Dispatch contract row added for `implement` with both prereq-state and ledger-path passing. Second documented exception added to dispatch-contract exceptions section: `implement-cohesively` consumes a workflow-prereq (Approved verdict) rather than a discovery-prereq.

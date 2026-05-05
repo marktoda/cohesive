@@ -204,11 +204,11 @@ If the user declines persistence (one-shot brainstorm, no rewrite intended), the
 
 ## What this skill is *not*
 
-- Not an implementation planner. That's V1's `plan-implementation` (Superpowers' `writing-plans` works for now).
+- Not an implementation planner. After `validate-rewrite` Approved, `cohesive:implement-cohesively` drives implementation against the delta ledger (per-phase composition with `superpowers:writing-plans` and `superpowers:executing-plans`); for non-substrate-shaped implementation, `superpowers:writing-plans` is also available directly.
 - Not an architecture review. That's `cohesive:review-codebase`.
 - Not a substrate audit. That's `cohesive:audit-substrate`.
 
 ## Composition
 
 - **Always preceded by:** `discover-substrate` (or its output reused from earlier in session)
-- **Often followed by:** `rewrite-specs` (if direction is approved and large enough to justify a spec rewrite) or directly to implementation planning (if change is small and substrate is already in good shape)
+- **Often followed by:** `rewrite-specs` (if direction is approved and large enough to justify a spec rewrite). When `rewrite-specs` runs, the chain continues `validate-rewrite` → `implement-cohesively`. If the change is small and substrate is already in good shape, the user may go directly to `superpowers:writing-plans` without the rewrite chain.

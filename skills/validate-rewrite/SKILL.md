@@ -19,7 +19,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 1. **Always dispatch the `spec-cohesion-reviewer` agent via Task tool.** The skill itself never renders the verdict from in-conversation reading — it dispatches and surfaces the agent's report. The Task subprocess provides the structural fresh-eyes fence; this skill's job is the dispatch and the synthesis.
 2. **Inputs must be paths, not summaries.** Pass the agent file paths to read; don't pre-summarize the design for it. The dispatch prompt's content is the entire context the agent has, so any summary the dispatching skill writes into it bypasses fresh-eyes — the harness fence prevents conversation inheritance, but it can't prevent prompt contamination.
-3. **The review can block implementation.** A "Design Incoherent" or "Issues Found (blocking)" verdict means `rewrite-specs` should run again, not `plan-implementation`.
+3. **The review can block implementation.** A "Design Incoherent" or "Issues Found (blocking)" verdict means `rewrite-specs` should run again, not `implement-cohesively`. An "Approved" verdict unlocks the implementation route — but the user picks between `cohesive:implement-cohesively` (delta-coverage discipline) and direct `superpowers:writing-plans` (no delta-coverage discipline) per the decision matrix in the Output format block.
 
 ## Process
 
@@ -87,7 +87,7 @@ If the user passed `--no-write`, render in chat only and skip persistence. The r
 
 Based on verdict:
 
-- **Approved** → "Spec rewrite is ready for implementation. Next: `plan-implementation` (V1) or Superpowers' `writing-plans`."
+- **Approved** → render the implementation decision matrix (see Output format below). The user picks among four options: implement-now via `cohesive:implement-cohesively` (delta-coverage discipline; default for substantial rewrites), land specs first then implement separately (merge the design branch, run `implement-cohesively` later against the merged ledger), hand off to `superpowers:writing-plans` directly (no delta-coverage discipline; user accepts implementation may drift from rewrite), or schedule for later (no immediate action). Do not improvise into code-writing — Cohesive's structural answer for "implement now" is route `implement` via the `cohesively` router.
 - **Issues Found** → "Repair the blocking issues, then re-run this skill. Many repairs can be made in the same worktree without going back to `brainstorm-design`."
 - **Design Incoherent** → "The design itself is incoherent — fixes won't help. Return to `brainstorm-design` with the reviewer's report as input."
 
@@ -133,9 +133,19 @@ The skill's chat output (the agent's report, surfaced):
 ### Recommended next Cohesive skill
 
 Per verdict:
-- **Approved** — `superpowers:writing-plans` (or `plan-implementation` in V1) — substrate is sound; implementation can proceed.
-- **Issues Found** — `cohesive:rewrite-specs` — repair the blocking issues in the same worktree, then re-run this skill.
-- **Design Incoherent** — `cohesive:brainstorm-design` — the design itself needs revisiting; fixes won't help.
+
+**Approved** — pick from the implementation decision matrix:
+
+| Option | Skill | When to pick |
+|---|---|---|
+| Implement now with delta-coverage discipline (default) | `cohesive:implement-cohesively` | Substantial rewrites; the rewrite added named invariants, behavior matrices, or cross-cutting conceptual changes. Phase loop with per-phase cross-review against the delta. |
+| Land specs first; implement separately later | merge the `design/<slug>` branch first; later run `cohesive:implement-cohesively` against the merged delta ledger | Spec rewrite is independently valuable (e.g., for review by humans before code lands); the implementation has dependencies that aren't yet ready. |
+| Hand off to Superpowers without delta-coverage discipline | `superpowers:writing-plans` | Small rewrites where the delta is mostly cosmetic; user accepts that the implementation may drift from the rewrite. The bypass is documented per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md` §"Known bypass risks." |
+| Schedule for later | (no immediate action) | The rewrite is approved; implementation is not currently in scope. Re-invoke `cohesive:implement-cohesively` or `superpowers:writing-plans` when ready. |
+
+**Issues Found** — `cohesive:rewrite-specs` — repair the blocking issues in the same worktree, then re-run this skill.
+
+**Design Incoherent** — `cohesive:brainstorm-design` — the design itself needs revisiting; fixes won't help.
 ```
 
 ## Why fresh eyes matter here
@@ -163,7 +173,7 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 ## Composition
 
 - **Always preceded by:** `rewrite-specs`
-- **Followed by:** `rewrite-specs` again (Issues Found) or `brainstorm-design` (Design Incoherent) or implementation planning (Approved)
+- **Followed by:** `rewrite-specs` again (Issues Found), or `brainstorm-design` (Design Incoherent), or `cohesive:implement-cohesively` / `superpowers:writing-plans` / "land specs first" / "schedule" (Approved — see decision matrix in Output format)
 
 ## What this skill is *not*
 

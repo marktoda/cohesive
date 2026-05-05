@@ -18,20 +18,21 @@ Use Cohesive when you are about to:
 
 - brainstorm a feature or refactor that touches behavior, architecture, or invariants
 - rewrite design docs / specs to a chosen end state
+- drive implementation of an approved spec rewrite phase-by-phase against a design delta ledger
 - review a codebase or subsystem architecture
 - review a PR / diff for behavior, spec, test, or invariant risks
 - audit a repo for missing memory (specs, matrices, invariants, gotchas, linters)
 - decide whether to centralize, duplicate, split, or abstract
 
-## When to use Superpowers instead
+## When to use Superpowers alongside Cohesive
 
-Use [Superpowers](https://github.com/obra/superpowers) when you need disciplined implementation: TDD, debugging methodology, plan execution, verification-before-completion. Cohesive doesn't replace these — it complements them.
+Use [Superpowers](https://github.com/obra/superpowers) for disciplined plan-writing and TDD execution. Cohesive's `implement-cohesively` skill composes Superpowers per phase: Cohesive owns the delta-derived phase shape and the per-phase cross-review against the design delta ledger; Superpowers owns the per-phase plan and the TDD execution inside each phase.
 
-The pattern: **Cohesive shapes the substrate; Superpowers shapes the implementation.** Use both when you want substrate-first design followed by disciplined execution.
+The pattern: **Cohesive shapes the substrate and the implementation phases; Superpowers shapes the per-phase plan and code.** Cohesive's substrate-only workflows (review, audit, design, rewrite, validate) work without Superpowers; `implement-cohesively` requires Superpowers.
 
 ## Main commands
 
-The flagship workflow chain reads as four imperatives — `discover → brainstorm → rewrite → validate` — paralleling Superpowers' `brainstorm → plan → execute`. Three diagnostics sit off-chain.
+The flagship workflow chain reads as five imperatives — `discover → brainstorm → rewrite → validate → implement` — paralleling and extending Superpowers' `brainstorm → plan → execute`. Three diagnostics sit off-chain.
 
 ```text
 /cohesive:cohesively <task>        # Router — picks the right workflow
@@ -41,6 +42,9 @@ The flagship workflow chain reads as four imperatives — `discover → brainsto
 /cohesive:brainstorm-design        # Options + pressure-test, grounded in substrate
 /cohesive:rewrite-specs            # Hard-rewrite docs to chosen end state (in worktree)
 /cohesive:validate-rewrite         # Fresh-eyes review of rewritten specs
+/cohesive:implement-cohesively     # Drive implementation phase-by-phase against the delta;
+                                   # composes superpowers:writing-plans + executing-plans
+                                   # per phase; per-phase delta-coverage cross-review.
 
 # Off-chain diagnostics
 /cohesive:review-codebase          # Full architecture review
@@ -58,7 +62,17 @@ The flagship Cohesive flow. For non-trivial features or refactors:
 /cohesive:cohesively brainstorm a refactor of intake classification
 ```
 
-Behind the scenes: `discover-substrate` → `brainstorm-design` (with pressure-test) → user approves direction → `rewrite-specs` (in worktree) → `validate-rewrite`. Implementation happens in a separate session, ideally with Superpowers.
+Behind the scenes: `discover-substrate` → `brainstorm-design` (with pressure-test) → user approves direction → `rewrite-specs` (in worktree) → `validate-rewrite`. After Approved, the user picks an implementation path from the decision matrix in the validate-rewrite footer (default: `implement-cohesively`).
+
+### Implementation against an approved rewrite
+
+After `validate-rewrite` returns Approved:
+
+```text
+/cohesive:cohesively implement the approved rewrite
+```
+
+Behind the scenes: `implement-cohesively` derives phases from the design delta ledger via the phase-derivation matrix, invokes `superpowers:writing-plans` and `superpowers:executing-plans` per phase, dispatches the `delta-coverage-reviewer` agent for per-phase cross-review, and runs `cohesive:review-diff` against the branch as the final substrate check before recommending `superpowers:finishing-a-development-branch`.
 
 ### Architecture review
 
@@ -102,6 +116,9 @@ skills/
   brainstorm-design/                Options + pressure-test
   rewrite-specs/                    Hard spec rewrite (in worktree)
   validate-rewrite/                 Fresh-eyes review of the rewrite (dispatches agent)
+  implement-cohesively/             Drive implementation phase-by-phase against the delta
+                                    ledger; composes superpowers:writing-plans +
+                                    executing-plans per phase
   review-codebase/                  Full architecture review
   review-diff/                      PR / branch / working-changes review
   audit-substrate/                  Substrate audit — what memory is missing
@@ -112,6 +129,7 @@ agents/
   structure-reviewer                Locality + concepts + complexity
   library-native-reviewer           Ecosystem alignment
   agent-readiness-reviewer          Could a future agent change this safely?
+  delta-coverage-reviewer           Per-phase: did this phase cover its delta entries?
 
 references/                         Runtime methodology cited by skills/agents
                                     when running on the user's codebase:
@@ -132,16 +150,21 @@ docs/substrate/                     Contributor-facing rules about THIS repo:
     reviewer-agent-template.md      Canonical reviewer-agent shape
     substrate-layout.md             Where this repo's artifacts live
     three-layer-architecture.md     Plugin's architectural layout
-    composition-with-superpowers.md Plugin composition design
+    composition-with-superpowers.md Plugin composition design (incl. implement-cohesively
+                                    seam: tight composition with no fallback)
     agent-dispatch-protocol.md      Reviewer-agent dispatch contract
   invariants/                       Named global rules: PLUGIN_ROOT_PATHS,
-                                    VERDICT_BEFORE_EVIDENCE
+                                    VERDICT_BEFORE_EVIDENCE,
+                                    IMPLEMENTATION_PLAN_COVERS_DELTA
   gotchas/                          Documented scars: soft-prereqs,
                                     discovery-vs-superpowers,
-                                    wordy-output, style-guide-rot
+                                    wordy-output, style-guide-rot,
+                                    no-implementation-handoff,
+                                    skipping-per-phase-plan
   matrices/                         Branchy behavior with stable IDs:
                                     router, reviewer-output-shape,
-                                    skill-section-presence, artifact-placement
+                                    skill-section-presence, artifact-placement,
+                                    phase-derivation
 
 docs/history/
   reviews/                          Persisted architecture / cohesion / validation reviews
@@ -174,13 +197,14 @@ bash scripts/validate_plugin.sh   # ensure structure is valid
 
 ### Recommended companion
 
-Install [`superpowers`](https://github.com/obra/superpowers) alongside Cohesive. When superpowers is present:
+Install [`superpowers`](https://github.com/obra/superpowers) alongside Cohesive. The two plugins compose at known seams:
 
-- `rewrite-specs` invokes `superpowers:using-git-worktrees` for worktree setup
-- After Cohesive design/review, hand off to Superpowers' `writing-plans` and `executing-plans` for implementation
-- Use `superpowers:code-reviewer` for the implementation-quality lens after Cohesive's substrate lens
+- `rewrite-specs` invokes `superpowers:using-git-worktrees` for worktree setup. Loose composition: a 5-line inline fallback exists when Superpowers is absent.
+- `implement-cohesively` invokes `superpowers:writing-plans` and `superpowers:executing-plans` per phase. Tight composition: **Superpowers is required for the implementation phase**; there is no fallback. If Superpowers is absent, `implement-cohesively` stops with a hard error and recommends installation. (Plan-writing and TDD execution are not 5-line operations and reinventing them inside Cohesive is exactly the duplication the seam exists to prevent.)
+- After `implement-cohesively` returns Implemented, hand off to `superpowers:finishing-a-development-branch` for branch finishing (user-invoked).
+- Use `superpowers:code-reviewer` for the implementation-quality lens after Cohesive's substrate lens.
 
-Cohesive works without superpowers — it includes inline fallbacks for worktree creation — but the combination is stronger than either alone.
+Cohesive's substrate-only workflows (review, audit, design, rewrite, validate) work without Superpowers. The implementation phase requires Superpowers.
 
 ## Philosophy
 

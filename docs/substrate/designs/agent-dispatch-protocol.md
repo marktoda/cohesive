@@ -14,7 +14,7 @@ Cohesive skills dispatch reviewer agents via the Task tool. The dispatch protoco
 
 4. **Structured output.** The agent returns findings in the canonical shape (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) so the dispatching skill can synthesize.
 
-The protocol applies to every reviewer agent dispatched from any Cohesive skill: today, the four reviewers in `review-codebase` Phase 3, the two reviewers in `review-diff`, and the spec-cohesion-reviewer in `validate-rewrite`.
+The protocol applies to every reviewer agent dispatched from any Cohesive skill: the four reviewers in `review-codebase` Phase 3, the two reviewers in `review-diff`, the spec-cohesion-reviewer in `validate-rewrite`, and the delta-coverage-reviewer dispatched per phase by `implement-cohesively`.
 
 ## Why fresh-eyes matters
 
@@ -123,10 +123,11 @@ The fresh-eyes property was previously formalized as a named invariant (`FRESH_E
 - **`skills/review-codebase/SKILL.md` Phase 3** — dispatches four reviewer agents in a single message via Task tool: `substrate-alignment-reviewer`, `structure-reviewer`, `library-native-reviewer`, `agent-readiness-reviewer`.
 - **`skills/review-diff/SKILL.md`** — dispatches two reviewers in a single message: `substrate-alignment-reviewer`, `structure-reviewer` (and the other two only for very large diffs).
 - **`skills/validate-rewrite/SKILL.md`** — dispatches `spec-cohesion-reviewer` once, with the design delta ledger and rewritten spec paths as inputs.
+- **`skills/implement-cohesively/SKILL.md` Phase 2c (per phase)** — dispatches `delta-coverage-reviewer` once per implementation phase, with the delta-ledger excerpt, plan path, and phase diff as inputs. Each dispatch is independent (per-phase fence); no cross-phase reviewer state.
 
-Both sites honor the protocol. The post-Phase-1 architecture review (2026-05-04) found that the agent-file preamble had drifted in wording across the agents — three variants among five files — and that the prior self-review's claim of full compliance was incorrect. That drift is what motivated the v0.1 substrate collapse: the verbatim-bullet rule was producing the appearance of an enforced contract without the substance.
+All sites honor the protocol. The post-Phase-1 architecture review (2026-05-04) found that the agent-file preamble had drifted in wording across the agents — three variants among five files — and that the prior self-review's claim of full compliance was incorrect. That drift is what motivated the v0.1 substrate collapse: the verbatim-bullet rule was producing the appearance of an enforced contract without the substance.
 
-The substrate collapse demoted the verbatim-bullet rule to convention; it did not sweep the five agent files. The drift survives as drift-from-convention rather than drift-from-invariant. A future tightening pass may sweep the corpus to canonical wording when the wording itself stabilizes — until then, the property is held by the harness fence (structural) plus reviewer judgment of the convention (not mechanical enforcement).
+The substrate collapse demoted the verbatim-bullet rule to convention; it did not sweep the agent files. The drift survives as drift-from-convention rather than drift-from-invariant. A future tightening pass may sweep the corpus to canonical wording when the wording itself stabilizes — until then, the property is held by the harness fence (structural) plus reviewer judgment of the convention (not mechanical enforcement). `delta-coverage-reviewer` ships with the canonical preamble verbatim from day one; whether the corpus stays aligned is reviewer-judged.
 
 ## Enforcement
 
