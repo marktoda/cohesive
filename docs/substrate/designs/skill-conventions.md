@@ -175,7 +175,7 @@ The router (`cohesively`) follows two extra rules:
    I'm treating this as a Cohesive <route> workflow: <subskill-1> → <subskill-2> → <subskill-3>. Reason: <one short clause>.
    ```
 
-   `<route>` is one of the canonical route names (`design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `artifact`). The reason clause is one sentence, not a paragraph. The announcement is plain text, not a comment, not buried in a tool call.
+   `<route>` is one of the canonical route names (`design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`). The reason clause is one sentence, not a paragraph. The announcement is plain text, not a comment, not buried in a tool call.
 
 2. **One pre-canned clarifying question per route.** Per the rule above, vague phrasing forbidden. The matrix at [`docs/substrate/matrices/router.md`](../matrices/router.md) names which routes ask which question.
 
@@ -201,6 +201,7 @@ These deviations are observed and accepted in v0.1:
 - The substrate-discovery skill (`discover-substrate`) uses "When to invoke" + "Inputs" + "Process" instead of "Hard constraints" + "Process." It is a no-dispatch utility skill that has prereq-shaped guidance to give rather than process-internal constraints to enforce. The "When to invoke" section is the load-bearing one for callers.
 - A skill may add a "## Token discipline" section if its outputs can grow large.
 - The `implement-cohesively` skill adds a "## Branch shape" section because its branch model — implementation lands on the rewrite's `design/<slug>` branch by default, with an alternative `implement/<slug>` shape for split-merge cases — is normative behavior the skill body must specify.
+- The `validate-rewrite` skill places the canonical `### Recommended next Cohesive skill` heading inside its Output format's rendered review template (after the review body, where the verdict-branch decision matrix lives) rather than as a standalone trailing heading. This is acceptable because `validate-rewrite`'s output *is* a review document with its own internal structure, not the skill's own chat trailer; the recommended-next branching is per-verdict and lives where the verdict is rendered. The footer convention is satisfied because the canonical heading is present and per-verdict recommendations follow it; no other skill should adopt this shape without an entry here.
 
 These deviations are documented; new deviations require explicit discussion and an entry in this section before adoption.
 

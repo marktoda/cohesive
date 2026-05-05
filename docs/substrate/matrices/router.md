@@ -6,7 +6,7 @@
 
 ## Purpose
 
-The router (`cohesively`) selects one of six routes based on the user's request. Each route is branchy in three dimensions: verb tense (forward-looking vs retrospective), scope hint (whole-repo vs subsystem vs diff vs missing-memory), and explicitness (explicit instruction vs ambiguous request). This matrix enumerates the (input shape × selected route) cells with stable IDs so future contributors can reason about routing without reading prose.
+The router (`cohesively`) selects one of seven routes based on the user's request. Each route is branchy in three dimensions: verb tense (forward-looking vs retrospective vs implementation-imperative), scope hint (whole-repo vs subsystem vs diff vs missing-memory vs approved-rewrite-present), and explicitness (explicit instruction vs ambiguous request). This matrix enumerates the (input shape × selected route) cells with stable IDs so future contributors can reason about routing without reading prose.
 
 The matrix is normative. When a user request matches a row, the router must select that row's route. When a request matches no row, the router falls through to the default rule (R900-series) and emits the canonical announcement plus a one-precise-question if needed.
 

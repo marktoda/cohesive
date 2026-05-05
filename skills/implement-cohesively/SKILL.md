@@ -25,12 +25,14 @@ This is the second of Cohesive's flagship skills that owns code-producing work i
 
 2. **Compose with Superpowers; do not reinvent its execution discipline.** This skill invokes `superpowers:writing-plans` once per phase to author the plan and `superpowers:executing-plans` once per phase to execute it. The skill never authors a TDD-shaped plan directly and never writes code itself. If Superpowers is not installed, the skill stops with a hard error and recommends installation — the inline 5-line worktree fallback in `rewrite-specs` does not apply here, because plan-writing and TDD execution are not 5-line operations.
 3. **Per-phase cross-review is mandatory.** Every phase ends with a `delta-coverage-reviewer` dispatch (Task subprocess, paths-only inputs, fresh eyes). No phase advances without a Covered verdict. A Drift or Incomplete verdict gates the next phase until repaired.
-4. **Coverage of the delta is structural.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`, every entry in the design delta ledger maps to at least one phase. The skill's Phase 1 produces a coverage table and refuses to advance to Phase 2 if any delta entry is uncovered.
-5. **Final substrate review is mandatory.** After the last phase passes its cross-review, the skill dispatches `cohesive:review-diff` against the branch. A non-Pass verdict gates merge.
+4. **Coverage of the delta is structural.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`, every entry in the design delta ledger maps to at least one phase. Phase 1 produces a coverage table and refuses to advance to Phase 2 if any delta entry is uncovered.
+5. **Final substrate review is mandatory.** After the last per-phase iteration of Phase 2 passes its cross-review, Phase 3 dispatches `cohesive:review-diff` against the branch. A non-Pass verdict gates merge.
 
 ## Process
 
-### 0. Resolve inputs and confirm prereqs
+The skill body uses `Step 0` and `Step 4` for preflight and handoff bookends, and `Phase 1`, `Phase 2`, `Phase 3` for the three structural phases the named invariant `IMPLEMENTATION_PLAN_COVERS_DELTA` references. Citations to "Phase 1" / "Phase 2" / "Phase 3" elsewhere in the substrate (the invariant, anti-patterns, acceptance criteria) refer to the headings in this section by exactly those labels.
+
+### Step 0. Resolve inputs and confirm prereqs
 
 Required inputs:
 
@@ -41,7 +43,7 @@ Required inputs:
 
 If any required input is missing, stop and ask. Do not invent inputs.
 
-### 1. Derive phases from the design delta ledger
+### Phase 1. Derive phases from the design delta ledger
 
 Read the delta ledger and apply the phase-derivation matrix at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/phase-derivation.md` to produce an ordered list of phases. Each phase carries:
 
@@ -57,9 +59,9 @@ Phase ordering rules:
 4. New gotchas and their accompanying tests ship in the same phase.
 5. Semantic linter specs marked "deferred" in the delta ledger do not produce phases (they are explicitly out of scope for the current implementation pass).
 
-Render the phase list as a coverage table (see Output format). If any delta-ledger entry is uncovered, stop and surface the gap. Do not advance until coverage is complete.
+Render the phase list as a **coverage table**. The Phase 1 coverage table uses the same column shape as the final Phases table in §Output format: `# | Intent (one clause) | Delta entries | Plan | Cross-review`. At Phase 1 the `Plan` and `Cross-review` columns are filled with the literal value `pending`; they update as each phase completes. The Phase 1 coverage table and the final Phases table are the same table at two points in time, not two artifacts. If any delta-ledger entry is uncovered, stop and surface the gap. Do not advance until coverage is complete.
 
-### 2. For each phase, run the loop
+### Phase 2. For each phase, run the loop
 
 For phase N in order:
 
@@ -76,8 +78,10 @@ Invoke `superpowers:executing-plans` via the Skill tool with the persisted plan 
 Dispatch the `delta-coverage-reviewer` agent via Task tool with `subagent_type: delta-coverage-reviewer`. The dispatch prompt names exactly three artifact paths: the delta-ledger entries this phase covers (passed as a quoted excerpt of the ledger plus the ledger path), the plan path, and the phase diff (`git diff <branch>..HEAD` or equivalent). The reviewer returns one of three verdicts:
 
 - **Covered** — every delta entry the phase claims is implemented; the implementation is consistent with the plan; advance to phase N+1.
-- **Drift** — implementation diverges from the plan or the delta. The reviewer names the divergent items. Repair: re-invoke `superpowers:writing-plans` for a focused repair plan, then `superpowers:executing-plans` for the repair, then re-dispatch the reviewer. Loop until Covered or escalate to user after one repair cycle.
+- **Drift** — implementation diverges from the plan or the delta. The reviewer names the divergent items. Repair: re-invoke `superpowers:writing-plans` for a focused repair plan, then `superpowers:executing-plans` for the repair, then re-dispatch the reviewer.
 - **Incomplete** — the implementation does not cover all delta entries the phase claims. Same repair loop as Drift, with the missing entries called out.
+
+**Escalation rule.** Each phase gets at most **one repair cycle**. If the post-repair re-dispatch of `delta-coverage-reviewer` still returns Drift or Incomplete, the skill stops with verdict `Phase Drift`, surfaces the reviewer's findings to the user, and refuses to advance to phase N+1. The skill does not auto-loop a third time. Repair beyond the second attempt is a user action — either the user repairs by hand and re-invokes the skill, or the user returns to `cohesive:rewrite-specs` because the delta entry itself was misformulated.
 
 #### 2d. Commit the phase
 
@@ -91,9 +95,9 @@ Cross-review: Covered
 "
 ```
 
-Commit messages cite the plan path and the delta entries by stable ID. This is what makes per-branch grep auditing of "which phase implemented which delta entry" possible — and is the substrate-shape of the proposed `design/<slug>`-branch commit-message linter (deferred).
+Commit messages cite the plan path and the delta entries by stable ID. This is what makes per-branch grep auditing of "which phase implemented which delta entry" possible — and is the substrate-shape of the proposed `design/<slug>`-or-`implement/<slug>`-branch commit-message linter (deferred).
 
-### 3. Final substrate review
+### Phase 3. Final substrate review
 
 After the last phase passes its cross-review, dispatch `cohesive:review-diff` against the branch. The review compares the branch diff to the rewritten specs and the substrate model. Verdict:
 
@@ -101,7 +105,7 @@ After the last phase passes its cross-review, dispatch `cohesive:review-diff` ag
 - **Needs substrate** — implementation introduced behavior not covered by the rewrite. Either rewrite the specs (`cohesive:rewrite-specs` to extend the rewrite) or revert the implementation in question.
 - **Risky** or **Block** — substrate drift or invariant violation. Repair before merge.
 
-### 4. Hand off
+### Step 4. Hand off
 
 Announce the verdict and the recommended next step. Do not invoke `superpowers:finishing-a-development-branch` automatically — branch finishing is a user action.
 
@@ -159,7 +163,8 @@ Per verdict:
 | Producing code from this skill body | The skill orchestrates; it never writes code itself | All code-writing happens inside `superpowers:executing-plans` |
 | Letting a phase advance without `delta-coverage-reviewer` Covered verdict | Phases that drift compound; final review can't repair the gap | Per-phase cross-review is mandatory per Hard constraint #3 |
 | Ignoring uncovered delta entries because they "look small" | Coverage gap = silent substrate drift | Phase 1's coverage table refuses to advance with uncovered entries |
-| Skipping the final substrate review | The branch may pass per-phase reviews and still drift in aggregate | Hard constraint #5 — `cohesive:review-diff` is mandatory before handoff |
+| Auto-looping repair cycles past the first | Hides design defects behind reviewer fatigue; the second-failure case usually means the delta entry itself is wrong, not the code | Per Phase 2c escalation rule: stop at `Phase Drift` after one repair cycle; surface findings to user |
+| Skipping the final substrate review (Phase 3) | The branch may pass per-phase reviews and still drift in aggregate | Hard constraint #5 — `cohesive:review-diff` is mandatory before handoff |
 | Auto-invoking `superpowers:finishing-a-development-branch` | Branch finishing is a user action per Cohesive↔Superpowers seam | Recommend; do not invoke |
 | Pre-summarizing the design for the cross-review agent | Bypasses fresh-eyes per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/agent-dispatch-protocol.md` | Pass paths only; never summarize the rewrite for the agent |
 
@@ -179,11 +184,12 @@ The implementation lands on the same `design/<slug>` branch the rewrite produced
 ## Acceptance criteria
 
 - An Approved validate-rewrite verdict path is in the inputs.
-- Phase 1 produces a coverage table; the skill refuses to advance with uncovered delta entries.
+- Phase 1 produces a coverage table that uses the same column shape as the final Phases table in §Output format, with `Plan` and `Cross-review` columns initialized to `pending`; the skill refuses to advance with uncovered delta entries.
 - Each phase invokes `superpowers:writing-plans`, then `superpowers:executing-plans`, then `delta-coverage-reviewer` — in that order.
 - The cross-review agent receives only paths and a quoted ledger excerpt; never a pre-summarized design narrative.
 - Each phase commit cites the plan path and the delta-entry stable IDs.
-- The final substrate review (`cohesive:review-diff`) runs after the last phase.
+- The Phase 2c escalation rule holds: after one repair cycle, the skill stops with verdict `Phase Drift`; no auto-loop past the first repair.
+- Phase 3 (`cohesive:review-diff`) runs after the last per-phase iteration of Phase 2.
 - The skill never invokes `superpowers:finishing-a-development-branch` — handoff is a user action.
 
 ## What this skill is *not*

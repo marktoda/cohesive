@@ -152,3 +152,79 @@ Things the rewrite couldn't fully resolve and that the fresh-eyes reviewer shoul
 2. Skim "Conceptual changes" to know what's *different*.
 3. Read "Files rewritten" with before/after summaries to verify each rewrite hits the right thing.
 4. Use "Remaining ambiguity" as the focused fresh-eyes punch list.
+5. After the first `validate-rewrite` pass, see "Repair pass 1" below for the tightening that closed three blockers and five important issues from the first review.
+
+## Repair pass 1 — 2026-05-04
+
+The first `cohesive:validate-rewrite` returned **Issues Found** with three blockers and five important issues. Repair pass 1 closes all eight in the same worktree, in place. Validation review at `docs/history/reviews/2026-05-04-implement-cohesively-rewrite-validation.md`.
+
+### Files rewritten in repair pass 1
+
+- `skills/implement-cohesively/SKILL.md`
+  - **B1 (numbering schism).** `## Process` body sections renamed: `### 0. Resolve inputs` and `### 4. Hand off` are now `### Step 0` and `### Step 4` (preflight and handoff bookends, not phases). `### 1. Derive phases`, `### 2. For each phase, run the loop`, and `### 3. Final substrate review` are now `### Phase 1`, `### Phase 2`, `### Phase 3`. Hard constraint #5 updated to reference Phase 3 (was implicit "the last phase / the final substrate review" in mixed vocabulary). A short paragraph at the top of `## Process` makes the Step/Phase distinction explicit and pins the phase labels for citation by the invariant. Anti-patterns table updated: "Skipping the final substrate review" → "Skipping the final substrate review (Phase 3)"; new row added for the auto-loop-past-first anti-pattern (cross-references the new Phase 2c escalation rule).
+  - **I2 (escalation rule).** Phase 2c gains an explicit **Escalation rule** paragraph: each phase gets at most one repair cycle; if the post-repair re-dispatch still returns Drift or Incomplete, the skill stops with verdict `Phase Drift`, surfaces findings to the user, and refuses to advance. The skill does not auto-loop a third time. Acceptance criteria gains a corresponding line.
+  - **I4 (coverage table relation).** Phase 1's coverage-table description specifies the column shape explicitly and states that the Phase 1 coverage table and the final Phases table are the same table at two points in time, with `Plan` and `Cross-review` columns initialized to `pending`. Acceptance criteria updated to match.
+
+- `docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`
+  - **B1 (numbering schism).** §Runtime paths and §Enforcement updated: "Phase 4" → "Phase 3" (the final substrate review). Inline references to Phase 1, Phase 2, Phase 3 now match the SKILL body's labels. §Enforcement's commit-citation line names the SKILL section by its new label ("Phase 2d. Commit the phase").
+  - **I1 (invariant scope undercount).** §Scope §Applies-to extends to the alternative `implement/<slug>` child branch. §Runtime paths' branch-commit row now reads "`design/<slug>` or `implement/<slug>` branch commit messages." §Enforcement's deferred CI grep description names both branch shapes.
+  - **I3 (bypass handshake).** §Known bypass risks specifies the convention: when the user picks the bypass row in the validate-rewrite decision matrix, `validate-rewrite` renders the literal acknowledgment line `Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.` before invoking `superpowers:writing-plans`. The acknowledgment lands in the conversation transcript; v0.1 does not require it in commit history.
+  - History entry appended for repair pass 1.
+
+- `skills/validate-rewrite/SKILL.md`
+  - **I3 (bypass handshake).** Output format's Approved-verdict block gains a **Bypass acknowledgment** paragraph immediately after the decision matrix table. The literal acknowledgment line is named verbatim. The convention is enforced by reviewer judgment in `cohesive:review-codebase` (no automated check in v0.1).
+
+- `docs/substrate/matrices/router.md`
+  - **B2 (six-routes drift).** §Purpose updated: "selects one of six routes" → "selects one of seven routes." The branchy-dimensions clause now names the third dimension explicitly (verb tense including implementation-imperative; scope hint including approved-rewrite-present). The dispatch contract grid was already correct in the original rewrite — it lists seven rows; only the prose summary was stale.
+
+- `docs/substrate/designs/skill-conventions.md`
+  - **B2 (six-routes drift).** §Router conventions §1 canonical route enumeration now includes `implement` between `rewrite-only` and `artifact`.
+  - **I5 (validate-rewrite footer placement).** §"When sections may differ" gains a fourth accepted deviation: `validate-rewrite` places `### Recommended next Cohesive skill` inside its rendered review template (where the verdict-branch decision matrix lives) rather than as a standalone trailing heading. Documented as acceptable because `validate-rewrite`'s output *is* a review document with its own internal structure; per-verdict recommendations follow the canonical heading and the convention is satisfied. No other skill should adopt this shape without an entry here.
+
+- `ARCHITECTURE.md`
+  - **B3 (skill count drift).** §Three-tier architecture line previously read "the router (`cohesively`) and eight subskills"; now reads "the router (`cohesively`) plus eight subskills make nine skills total." Aligns with §"v0.1 scope" which already said "9 skills."
+
+### Files added in repair pass 1
+
+None. All repairs are edits to files already in the worktree.
+
+### Files removed or deprecated in repair pass 1
+
+None.
+
+### Conceptual changes in repair pass 1
+
+| Old concept | New concept | Status |
+|---|---|---|
+| `Step 1..4` in `implement-cohesively` Process body | `Step 0` (preflight), `Phase 1`, `Phase 2`, `Phase 3`, `Step 4` (handoff) | Renamed |
+| "Phase 4" referring to the final substrate review | "Phase 3" referring to the final substrate review | Renumbered |
+| Phase 1 coverage table and final Phases table as separate artifacts | Same table at two points in time | Clarified |
+| Implicit "loop until covered" in Phase 2c | Explicit "one repair cycle, then `Phase Drift`" escalation rule | Tightened |
+| Invariant scope: `design/<slug>` branches | Invariant scope: `design/<slug>` or `implement/<slug>` branches | Extended |
+| Bypass row in validate-rewrite decision matrix without specified handshake | Bypass row with literal acknowledgment-line convention | Tightened |
+
+### Substrate updated in repair pass 1
+
+- Specs: 5 (`implement-cohesively/SKILL.md`, `validate-rewrite/SKILL.md`, `skill-conventions.md`, `router.md`, `ARCHITECTURE.md`)
+- Behavior matrices: 1 (`router.md` — prose only, no cell changes)
+- Named invariants: 1 (`IMPLEMENTATION_PLAN_COVERS_DELTA` — scope and rule-citation tightened)
+- Gotchas: 0
+- Semantic linter specs (proposed): 0 new (the existing branch-citation lint description in the invariant now names both branch shapes)
+
+### Tests / checks proposed (not yet implemented) in repair pass 1
+
+- Lint check (deferred V1): `validate-rewrite/SKILL.md` Output format must contain the literal bypass-acknowledgment line. A grep on the SKILL body verifies presence; runtime enforcement is reviewer-judged.
+
+### Remaining ambiguity after repair pass 1
+
+The original "Remaining ambiguity" punch list is reduced:
+
+- **Phase ordering when delta entries are mutually independent.** Unchanged — still intentional flexibility for the implementer; a fresh-eyes question about whether to tighten further.
+- **Branch shape default.** Closed by I1 — the invariant's scope and the SKILL's "Branch shape" section now agree explicitly that both `design/<slug>` and `implement/<slug>` are in scope.
+- **Coverage table format.** Closed by I4 — column shape and lifecycle pinned in the SKILL body.
+- **Bypass legitimacy boundary.** Closed by I3 — convention is the literal acknowledgment line, named verbatim in both the SKILL body and the invariant's bypass-risks section.
+- **Token cost at scale.** Unchanged — risk acknowledged in ARCHITECTURE.md, no concrete budget set; a fresh-eyes question about whether to ship a pre-flight phase-count estimate.
+
+### Ready for second fresh-eyes review?
+
+**Yes** — proceeding to `cohesive:validate-rewrite` (pass 2).

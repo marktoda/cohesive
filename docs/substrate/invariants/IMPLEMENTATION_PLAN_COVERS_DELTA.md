@@ -19,9 +19,9 @@ If any of points 1–5 fail, the implementation pass is non-compliant and substr
 ### Applies to
 
 - Every invocation of `cohesive:implement-cohesively`
-- Every branch produced by an `implement-cohesively` invocation
+- Every branch produced by an `implement-cohesively` invocation — the default `design/<slug>` branch (rewrite + implementation on one branch) and the alternative `implement/<slug>` child branch (per `implement-cohesively`'s "Branch shape" section) are both in scope
 - Every per-phase plan persisted under `docs/history/plans/`
-- Every per-phase commit on a `design/<slug>` (or child) branch produced by an `implement-cohesively` invocation
+- Every per-phase commit on a `design/<slug>` or `implement/<slug>` branch produced by an `implement-cohesively` invocation
 
 ### Does not apply to
 
@@ -44,26 +44,26 @@ This is the third named invariant Cohesive ships, joining `${CLAUDE_PLUGIN_ROOT}
 Every place this invariant must hold:
 
 - **`cohesive:implement-cohesively` Phase 1.** Produces the coverage table; refuses to advance to Phase 2 if any delta entry is uncovered.
-- **`cohesive:implement-cohesively` Phase 2 per-phase loop.** Each phase invokes `superpowers:writing-plans` (plan persistence), `superpowers:executing-plans` (code), `delta-coverage-reviewer` (cross-review verdict).
+- **`cohesive:implement-cohesively` Phase 2 per-phase loop.** Each iteration invokes `superpowers:writing-plans` (plan persistence), `superpowers:executing-plans` (code), `delta-coverage-reviewer` (cross-review verdict).
+- **`cohesive:implement-cohesively` Phase 3.** Final substrate check via `cohesive:review-diff`; any non-Pass verdict gates merge.
 - **`docs/history/plans/`.** Plans persisted here are the audit trail. A branch with implementation commits but no plans persisted is a violation.
-- **`design/<slug>` branch commit messages.** Each phase commit cites the plan path and the delta-entry stable IDs. A commit with implementation changes but no citation is a violation.
-- **`cohesive:review-diff` at end of pass.** Final substrate check; any non-Pass verdict gates merge.
+- **`design/<slug>` or `implement/<slug>` branch commit messages.** Each phase commit cites the plan path and the delta-entry stable IDs. A commit with implementation changes but no citation is a violation. Both branch shapes (default one-branch-end-to-end on `design/<slug>` and the split-merge alternative on `implement/<slug>`) are in scope.
 
 ## Enforcement
 
 How the invariant is structurally enforced:
 
-- **Skill-body acceptance criteria:** `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` Hard constraints #4 and #5 require coverage and cross-review by Hard constraint. The skill body refuses to advance with uncovered delta entries (Phase 1 acceptance) and requires final substrate review (Phase 4).
+- **Skill-body acceptance criteria:** `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` Hard constraints #4 and #5 require coverage and cross-review. The skill body refuses to advance with uncovered delta entries (Phase 1 acceptance) and requires final substrate review (Phase 3).
 - **Reviewer agent verdict:** `${CLAUDE_PLUGIN_ROOT}/agents/delta-coverage-reviewer.md` returns Covered/Drift/Incomplete; Drift and Incomplete are non-advancing verdicts. The agent's "What you check" §1 names coverage as the priority-one judgment.
 - **Plan persistence:** `superpowers:writing-plans` writes plans to disk. Plans cannot exist only in conversation. The artifact is the audit surface.
-- **Commit message citation:** `implement-cohesively`'s "2d. Commit the phase" §names the plan path and delta IDs in the commit message body. Lint check (deferred V1): a CI grep that every commit on a `design/<slug>` branch authored by `implement-cohesively` cites at least one plan path and at least one delta entry stable ID.
-- **Final substrate review:** `cohesive:review-diff` runs after the last phase per `implement-cohesively` Hard constraint #5. Its verdict gates merge.
+- **Commit message citation:** `implement-cohesively`'s Phase 2d. Commit the phase names the plan path and delta IDs in the commit message body. Lint check (deferred V1): a CI grep that every commit on a `design/<slug>` or `implement/<slug>` branch authored by `implement-cohesively` cites at least one plan path and at least one delta entry stable ID.
+- **Final substrate review (Phase 3):** `cohesive:review-diff` runs after the last per-phase iteration of Phase 2 per `implement-cohesively` Hard constraint #5. Its verdict gates merge.
 
 A convention without enforcement is just a hope. The structural fences above (Phase 1 refuses to advance; reviewer returns non-advancing verdicts; plans persisted; final review runs) are the load-bearing enforcement. The deferred CI grep is the convention pin that promotes commit-message citation from "skill-body acceptance" to "CI-enforced."
 
 ## Known bypass risks
 
-- **A user invokes `superpowers:writing-plans` directly after `validate-rewrite` Approved**, bypassing `implement-cohesively`. The invariant does not apply (per Scope). The user accepts that the implementation may drift from the rewrite. The `validate-rewrite` Approved footer's decision matrix names this as a legitimate option ("Hand off to Superpowers without delta-coverage discipline") so the bypass is documented, not silent.
+- **A user invokes `superpowers:writing-plans` directly after `validate-rewrite` Approved**, bypassing `implement-cohesively`. The invariant does not apply (per Scope). The user accepts that the implementation may drift from the rewrite. The `validate-rewrite` Approved footer's decision matrix names this as a legitimate option ("Hand off to Superpowers without delta-coverage discipline") so the bypass is documented, not silent. The handshake is convention: when the user picks the bypass row, `validate-rewrite`'s Output format renders the literal acknowledgment line `Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.` before invoking `superpowers:writing-plans`. The acknowledgment lands in the conversation transcript, not in commit history; this is enough for v0.1 because the bypass is rare and the substrate-side fence (this invariant scoped to `implement-cohesively`) holds independently. A future tightening can require the acknowledgment in commit history if the bypass is taken regularly.
 - **Phase 1's coverage table is gamed.** A future implementer could produce a coverage table that maps every delta entry to a phase nominally, but with phase intents so vague that the corresponding plans don't actually implement the entries. Mitigated by: `delta-coverage-reviewer`'s "What you check" §1 (coverage of delta entries in the diff, not in the table); `cohesive:review-diff` at the end. Both fences require the *diff* to make the entry true, not just the *table*.
 - **A phase commit doesn't cite the plan or delta IDs.** No automated check catches this in v0.1; reviewer memory is the enforcement until the deferred CI grep ships. Mitigated by: `cohesive:review-codebase` includes commit-citation discipline as a structure-reviewer concern.
 - **`writing-plans` is invoked but the produced plan is empty / trivial.** The cross-review reviewer can flag this as Drift (plan-implementation agreement breaks). Mitigated by reviewer judgment.
@@ -94,3 +94,4 @@ When reviewing a change to `implement-cohesively`, the phase-derivation matrix, 
 ## History
 
 - 2026-05-04 — Created. The structural pin behind `implement-cohesively`. Earned invariant status from day one because the rule has a concrete structural failure mode (silent substrate drift), an explicit enforcement path (Phase 1 coverage table; reviewer verdict; final substrate review), and a real cost on regression.
+- 2026-05-04 — Repair pass 1 (post first validate-rewrite verdict): Step/Phase numbering reconciled with `implement-cohesively` SKILL body (Phase 4 → Phase 3; the SKILL has three phases plus two Step bookends). §Scope and §Runtime paths extended to cover the alternative `implement/<slug>` child branch (the default `design/<slug>` was the only branch named in the original; the SKILL's "Branch shape" section had named both but the invariant did not). §Known bypass risks specifies the acknowledgment-line handshake for the validate-rewrite decision matrix's bypass row.

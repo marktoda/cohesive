@@ -143,6 +143,8 @@ Per verdict:
 | Hand off to Superpowers without delta-coverage discipline | `superpowers:writing-plans` | Small rewrites where the delta is mostly cosmetic; user accepts that the implementation may drift from the rewrite. The bypass is documented per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md` §"Known bypass risks." |
 | Schedule for later | (no immediate action) | The rewrite is approved; implementation is not currently in scope. Re-invoke `cohesive:implement-cohesively` or `superpowers:writing-plans` when ready. |
 
+**Bypass acknowledgment.** When the user picks the third row (`superpowers:writing-plans` directly), the skill renders the literal acknowledgment line `Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.` in chat *before* invoking `superpowers:writing-plans`. The acknowledgment lands in the conversation transcript, making the bypass legible. No file is written, no flag is required — the convention is the line itself, and skipping it is a substrate violation reviewed in `cohesive:review-codebase`.
+
 **Issues Found** — `cohesive:rewrite-specs` — repair the blocking issues in the same worktree, then re-run this skill.
 
 **Design Incoherent** — `cohesive:brainstorm-design` — the design itself needs revisiting; fixes won't help.

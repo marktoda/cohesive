@@ -8,7 +8,7 @@ This is the binding architectural map. Hook lines point at the design docs, inva
 
 Cohesive is a Claude Code plugin organized in three implementation tiers under `${CLAUDE_PLUGIN_ROOT}`. Implementation is what *plugin users get*; substrate is contributor-facing rules about *this repo itself*.
 
-- **`skills/`** — workflow orchestration. The router (`cohesively`) and eight subskills are the user-facing surface. Each skill is a process; skills do not run reviews directly. The `implement-cohesively` skill is the only one that produces code, and it does so by composing `superpowers:executing-plans` per phase rather than writing code directly.
+- **`skills/`** — workflow orchestration. The router (`cohesively`) plus eight subskills make nine skills total; this is the user-facing surface. Each skill is a process; skills do not run reviews directly. The `implement-cohesively` skill is the only one that produces code, and it does so by composing `superpowers:executing-plans` per phase rather than writing code directly.
 - **`agents/`** — fresh-context reviewer agents. Dispatched via the Task tool with explicit input paths. They do not inherit conversation context; each review runs in a clean subprocess.
 - **`references/`** — runtime methodology cited by skills and agents during the workflow: the rubrics (`cohesion-rubric.md`, `architecture-review-rubric.md`), the design pressure-test battery, the locality-over-centralization principle, the substrate model, the chat-render voice guide (`output-voice.md`), and `templates/` — fillable forms skills consume to produce artifacts. All shipped to plugin users.
 
