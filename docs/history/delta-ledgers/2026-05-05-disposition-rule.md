@@ -73,7 +73,7 @@ none
 - `docs/substrate/designs/skill-conventions.md` — updates `validate-rewrite` deviation entry to describe new Disposition + Implementation-route shape under the canonical `### Recommended next Cohesive skill` heading
 
 ### Behavior matrices
-- The 6-row disposition table in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings" is matrix-shaped (rows: severity-presence; columns: recommendation, re-validate?) but lives embedded in the rubric rather than as a standalone matrix file. A future promotion to standalone matrix is queueable if the table grows.
+- The 5-row disposition table in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings" is matrix-shaped (rows: severity-presence; columns: recommendation, re-validate?) but lives embedded in the rubric rather than as a standalone matrix file. A future promotion to standalone matrix is queueable if the table grows.
 
 ### Named invariants
 - none added; promotion of the disposition rule to a named invariant is deferred (see Remaining ambiguity)
@@ -114,9 +114,16 @@ Pass-1 validation review at `docs/history/reviews/2026-05-05-disposition-rule-re
 - **I1 closed** — `references/templates/cohesion-review.md` §"Blocking issues" and §"Important issues" headers carry severity-class glosses citing the rubric's severity vocabulary. The historic word "Blocking" is preserved as the section label; the **Severity** field within each finding carries the canonical Blocker/High/Medium/Low vocabulary. Section-name vs. severity-name relationship is now stated explicitly.
 - **I2 closed** — Rubric §"User override" carries an explicit re-evaluation trigger (>3 silent overrides per release cycle → promote first-class override-residue surface in next pass). Ledger §"Remaining ambiguity" override entry amended to mirror. Substrate-note overrides continue to land in the existing §"Remaining ambiguity" residue per B1's reframing.
 
+## Repair pass 2 (post pass-2 validation)
+
+Pass-2 validation review at `docs/history/reviews/2026-05-05-disposition-rule-rewrite-validation-pass-2.md` returned `Issues Found` with 1 Blocker + 1 Medium. Both new findings (introduced by repair pass 1's incomplete propagation); both closed in this repair pass.
+
+- **pass-2 B1 closed** — `references/templates/cohesion-review.md:91` Disposition phrase list reconciled with `skills/validate-rewrite/SKILL.md:153`. The template now lists the same 5 canonical phrases and explicitly notes that substrate-noting is a user override per rubric §"Substrate-note as user override", not a phrase the agent renders. The Implementation route conditional simplified from "iff verdict is Approved and disposition does not require re-validation" to "iff verdict is Approved" — the verdict-floor mapping makes the re-validation gate redundant for Approved.
+- **pass-2 I1 closed** — Ledger §"New or updated substrate" → §"Behavior matrices" line corrected from "6-row" to "5-row". Preamble was already correct; body now matches.
+
 ## Ready for fresh-eyes review?
 
-**Yes** — substrate change is internally complete; validator passes (`bash scripts/validate_plugin.sh` returns 0 errors, 0 warnings); the disposition rule has a single canonical home with three citing surfaces; verdict-floor mapping is pinned and cited from the agent's verdict definitions. Hand off to `cohesive:validate-rewrite` for pass 2 fresh-eyes review.
+**Yes** — substrate change is internally complete; validator passes (`bash scripts/validate_plugin.sh` returns 0 errors, 0 warnings); the disposition rule has a single canonical home with three citing surfaces; verdict-floor mapping is pinned and cited from the agent's verdict definitions; cohesion-review template phrase list now matches the SKILL.md derivation list. Hand off to `cohesive:validate-rewrite` for pass 3 fresh-eyes review.
 
 ## How to read this ledger
 
