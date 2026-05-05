@@ -1,6 +1,6 @@
 # Skill conventions
 
-The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces the named invariants — `PLUGIN_ROOT_PATHS` and `VERDICT_BEFORE_EVIDENCE` (see [`docs/substrate/invariants/`](../docs/substrate/invariants/)) — structural plugin shape, and a small set of convention pins: the canonical prereq-detection question in subskills with a discover-substrate prereq, the fresh-eyes preamble bullet across reviewer agents, the `### Recommended next Cohesive skill` footer in every persisting skill, the voice-citation line in every Output format block, and a negative-trigger check on skill descriptions. The rest of the rules below — section order, body prose tone, anti-pattern table shape — remain convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Convention status is deliberate where wording is still settling; promotion to enforcement happens when a rule earns it.
+The canonical shape for a Cohesive `SKILL.md`. Read this before adding a new skill or modifying an existing one. The `validate_plugin.sh` semantic linter enforces the named invariants — `PLUGIN_ROOT_PATHS` and `VERDICT_BEFORE_EVIDENCE` (see [`docs/substrate/invariants/`](../invariants/)) — structural plugin shape, and a small set of convention pins: the canonical prereq-detection question in subskills with a discover-substrate prereq, the fresh-eyes preamble bullet across reviewer agents, the `### Recommended next Cohesive skill` footer in every persisting skill, the voice-citation line in every Output format block, and a negative-trigger check on skill descriptions. The rest of the rules below — section order, body prose tone, anti-pattern table shape — remain convention, reviewed in `review-codebase` / `review-diff` rather than mechanically enforced. Convention status is deliberate where wording is still settling; promotion to enforcement happens when a rule earns it.
 
 This document specifies the SKILL.md *shape*. Chat-rendered output follows [`output-voice.md`](output-voice.md), which is normative for every user-facing render — verdict-leads, header-depth cap, density budgets, forbidden phrasings, the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md). Every Output format block in this repo opens with a one-line citation pulling that guide into context at generation time.
 
@@ -65,14 +65,14 @@ In every `skills/*/SKILL.md` Output format block, the canonical render opens wit
 ```
 # <Skill output title>
 
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md
 ```
 
-Title-then-citation is the canonical layout (matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md)). The citation is what pulls [`output-voice.md`](output-voice.md) into context at generation time. Without it, voice rules drift silently — the failure mode documented in [`docs/substrate/gotchas/style-guide-rot.md`](../docs/substrate/gotchas/style-guide-rot.md). `validate_plugin.sh` greps for the literal blockquote line within the first three non-blank lines after the outermost `#` title.
+Title-then-citation is the canonical layout (matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../docs/history/transcripts/output-voice-worked-example.md)). The citation is what pulls [`output-voice.md`](output-voice.md) into context at generation time. Without it, voice rules drift silently — the failure mode documented in [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md). `validate_plugin.sh` greps for the literal blockquote line within the first three non-blank lines after the outermost `#` title.
 
 ### 2. Verdict-led skills lead with the verdict
 
-For skills whose output names a verdict (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`, plus future verdict-led skills), the Output format block opens — within the first three non-blank lines after the outermost header — with the literal string `**Verdict:**` followed by a value from the skill's verdict vocabulary. This is the named invariant `VERDICT_BEFORE_EVIDENCE` (see [`docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`](../docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md)).
+For skills whose output names a verdict (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`, plus future verdict-led skills), the Output format block opens — within the first three non-blank lines after the outermost header — with the literal string `**Verdict:**` followed by a value from the skill's verdict vocabulary. This is the named invariant `VERDICT_BEFORE_EVIDENCE` (see [`docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`](../invariants/VERDICT_BEFORE_EVIDENCE.md)).
 
 Skills without a controlled-vocabulary verdict (`cohesively`, `discover-substrate`, `brainstorm-design`, `rewrite-specs`) are out of scope for this rule but still carry the voice citation.
 
@@ -87,7 +87,7 @@ The canonical chat-render shape for verdict-led, persisted-output skills:
 ```md
 # <Skill output title>
 
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md
 
 **Verdict:** <value from vocabulary>
 
@@ -179,7 +179,7 @@ The router (`cohesively`) follows two extra rules:
 
    `<route>` is one of the canonical route names (`design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `artifact`). The reason clause is one sentence, not a paragraph. The announcement is plain text, not a comment, not buried in a tool call.
 
-2. **One pre-canned clarifying question per route.** Per the rule above, vague phrasing forbidden. The matrix at [`docs/substrate/matrices/router.md`](../docs/substrate/matrices/router.md) names which routes ask which question.
+2. **One pre-canned clarifying question per route.** Per the rule above, vague phrasing forbidden. The matrix at [`docs/substrate/matrices/router.md`](../matrices/router.md) names which routes ask which question.
 
 ## Tone
 
@@ -216,7 +216,7 @@ These deviations are documented; new deviations require explicit discussion and 
 | Frontmatter `description` written in first person ("I help you...") | Breaks the third-person plugin-dev convention | Rewrite in third person beginning with "Use when" |
 | New skill not mentioned in `ARCHITECTURE.md` §"v0.1 scope" or README "What's in the box" | Source-of-truth disagreement | Update both in the same pass |
 | Router omits the canonical announcement before dispatching | User can't tell which workflow is running | Use the canonical opening sentence; name the route |
-| Output format block missing the voice citation line | Voice rules drift silently — see [`docs/substrate/gotchas/style-guide-rot.md`](../docs/substrate/gotchas/style-guide-rot.md) | Open every Output format block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` |
+| Output format block missing the voice citation line | Voice rules drift silently — see [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md) | Open every Output format block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md` |
 | Verdict-led skill buries the verdict under a setup paragraph | Violates `VERDICT_BEFORE_EVIDENCE`; reader can't scan the answer | Lead the Output format block with `**Verdict:**` within the first three non-blank lines |
 | Chat render duplicates the full persisted body | Defeats the chat-trailer model; ceremony without information | Render verdict + thesis + top findings + next step in chat; point at the persisted file |
 | Header nesting reaches `####` or `#####` in chat output | Header soup is the most common form of ceremony | Cap at `###`; use a bullet list or table for sub-structure |

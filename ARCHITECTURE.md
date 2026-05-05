@@ -6,13 +6,13 @@ This is the binding architectural map. Hook lines point at the design docs, inva
 
 ## Three-tier architecture
 
-Cohesive is a Claude Code plugin organized in three deliberate tiers under `${CLAUDE_PLUGIN_ROOT}`:
+Cohesive is a Claude Code plugin organized in three deliberate implementation tiers under `${CLAUDE_PLUGIN_ROOT}`, with substrate as a fourth normative layer that all three tiers cite:
 
 - **`skills/`** — workflow orchestration. The router (`cohesively`) and seven subskills are the user-facing surface. Each skill is a process; skills do not run reviews directly.
 - **`agents/`** — fresh-context reviewer agents. Dispatched via the Task tool with explicit input paths. They do not inherit conversation context; each review runs in a clean subprocess.
-- **`references/`** — pure content consumed at runtime by skills and agents: the substrate model, rubrics, templates, and convention references. Shipped to plugin users.
+- **`references/templates/`** — fillable forms (invariant, gotcha, behavior matrix, design delta ledger, etc.) that skills consume at runtime when producing artifacts. Shipped to plugin users alongside skills and agents. After the 2026-05-04 `cut-anchor-pin` rewrite, `references/` contains only `templates/`; previously-co-located convention references and rubrics moved to `docs/substrate/designs/`.
 
-The three-tier separation is the load-bearing structural decision. → see [`docs/substrate/designs/three-layer-architecture.md`](docs/substrate/designs/three-layer-architecture.md).
+All three implementation tiers cite **substrate** at `docs/substrate/**` (the normative rules, designs, conventions, rubrics, invariants, matrices, gotchas) and **history** at `docs/history/**` (workflow products, plans, transcripts). Substrate is what the system claims about itself; implementation is what does the work. The split is the load-bearing structural decision. → see [`docs/substrate/designs/three-layer-architecture.md`](docs/substrate/designs/three-layer-architecture.md).
 
 ## Composition over reinvention
 
@@ -41,9 +41,9 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 
 ## Conventions
 
-- **Skill conventions** — required body sections, frontmatter shape, output format, router announcement form, clarifying-question discipline, recommended-next-skill output blocks, anti-patterns: [`references/skill-conventions.md`](references/skill-conventions.md).
-- **Reviewer agent conventions** — required sections, the canonical fresh-eyes preamble: [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md).
-- **Output voice and density** — chat-render rules (verdict-leads, header-depth cap, density budgets, forbidden phrasings, faithful-subset-of-persisted-file): [`references/output-voice.md`](references/output-voice.md). Cited from every Output format block; companion worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](docs/history/transcripts/output-voice-worked-example.md).
+- **Skill conventions** — required body sections, frontmatter shape, output format, router announcement form, clarifying-question discipline, recommended-next-skill output blocks, anti-patterns: [`docs/substrate/designs/skill-conventions.md`](docs/substrate/designs/skill-conventions.md).
+- **Reviewer agent conventions** — required sections, the canonical fresh-eyes preamble: [`docs/substrate/designs/reviewer-agent-template.md`](docs/substrate/designs/reviewer-agent-template.md).
+- **Output voice and density** — chat-render rules (verdict-leads, header-depth cap, density budgets, forbidden phrasings, faithful-subset-of-persisted-file): [`docs/substrate/designs/output-voice.md`](docs/substrate/designs/output-voice.md). Cited from every Output format block; companion worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](docs/history/transcripts/output-voice-worked-example.md).
 - **Path discipline** — every internal reference uses `${CLAUDE_PLUGIN_ROOT}/...`. Enforced by [`PLUGIN_ROOT_PATHS`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md).
 - **Verdict discipline** — every verdict-led skill leads with the verdict. Enforced by [`VERDICT_BEFORE_EVIDENCE`](docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md).
 - **Source-of-truth hierarchy** — this doc is binding for current architecture. The README §"What's in the box" is derived from this doc and from on-disk reality. The historical plan at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md) is preserved as the dated artifact that drove v0.1; not authoritative for current state.
@@ -54,11 +54,11 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 
 | If you're about to... | Start here |
 |---|---|
-| Add or modify a skill | [`references/skill-conventions.md`](references/skill-conventions.md) and the closest existing skill |
-| Add or modify a reviewer agent | [`references/reviewer-agent-template.md`](references/reviewer-agent-template.md) |
-| Modify the router | [`docs/substrate/matrices/router.md`](docs/substrate/matrices/router.md) and [`references/skill-conventions.md`](references/skill-conventions.md) §"Router conventions" |
+| Add or modify a skill | [`docs/substrate/designs/skill-conventions.md`](docs/substrate/designs/skill-conventions.md) and the closest existing skill |
+| Add or modify a reviewer agent | [`docs/substrate/designs/reviewer-agent-template.md`](docs/substrate/designs/reviewer-agent-template.md) |
+| Modify the router | [`docs/substrate/matrices/router.md`](docs/substrate/matrices/router.md) and [`docs/substrate/designs/skill-conventions.md`](docs/substrate/designs/skill-conventions.md) §"Router conventions" |
 | Touch any path reference | [`PLUGIN_ROOT_PATHS`](docs/substrate/invariants/PLUGIN_ROOT_PATHS.md) |
-| Author or revise an Output format block (or any chat-rendered output) | [`references/output-voice.md`](references/output-voice.md) and the worked transcript |
+| Author or revise an Output format block (or any chat-rendered output) | [`docs/substrate/designs/output-voice.md`](docs/substrate/designs/output-voice.md) and the worked transcript |
 | Add or change a skill's verdict | [`VERDICT_BEFORE_EVIDENCE`](docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md) |
 | Dispatch a reviewer agent | [`docs/substrate/designs/agent-dispatch-protocol.md`](docs/substrate/designs/agent-dispatch-protocol.md) |
 | Run Cohesive against this repo | `cohesive:review-codebase` — output lands in [`docs/history/reviews/`](docs/history/reviews/) |
@@ -73,6 +73,6 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 
 ## v0.1 scope
 
-The plugin ships 8 skills, 5 reviewer agents, 9 references (skill-conventions, reviewer-agent-template, output-voice, plus the rubrics, model, layout, locality, and design-pressure-testing docs), 9 templates, and 2 scripts. The dated milestone plan that drove v0.1 is preserved at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md). The original design vision (more ambitious surface, since trimmed) is at [`docs/history/initial-design.md`](docs/history/initial-design.md).
+The plugin ships 8 skills, 5 reviewer agents, 9 fillable templates under `references/templates/`, 12 substrate design docs under `docs/substrate/designs/` (formerly co-located in `references/` until the 2026-05-04 `cut-anchor-pin` rewrite hard-cut substrate from implementation), and 2 scripts. The dated milestone plan that drove v0.1 is preserved at [`docs/history/plans/2026-05-04-mvp-implementation.md`](docs/history/plans/2026-05-04-mvp-implementation.md). The original design vision (more ambitious surface, since trimmed) is at [`docs/history/initial-design.md`](docs/history/initial-design.md).
 
 The user-facing skill set is the four-step workflow chain `discover-substrate → brainstorm-design → rewrite-specs → validate-rewrite` (plus the `cohesively` router) and the three off-chain diagnostics `review-codebase`, `review-diff`, `audit-substrate`.

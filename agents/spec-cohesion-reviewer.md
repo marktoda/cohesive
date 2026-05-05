@@ -38,9 +38,9 @@ The dispatching skill will give you:
 - Optionally: the **substrate discovery report** path (so you know what existed before)
 
 You read **only** these files plus:
-- `${CLAUDE_PLUGIN_ROOT}/references/substrate-model.md`
-- `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`
-- `${CLAUDE_PLUGIN_ROOT}/references/locality-over-centralization.md`
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-model.md`
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/locality-over-centralization.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` (your output template)
 
 You do **not** read implementation files, run tests, or invoke git commands. Your scope is the rewritten specs.
@@ -70,7 +70,7 @@ Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.
 
 ## Issue format (canonical six-field shape)
 
-Every issue you raise uses the canonical reviewer-finding shape from `${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md` §"Output format conventions":
+Every issue you raise uses the canonical reviewer-finding shape from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions":
 
 - **Severity** — Blocker / High / Medium / Low
 - **Category** — Spec drift / Locality / Invariant / Test / Domain model / Vague language / Future-fit / Enforcement
@@ -103,7 +103,7 @@ Include a "What looked right" section with the few highest-quality moves of the 
 
 ## Token discipline
 
-Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty sections. Long discussion goes in linked appendix files only if explicitly requested by the dispatching skill. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
+Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty sections. Long discussion goes in linked appendix files only if explicitly requested by the dispatching skill. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
 
 ## Tone
 

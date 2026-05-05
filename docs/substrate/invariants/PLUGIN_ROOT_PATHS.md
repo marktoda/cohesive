@@ -6,7 +6,7 @@
 
 Every reference to a file inside this plugin (skill, agent, reference, template, script) — whether in a SKILL.md body, an agent system prompt, a script, or a generated artifact — uses the `${CLAUDE_PLUGIN_ROOT}/` prefix. Hardcoded paths like `/home/<user>/...`, `~/...`, or bare relative paths to plugin-internal files are forbidden.
 
-This is one of two named invariants Cohesive ships at v0.1, alongside [`VERDICT_BEFORE_EVIDENCE`](VERDICT_BEFORE_EVIDENCE.md) (every verdict-led skill leads its Output format block with `**Verdict:**`). Other v0.1 rules (chat-render header-depth cap, density budgets, forbidden phrasings, voice-citation pin, fresh-eyes preamble, router announcement form, clarifying-question discipline) live as conventions in [`references/skill-conventions.md`](../../../references/skill-conventions.md), [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md), and [`references/output-voice.md`](../../../references/output-voice.md). Conventions earn invariant status only when their wording has settled *and* their failure modes are concrete enough to grep for — both bars matter.
+This is one of two named invariants Cohesive ships at v0.1, alongside [`VERDICT_BEFORE_EVIDENCE`](VERDICT_BEFORE_EVIDENCE.md) (every verdict-led skill leads its Output format block with `**Verdict:**`). Other v0.1 rules (chat-render header-depth cap, density budgets, forbidden phrasings, voice-citation pin, fresh-eyes preamble, router announcement form, clarifying-question discipline) live as conventions in [`docs/substrate/designs/skill-conventions.md`](../designs/skill-conventions.md), [`docs/substrate/designs/reviewer-agent-template.md`](../designs/reviewer-agent-template.md), and [`docs/substrate/designs/output-voice.md`](../designs/output-voice.md). Conventions earn invariant status only when their wording has settled *and* their failure modes are concrete enough to grep for — both bars matter.
 
 ## Scope
 
@@ -54,8 +54,8 @@ When reviewing a change to any Cohesive-internal file:
 
 ## Related
 
-- [`references/skill-conventions.md`](../../../references/skill-conventions.md) — where the demoted v0.1 conventions live (skill output shape, clarifying questions, router announcement form).
-- [`references/reviewer-agent-template.md`](../../../references/reviewer-agent-template.md) — where the fresh-eyes-preamble convention lives.
+- [`docs/substrate/designs/skill-conventions.md`](../designs/skill-conventions.md) — where the demoted v0.1 conventions live (skill output shape, clarifying questions, router announcement form).
+- [`docs/substrate/designs/reviewer-agent-template.md`](../designs/reviewer-agent-template.md) — where the fresh-eyes-preamble convention lives.
 
 ## History
 

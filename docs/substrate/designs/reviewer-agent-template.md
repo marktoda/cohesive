@@ -74,7 +74,7 @@ Every reviewer agent's "What you must not do" section includes a bullet that nam
 
 Copying this verbatim is the safest default — divergence in wording produces drift across agent files that the structural fence (the harness's Task-subprocess isolation) doesn't catch.
 
-The structural fence does the heavy lifting: calling Task tool with `subagent_type` creates an isolated subprocess with no inherited conversation. The agent-file bullet is convention reinforcement on top of that fence. See [`docs/substrate/designs/agent-dispatch-protocol.md`](../docs/substrate/designs/agent-dispatch-protocol.md) for the full property and why both halves matter.
+The structural fence does the heavy lifting: calling Task tool with `subagent_type` creates an isolated subprocess with no inherited conversation. The agent-file bullet is convention reinforcement on top of that fence. See [`docs/substrate/designs/agent-dispatch-protocol.md`](agent-dispatch-protocol.md) for the full property and why both halves matter.
 
 If the agent reads any reference docs as part of its job, list them under "Inputs you will receive" with explicit `${CLAUDE_PLUGIN_ROOT}/...` paths. The agent must not glob.
 
@@ -88,7 +88,7 @@ Reviewer-agent findings are consumed by a synthesizing skill (`review-codebase`,
 
 1. **Voice citation.** The first non-blank line of the agent's "How to structure your output" code block is:
    ```
-   > Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+   > Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md
    ```
    Reviewer findings flow through a synthesizing skill that renders to chat, so voice rules apply transitively. The citation pulls the voice guide into context at finding-generation time. Reviewer agents do not render verdicts — verdicts are the synthesizing skill's job — so `VERDICT_BEFORE_EVIDENCE` does not apply directly to agent findings; it applies to the skill's render of those findings.
 
@@ -109,7 +109,7 @@ Reviewer-agent findings are consumed by a synthesizing skill (`review-codebase`,
 **Substrate artifact to add or update:** Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boundary
 ```
 
-Findings are ranked by leverage × severity, not by file location. Cap finding nesting at `###`. The six-field shape is tracked across all five reviewer agents in the [reviewer-output-shape behavior matrix](../docs/substrate/matrices/reviewer-output-shape.md); drift in any agent file is a regression against that matrix.
+Findings are ranked by leverage × severity, not by file location. Cap finding nesting at `###`. The six-field shape is tracked across all five reviewer agents in the [reviewer-output-shape behavior matrix](../matrices/reviewer-output-shape.md); drift in any agent file is a regression against that matrix.
 
 ## Severity rules
 
@@ -118,7 +118,7 @@ Findings are ranked by leverage × severity, not by file location. Cap finding n
 - **Medium** — substrate improvement worth making in the next pass.
 - **Low** — taste-level observation; useful context but not actionable on its own.
 
-Don't mark everything blocking. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything is blocking the prioritization is failing.
+Don't mark everything blocking. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`, if everything is blocking the prioritization is failing.
 
 ## Token discipline
 
@@ -151,6 +151,6 @@ The five existing reviewer agents have minor section-order drift (some put "How 
 | Output without "Substrate artifact to add or update" lines | Findings without targets aren't actionable | Every finding maps to an artifact |
 | Marking every finding "Blocker" | Prioritization signal lost | At most ~10–20% of findings should be Blocker |
 | First-person framing ("I'll review...") | Convention is third-person agent description | "You are the X reviewer..." in agent body, third-person in description frontmatter |
-| "How to structure your output" missing the voice citation | Voice rules drift transitively through the synthesizing skill | Open the output block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` |
+| "How to structure your output" missing the voice citation | Voice rules drift transitively through the synthesizing skill | Open the output block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md` |
 | Finding render with `####` or `#####` headers | Header soup propagates to the synthesized chat output | Cap finding nesting at `###`; use bullets for sub-structure |
-| Narrative paragraphs instead of the six-field finding shape | Synthesizer can't merge non-canonical findings | Use the six-field block verbatim per [reviewer-output-shape matrix](../docs/substrate/matrices/reviewer-output-shape.md) |
+| Narrative paragraphs instead of the six-field finding shape | Synthesizer can't merge non-canonical findings | Use the six-field block verbatim per [reviewer-output-shape matrix](../matrices/reviewer-output-shape.md) |

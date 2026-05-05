@@ -128,7 +128,7 @@ git worktree add .worktrees/cohesive-<slug> -b <prefix>/<slug>
 
 ### 4.4 `brainstorm-design` (with pressure-test merged)
 
-Two-phase body: (1) propose 2–4 options grounded in discovered substrate, (2) attack each option through the §11.3 question battery. Output is a single combined report — options + breakage analysis + recommendation + required substrate before implementation. The §11.3 questions live as a numbered checklist inside `references/design-pressure-testing.md`; the skill body references it.
+Two-phase body: (1) propose 2–4 options grounded in discovered substrate, (2) attack each option through the §11.3 question battery. Output is a single combined report — options + breakage analysis + recommendation + required substrate before implementation. The §11.3 questions live as a numbered checklist inside `docs/substrate/designs/design-pressure-testing.md`; the skill body references it.
 
 ### 4.5 `rewrite-specs`
 
@@ -175,13 +175,13 @@ All four use the `<example>...<commentary>` description block convention. All fo
 ### Milestone 2: Foundation (1 day)
 
 1. `scripts/scan_substrate.py`.
-2. `references/substrate-model.md`, `cohesion-rubric.md`.
+2. `docs/substrate/designs/substrate-model.md`, `cohesion-rubric.md`.
 3. `skills/discover-substrate/SKILL.md` end-to-end.
 4. **Gate:** `discover-substrate` produces the §9.6 report on cohesive itself and on one external repo.
 
 ### Milestone 3: Design-rewrite flow (2 days)
 
-1. `references/design-pressure-testing.md`, `locality-over-centralization.md`.
+1. `docs/substrate/designs/design-pressure-testing.md`, `locality-over-centralization.md`.
 2. Templates: `behavior-matrix.md`, `design-delta-ledger.md`, `cohesion-review.md`, `substrate-map.md`.
 3. Skills: `brainstorm-design`, `rewrite-specs`, `review-spec-cohesion`.
 4. Agent: `spec-cohesion-reviewer.md`.
@@ -189,7 +189,7 @@ All four use the `<example>...<commentary>` description block convention. All fo
 
 ### Milestone 4: Unified review (2 days)
 
-1. `references/architecture-review-rubric.md`.
+1. `docs/substrate/designs/architecture-review-rubric.md`.
 2. Templates: `architecture-review-report.md`, `invariant.md`, `gotcha.md`, `semantic-linter-spec.md`, `implementation-plan.md`.
 3. `skills/cohesive-review/SKILL.md` with all three modes.
 4. Reviewer agents: `substrate-alignment`, `structure`, `library-native`, `agent-readiness`.

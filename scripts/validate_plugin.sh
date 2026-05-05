@@ -180,7 +180,7 @@ for s in "${expected_skills[@]}"; do
 done
 
 # 10. Canonical prereq-detection question in subskills with a discover-substrate or
-# brainstorm-design prereq. Per references/skill-conventions.md §"Canonical prereq-detection
+# brainstorm-design prereq. Per docs/substrate/designs/skill-conventions.md §"Canonical prereq-detection
 # question". Stable opening: a blockquote line beginning `> "I see we're about to run <skill>.`
 prereq_subskills=(
   brainstorm-design
@@ -193,24 +193,24 @@ for s in "${prereq_subskills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
   if ! grep -qE "^[[:space:]]*> \"I see we're about to run $s\." "$skill_md"; then
-    fail "skills/$s/SKILL.md missing canonical prereq-detection question (per references/skill-conventions.md §Canonical prereq-detection question)"
+    fail "skills/$s/SKILL.md missing canonical prereq-detection question (per docs/substrate/designs/skill-conventions.md §Canonical prereq-detection question)"
   fi
 done
 
 # 11. Fresh-eyes preamble bullet verbatim across reviewer agent files.
-# Per references/reviewer-agent-template.md §"The fresh-eyes preamble".
+# Per docs/substrate/designs/reviewer-agent-template.md §"The fresh-eyes preamble".
 fresh_eyes_bullet='Inherit conversation context from the calling skill. Treat your input prompt as the entire context.'
 if [ -d agents ]; then
   for agent_md in agents/*.md; do
     [ -e "$agent_md" ] || continue
     if ! grep -qF "$fresh_eyes_bullet" "$agent_md"; then
-      fail "$agent_md missing fresh-eyes preamble bullet (per references/reviewer-agent-template.md §The fresh-eyes preamble)"
+      fail "$agent_md missing fresh-eyes preamble bullet (per docs/substrate/designs/reviewer-agent-template.md §The fresh-eyes preamble)"
     fi
   done
 fi
 
 # 12. "Recommended next Cohesive skill" footer in every persisting skill body.
-# Per references/skill-conventions.md §"Recommended-next-skill footer".
+# Per docs/substrate/designs/skill-conventions.md §"Recommended-next-skill footer".
 # The router (cohesively) is exempt: its output is a one-sentence announcement.
 persisting_skills=(
   discover-substrate
@@ -225,7 +225,7 @@ for s in "${persisting_skills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
   if ! grep -qE '^### Recommended next Cohesive skill' "$skill_md"; then
-    fail "skills/$s/SKILL.md missing '### Recommended next Cohesive skill' footer (per references/skill-conventions.md §Recommended-next-skill footer)"
+    fail "skills/$s/SKILL.md missing '### Recommended next Cohesive skill' footer (per docs/substrate/designs/skill-conventions.md §Recommended-next-skill footer)"
   fi
 done
 

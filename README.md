@@ -114,18 +114,33 @@ agents/
   agent-readiness-reviewer          Could a future agent change this safely?
 
 references/
-  substrate-model.md                The substrate thesis
-  cohesion-rubric.md                9-axis scorecard
-  design-pressure-testing.md        25-question battery for design options
-  locality-over-centralization.md   When to centralize vs duplicate
-  architecture-review-rubric.md     Four-phase review process
-  skill-conventions.md              Canonical SKILL.md shape + v0.1 conventions
-  reviewer-agent-template.md        Canonical reviewer-agent shape
-  substrate-layout.md               Where artifacts live in this repo
-  templates/                        Behavior matrix, invariant, gotcha,
-                                    design delta ledger, cohesion review,
+  templates/                        Fillable forms: behavior matrix, invariant,
+                                    gotcha, design delta ledger, cohesion review,
                                     architecture review report, substrate map,
                                     claimed system shape, substrate discovery report
+
+docs/substrate/
+  designs/                          Normative conventions and rubrics:
+                                    substrate-model.md, cohesion-rubric.md,
+                                    design-pressure-testing.md,
+                                    locality-over-centralization.md,
+                                    architecture-review-rubric.md,
+                                    skill-conventions.md,
+                                    reviewer-agent-template.md,
+                                    substrate-layout.md, output-voice.md,
+                                    three-layer-architecture.md,
+                                    composition-with-superpowers.md,
+                                    agent-dispatch-protocol.md
+  invariants/                       Named global rules: PLUGIN_ROOT_PATHS,
+                                    VERDICT_BEFORE_EVIDENCE
+  gotchas/                          Documented scars
+  matrices/                         Branchy behavior with stable IDs
+
+docs/history/
+  reviews/                          Persisted architecture / cohesion / validation reviews
+  delta-ledgers/                    Spec-rewrite ledgers (dated)
+  transcripts/                      Worked examples and dogfood captures
+  plans/                            Dated milestone plans
 
 scripts/
   scan_substrate.py                 Fast substrate inventory

@@ -1,7 +1,7 @@
 # Output voice and density
 
 > Normative for chat-rendered output across every Cohesive skill and reviewer agent. Every `skills/*/SKILL.md` "Output format" block opens with the citation:
-> `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`
+> `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md`
 > The citation is the load-bearing line — it pulls this guide into context at generation time, which is the only moment the rules can take effect.
 
 Cohesive's substrate work is rigorous. Cohesive's chat output is not the place to demonstrate that rigor. Users see the chat. They open the persisted file when they want depth. This guide describes the shape of the chat — terse, verdict-led, scannable, joyful to read.
@@ -42,7 +42,7 @@ These produce wordiness without information:
 - "There are several things to consider here..."
 - "It's worth noting that..." / "It's important to mention that..."
 - "I hope this helps!" / "Let me know if you have any questions!"
-- "What do you want to focus on?" / "Tell me more about your goals." / "Anything else I should know?" (these violate the forced-choice clarifying-question rule in `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"Clarifying questions")
+- "What do you want to focus on?" / "Tell me more about your goals." / "Anything else I should know?" (these violate the forced-choice clarifying-question rule in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Clarifying questions")
 
 ## Tone
 
@@ -83,7 +83,7 @@ The voice-citation requirement is grep-pinned by `validate_plugin.sh` (planned) 
 1. **Wording is the youngest part of this rewrite.** Named-invariant promotion freezes the literal blockquote line (`> Voice and density: ...`) into the substrate's most-load-bearing layer. The wording was authored in this single rewrite pass; it has not been dogfooded across multiple skill additions yet. Promoting too early makes the next contributor's small wording change ("Voice + density:" instead of "Voice and density:") into an invariant violation rather than a convention update.
 2. **The verdict-leads invariant earns more from promotion.** `VERDICT_BEFORE_EVIDENCE` defines a *behavior* (lead with the verdict) that has many surface forms; only a few of them satisfy the grep, and the grep ratifies a behavior the substrate already cared about. The voice-citation requirement defines a *literal string*; pinning it as invariant ratifies the string itself, which is a thinner promotion.
 
-Promotion criteria (per [`docs/substrate/gotchas/style-guide-rot.md`](../docs/substrate/gotchas/style-guide-rot.md)):
+Promotion criteria (per [`docs/substrate/gotchas/style-guide-rot.md`](../gotchas/style-guide-rot.md)):
 
 - Two release cycles pass without the citation wording changing
 - A real regression occurs (a skill ships without the citation, validator catches it, the catch is judged valuable)
@@ -101,8 +101,8 @@ If this guide changes, update the worked transcript in the same pass. Rules with
 
 ## What this guide is *not*
 
-- Not a guide for normative-doc prose (specs, invariants, gotchas, matrices). Those follow `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"Tone" — imperative for instructions, declarative for descriptions, no hedging.
-- Not a guide for review-finding shape. Reviewer findings follow the six-field canonical shape in `${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md` §"Output format conventions".
+- Not a guide for normative-doc prose (specs, invariants, gotchas, matrices). Those follow `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Tone" — imperative for instructions, declarative for descriptions, no hedging.
+- Not a guide for review-finding shape. Reviewer findings follow the six-field canonical shape in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions".
 - Not a guide for what to *say* — what content goes into a review or a brainstorm — only how to render it in chat.
 
 ## Related substrate
@@ -111,5 +111,5 @@ If this guide changes, update the worked transcript in the same pass. Rules with
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/wordy-output.md` — the scar this guide retires
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` — the trap this guide must avoid
 - `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md` — the worked example
-- `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"Output format conventions" — canonical Output format shape (cites this guide)
-- `${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md` §"Output format conventions" — canonical reviewer-agent shape (cites this guide)
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions" — canonical Output format shape (cites this guide)
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" — canonical reviewer-agent shape (cites this guide)

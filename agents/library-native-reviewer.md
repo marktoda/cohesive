@@ -35,8 +35,8 @@ This is a different lens from `structure-reviewer`. Structure asks "are seams in
 - **Substrate discovery report** — including the §"Package files" section per `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-discovery-report.md` (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, etc.). If the report omits this section, request the dispatching skill pass package paths explicitly rather than globbing.
 
 You also have access to:
-- `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` (axis 7: library-native alignment)
-- `${CLAUDE_PLUGIN_ROOT}/references/substrate-model.md`
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md` (axis 7: library-native alignment)
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-model.md`
 
 ## What you check
 
@@ -165,7 +165,7 @@ Optional pre-finding observation sections (omit any with no findings):
 
 ## Token discipline
 
-Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty optional sections. Pre-finding observation buckets are optional — only the ranked findings are the contract. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
+Output ≤500 words / ≤8 ranked findings. Stop when bounded; do not fill empty optional sections. Pre-finding observation buckets are optional — only the ranked findings are the contract. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`, if everything is Blocker, prioritization is failing.
 
 ## Tone
 

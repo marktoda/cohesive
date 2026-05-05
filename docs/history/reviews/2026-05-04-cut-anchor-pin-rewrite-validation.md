@@ -82,8 +82,8 @@ Promotion criteria for voice-citation → invariant ("two release cycles without
 
 ## Vague language to tighten
 
-- `references/output-voice.md:13` — "may be a faithful subset" — "may" softens a normative rule. Pick "is."
-- `references/skill-conventions.md:77` — "may be a faithful subset" — same softening.
+- `docs/substrate/designs/output-voice.md:13` — "may be a faithful subset" — "may" softens a normative rule. Pick "is."
+- `docs/substrate/designs/skill-conventions.md:77` — "may be a faithful subset" — same softening.
 - `docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md:9` — "and to any persisted artifact the skill writes" — followed by "if any" elsewhere. Conditional unclear.
 
 ## Recommended repairs (ranked)

@@ -13,7 +13,7 @@ This ledger records the second `rewrite-specs` pass on 2026-05-04. The previous 
   - **After:** Source-of-truth section names `/ARCHITECTURE.md` as binding. Directs contributors to update `ARCHITECTURE.md` only when broad shape changes; historical context (initial-design, mvp plan) acknowledged as preserved-but-not-authoritative. Default substrate locations updated to the new tree (`docs/substrate/<kind>/`, `docs/history/<kind>/`).
   - **Reason:** Demotion of the plan from binding to historical required the source-of-truth doc to redirect.
 
-- `references/skill-conventions.md`
+- `docs/substrate/designs/skill-conventions.md`
   - **Before:** "Process when adding a new skill" step 3 told the contributor to update plan §2.
   - **After:** Step 3 directs the contributor to `/ARCHITECTURE.md` only when the skill changes the broad shape; otherwise just the README.
   - **Reason:** Plan demotion.

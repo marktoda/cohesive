@@ -7,7 +7,7 @@ description: Use when reviewing a whole codebase or named subsystem for cohesion
 
 ## What this skill produces
 
-A full architecture review per `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`. Output written to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` and rendered in chat.
+A full architecture review per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/architecture-review-rubric.md`. Output written to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` and rendered in chat.
 
 For PR/branch/working-changes reviews, use [`cohesive:review-diff`](${CLAUDE_PLUGIN_ROOT}/skills/review-diff/SKILL.md). For "what memory is missing" inventories, use [`cohesive:audit-substrate`](${CLAUDE_PLUGIN_ROOT}/skills/audit-substrate/SKILL.md). Each of those skills produces a different output shape and uses different machinery.
 
@@ -25,11 +25,11 @@ For PR/branch/working-changes reviews, use [`cohesive:review-diff`](${CLAUDE_PLU
 
 ## Process
 
-Implements the four-phase architecture review from `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`. Phase 0 below resolves where the output is written before any reading begins; Phases 1-5 are the rubric.
+Implements the four-phase architecture review from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/architecture-review-rubric.md`. Phase 0 below resolves where the output is written before any reading begins; Phases 1-5 are the rubric.
 
 ### Phase 0: Resolve the artifact directory
 
-Before any reading or dispatch, resolve where the output review will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
+Before any reading or dispatch, resolve where the output review will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
 
 1. If `docs/history/reviews/` exists, write there.
 2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `reviews/` subdir alongside it (e.g., `docs/adr/reviews/`).
@@ -45,7 +45,7 @@ Use `discover-substrate` (or its output) to get the list. Read in priority order
 2. `ARCHITECTURE.md`, `architecture.md`
 3. `README.md`
 4. `docs/design/**`, `docs/specs/**`, `docs/adr/**`, `docs/substrate/**`
-5. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`)
+5. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md`)
 
 Produce the **claimed system shape** summary (sections from the rubric: Product goal / Architectural priors / Intended seams / Named invariants / Testing philosophy / Future direction implied by docs).
 
@@ -98,7 +98,7 @@ Each Task prompt includes:
 - The scope ("whole repo" or "subsystem X")
 - An instruction to read **only paths surfaced by discovery**, not to glob
 
-The dispatch prompt also explicitly states, in prose: "The reviewer reads only paths passed to it, not the conversation." This is convention, not invariant — the structural fence is the harness's Task-subprocess isolation, but the prose preamble reinforces it. See [`reviewer-agent-template.md`](${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md) §"The fresh-eyes preamble" for the canonical form.
+The dispatch prompt also explicitly states, in prose: "The reviewer reads only paths passed to it, not the conversation." This is convention, not invariant — the structural fence is the harness's Task-subprocess isolation, but the prose preamble reinforces it. See [`reviewer-agent-template.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md) §"The fresh-eyes preamble" for the canonical form.
 
 Token discipline: each reviewer agent already declares its own output budget (≤500 words / ≤8 ranked findings per agent file's "Token discipline" section). The dispatching prompt reinforces by passing the scope and reminding the agent that pre-finding observation sections are optional. Long discussion goes in linked appendix files if explicitly requested.
 
@@ -106,10 +106,10 @@ Token discipline: each reviewer agent already declares its own output budget (�
 
 Don't concatenate. Synthesize:
 
-1. **TL;DR** — verdict + 3-line thesis + top 3 findings + recommended next skill, in this order, as the very first content in chat. The TL;DR convention is in `${CLAUDE_PLUGIN_ROOT}/references/skill-conventions.md` §"TL;DR convention" and applies to every persisted skill output.
+1. **TL;DR** — verdict + 3-line thesis + top 3 findings + recommended next skill, in this order, as the very first content in chat. The TL;DR convention is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"TL;DR convention" and applies to every persisted skill output.
 2. **Thesis** — one paragraph naming the codebase's overall shape, the highest-leverage risk, and whether the system can scale development without founder memory. Concrete; specific to this codebase.
 3. **Verdict** — one of: Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk
-4. **Cohesion scorecard** — 9-axis ratings from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`
+4. **Cohesion scorecard** — 9-axis ratings from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`
 5. **Highest-leverage findings** — ranked by leverage × severity, format from rubric (canonical six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md`)
 6. **Substrate improvements** — specs to rewrite, matrices to add, semantic linters to add, gotchas to document
 7. **Phased roadmap** — first repair substrate, then simplify architecture, then strengthen enforcement
@@ -120,7 +120,7 @@ Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-rev
 
 Write the report to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` (where `<slug>` is derived from the scope). Render the same content in chat.
 
-If `docs/history/reviews/` doesn't exist, create it. Reviews are append-only history (per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md`) — commit them. User can suppress persistence with `--no-write` if they want it transient.
+If `docs/history/reviews/` doesn't exist, create it. Reviews are append-only history (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md`) — commit them. User can suppress persistence with `--no-write` if they want it transient.
 
 ## Output format
 

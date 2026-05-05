@@ -45,7 +45,7 @@ Make the choice explicit at the route level, not at the description-match level.
 
 ## Related convention
 
-- **Router announcement** ([`references/skill-conventions.md`](../../../references/skill-conventions.md) §"Router conventions") — the router's announcement makes the skill choice visible before any subskill runs, so the user can correct mid-route if Cohesive was the wrong framing.
+- **Router announcement** ([`docs/substrate/designs/skill-conventions.md`](../designs/skill-conventions.md) §"Router conventions") — the router's announcement makes the skill choice visible before any subskill runs, so the user can correct mid-route if Cohesive was the wrong framing.
 
 ## Tests / checks that preserve this
 

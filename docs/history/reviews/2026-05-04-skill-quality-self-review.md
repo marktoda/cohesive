@@ -4,7 +4,7 @@
 **Scope:** `--scope codebase`, whole repo (Cohesive itself)
 **Substrate discovery:** in-conversation, see Phase 1 below
 **Reviewers dispatched:** substrate-alignment, structure, library-native, agent-readiness (4-way parallel)
-**Methodology:** four-phase rubric per `${CLAUDE_PLUGIN_ROOT}/references/architecture-review-rubric.md`
+**Methodology:** four-phase rubric per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/architecture-review-rubric.md`
 **Prior art triaged:** the four review artifacts under `docs/history/reviews/` from earlier today, especially `2026-05-04-self-review-v0.1-release-gate.md`
 
 ---
@@ -78,9 +78,9 @@ Phase 1.5 sparse-substrate gate: passed (rich substrate). Phase 2 spec-prior gat
 **Severity:** Blocker
 **Category:** Invariant / Spec drift (cross-doc)
 
-**Why it matters:** `PLUGIN_ROOT_PATHS` is the one rule Cohesive kept after the 2026-05-04 substrate collapse — kept *specifically because* it has a real runtime failure mode and (per its own doc) deserves structural enforcement. Five top-level docs claim the rule is "enforced by `scripts/validate_plugin.sh`": `ARCHITECTURE.md:35,46`, `AGENTS.md:24`, `README.md:124`, `references/skill-conventions.md:106`. The script (currently 161 lines, with two new substrate-discipline checks added since this morning) contains zero grep for `/home/`, `/Users/`, `/usr/local/`, or `~/` — only a warn-level path-existence check. A new agent file with `/home/toda/...` passes validation cleanly. By the methodology Cohesive itself articulates, the named invariant is held by reviewer memory — the exact failure mode the substrate-collapse said the invariant set must not contain. Two reviewers confirmed independently.
+**Why it matters:** `PLUGIN_ROOT_PATHS` is the one rule Cohesive kept after the 2026-05-04 substrate collapse — kept *specifically because* it has a real runtime failure mode and (per its own doc) deserves structural enforcement. Five top-level docs claim the rule is "enforced by `scripts/validate_plugin.sh`": `ARCHITECTURE.md:35,46`, `AGENTS.md:24`, `README.md:124`, `docs/substrate/designs/skill-conventions.md:106`. The script (currently 161 lines, with two new substrate-discipline checks added since this morning) contains zero grep for `/home/`, `/Users/`, `/usr/local/`, or `~/` — only a warn-level path-existence check. A new agent file with `/home/toda/...` passes validation cleanly. By the methodology Cohesive itself articulates, the named invariant is held by reviewer memory — the exact failure mode the substrate-collapse said the invariant set must not contain. Two reviewers confirmed independently.
 
-**Evidence:** `scripts/validate_plugin.sh:1-161` (no path-pattern grep); contradicting claims at `ARCHITECTURE.md:35,46`, `README.md:124`, `AGENTS.md:24`, `references/skill-conventions.md:106`. Honest counter-claim at `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md:32-38`.
+**Evidence:** `scripts/validate_plugin.sh:1-161` (no path-pattern grep); contradicting claims at `ARCHITECTURE.md:35,46`, `README.md:124`, `AGENTS.md:24`, `docs/substrate/designs/skill-conventions.md:106`. Honest counter-claim at `docs/substrate/invariants/PLUGIN_ROOT_PATHS.md:32-38`.
 
 **Recommended fix:** Add the grep — five lines of bash:
 
@@ -106,7 +106,7 @@ Then sweep the five overstating docs in a single pass to match what the script n
 
 **Evidence:** `skills/review-codebase/SKILL.md:10,110-112`; `skills/audit-substrate/SKILL.md:9,96`; `skills/rewrite-specs/SKILL.md:11,89`; `skills/brainstorm-design/SKILL.md:163`; `skills/validate-rewrite/SKILL.md:10,67`; contract at `AGENTS.md:57`, `ARCHITECTURE.md:48`.
 
-**Recommended fix:** Add a "Step 0: Resolve artifact directory" preamble to each of the five persisting skills, citing one shared reference. Centralize the detection rules in `references/substrate-layout.md`. Add `docs/substrate/matrices/artifact-placement.md` with cells (this-repo / external-with-docs-substrate / external-with-docs-adr / external-empty) × (review / audit / delta-ledger / brainstorm / validation) so the contract is testable.
+**Recommended fix:** Add a "Step 0: Resolve artifact directory" preamble to each of the five persisting skills, citing one shared reference. Centralize the detection rules in `docs/substrate/designs/substrate-layout.md`. Add `docs/substrate/matrices/artifact-placement.md` with cells (this-repo / external-with-docs-substrate / external-with-docs-adr / external-empty) × (review / audit / delta-ledger / brainstorm / validation) so the contract is testable.
 
 **Substrate artifact to add or update:** Reference (`substrate-layout.md` detection rules); five skill bodies (Step 0); behavior matrix (`artifact-placement.md`).
 
@@ -183,7 +183,7 @@ Each is one line of grep. Each closes a self-admitted "reviewer memory only" gap
 **Severity:** Medium
 **Category:** Centralization (under-enforced)
 
-**Why it matters:** `references/skill-conventions.md` lists section-deviation exemptions; no matrix tracks which canonical sections each of the now-eight skills carries. `docs/substrate/matrices/` contains only `reviewer-output-shape.md` and `router.md`. Drift surfaces only if a reviewer happens to notice. The `reviewer-output-shape.md` matrix is the working precedent: it caught and named drift across five agent files in a single grid. The same shape applied to skill-section presence would catch skill-body drift and (combined with finding 3) become testable.
+**Why it matters:** `docs/substrate/designs/skill-conventions.md` lists section-deviation exemptions; no matrix tracks which canonical sections each of the now-eight skills carries. `docs/substrate/matrices/` contains only `reviewer-output-shape.md` and `router.md`. Drift surfaces only if a reviewer happens to notice. The `reviewer-output-shape.md` matrix is the working precedent: it caught and named drift across five agent files in a single grid. The same shape applied to skill-section presence would catch skill-body drift and (combined with finding 3) become testable.
 
 **Evidence:** `ls docs/substrate/matrices/` → 2 files; precedent at `docs/substrate/matrices/reviewer-output-shape.md`.
 
@@ -213,7 +213,7 @@ By artifact type:
 
 - **Semantic linter (`scripts/validate_plugin.sh`):** add greps for (a) `PLUGIN_ROOT_PATHS` violations [finding 1], (b) canonical prereq question in five subskills [finding 3], (c) fresh-eyes preamble verbatim across five agents [finding 3], (d) `### Recommended next Cohesive skill` footer in every persisting skill [finding 3], (e) negative-trigger check on Cohesive descriptions [finding 4]. Each ≤5 lines.
 - **Behavior matrices (new):** `artifact-placement.md` [finding 2]; `skill-section-presence.md` [finding 7]. Both mirror the working `reviewer-output-shape.md` precedent.
-- **Skill bodies (5 persisting skills):** add "Step 0: Resolve artifact directory" citing `references/substrate-layout.md` [finding 2].
+- **Skill bodies (5 persisting skills):** add "Step 0: Resolve artifact directory" citing `docs/substrate/designs/substrate-layout.md` [finding 2].
 - **Skill body (`cohesively/SKILL.md`):** trim restated rationale around the dispatch table [finding 8g]; verify negative-trigger compliance [finding 4].
 - **Skill body (`discover-substrate/SKILL.md`):** promote "Empty-substrate verdict" to a labeled section heading [finding 8c].
 - **Skill body (`rewrite-specs/SKILL.md`):** name the platform-native Superpowers detection mechanism [finding 8e].

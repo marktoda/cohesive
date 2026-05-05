@@ -27,7 +27,7 @@ A second tempting wrong fix: copy the guide into every skill body verbatim. Why 
 Cite the guide *from where the model reads at generation time*. Specifically, every `skills/*/SKILL.md` Output format block opens with a single-line citation:
 
 ```
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md
 ```
 
 The skill body's Output format block is what the model loads when rendering chat output for that skill. The citation is what triggers the model to load the voice guide alongside it. The guide stays canonical (one file), the citation stays minimal (one line per skill), and the locality problem is solved structurally.
@@ -38,13 +38,13 @@ A second structural lever: pair the rules with a worked transcript. `${CLAUDE_PL
 
 ## Related invariant
 
-- Invariant: `VERDICT_BEFORE_EVIDENCE` — the one rule from `references/output-voice.md` promoted to invariant because it has the cleanest grep and the highest-leverage failure mode. The other voice rules stay convention, defended by the citation pattern and the worked transcript. This gotcha is the trap those defenses must avoid.
+- Invariant: `VERDICT_BEFORE_EVIDENCE` — the one rule from `docs/substrate/designs/output-voice.md` promoted to invariant because it has the cleanest grep and the highest-leverage failure mode. The other voice rules stay convention, defended by the citation pattern and the worked transcript. This gotcha is the trap those defenses must avoid.
 
 ## Tests / checks that preserve this
 
 - `scripts/validate_plugin.sh` (planned): grep every `skills/*/SKILL.md` Output format block for the literal voice-citation line. A skill missing the citation fails the validator with a message naming this gotcha.
 - `cohesive:review-codebase` and `cohesive:review-diff` flag missing or stale citations as substrate findings.
-- `cohesive:review-diff` flags chat output that diverges from `references/output-voice.md` as a "substrate-alignment" finding when reviewing a diff that touches a skill body.
+- `cohesive:review-diff` flags chat output that diverges from `docs/substrate/designs/output-voice.md` as a "substrate-alignment" finding when reviewing a diff that touches a skill body.
 
 If the citation grep is dropped or weakened, this gotcha returns immediately. The grep is small; deleting it for "simplicity" is the predictable failure mode.
 

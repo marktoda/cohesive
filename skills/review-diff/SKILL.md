@@ -48,7 +48,7 @@ Lighter than codebase scope:
 
 Skip `library-native-reviewer` and `agent-readiness-reviewer` for diff scope unless the diff is large (>500 lines changed) or restructures architecture.
 
-The dispatch prompt includes the same fresh-eyes prose as in codebase mode: "The reviewer reads only paths passed to it, not the conversation." See [`reviewer-agent-template.md`](${CLAUDE_PLUGIN_ROOT}/references/reviewer-agent-template.md) §"The fresh-eyes preamble" for the canonical form.
+The dispatch prompt includes the same fresh-eyes prose as in codebase mode: "The reviewer reads only paths passed to it, not the conversation." See [`reviewer-agent-template.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md) §"The fresh-eyes preamble" for the canonical form.
 
 ### 4. Render verdict in chat
 

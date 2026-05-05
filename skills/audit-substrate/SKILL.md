@@ -27,7 +27,7 @@ This skill is intentionally separate from `review-codebase` and `review-diff`. T
 
 ### 0. Resolve the artifact directory
 
-Before scanning, resolve where the audit report will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
+Before scanning, resolve where the audit report will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
 
 1. If `docs/history/reviews/` exists, write there.
 2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `reviews/` subdir alongside it.
@@ -44,7 +44,7 @@ When invoked from the `cohesively` router with the `audit (substrate)` route, th
 
 ### 2. Apply the cohesion rubric to the substrate, not the code
 
-Walk each axis from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`. For each axis, ask: *does the substrate that should exist for this axis actually exist?* — not *is the code well-shaped on this axis*.
+Walk each axis from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/cohesion-rubric.md`. For each axis, ask: *does the substrate that should exist for this axis actually exist?* — not *is the code well-shaped on this axis*.
 
 - **Spec coherence:** are there docs at all? Are they internally consistent?
 - **Code/spec alignment:** the question here is whether the docs have something to *be aligned with*, not whether they currently are.
@@ -109,7 +109,7 @@ Walk each axis from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`. For e
 
 ### 4. Persist
 
-Write the report to `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md`. Reviews and audits are append-only history per `${CLAUDE_PLUGIN_ROOT}/references/substrate-layout.md` — commit them.
+Write the report to `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md`. Reviews and audits are append-only history per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` — commit them.
 
 If the user passes `--no-write`, render in chat only.
 

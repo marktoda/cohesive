@@ -15,7 +15,7 @@ The driver: post-Phase-1 architecture review at [`docs/history/reviews/2026-05-0
 
 - `AGENTS.md`
   - **Before:** §"Named invariants (read these before changing anything)" enumerated five; "When you are about to..." cross-referenced `ROUTER_ANNOUNCES_BEFORE_DISPATCH`, `ONE_PRECISE_QUESTION`, `FRESH_EYES_DISPATCH`; §"Default substrate locations" said `delta-ledgers/`; §48 gated v0.1 on two transcripts.
-  - **After:** §"The one named invariant" lists only `PLUGIN_ROOT_PATHS` with explicit framing of why it earns the name; "When you are about to..." routes contributors through `references/skill-conventions.md` and `references/reviewer-agent-template.md` for the demoted rules; transcripts are no longer release-gating ("v0.1 ships one architecture-review artifact; further dogfood is welcome but not gating").
+  - **After:** §"The one named invariant" lists only `PLUGIN_ROOT_PATHS` with explicit framing of why it earns the name; "When you are about to..." routes contributors through `docs/substrate/designs/skill-conventions.md` and `docs/substrate/designs/reviewer-agent-template.md` for the demoted rules; transcripts are no longer release-gating ("v0.1 ships one architecture-review artifact; further dogfood is welcome but not gating").
   - **Reason:** Contributor entry point must accurately reflect the one-invariant world; release-gate honesty.
 
 - `README.md`
@@ -28,12 +28,12 @@ The driver: post-Phase-1 architecture review at [`docs/history/reviews/2026-05-0
   - **After:** single-paragraph Enforcement section describing what `validate_plugin.sh` actually does; blockquote frames the failure mode ("Hardcoded absolute paths break the plugin for every user who isn't the original author"); explicit framing that this is "the one named invariant Cohesive ships at v0.1" and why other v0.1 rules earned only convention status.
   - **Reason:** Drop the elaborate enforcement schema in favor of describing what's actually enforced.
 
-- `references/skill-conventions.md`
+- `docs/substrate/designs/skill-conventions.md`
   - **Before:** had a §"Output format conventions" pointing at `SUBSKILL_RECOMMENDS_NEXT`; §"Dispatch discipline" pointing at `FRESH_EYES_DISPATCH`; §"Clarifying questions" pointing at `ONE_PRECISE_QUESTION`. Each treated the rule as enforced by a named invariant.
   - **After:** absorbs all three rules as conventions in their own right; new §"Router conventions" carries the announcement form and clarifying-question rule that previously lived as named invariants in the router. Frontmatter now opens by stating that the conventions are reviewer-judged, not mechanically enforced — "treating them as conventions is deliberate." `SUBSKILL_RECOMMENDS_NEXT.md`'s per-verdict rule and non-Cohesive-next-step rule both folded in.
   - **Reason:** This is now where the four demoted rules canonically live.
 
-- `references/reviewer-agent-template.md`
+- `docs/substrate/designs/reviewer-agent-template.md`
   - **Before:** §"The fresh-eyes preamble (load-bearing — verbatim)" framed the bullet as "the textual half of named invariant `FRESH_EYES_DISPATCH`"; anti-pattern table cited "Breaks `FRESH_EYES_DISPATCH`" as the failure mode.
   - **After:** §"The fresh-eyes preamble (convention)" frames verbatim copy as the safest default and points at `agent-dispatch-protocol.md` for the property's actual structural fence (harness subprocess isolation); anti-pattern column reads "Drift across agent files; loosens convention reinforcement."
   - **Reason:** Honest framing of where the load-bearing fence lives.
@@ -73,7 +73,7 @@ The driver: post-Phase-1 architecture review at [`docs/history/reviews/2026-05-0
   - **After:** R007 chains to `substrate-audit`; convention citations replace invariant citations; "Related substrate" points at the conventions doc; History section gains a 2026-05-04 entry recording the collapse.
   - **Reason:** Cross-reference cleanup + honest record of what changed.
 
-- `references/substrate-layout.md`
+- `docs/substrate/designs/substrate-layout.md`
   - **Before:** layout block omitted `designs/`; naming table omitted Design and Transcript rows; growth pattern had four phases that didn't mention `designs/`.
   - **After:** layout block adds `designs/` and `transcripts/`; naming table adds rows for Design and Transcript; growth pattern is five phases naming when `designs/` typically appears.
   - **Reason:** Closes the documentation gap that the post-Phase-1 architecture review flagged: the `designs/` tier is load-bearing in `ARCHITECTURE.md` and `AGENTS.md` but was unowned by the canonical layout doc.
@@ -94,7 +94,7 @@ The driver: post-Phase-1 architecture review at [`docs/history/reviews/2026-05-0
 ## Renamed
 
 - `docs/history/design-changes/` → `docs/history/delta-ledgers/`
-  - **Before:** AGENTS.md and on-disk used `design-changes/`; every skill body and `references/substrate-layout.md` used `delta-ledgers/`.
+  - **Before:** AGENTS.md and on-disk used `design-changes/`; every skill body and `docs/substrate/designs/substrate-layout.md` used `delta-ledgers/`.
   - **After:** unified to `delta-ledgers/` because that name matches the canonical artifact name (`design-delta-ledger`) used in templates. AGENTS.md was patched to match.
   - **Reason:** Schism between AGENTS.md and the skill bodies meant a future `rewrite-specs` would write to one location while contributors read from another.
 
@@ -114,9 +114,9 @@ The driver: post-Phase-1 architecture review at [`docs/history/reviews/2026-05-0
 - `ARCHITECTURE.md` — names one invariant; "Local validation only" replaces "when CI lands" hedge; v0.1 scope updated to 7 skills.
 - `AGENTS.md` — §"The one named invariant"; honest DoD on transcripts.
 - `README.md` — `docs/history/reviews/` path; substrate-audit listed; templates list updated.
-- `references/skill-conventions.md` — absorbs the four demoted rules; §"Router conventions" added; opening framing of conventions-as-reviewer-judged.
-- `references/reviewer-agent-template.md` — §"The fresh-eyes preamble (convention)" reframed.
-- `references/substrate-layout.md` — `designs/` and `transcripts/` rows added.
+- `docs/substrate/designs/skill-conventions.md` — absorbs the four demoted rules; §"Router conventions" added; opening framing of conventions-as-reviewer-judged.
+- `docs/substrate/designs/reviewer-agent-template.md` — §"The fresh-eyes preamble (convention)" reframed.
+- `docs/substrate/designs/substrate-layout.md` — `designs/` and `transcripts/` rows added.
 - `skills/cohesive-review/SKILL.md` — two-mode skill; per-verdict footers.
 - `skills/cohesively/SKILL.md` — substrate-audit chained as standalone skill; convention-doc cross-references.
 - `docs/substrate/designs/agent-dispatch-protocol.md` — fence-attribution honest; demotion explained.

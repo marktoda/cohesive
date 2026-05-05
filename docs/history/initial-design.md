@@ -350,11 +350,11 @@ cohesively
 ### 7.2 MVP references/templates
 
 ```text
-references/substrate-model.md
-references/cohesion-rubric.md
-references/design-pressure-testing.md
-references/locality-over-centralization.md
-references/architecture-review-rubric.md
+docs/substrate/designs/substrate-model.md
+docs/substrate/designs/cohesion-rubric.md
+docs/substrate/designs/design-pressure-testing.md
+docs/substrate/designs/locality-over-centralization.md
+docs/substrate/designs/architecture-review-rubric.md
 
 templates/substrate-map.md
 templates/behavior-matrix.md
@@ -1196,7 +1196,7 @@ Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boun
 
 ### 15.5 Cleaned-up seed prompt
 
-Include this in `references/architecture-review-rubric.md` or directly in the skill.
+Include this in `docs/substrate/designs/architecture-review-rubric.md` or directly in the skill.
 
 ```md
 You are an expert software architect performing a Cohesive architecture review.

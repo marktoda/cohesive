@@ -6,7 +6,7 @@
 
 ## Purpose
 
-The five reviewer agents under `agents/` each produce findings. The canonical finding shape is defined in `references/reviewer-agent-template.md` §"Output format conventions": six fields per finding (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact). The synthesizing skills (`review-codebase` Phase 4, `review-diff`, or `validate-rewrite`) merge findings from one or more agents into a unified report — a merge that only works if the agents produce findings in the same shape.
+The five reviewer agents under `agents/` each produce findings. The canonical finding shape is defined in `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions": six fields per finding (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact). The synthesizing skills (`review-codebase` Phase 4, `review-diff`, or `validate-rewrite`) merge findings from one or more agents into a unified report — a merge that only works if the agents produce findings in the same shape.
 
 This matrix tracks which agent file teaches which fields. A cell of `✓` means the agent's "How to structure your output" section explicitly lists the field. A cell of `✗` means the field is absent. A cell of `~` means the field is renamed (cell text names the rename).
 
@@ -29,7 +29,7 @@ Cell legend:
 
 The first six columns reflect the state *after* the 2026-05-04 skill-architecture repair pass. Prior state showed drift: `substrate-alignment-reviewer` dropped Evidence; `library-native-reviewer` and `agent-readiness-reviewer` dropped Category; `spec-cohesion-reviewer` used a different shape entirely (Risk / Substrate artifact / Suggested repair). That repair pass swept all five to canonical.
 
-The "Voice citation" column was added in the 2026-05-04 `cut-anchor-pin` substrate rewrite. Each agent's "How to structure your output" code block must open with the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. All five cells are `pending` until the implementation follow-up pass (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`) adds the citation line to each agent file. After implementation, all five must be `✓`; `validate_plugin.sh` greps for the citation line as a convention pin.
+The "Voice citation" column was added in the 2026-05-04 `cut-anchor-pin` substrate rewrite. Each agent's "How to structure your output" code block must open with the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/output-voice.md`. All five cells are `pending` until the implementation follow-up pass (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md`) adds the citation line to each agent file. After implementation, all five must be `✓`; `validate_plugin.sh` greps for the citation line as a convention pin.
 
 ### Verdict-leads is tracked elsewhere
 
@@ -38,7 +38,7 @@ Reviewer agents produce findings, not verdicts. The named invariant `VERDICT_BEF
 ## Rules
 
 - The canonical six fields are mandatory in every reviewer agent's "How to structure your output" section, in the order shown above.
-- When adding a new reviewer agent, copy the output-format block from `references/reviewer-agent-template.md` §"Output format conventions" verbatim. Do not invent new fields.
+- When adding a new reviewer agent, copy the output-format block from `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" verbatim. Do not invent new fields.
 - When adding a new field (e.g., "Confidence" in some V1 setting), update this matrix and all five agent files in the same pass — partial drift breaks synthesis.
 - `review-codebase` Phase 4, `review-diff`, and `validate-rewrite` synthesis can assume canonical shape from any reviewer agent dispatched. If a finding arrives in a different shape, that's a regression to be filed against this matrix.
 
@@ -51,7 +51,7 @@ For the Severity field, every agent uses one of:
 - **Medium** — substrate improvement worth making in the next pass.
 - **Low** — taste-level observation; useful context but not actionable on its own.
 
-Per `references/cohesion-rubric.md`, agents do not mark every finding Blocker. If everything is Blocker, prioritization is failing.
+Per `docs/substrate/designs/cohesion-rubric.md`, agents do not mark every finding Blocker. If everything is Blocker, prioritization is failing.
 
 ## Removed cells
 
@@ -63,7 +63,7 @@ Per `references/cohesion-rubric.md`, agents do not mark every finding Blocker. I
 
 - The agent's *internal* analysis structure (the "How to scope your reading" section, the "What you check" section). Different agents have different lenses; only the *output* must be uniform.
 - The dispatch protocol shape (claimed-system-shape, normative-doc paths, scope, discovery report). That's defined in `docs/substrate/designs/agent-dispatch-protocol.md`.
-- The canonical fresh-eyes preamble bullet. That's a convention in `references/reviewer-agent-template.md`; not a finding-shape concern.
+- The canonical fresh-eyes preamble bullet. That's a convention in `docs/substrate/designs/reviewer-agent-template.md`; not a finding-shape concern.
 
 ## Notes
 
@@ -72,7 +72,7 @@ Per `references/cohesion-rubric.md`, agents do not mark every finding Blocker. I
 
 ## Related substrate
 
-- `references/reviewer-agent-template.md` §"Output format conventions" — the canonical shape definition.
+- `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" — the canonical shape definition.
 - `docs/substrate/designs/agent-dispatch-protocol.md` — dispatch protocol the synthesizer relies on.
 - `skills/review-codebase/SKILL.md` Phase 4 and `skills/review-diff/SKILL.md` — synthesis steps that require shape uniformity.
 - `skills/validate-rewrite/SKILL.md` — single-agent dispatch; same canonical shape required.
