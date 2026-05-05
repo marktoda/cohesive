@@ -10,6 +10,10 @@
 
 One paragraph. Could a future contributor — human or agent — read these rewritten specs and implement the system without needing the original architect's memory? If not, what's the single biggest gap?
 
+## Delta at a glance
+
+Quote the ledger's `## Delta at a glance` section verbatim. See `references/templates/design-delta-ledger.md` §"Delta at a glance" for the canonical category list and the consumer rendering rules (missing-preamble handling and divergence-from-body handling).
+
 ## Blocking issues
 
 Issues that should prevent moving from spec rewrite to implementation. Each must be repairable.

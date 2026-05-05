@@ -103,6 +103,9 @@ The skill's chat output (the agent's report, surfaced):
 ## Executive judgment
 <one paragraph>
 
+## Delta at a glance
+<verbatim quote of the ledger's `## Delta at a glance` preamble per the consumer rendering rules in `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Delta at a glance" (which is the canonical home of the category list, authoring rules, and consumer rendering rules including missing-preamble and divergence handling). This section appears across all three verdicts (Approved / Issues Found / Design Incoherent), not just Approved — Issues Found and Design Incoherent readers also need decision-time context for whether to repair the rewrite or revisit `brainstorm-design`.>
+
 ## Blocking issues
 ### B1. <title>
 - Risk: ...

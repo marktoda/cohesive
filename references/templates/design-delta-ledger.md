@@ -6,6 +6,35 @@
 
 This ledger records *what changed* in the substrate during a `rewrite-specs` pass. It exists so the fresh-eyes reviewer (and future readers) can see the rewrite as a delta, not as 'a bunch of files moved around.'
 
+## Delta at a glance
+
+A scannable, verbatim-quotable summary of what this rewrite changes. `validate-rewrite` and its dispatched `spec-cohesion-reviewer` agent render this section verbatim into the validation review (after the Executive judgment, before the Blocking issues), so the reader of the validation review sees what's in the rewrite at decision time — what to implement, defer, or merge — without invoking another skill first.
+
+This section is the canonical home of the preamble's category list, authoring rules, and consumer rendering rules. `references/templates/cohesion-review.md`, `agents/spec-cohesion-reviewer.md` ("What you check" item 11), and `skills/validate-rewrite/SKILL.md` (Output format render template) cite this section rather than restate its contents — the single-source-of-truth shape closes the drift surface between author-side and consumer-side specifications.
+
+### Authoring rules
+
+Render every bullet as a count-or-name list. When a category has no entries, render `none` rather than omitting the bullet; consistent shape aids scanning. Density target: 8–15 lines of itemized content.
+
+- **Files:** N rewritten, M added, K removed/deprecated
+- **Conceptual changes:** <name1>; <name2>; <name3> — or `none`
+- **Named invariants:** `INVARIANT_A` (added); `INVARIANT_B` (strengthened); `INVARIANT_C` (weakened); `INVARIANT_D` (removed) — or `none`
+- **Behavior matrices:** `<matrix-1>` (added); `<matrix-2>` (cells added/removed/renamed) — or `none`
+- **Gotchas:** <name1> (added); <name2> (retired) — or `none`
+- **Semantic linters:** <name1> (proposed, not yet implemented); <name2> (added) — or `none`
+- **Tests proposed:** <description> — or `none`
+- **Deferred (out of scope this pass):** <items> — or `none`
+
+### Consumer rendering rules
+
+When a consumer (a validation review, a future implement-cohesively Phase 1 announcement, a future ledger-viewer CLI) renders the preamble, three rules govern what appears:
+
+- **Preamble present and consistent with the body:** quote it verbatim into the consumer's `## Delta at a glance` section. No further annotation.
+- **Preamble missing:** render the literal string `Preamble missing — see Blocking issues` in the consumer's `## Delta at a glance` section. The consumer raises a Blocking Issue against this template's §"Delta at a glance" pointing to the missing preamble.
+- **Preamble present but inconsistent with the body** (preamble claims an invariant the body does not record, omits a file the body rewrites, names a behavior matrix not present in the body's `### Behavior matrices` section, etc.): still quote the preamble verbatim into the consumer's `## Delta at a glance` section — the reader sees what was claimed even when it is wrong — and raise a Blocking Issue naming the divergence.
+
+`spec-cohesion-reviewer`'s "What you check" item 11 operationalizes the consistency check: compare each preamble category bullet to the corresponding body section of the same ledger.
+
 ## Files rewritten
 
 For each file whose normative content changed:
@@ -76,6 +105,9 @@ Things the rewrite couldn't fully resolve and that the fresh-eyes reviewer shoul
 
 The intent is that a reviewer can:
 1. Read the "Approved direction" line and know the destination.
-2. Skim "Conceptual changes" and know what's *different*.
-3. Read "Files rewritten" with before/after snippets to verify each rewrite.
-4. Use "Remaining ambiguity" as the focused review punch list.
+2. Skim "Delta at a glance" and know the shape of the change in 8–15 lines.
+3. Skim "Conceptual changes" and know what's *different* in detail.
+4. Read "Files rewritten" with before/after snippets to verify each rewrite.
+5. Use "Remaining ambiguity" as the focused review punch list.
+
+The "Delta at a glance" preamble is also the surface `validate-rewrite` quotes verbatim into its rendered review, so the validation-review reader sees the same scannable summary at decision time. Keep it consistent with the body sections — the `spec-cohesion-reviewer` agent flags divergence as a Blocking Issue.

@@ -418,6 +418,42 @@ else
   fail "skills/validate-rewrite/SKILL.md missing the literal bypass-acknowledgment string (per docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md §Known bypass risks). Expected the string '$bypass_string' to appear in the SKILL body."
 fi
 
+# 13h. "Delta at a glance" preamble in delta-ledger files dated on or after the cutoff.
+# Per references/templates/design-delta-ledger.md §"Delta at a glance" and the
+# rewrite-specs SKILL Acceptance criteria. Forward-looking: ledgers dated before the
+# cutoff are grandfathered (the convention shipped on the cutoff date). Update the
+# cutoff only when the convention itself changes in a way historical ledgers cannot
+# satisfy; otherwise the cutoff is stable.
+preamble_cutoff='2026-05-05'
+errors_before=$errors
+if [ -d docs/history/delta-ledgers ]; then
+  preamble_check_count=0
+  preamble_skipped_count=0
+  for ledger in docs/history/delta-ledgers/*.md; do
+    [ -e "$ledger" ] || continue
+    base=$(basename "$ledger" .md)
+    date_prefix=${base:0:10}
+    if [[ ! "$date_prefix" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+      continue
+    fi
+    if [[ "$date_prefix" < "$preamble_cutoff" ]]; then
+      preamble_skipped_count=$((preamble_skipped_count + 1))
+      continue
+    fi
+    preamble_check_count=$((preamble_check_count + 1))
+    if ! grep -qE '^## Delta at a glance' "$ledger"; then
+      fail "$ledger missing required '## Delta at a glance' preamble (per references/templates/design-delta-ledger.md §Delta at a glance; rule applies to ledgers dated >= $preamble_cutoff)"
+    fi
+  done
+  if [ "$errors" -eq "$errors_before" ]; then
+    if [ "$preamble_check_count" -eq 0 ]; then
+      ok "Delta at a glance preamble check: no ledgers dated >= $preamble_cutoff present yet (cutoff active; $preamble_skipped_count grandfathered)"
+    else
+      ok "Delta at a glance preamble present in all $preamble_check_count delta-ledger files dated >= $preamble_cutoff ($preamble_skipped_count grandfathered)"
+    fi
+  fi
+fi
+
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
 # Per docs/substrate/invariants/PLUGIN_ROOT_PATHS.md. Excludes lines inside fenced code
 # blocks and lines marked as anti-pattern examples (so the rule's own anti-pattern
