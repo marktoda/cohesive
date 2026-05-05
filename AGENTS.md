@@ -17,6 +17,19 @@ Historical context lives separately under `docs/history/`:
 - `docs/history/plans/2026-05-04-mvp-implementation.md` — the dated milestone plan that drove v0.1 (preserved; not authoritative).
 - `docs/history/reviews/` and `docs/history/delta-ledgers/` — workflow products from prior `review-codebase` / `review-diff` / `audit-substrate` and `rewrite-specs` runs (older artifacts may reference predecessor names like `cohesive-review` and `substrate-audit`; preserved as time-stamped record).
 
+## Substrate vs implementation
+
+Files in this repo split into two roles:
+
+- **Substrate** — what the system *claims* about itself. Lives in `docs/substrate/**`, `docs/history/**`, `ARCHITECTURE.md`, `AGENTS.md`, `README.md`. Normative content: named invariants, behavior matrices, gotchas, cross-cutting designs, the architectural map, the contributor guide. A change here changes the rules.
+- **Implementation** — the runtime artifacts that *do* the work. Lives in `skills/**`, `agents/**`, `references/**`, `scripts/**`, `.claude-plugin/**`. Skill prompts Claude reads at invocation, reviewer-agent system prompts, runtime-cited content (templates, rubrics, conventions), the validator script, the plugin manifest. A change here changes behavior.
+
+`references/` is the fuzzy edge: it ships runtime content but also carries normative claims (`skill-conventions.md`, `reviewer-agent-template.md`, the rubrics). Treat it as implementation by location; recognize that some references double as load-bearing substrate-shaped content. When a `references/` doc carries a normative claim with a real failure mode, the corresponding rule should also live as a named invariant under `docs/substrate/invariants/` — that's how a convention earns invariant promotion.
+
+This distinction matters most for `cohesive:rewrite-specs`. Per its Hard Constraint #3, rewrite-specs touches *substrate only*. If a substrate change implies an implementation change (e.g., a new behavior matrix downstream skills must honor, or a new validator check), the implementation update is a separate phase — typically `superpowers:writing-plans` → `superpowers:executing-plans`, with `cohesive:review-diff` on the result. Doing both in one rewrite-specs pass conflates "what we claim" with "what we do" and loses the fresh-eyes review power that comes from validating the substrate alone.
+
+The same line applies to `cohesive:review-codebase` and `cohesive:review-diff`: substrate findings recommend substrate repairs (a new invariant, a missing matrix, a gotcha to write); implementation findings recommend `superpowers:writing-plans` to bring runtime artifacts into alignment.
+
 ## The one named invariant
 
 Cohesive ships v0.1 with a single named invariant:
