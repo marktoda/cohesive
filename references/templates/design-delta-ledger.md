@@ -95,9 +95,19 @@ For each file whose normative content changed:
 
 ## Remaining ambiguity
 
-Things the rewrite couldn't fully resolve and that the fresh-eyes reviewer should flag:
+This section is the **substrate residue for what the rewrite did not close**. It serves two roles, both load-bearing:
 
-- <ambiguity>: <why it was left open>
+1. **Author-time entries** — ambiguities the rewriter knew were open at write-time. Format: `<short title>: <why it was left open>`.
+2. **Deferred validation-review findings** — non-Blocker findings the validation review surfaced that the user chose to substrate-note rather than close inline (per the disposition rule in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings"). Format: `<finding ID, e.g., pass-1 I2 or pass-2 New-I3> — <one-line crux>: <rationale for deferral>; <link to the validation review file>`.
+
+A deferred finding that does not land here is a substrate violation: the next reviewer cannot see it, and the same gap surfaces again in a later pass. `cohesive:validate-rewrite` reads this section on subsequent passes and treats a previously-deferred finding that still applies as either confirmation-of-deferral (no new finding needed) or escalation (if the gap is now causing drift, raise it as a fresh finding with the original ID cited).
+
+Entries:
+
+- <ambiguity title>: <why it was left open>
+- pass-N I<n> — <crux>: <deferral rationale>; <`docs/history/reviews/...` path>
+
+If both kinds are absent, write `none` rather than omitting the section.
 
 ## Ready for fresh-eyes review?
 

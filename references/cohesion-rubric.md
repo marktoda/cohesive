@@ -92,12 +92,46 @@ Does the architecture create the right change surface for the *next* ten changes
 
 ## Severity vocabulary for findings
 
-When `review-codebase` or `review-diff` returns issues, use:
+When `review-codebase`, `review-diff`, or `validate-rewrite` returns issues, use:
 
-- **Blocking** — would produce or has produced a real defect; substrate must be repaired before further work in this area
+- **Blocker** — would produce or has produced a real defect; substrate must be repaired before further work in this area
 - **High** — high-leverage substrate gap; not yet a defect, but a predictable source of future defects
 - **Medium** — substrate improvement worth making in the next pass
 - **Low** — taste-level observation; useful context but not actionable on its own
+
+This is the canonical severity vocabulary; reviewer agents (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions") and chat-rendered review outputs cite this list rather than restate it.
+
+### Verdict → severity-floor mapping (validate-rewrite)
+
+`validate-rewrite` returns one of three verdicts. Severity gates the verdict deterministically:
+
+- **Approved** — highest severity present is `Medium`, `Low`, or none. The rewrite is implementable now; the disposition rule below specifies what (if anything) to close before merge.
+- **Issues Found** — highest severity present is `High` or `Blocker`. The rewrite is salvageable but not merge-ready; a repair pass + re-validation is required.
+- **Design Incoherent** — verdict orthogonal to severity. The design itself is incoherent; spec repairs won't help. Return to `brainstorm-design`.
+
+This pin is normative: an agent that returns `Issues Found` with no `High` or `Blocker` finding violates the verdict contract (and vice versa, an `Approved` verdict with a `High` finding is a contract violation). The agent verdict definitions at `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md` §"How to structure your output" cite this mapping rather than restate it.
+
+## Disposition rule for validation-review findings
+
+When `validate-rewrite` returns a verdict, the recommendation that follows is determined by the verdict and the highest severity present among the findings. The rule below picks; the agent does not render a menu of options.
+
+| Verdict | Highest severity present | Recommendation | Re-validate after repair? | Canonical Disposition phrase |
+|---|---|---|---|---|
+| Approved | none | Route to the implementation decision matrix in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format" | N/A | `Merge as-is — no findings` |
+| Approved | Low | Close inline (≤2 lines per finding) | No | `Close inline (≤2 lines per finding) → merge` |
+| Approved | Medium | Close in the same worktree before merge | Yes if the repair adds a new file or named invariant; otherwise no | `Close in same worktree → merge` |
+| Issues Found | High or Blocker | Repair, then re-run `validate-rewrite` | Yes | `Repair → re-validate` |
+| Design Incoherent | — | Return to `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` with the reviewer's report | N/A (no repair pass at this verdict) | `Return to brainstorm-design` |
+
+The 5-row table is total over the verdict→severity-floor mapping above: every legitimate `(verdict, highest-severity)` pair maps to exactly one row. Combinations the verdict-floor mapping forbids (e.g., `Approved + High`, `Issues Found + Medium`) are contract violations on the agent's verdict choice, not gaps in the disposition rule. The **Canonical Disposition phrase** column is the literal string the dispatching skill and the cohesion-review template render in the validation review's `## Recommended next Cohesive skill` section; citing surfaces (`${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format", `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Recommended next Cohesive skill") cite this column rather than restate the strings.
+
+**Why this is a rule, not a menu.** The "Three options" pattern (offering the reader a choice between fix-and-merge, substrate-note-and-merge, and pause) emerges when the agent treats the disposition as a judgment call. It violates `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule #5 ("Recommend exactly one next move") by forcing the reader to re-derive what to do. The rule above eliminates the menu surface: the verdict + highest severity determine the recommendation, deterministically.
+
+**Substrate-note as user override.** The default for `Approved + Low` is close-inline (the lower-friction path). When the user judges that a finding has cross-pass relevance — future reviewers should see it as deferred substrate, not silently repaired — the user overrides the close-inline default and substrate-notes the finding in the ledger §"Remaining ambiguity" with a stable ID, rationale, and a citation to the validation review that surfaced it. See `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Remaining ambiguity" for the contract. A user-elected substrate-note that does not land in the ledger is a substrate violation — the next reviewer can't see it, and the same gap surfaces again in a future pass. The override does not change the agent's rendered Disposition phrase; the agent renders the rule's default, and the user's override is a post-render move.
+
+**User override.** The user can override the rule's recommendation ("just merge — I don't care about the Medium", or substrate-note the Low instead of close-inline). The override is a deliberate move against a published default, not a derivation from a menu. Overrides do not require general ledger annotation in v0.1, *except* substrate-note overrides per the section above (which use the ledger §"Remaining ambiguity" residue the rule already provides). The cost of unannotated overrides is observability: the team cannot count silent overrides per release cycle. Re-evaluation trigger: if more than 3 `validate-rewrite` passes in a single release cycle reveal the same finding repeatedly because it was silently overridden, promote a first-class override-residue surface (a §"Overrides applied" section in the ledger) in the next pass and update this clause.
+
+**Citations.** `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format", `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md` §"How to structure your output", `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Recommended next Cohesive skill", and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"When sections may differ" (the `validate-rewrite` deviation entry) all cite this section — including the `Canonical Disposition phrase` column for the literal phrase strings — rather than restate the table. Single canonical home prevents the same multi-surface drift that pre-`design/cohesion-review-cleanup` §"Delta at a glance" exhibited.
 
 ## How findings become substrate
 

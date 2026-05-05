@@ -84,11 +84,13 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 (Each finding uses the canonical six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions".)
 ```
 
-Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`. Your verdict must be one of:
+Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`. Your verdict must be one of, gated on the verdict→severity-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)":
 
-- **Approved** — the rewrite is implementable. List the few highest-quality moves under "What looked right." Important issues may still be listed but should not block.
-- **Issues Found** — the rewrite is salvageable. List blocking issues that must be repaired before implementation, important issues that should be repaired in the same pass, and ranked recommended repairs.
-- **Design Incoherent** — the rewrite reveals that the underlying design itself is incoherent. Repairs to the docs won't help. Recommend returning to `brainstorm-design` and explain why.
+- **Approved** — highest severity present is `Medium`, `Low`, or none. The rewrite is implementable; the disposition rule specifies what (if any) findings to close before merge. List the few highest-quality moves under "What looked right."
+- **Issues Found** — highest severity present is `High` or `Blocker`. The rewrite is salvageable but not merge-ready. List the High/Blocker findings under §"Blocking issues" with the canonical six-field shape, plus any Medium/Low findings under §"Important issues", plus ranked recommended repairs.
+- **Design Incoherent** — verdict orthogonal to severity. The rewrite reveals that the underlying design itself is incoherent; spec repairs won't help. Recommend returning to `brainstorm-design` and explain why.
+
+Returning `Approved` with a `High` or `Blocker` finding, or `Issues Found` with no `High` or `Blocker` finding, is a contract violation against the verdict-floor mapping.
 
 ## Issue format (canonical six-field shape)
 
@@ -105,9 +107,7 @@ This shape is tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer
 
 ## Severity rules
 
-- An issue is **blocking** if it would produce or has already produced a real defect, or if a future contributor would predictably write incorrect code based on the spec as written.
-- An issue is **important** (non-blocking) if it's a high-leverage substrate gap but doesn't yet produce defects.
-- Don't mark everything blocking. If you do, the prioritization is failing.
+Severity vocabulary lives at `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Severity vocabulary for findings" (canonical home). Apply it as written: `Blocker` for findings that would produce or have produced a real defect; `High` for predictable defect sources; `Medium` for next-pass improvements; `Low` for taste-level observations. Don't mark everything `Blocker` — if you do, the prioritization is failing. Section-placement in the cohesion-review template follows the severity-class gloss in `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Blocking issues" / §"Important issues".
 
 ## Calibration
 
@@ -122,6 +122,7 @@ Include a "What looked right" section with the few highest-quality moves of the 
 - Pre-summarize or paraphrase the design's intent. Read the docs as the future contributor will: as the source of truth.
 - Recommend code changes. You're reviewing specs.
 - Treat the rewrite as good because it's tidy. A tidy spec that omits an invariant is worse than a messy one that names it.
+- Render an options menu (e.g., "Three options: repair pass / substrate-note / persist-and-pause") in place of the disposition recommendation. The disposition rule in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings" determines the recommendation from the verdict and the highest severity present; you commit to one phrase and do not offer alternatives. Forcing the user to choose between dispositions violates `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule #5.
 
 ## Token discipline
 

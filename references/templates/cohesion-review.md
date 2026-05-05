@@ -16,7 +16,7 @@ This section is a **render slot** in the validation review document, not the can
 
 ## Blocking issues
 
-Issues that should prevent moving from spec rewrite to implementation. Each finding uses the canonical six-field shape from `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" — the same shape every Cohesive reviewer agent produces — so the synthesizing skill (`validate-rewrite`, `cohesive:review-codebase`, `cohesive:review-diff`) can merge findings uniformly.
+Findings with severity `High` or `Blocker` (severity vocabulary: see `references/cohesion-rubric.md` §"Severity vocabulary for findings"; the verdict-floor mapping in the same file requires `High` or `Blocker` findings to land in this section under an `Issues Found` verdict). The section heading uses the historic word "Blocking" as a category label; the severity-vocabulary terms (`Blocker` for produced-defect findings, `High` for predictable-defect findings) live in the **Severity** field of each finding below. Each finding uses the canonical six-field shape from `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" — the same shape every Cohesive reviewer agent produces — so the synthesizing skill (`validate-rewrite`, `cohesive:review-codebase`, `cohesive:review-diff`) can merge findings uniformly.
 
 ### B1. <short title>
 - **Severity:** Blocker / High / Medium / Low
@@ -30,7 +30,7 @@ Issues that should prevent moving from spec rewrite to implementation. Each find
 
 ## Important issues
 
-Not blocking, but should be repaired in the same pass. Use the same six-field shape as Blocking issues.
+Findings with severity `Medium` or `Low` (severity vocabulary: see `references/cohesion-rubric.md` §"Severity vocabulary for findings"). These do not block implementation; the disposition rule in the rubric specifies what to do with them per `(verdict, highest-severity-present)`. Use the same six-field shape as Blocking issues.
 
 ### I1. <short title>
 - **Severity:** ...
@@ -83,6 +83,14 @@ Look for "should," "probably," "we will," "TODO," "TBD" in normative sections of
 1. <highest leverage>
 2. <next>
 3. ...
+
+## Recommended next Cohesive skill
+
+The recommendation is determined by the disposition rule in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which maps `(verdict, highest-severity-present)` to a single recommendation. The reviewer commits to one phrase; alternative options are not rendered.
+
+**Disposition:** <the literal string in the `Canonical Disposition phrase` column of the rubric table at `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", for the row whose `(Verdict, Highest severity present)` pair matches this review. The rubric is the single source of truth for the phrase string; this template cites rather than restates. Substrate-noting is a user override of the Approved + Low default per the rubric §"Substrate-note as user override", **not a separate Disposition phrase the agent renders**; the agent renders the rule's default and the user's override (if any) is a post-render move that lands in the ledger §"Remaining ambiguity".>
+
+**Implementation route:** [render iff verdict is `Approved`; otherwise omit] — the verdict-floor mapping in `references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)" guarantees `Approved` is merge-ready, so the dispatching `validate-rewrite` skill renders the implementation decision matrix from `skills/validate-rewrite/SKILL.md` §"Output format" unconditionally for Approved. Omit the matrix entirely for `Issues Found` and `Design Incoherent`.
 
 ## What looked right
 
