@@ -15,6 +15,10 @@ description: Use after validate-rewrite has returned Approved on a spec rewrite,
 
 This is the second of Cohesive's flagship skills that owns code-producing work indirectly. The skill itself writes no code: it composes with `superpowers:writing-plans` (which authors plans) and `superpowers:executing-plans` (which writes code with TDD inside each phase). The Cohesive contribution is the **phase loop**: deriving phase shape from substrate, dispatching the cross-review agent against the delta ledger, and gating progression on coverage.
 
+## Voice
+
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+
 ## Hard constraints
 
 1. **An Approved validate-rewrite verdict is required.** Don't try to detect prior validation from session memory — per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, that detection silently degrades. Open the turn with the canonical forced-choice question:
@@ -115,8 +119,6 @@ Announce the verdict and the recommended next step. Do not invoke `superpowers:f
 
 ```md
 # Implementation Complete — <topic>
-
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Verdict:** Implemented / Phase Drift / Substrate Drift / Aborted
 

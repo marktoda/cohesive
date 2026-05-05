@@ -393,7 +393,7 @@ else
   fail "skills/validate-rewrite/SKILL.md missing one or more rows of the implementation decision matrix (per docs/substrate/gotchas/no-implementation-handoff.md). All four canonical rows must be present: implement-now, land-specs-first, hand-off-to-Superpowers, schedule-for-later."
 fi
 
-# 13e. implement-cohesively cites phase-derivation matrix + IMPLEMENTATION_PLAN_COVERS_DELTA.
+# 13f. implement-cohesively cites phase-derivation matrix + IMPLEMENTATION_PLAN_COVERS_DELTA.
 # Per docs/substrate/gotchas/no-implementation-handoff.md "Tests / checks that preserve this"
 # bullet 3. The skill body's Process / Hard constraints must reference both substrate
 # artifacts so a reader of the SKILL alone can trace to the matrix and the invariant.
@@ -405,7 +405,7 @@ else
   fail "skills/implement-cohesively/SKILL.md must cite docs/substrate/matrices/phase-derivation.md AND docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md (per docs/substrate/gotchas/no-implementation-handoff.md). One or both citations are missing."
 fi
 
-# 13f. Literal bypass-acknowledgment string in validate-rewrite.
+# 13g. Literal bypass-acknowledgment string in validate-rewrite.
 # Per docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md §Known bypass risks
 # and docs/substrate/gotchas/no-implementation-handoff.md "Tests / checks that
 # preserve this" bullet 4. The SKILL body must carry the literal string the
