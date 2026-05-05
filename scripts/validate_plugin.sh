@@ -132,6 +132,7 @@ expected_skills=(
   brainstorm-design
   rewrite-specs
   validate-rewrite
+  implement-cohesively
   review-codebase
   review-diff
   audit-substrate
@@ -201,6 +202,7 @@ done
 prereq_subskills=(
   brainstorm-design
   rewrite-specs
+  implement-cohesively
   review-codebase
   review-diff
   audit-substrate
@@ -239,6 +241,7 @@ persisting_skills=(
   brainstorm-design
   rewrite-specs
   validate-rewrite
+  implement-cohesively
   review-codebase
   review-diff
   audit-substrate
@@ -261,6 +264,7 @@ verdict_led_skills=(
   review-diff
   validate-rewrite
   audit-substrate
+  implement-cohesively
 )
 errors_before=$errors
 for s in "${verdict_led_skills[@]}"; do
@@ -298,6 +302,7 @@ voice_imperative_skills=(
   brainstorm-design
   rewrite-specs
   validate-rewrite
+  implement-cohesively
   review-codebase
   review-diff
   audit-substrate
