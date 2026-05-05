@@ -103,6 +103,9 @@ The skill's chat output (the agent's report, surfaced):
 ## Executive judgment
 <one paragraph>
 
+## Delta at a glance
+<verbatim quote of the ledger's `## Delta at a glance` preamble — counts of files, named invariants by name + status, behavior matrices, gotchas, semantic linters, tests proposed, deferred items. This section appears across all three verdicts (Approved / Issues Found / Design Incoherent), not just Approved — Issues Found and Design Incoherent readers also need decision-time context for whether to repair the rewrite or revisit `brainstorm-design`. Render `Preamble missing — see Blocking issues` if the ledger lacks the preamble.>
+
 ## Blocking issues
 ### B1. <title>
 - Risk: ...

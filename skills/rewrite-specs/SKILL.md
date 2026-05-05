@@ -105,6 +105,8 @@ If a substrate map exists at the repo level, update it to reflect the rewrites: 
 
 Write `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md`. Delta ledgers are dated, append-only history. The ledger is what the fresh-eyes reviewer reads to understand the rewrite as a delta.
 
+The ledger's `## Delta at a glance` preamble is required and load-bearing. `validate-rewrite` quotes it verbatim into the validation review (after the Executive judgment, before the Blocking issues), so the reader of the validation review sees what's in the rewrite at decision time without invoking another skill first. Fill the preamble in last, after the body sections are stable, so it accurately summarizes them. `spec-cohesion-reviewer` cross-checks the preamble against the body and raises a Blocking Issue on divergence; `scripts/validate_plugin.sh` greps for preamble presence on every delta-ledger file dated on or after the cutoff (see §"Acceptance criteria").
+
 ### 6. Commit the rewrite
 
 ```bash
@@ -173,12 +175,15 @@ The skill's chat output (separate from the file changes) is short:
 | Treating all future pressure as current scope | Spec bloat; future pressure becomes implicit promise | Keep future pressure in a clearly-marked non-normative section |
 | Rewriting docs in the main worktree | Loses the ability to review the rewrite as a coherent diff | Use a worktree |
 | Skipping the design delta ledger | Reviewer can't see the rewrite as a delta; review becomes "read everything again" | Always produce the ledger |
+| Skipping or stubbing the `## Delta at a glance` preamble | `validate-rewrite` has nothing to quote at decision time; the user is asked to choose an implementation path without seeing what the rewrite contains | Fill in the preamble after body sections stabilize; the validator greps for its presence on any ledger dated on or after the cutoff |
+| Filling in the preamble first, then drifting body sections away from it | Preamble and body diverge; reviewer raises a Blocking Issue and the rewrite goes back through repair | Fill the preamble last, or re-sync it before commit |
 
 ## Acceptance criteria
 
 - All affected docs are in end-state language; no "we will" / "should consider" in normative sections.
 - Obsolete concepts are removed, not annotated.
 - A design delta ledger exists at the canonical path.
+- The ledger's `## Delta at a glance` preamble is filled in (count-or-name list across Files / Conceptual changes / Named invariants / Behavior matrices / Gotchas / Semantic linters / Tests proposed / Deferred), accurately summarizes the body, and renders 8–15 lines of itemized content.
 - Substrate map (if it exists) is updated.
 - The rewrite happens on a `design/<slug>` branch in a worktree.
 - A commit captures the rewrite atomically.

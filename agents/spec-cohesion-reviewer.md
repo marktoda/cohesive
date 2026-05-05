@@ -59,6 +59,7 @@ For every rewritten and added spec, evaluate against the cohesion rubric:
 8. **Shared abstractions justified.** Where the rewrite proposes shared abstractions, does the ledger justify them — or is "code-shape similarity" the only argument?
 9. **Obsolete concepts removed.** Are old concepts gone from normative sections, or have they been left as `(deprecated)` notes that contradict the new claims?
 10. **Vague language.** Hunt for "should," "may," "could," "we will," "TBD," "TODO," "consider" in normative sections. Each occurrence needs to be tightened or moved to a non-normative section.
+11. **`## Delta at a glance` preamble matches the body.** The ledger's preamble is what the dispatching `validate-rewrite` skill quotes verbatim into the validation review at decision time. Read the preamble's count-or-name list across Files / Conceptual changes / Named invariants / Behavior matrices / Gotchas / Semantic linters / Tests proposed / Deferred, and compare each bullet to the body sections of the same ledger. A divergence — preamble claims an invariant the body does not record, omits a file the body rewrites, names a behavior matrix not present in the body's `### Behavior matrices` section, etc. — is a Blocking Issue against `references/templates/design-delta-ledger.md` §"Delta at a glance". A missing preamble is also a Blocking Issue. Quote the preamble verbatim into your `## Delta at a glance` section regardless; the reader sees what was claimed even when it is wrong.
 
 ## How to structure your output
 
@@ -71,6 +72,9 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Executive judgment
 <one paragraph>
+
+## Delta at a glance
+<verbatim quote of the ledger's `## Delta at a glance` section, or `Preamble missing — see Blocking issues` when absent>
 
 ## Blocking issues
 ### B1. <title>

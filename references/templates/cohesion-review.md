@@ -10,6 +10,12 @@
 
 One paragraph. Could a future contributor — human or agent — read these rewritten specs and implement the system without needing the original architect's memory? If not, what's the single biggest gap?
 
+## Delta at a glance
+
+Quote the ledger's `## Delta at a glance` section verbatim. This places the decision-time summary of what the rewrite changes directly under the verdict, before any findings. If the ledger lacks the preamble, render `Preamble missing — see Blocking issues` here and raise a Blocking Issue against `references/templates/design-delta-ledger.md` §"Delta at a glance".
+
+If the preamble is present but inconsistent with the body sections of the ledger (preamble claims a behavior matrix the body doesn't record, omits a rewritten file the body lists, etc.), still quote it verbatim here — the reader sees what was claimed — and raise a Blocking Issue naming the divergence.
+
 ## Blocking issues
 
 Issues that should prevent moving from spec rewrite to implementation. Each must be repairable.
