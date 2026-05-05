@@ -19,7 +19,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 1. **Always dispatch the `spec-cohesion-reviewer` agent via Task tool.** The skill itself never renders the verdict from in-conversation reading — it dispatches and surfaces the agent's report. The Task subprocess provides the structural fresh-eyes fence; this skill's job is the dispatch and the synthesis.
 2. **Inputs must be paths, not summaries.** Pass the agent file paths to read; don't pre-summarize the design for it. The dispatch prompt's content is the entire context the agent has, so any summary the dispatching skill writes into it bypasses fresh-eyes — the harness fence prevents conversation inheritance, but it can't prevent prompt contamination.
-3. **The review can block implementation.** A "Design Incoherent" or "Issues Found" verdict means `rewrite-specs` should run again, not `implement-cohesively`. An "Approved" verdict unlocks the implementation route subject to the disposition rule in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings": when the disposition is merge-ready, the user picks among the rows of the implementation decision matrix in the Output format block; when the disposition requires re-validation, `rewrite-specs` runs again first.
+3. **The review can block implementation.** Verdicts gate implementation per the verdict→severity-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)": `Issues Found` (highest severity High or Blocker) and `Design Incoherent` block implementation and route back to `rewrite-specs` or `brainstorm-design` respectively. `Approved` (highest severity Medium, Low, or none) unlocks the implementation route and the user picks among the rows of the implementation decision matrix in the Output format block; the disposition rule in the rubric specifies what (if anything) to close before merge.
 
 ## Process
 
@@ -87,12 +87,12 @@ If the user passed `--no-write`, render in chat only and skip persistence. The r
 
 The recommendation is determined by the **disposition rule** in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which is the canonical home — this skill cites it rather than restate the table. The rule maps `(verdict, highest-severity-present)` to a single recommendation; the skill does not render a menu of options for the user to pick from.
 
-Two-step render for the **Approved** branch:
+Two-step render for the **Approved** branch (which the rubric's verdict-floor mapping guarantees is merge-ready):
 
-1. **Disposition recommendation** — one phrase derived from the rubric table (e.g., `Merge as-is — no findings`, `Close inline (≤2 lines per finding) → merge`, `Substrate-note in ledger §"Remaining ambiguity" → merge`, `Repair → re-validate`).
-2. **Implementation decision matrix** — render iff the disposition does not require re-validation (i.e., the rewrite is ready to merge after the disposition action). When the disposition is `Repair → re-validate`, omit the matrix and direct the user to the repair pass; the matrix renders on the next Approved verdict whose disposition is merge-ready.
+1. **Disposition recommendation** — one phrase derived from the rubric table: `Merge as-is — no findings` (Approved + none), `Close inline (≤2 lines per finding) → merge` (Approved + Low), or `Close in same worktree → merge` (Approved + Medium).
+2. **Implementation decision matrix** — render unconditionally for Approved. The verdict-floor mapping ensures `High` and `Blocker` findings produce `Issues Found`, not `Approved`, so an Approved verdict always reaches the matrix.
 
-For **Issues Found** and **Design Incoherent**, the disposition rule's recommendation is the entire next step — no implementation matrix renders. Issues Found → repair-then-re-validate. Design Incoherent → return to `brainstorm-design`.
+For **Issues Found** and **Design Incoherent**, the disposition rule's recommendation is the entire next step — no implementation matrix renders. Issues Found → `Repair → re-validate`. Design Incoherent → `Return to brainstorm-design`.
 
 ## Output format
 
@@ -150,9 +150,9 @@ The skill's chat output (the agent's report, surfaced):
 | Schedule for later | (no immediate action) | The rewrite is approved; implementation is not currently in scope. Re-invoke `cohesive:implement-cohesively` or `superpowers:writing-plans` when ready. |
 ```
 
-**Disposition derivation.** The Disposition phrase above is selected from the rubric table at `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings" by mapping `(verdict, highest-severity-present)` to a single recommendation. Examples: `Merge as-is — no findings`; `Close inline (≤2 lines per finding) → merge`; `Substrate-note in ledger §"Remaining ambiguity" → merge`; `Repair → re-validate`; `Return to brainstorm-design`.
+**Disposition derivation.** The Disposition phrase above is selected from the rubric table at `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings" by mapping `(verdict, highest-severity-present)` to a single recommendation. The five legitimate phrases are `Merge as-is — no findings` (Approved + none), `Close inline (≤2 lines per finding) → merge` (Approved + Low), `Close in same worktree → merge` (Approved + Medium), `Repair → re-validate` (Issues Found), `Return to brainstorm-design` (Design Incoherent). Substrate-noting is a user override of the Approved + Low default per the rubric §"Substrate-note as user override", not a separate Disposition phrase the agent renders.
 
-**Conditional implementation route.** Render the implementation decision matrix iff the verdict is `Approved` and the disposition does not require re-validation. Omit the matrix entirely for `Issues Found`, `Design Incoherent`, and Approved-with-Repair-required dispositions — in those cases the Disposition phrase is the complete next step.
+**Conditional implementation route.** Render the implementation decision matrix iff the verdict is `Approved` (which by the verdict-floor mapping in the rubric §"Verdict → severity-floor mapping" guarantees the disposition is merge-ready). Omit the matrix entirely for `Issues Found` and `Design Incoherent` — in those cases the Disposition phrase is the complete next step.
 
 **Bypass acknowledgment.** When the user picks the third row (`superpowers:writing-plans` directly), the skill renders the literal acknowledgment line `Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.` in chat *before* invoking `superpowers:writing-plans`. The acknowledgment lands in the conversation transcript, making the bypass legible. No file is written, no flag is required — the convention is the line itself, and skipping it is a substrate violation reviewed in `cohesive:review-codebase`.
 

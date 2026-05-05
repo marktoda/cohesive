@@ -8,14 +8,14 @@ This ledger records a substrate change to close the **Three options** failure mo
 
 ## Delta at a glance
 
-- **Files:** 6 rewritten, 0 added, 0 removed/deprecated
-- **Conceptual changes:** disposition rule promoted to canonical home of validation-review-finding recommendation; "Three options" menu pattern explicitly forbidden; `Approved` verdict semantics refined (merge-ready vs. repair-required dispositions); severity vocabulary aligned (`Blocking` → `Blocker` in rubric, matching reviewer-agent template)
+- **Files:** 6 rewritten, 0 added, 0 removed/deprecated (file counts unchanged across repair pass 1; only intra-file content tightened)
+- **Conceptual changes:** disposition rule promoted to canonical home of validation-review-finding recommendation; "Three options" menu pattern explicitly forbidden; verdict-floor mapping pinned (`Approved` ⇔ highest-severity ≤ Medium; `Issues Found` ⇔ highest-severity ≥ High); `Approved + Low` row made deterministic with substrate-note as user override; severity vocabulary aligned (`Blocking` → `Blocker` in rubric, matching reviewer-agent template); cohesion-review template section headers (`Blocking issues` / `Important issues`) glossed against severity vocabulary
 - **Named invariants:** none added (disposition rule lives as convention in cohesion-rubric.md; promotion criteria deferred — see Remaining ambiguity)
-- **Behavior matrices:** disposition table embedded in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings" (6-row mapping of `(verdict, highest-severity)` → `(recommendation, re-validate?)`); not a standalone matrix file
+- **Behavior matrices:** disposition table embedded in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings" (5-row mapping of `(verdict, highest-severity)` → `(recommendation, re-validate?)`, total over the verdict-floor mapping); not a standalone matrix file
 - **Gotchas:** none added (a future "Three options improvisation" gotcha is substrate-noted for follow-up if the pattern recurs)
 - **Semantic linters:** none (a future grep that flags option-menu shapes in validation-review chat output is substrate-noted)
 - **Tests proposed:** none
-- **Deferred (out of scope this pass):** promotion of disposition rule to named invariant; validator check pinning the literal `Disposition:` line in `validate-rewrite` rendered output; gotcha note for the "Three options" failure mode
+- **Deferred (out of scope this pass):** promotion of disposition rule to named invariant; validator check pinning the literal `Disposition:` line in `validate-rewrite` rendered output; gotcha note for the "Three options" failure mode; first-class override-residue ledger section (re-evaluation trigger: >3 silent overrides per release cycle)
 
 ## Files rewritten
 
@@ -92,7 +92,7 @@ none
 - Implementation code: not changed (no executable code in this substrate)
 - Tests: not changed
 - CI: not changed (no validator updates beyond what the existing `Recommended next Cohesive skill` grep already catches)
-- Verdict vocabulary: not changed; verdicts remain `{Approved, Issues Found, Design Incoherent}`. The disposition fineness lives in the rubric, not in the verdict set.
+- Verdict vocabulary lexical set: not changed; verdicts remain `{Approved, Issues Found, Design Incoherent}`. **Verdict semantics did change** (per repair pass 1, B2): the verdict-floor mapping pins `Approved` to highest-severity ≤ Medium and `Issues Found` to highest-severity ≥ High. The disposition rule is gated by, not orthogonal to, this mapping. Pre-rewrite semantics ("Approved with non-blocking findings is acceptable") is replaced by the verdict-floor pin; the rubric §"Verdict → severity-floor mapping (validate-rewrite)" is the canonical statement of the new semantics.
 - Implementation decision matrix rows: not changed; the four rows (`implement-cohesively` / land-specs-first / `superpowers:writing-plans` / schedule) are unchanged.
 
 ## Remaining ambiguity
@@ -102,11 +102,21 @@ This section carries author-time ambiguities and deferred validation-review find
 - **Promotion of the disposition rule to a named invariant:** the rule is first-iteration; the `style-guide-rot` promotion criteria (wording stability across two release cycles, caught regression, captured worked transcript) are not yet met. The rule lives as convention in the rubric for now. Re-evaluate after one release cycle of dogfooding.
 - **Validator pin on the literal `Disposition:` line:** would catch agent regressions byte-for-byte. Not added this pass to keep the rewrite minimal; substrate-noted for follow-up if a regression appears.
 - **Gotcha note for the "Three options" failure mode:** would document the symptom + tempting wrong fix + correct pattern in `docs/substrate/gotchas/`. Not added this pass; the Red flag in the skill body and agent body is the load-bearing defense for now. Promote to gotcha if the pattern recurs after this substrate lands.
-- **Behavior of the override case:** the rubric says "Overrides do not require ledger annotation; the next `validate-rewrite` pass will surface the finding again if it still applies." This relies on the user re-invoking `validate-rewrite` rather than carrying the override decision in any persistent surface. If overrides become common, a substrate residue for them (analogous to deferred findings) may need to be added.
+- **Behavior of the override case:** the rubric §"User override" carries an explicit re-evaluation trigger (per repair pass 1, I2): if more than 3 `validate-rewrite` passes in a single release cycle reveal the same finding repeatedly because it was silently overridden, promote a first-class override-residue surface (a §"Overrides applied" section in the ledger) in the next pass. Until the trigger fires, overrides do not require general ledger annotation; substrate-note overrides land in the existing §"Remaining ambiguity" residue.
+
+## Repair pass 1 (post pass-1 validation)
+
+Pass-1 validation review at `docs/history/reviews/2026-05-05-disposition-rule-rewrite-validation.md` returned `Issues Found` with 3 Blockers + 2 Important. All 5 findings closed in this repair pass; no findings substrate-noted.
+
+- **B1 closed** — `Approved + Low` row in the rubric is now deterministic: `Close inline (≤2 lines per finding)` with `Re-validate? No`. Substrate-noting reframed as a user override per new rubric §"Substrate-note as user override". `validate-rewrite` SKILL.md disposition examples (formerly listed both Close-inline and Substrate-note as legitimate phrases) collapsed to the five canonical phrases derived deterministically from the 5-row table. Agent renders the rule's default; the user's substrate-note override is a post-render move that lands in the ledger §"Remaining ambiguity" via the existing residue contract.
+- **B2 closed** — `Approved + High` row removed from the disposition table. Verdict-floor mapping pinned in new rubric §"Verdict → severity-floor mapping (validate-rewrite)": `Approved` ⇔ highest-severity ≤ Medium; `Issues Found` ⇔ highest-severity ≥ High; `Design Incoherent` orthogonal. The previous "Approved unlocks subject to disposition" framing in `validate-rewrite` Hard constraint #3 reframed as "Approved unlocks the implementation route" without disposition gating, since the verdict floor now guarantees Approved is merge-ready. Ledger §"What this rewrite did not do" amended to acknowledge verdict semantics changed (the lexical set is unchanged but the meaning is now gated on severity).
+- **B3 closed** — `Issues Found` row in the disposition table now covers `High or Blocker` (single row). The verdict-floor mapping makes `Issues Found + High` legitimate; the agent's verdict definitions at `agents/spec-cohesion-reviewer.md:88-91` rewritten to cite the verdict-floor mapping and forbid contract-violating verdict choices (Approved with High, Issues Found without High/Blocker).
+- **I1 closed** — `references/templates/cohesion-review.md` §"Blocking issues" and §"Important issues" headers carry severity-class glosses citing the rubric's severity vocabulary. The historic word "Blocking" is preserved as the section label; the **Severity** field within each finding carries the canonical Blocker/High/Medium/Low vocabulary. Section-name vs. severity-name relationship is now stated explicitly.
+- **I2 closed** — Rubric §"User override" carries an explicit re-evaluation trigger (>3 silent overrides per release cycle → promote first-class override-residue surface in next pass). Ledger §"Remaining ambiguity" override entry amended to mirror. Substrate-note overrides continue to land in the existing §"Remaining ambiguity" residue per B1's reframing.
 
 ## Ready for fresh-eyes review?
 
-**Yes** — substrate change is internally complete; validator passes (`bash scripts/validate_plugin.sh` returns 0 errors, 0 warnings); the disposition rule has a single canonical home with three citing surfaces. Hand off to `cohesive:validate-rewrite` for fresh-eyes review.
+**Yes** — substrate change is internally complete; validator passes (`bash scripts/validate_plugin.sh` returns 0 errors, 0 warnings); the disposition rule has a single canonical home with three citing surfaces; verdict-floor mapping is pinned and cited from the agent's verdict definitions. Hand off to `cohesive:validate-rewrite` for pass 2 fresh-eyes review.
 
 ## How to read this ledger
 

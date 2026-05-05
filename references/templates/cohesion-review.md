@@ -16,7 +16,7 @@ This section is a **render slot** in the validation review document, not the can
 
 ## Blocking issues
 
-Issues that should prevent moving from spec rewrite to implementation. Each finding uses the canonical six-field shape from `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" — the same shape every Cohesive reviewer agent produces — so the synthesizing skill (`validate-rewrite`, `cohesive:review-codebase`, `cohesive:review-diff`) can merge findings uniformly.
+Findings with severity `High` or `Blocker` (severity vocabulary: see `references/cohesion-rubric.md` §"Severity vocabulary for findings"; the verdict-floor mapping in the same file requires `High` or `Blocker` findings to land in this section under an `Issues Found` verdict). The section heading uses the historic word "Blocking" as a category label; the severity-vocabulary terms (`Blocker` for produced-defect findings, `High` for predictable-defect findings) live in the **Severity** field of each finding below. Each finding uses the canonical six-field shape from `docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" — the same shape every Cohesive reviewer agent produces — so the synthesizing skill (`validate-rewrite`, `cohesive:review-codebase`, `cohesive:review-diff`) can merge findings uniformly.
 
 ### B1. <short title>
 - **Severity:** Blocker / High / Medium / Low
@@ -30,7 +30,7 @@ Issues that should prevent moving from spec rewrite to implementation. Each find
 
 ## Important issues
 
-Not blocking, but should be repaired in the same pass. Use the same six-field shape as Blocking issues.
+Findings with severity `Medium` or `Low` (severity vocabulary: see `references/cohesion-rubric.md` §"Severity vocabulary for findings"). These do not block implementation; the disposition rule in the rubric specifies what to do with them per `(verdict, highest-severity-present)`. Use the same six-field shape as Blocking issues.
 
 ### I1. <short title>
 - **Severity:** ...
