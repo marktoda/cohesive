@@ -7,15 +7,18 @@
 For every Cohesive skill in the **verdict-led** scope below, the canonical "Output format" block in `skills/<name>/SKILL.md` renders, in order:
 
 1. The outermost `#` title naming the rendered output (e.g. `# Change Cohesion Review`)
-2. The voice-citation blockquote (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions" rule 1)
-3. The literal string `**Verdict:**` followed by a value drawn from the skill's verdict vocabulary
+2. The literal string `**Verdict:**` followed by a value drawn from the skill's verdict vocabulary
 
-`**Verdict:**` appears within the **first three non-blank lines after the outermost `#` title**. With the canonical title-then-citation layout, the citation is line 1 and `**Verdict:**` is line 2 — well inside the budget. The three-line allowance accommodates skills that introduce a thesis before the verdict in unusual cases; the canonical shape uses lines 1–2.
+`**Verdict:**` appears within the **first three non-blank lines after the outermost `#` title**. The canonical layout places `**Verdict:**` on the very next non-blank line — separated from the title by one blank line in the rendered output, so a reader sees title, blank, verdict in that order. The three-line allowance accommodates skills that introduce a thesis before the verdict in unusual cases; the canonical shape uses the immediately-next non-blank line.
+
+The frame is **non-blank lines**, counted from the line after the outermost `#` title. The validator and the worked transcript at `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md` both use this frame; counting raw lines (including blanks) is not normative because the blank between title and verdict is a rendering choice, not a positional constraint.
+
+The voice guide (`${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`) is loaded via a body-level imperative in the skill prose (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions" rule 1), not via a citation in the Output format block — the Output format block is a render template, and instructions placed inside it leak verbatim into user-facing output.
 
 The rule applies to:
 
 - The rendered chat output the skill produces
-- Any persisted artifact the skill writes (architecture review, brainstorm, audit report, change cohesion review, spec cohesion review). The persisted artifact's first `#` heading is the same title as the chat output's, and the same line-2 verdict rule applies.
+- Any persisted artifact the skill writes (architecture review, brainstorm, audit report, change cohesion review, spec cohesion review). The persisted artifact's first `#` heading is the same title as the chat output's, and the same first-three-non-blank-lines window applies.
 
 Both surfaces are enforced by the validator grep (see "Enforcement" below) — the grep reads SKILL.md Output format blocks, which are the source of truth for both surfaces.
 
@@ -47,15 +50,16 @@ This is the second named invariant Cohesive ships, joining `${CLAUDE_PLUGIN_ROOT
 
 ## Enforcement
 
-`scripts/validate_plugin.sh` enforces the invariant via three awk-based checks (13a, 13b, 13c — see the script for line-level detail):
+`scripts/validate_plugin.sh` enforces the invariant — and the co-resident voice-imperative convention — via four awk-based checks (13a, 13b, 13c, 13d — see the script for line-level detail):
 
 1. **Verdict-leads check (13a).** For each skill listed under "Applies to" above, the validator finds the first `#` title inside a fenced code block in the SKILL.md and verifies `**Verdict:**` appears within the next three non-blank lines. A violation is a hard fail; the failure message names this invariant.
-2. **Voice-citation check, skills (13b).** Every `skills/*/SKILL.md` Output format code block (excluding `cohesively`, which has no `#` title — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` §"Convention pins" for the exemption) must contain the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` within the first three non-blank lines after the outermost `#` title. The check pins the citation as convention; the invariant is the verdict-leads rule itself.
-3. **Voice-citation check, agents (13c).** Every `agents/*.md` first code block must contain the same citation line in its first three non-blank lines.
+2. **Voice-imperative check, skills (13b).** Every non-router `skills/*/SKILL.md` body (i.e., outside fenced code blocks) contains the literal line `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.`. The router (`cohesively`) is exempt — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` §"Convention pins enforced alongside this invariant" for the exemption. The check pins the imperative as convention; the named invariant is the verdict-leads rule itself.
+3. **Voice-imperative check, agents (13c).** Every `agents/*-reviewer.md` body (outside fenced code blocks) contains the same imperative literal.
+4. **Anti-citation check, render templates (13d).** No `skills/*/SKILL.md` Output format code block and no `agents/*-reviewer.md` "How to structure your output" code block contains the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. Citation literals in render templates leak verbatim into user-facing output — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` §"Correct pattern" for why the imperative belongs in body prose, not in the render template. Failure message names this gotcha by path.
 
-All three checks anchor on the **outermost `#` title inside a fenced code block**. The canonical layout (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions") places title on line 1 of the rendered output, citation on line 2 (after a blank), and verdict on line 3 (after a blank). The greps verify *citation present in lines 1–3 after title* and *verdict present in lines 1–3 after title* — they do not enforce the line-by-line ordering between citation and verdict; that ordering is the worked-transcript exemplar (`${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md`), not a structural check. A skill author who writes `# title` / `**Verdict:**` / `> Voice and density: …` (verdict before citation) passes the grep; a future tightening could require strict ordering once the worked-transcript shape has been dogfooded across enough real renders.
+Check 13a anchors on the outermost `#` title inside the Output format code block and verifies `**Verdict:**` appears within the first three non-blank lines after that title — the same frame the rule statement uses. Checks 13b/13c grep the SKILL.md/agent body outside code blocks for the imperative literal. Check 13d greps inside Output format / "How to structure your output" code blocks for absence of the citation literal — the inverse of the pre-pivot 13b/13c.
 
-Persisted artifacts inherit the rule because the SKILL.md Output format block is the source of truth for both chat render and persisted file. The validator runs locally and in CI on push/PR via [`.github/workflows/validate.yml`](../../../.github/workflows/validate.yml). A red check blocks merge — checks 13a/13b/13c are part of the structural fence that promotes this invariant from "convention-with-script" to "convention-with-CI-enforcement."
+Persisted artifacts inherit the verdict-leads rule because the SKILL.md Output format block is the source of truth for both chat render and persisted file. The validator runs locally and in CI on push/PR via [`.github/workflows/validate.yml`](../../../.github/workflows/validate.yml). A red check blocks merge — checks 13a/13b/13c/13d are part of the structural fence that promotes this invariant from "convention-with-script" to "convention-with-CI-enforcement."
 
 ## Known bypass risks
 
@@ -71,7 +75,8 @@ When reviewing a change to a verdict-led skill (or adding one):
 - [ ] Does the verdict value come from the controlled vocabulary documented in the skill body?
 - [ ] Is the same shape carried into the persisted artifact, if one exists?
 - [ ] If the skill is new, is it added to this invariant's "Applies to" list?
-- [ ] Does the skill's Output format block carry the voice citation line?
+- [ ] Does the skill body carry the voice imperative (`Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.`) outside any code block?
+- [ ] Does the skill's Output format block contain *no* citation literal?
 - [ ] `bash scripts/validate_plugin.sh` passes?
 
 ## Related
@@ -88,4 +93,5 @@ When reviewing a change to a verdict-led skill (or adding one):
 - 2026-05-04 — Created during the `cut-anchor-pin` UX/conciseness rewrite, as the one rule from `references/output-voice.md` promoted to invariant.
 - 2026-05-04 — Repair pass 1: pinned the canonical layout as title-then-citation-then-verdict (matching the worked transcript), tightened the rule statement to enumerate the three lines explicitly, and clarified that persisted artifacts inherit the rule because the SKILL.md Output format block is the single source of truth for both chat and persisted shape.
 - 2026-05-04 — Implementation pass: validator checks 13a (verdict-leads), 13b (voice-citation, skills), and 13c (voice-citation, agents) wired into `scripts/validate_plugin.sh`. The invariant is now mechanically enforced; prior "planned for implementation pass" prose retired.
-- 2026-05-04 — Polish pass (post review-diff): clarified that the greps verify *citation/verdict present in lines 1–3 after title* but do not enforce the structural ordering between citation and verdict; that ordering is the worked-transcript exemplar, not a structural check. A future tightening can require strict ordering once the shape is dogfooded.
+- 2026-05-04 — Polish pass (post review-diff): clarified that the greps verify *citation/verdict present in lines 1–3 after title* but do not enforce the structural ordering between citation and verdict; that ordering is the worked-transcript exemplar, not a structural check. A future tightening can require strict ordering once the shape is dogfooded. *(Superseded by the voice-imperative pivot entry below: the citation grep was retargeted to body-prose-imperative; the line-window frame is now stated as "first three non-blank lines after the outermost `#` title" — see `:12,14,55,60`.)*
+- 2026-05-04 — Voice-imperative pivot: the voice-citation literal previously rendered into user-facing output because the convention placed it inside the Output format code block (a render template the model reproduces in output). Replaced with a body-level imperative in skill/agent prose; loading happens via a `Read` tool call the imperative triggers. Validator Checks 13b/13c retargeted from "citation present in render template" to "imperative present in body"; new Check 13d added to lint for absence of the citation literal inside render templates (catches half-migrations). Canonical layout simplified to title-then-verdict (no citation line). The named invariant (`VERDICT_BEFORE_EVIDENCE`) is unchanged in spirit; only its co-resident voice-imperative grep is retargeted. See `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md`.

@@ -18,17 +18,23 @@ Cell legend:
 - `✓` — both spec required and agent file complies (the steady-state value)
 - `✗` — spec required and agent file is non-compliant (regression; should not appear in a clean release)
 
-| Agent | Severity | Category | Why it matters | Evidence | Recommended fix | Substrate artifact | Voice citation |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| substrate-alignment-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| structure-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| library-native-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| agent-readiness-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| spec-cohesion-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Agent | Severity | Category | Why it matters | Evidence | Recommended fix | Substrate artifact | Voice imperative in body | Citation absent from output template |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| substrate-alignment-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| structure-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| library-native-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| agent-readiness-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| spec-cohesion-reviewer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The first six columns reflect the state *after* the 2026-05-04 skill-architecture repair pass. Prior state showed drift: `substrate-alignment-reviewer` dropped Evidence; `library-native-reviewer` and `agent-readiness-reviewer` dropped Category; `spec-cohesion-reviewer` used a different shape entirely (Risk / Substrate artifact / Suggested repair). That repair pass swept all five to canonical.
 
-The "Voice citation" column was added in the 2026-05-04 `cut-anchor-pin` substrate rewrite. Each agent's "How to structure your output" code block opens with the literal line `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. All five cells are `✓` after the cut-anchor-pin implementation pass (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-cut-anchor-pin.md` §"Implementation pass") added the citation line to each agent file and the validator grep that pins it.
+The last two columns track the voice-imperative convention. The "Voice imperative in body" column verifies each agent's system-prompt body carries the literal `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` outside fenced code blocks (validator Check 13c). The "Citation absent from output template" column verifies the literal `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` does **not** appear inside the agent's "How to structure your output" code block (validator Check 13d). Both columns landed `✓` after the 2026-05-04 voice-citation-imperative pivot (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md`), which retargeted Check 13c from "citation present in output template" to "imperative present in body" and added the new anti-citation Check 13d. The pre-pivot single "Voice citation" column tracked a different artifact (citation in the output template) and is retired.
+
+### Imperative placement (convention, not column)
+
+The voice imperative lives in body prose at a specific place in each agent: as the opening prose paragraph of the "How to structure your output" section, immediately above the canonical six-field finding-shape code block. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions" rule 1, this is the agent-side analog of the skill-side `## Voice` section: skills carry the imperative in a top-level section between `## What this skill produces` and `## Hard constraints`; agents (which are system prompts, not SKILL.md files with the same section structure) carry it inside their render-shaping section.
+
+Validator Check 13c greps each agent body (outside fenced code blocks) for the imperative literal — it does **not** verify the placement (above the code block, in the "How to structure your output" section). Placement is convention reinforced by this matrix and the reviewer-agent template; drift in placement passes Check 13c silently and is caught only at review time. All five reviewer agents currently place the imperative correctly per the template; if a future contributor places it elsewhere (a "Tone" subsection, a "What you check" section, frontmatter), the synthesizer's chat render still works but the placement convention has drifted and a `cohesive:review-codebase` or `cohesive:review-diff` finding should fix it.
 
 ### Verdict-leads is tracked elsewhere
 

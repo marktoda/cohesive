@@ -13,6 +13,10 @@ description: Use after brainstorm-design has produced an approved direction and 
 
 This is one of Cohesive's flagship skills. Spec rewriting is the cheapest place to discover that a design is wrong, and the rewrite-then-review loop is what makes that discovery happen *before* code.
 
+## Voice
+
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+
 ## Hard constraints
 
 1. **An approved direction is required.** Don't try to detect prior brainstorm output from session memory — per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, that detection silently degrades. Instead, open the turn with the canonical forced-choice question:
@@ -124,8 +128,6 @@ The skill's chat output (separate from the file changes) is short:
 
 ```md
 # Spec Rewrite Complete — <topic>
-
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Worktree:** `.worktrees/cohesive-<slug>` on `design/<slug>`
 **Approved direction:** <option name>

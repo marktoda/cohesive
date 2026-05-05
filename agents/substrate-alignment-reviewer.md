@@ -84,11 +84,11 @@ For `--scope diff`: read only the diff and substrate it touches.
 
 ## How to structure your output
 
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the render template below — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+
 Return findings ranked by leverage × severity. Each finding uses the canonical six-field shape from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions":
 
 ```md
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
-
 ### <Finding title>
 
 **Severity:** Blocker / High / Medium / Low

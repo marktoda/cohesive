@@ -11,6 +11,10 @@ A change-cohesion review focused on whether the change preserves substrate. Rend
 
 For full architecture review use [`cohesive:review-codebase`](${CLAUDE_PLUGIN_ROOT}/skills/review-codebase/SKILL.md). For "what memory is missing" inventories, use [`cohesive:audit-substrate`](${CLAUDE_PLUGIN_ROOT}/skills/audit-substrate/SKILL.md).
 
+## Voice
+
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+
 ## Hard constraints
 
 1. **Substrate discovery is a prereq; ask the user, don't guess.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, detecting prior discovery from session memory silently degrades. Open the turn with the canonical forced-choice question:
@@ -57,8 +61,6 @@ Use this format:
 ```md
 # Change Cohesion Review
 
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
-
 **Verdict:** Pass / Pass with notes / Needs substrate / Risky / Block
 
 ## Main concern
@@ -103,8 +105,6 @@ The canonical render produced in step 4:
 
 ```md
 # Change Cohesion Review
-
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Verdict:** Pass / Pass with notes / Needs substrate / Risky / Block
 

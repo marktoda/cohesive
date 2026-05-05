@@ -14,16 +14,18 @@ Mirror skill: `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-sha
 
 ## Cells: required sections
 
-| Skill | What this skill produces | Hard constraints | Process | Output format | Acceptance criteria | What this skill is *not* |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|
-| cohesively | ~ (named "What this skill does"; router exemption) | ~ (named "Required behavior"; router exemption) | ~ (named "Routes"; router exemption) | ~ (named "Output"; router exemption) | ✓ | ✓ |
-| discover-substrate | ✓ | ~ (replaced by "When to invoke" + "Inputs"; documented exemption) | ✓ | ✓ | ✓ | ✓ |
-| brainstorm-design | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| rewrite-specs | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| validate-rewrite | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| review-codebase | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| review-diff | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| audit-substrate | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Skill | What this skill produces | Voice | Hard constraints | Process | Output format | Acceptance criteria | What this skill is *not* |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| cohesively | ~ (named "What this skill does"; router exemption) | ~ (router exempt; render budget too small to need imperative) | ~ (named "Required behavior"; router exemption) | ~ (named "Routes"; router exemption) | ~ (named "Output"; router exemption) | ✓ | ✓ |
+| discover-substrate | ✓ | ✓ | ~ (replaced by "When to invoke" + "Inputs"; documented exemption) | ✓ | ✓ | ✓ | ✓ |
+| brainstorm-design | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| rewrite-specs | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| validate-rewrite | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| review-codebase | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| review-diff | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| audit-substrate | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+The `Voice` column tracks the body-level imperative section added in the 2026-05-04 voice-citation-imperative pivot (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md`). For each non-router skill, the `## Voice` section appears between `## What this skill produces` and `## Hard constraints` (or before `## When to invoke` for `discover-substrate`) and contains the literal imperative `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.`. The router (`cohesively`) is exempt — its render budget is 1–2 sentences and its dispatched subskills carry the voice load. Validator Check 13b greps each non-router SKILL.md body (outside fenced code blocks) for the imperative; this matrix tracks the section's *placement* (a stricter rule than the validator's grep) — drift in placement is a regression to file even if Check 13b passes.
 
 ## Cells: optional sections
 
@@ -72,3 +74,4 @@ These two exemptions are the only deviations accepted in v0.1. Any other deviati
 ## History
 
 - 2026-05-04 — Created during the v0.1 release-gate Phase 1+2 substrate repair pass. Promoted from finding #7 of `docs/history/reviews/2026-05-04-skill-quality-self-review.md`. The same pass added the canonical "What this skill is *not*" section to `validate-rewrite/SKILL.md`, which the matrix would otherwise have shown as a `✗`.
+- 2026-05-04 — Voice-citation-imperative pivot repair pass: added the `Voice` column to track the new mandatory `## Voice` section in 7 non-router skills (and the router exemption). See `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md` §"Repair pass 1 (post validation)" — finding I1.

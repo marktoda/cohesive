@@ -86,11 +86,17 @@ All references to skills, references, templates, scripts use `${CLAUDE_PLUGIN_RO
 
 Reviewer-agent findings are consumed by a synthesizing skill (`review-codebase`, `review-diff`, `validate-rewrite`) which renders the user-facing chat output. The agent itself does not render to the user directly. Two rules apply:
 
-1. **Voice citation.** The first non-blank line of the agent's "How to structure your output" code block is:
+1. **Voice imperative.** Every reviewer agent body carries, as the opening prose paragraph of its "How to structure your output" section (above the code block, not inside it), a single-line imperative directing the model to load the voice guide before generating findings:
+
    ```
-   > Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
+   Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.
    ```
-   Reviewer findings flow through a synthesizing skill that renders to chat, so voice rules apply transitively. The citation pulls the voice guide into context at finding-generation time. Reviewer agents do not render verdicts — verdicts are the synthesizing skill's job — so `VERDICT_BEFORE_EVIDENCE` does not apply directly to agent findings; it applies to the skill's render of those findings.
+
+   The imperative lives in body prose — outside any fenced code block — so it triggers a `Read` tool call at finding-generation time without leaking into user-facing output. The "How to structure your output" code block immediately below stays a pure render template (six-field finding shape only); it carries **no instructions** and **no citation literal**. Instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents). Reviewer findings flow through a synthesizing skill that renders to chat, so voice rules apply transitively; the imperative pulls the voice guide into context at the moment the agent generates findings the synthesizer will later render. Reviewer agents do not render verdicts — verdicts are the synthesizing skill's job — so `VERDICT_BEFORE_EVIDENCE` does not apply directly to agent findings; it applies to the skill's render of those findings.
+
+   The imperative's body-prose placement is the asymmetry with skills: skills carry the imperative in a top-level `## Voice` section between `## What this skill produces` and `## Hard constraints`; reviewer agents (which are system prompts, not SKILL.md files) carry it inside "How to structure your output" because that is the agent's render-shaping section and the closest analog. The `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` matrix tracks per-agent compliance via the "Voice imperative in body" and "Citation absent from output template" columns.
+
+   `validate_plugin.sh` Check 13c greps each `agents/*-reviewer.md` body (outside fenced code blocks) for the imperative literal; Check 13d greps inside the agent's first code block to confirm the citation literal does **not** appear there.
 
 2. **Canonical six-field finding shape.** Every finding uses these six fields, in this order:
 
@@ -151,6 +157,7 @@ The five existing reviewer agents have minor section-order drift (some put "How 
 | Output without "Substrate artifact to add or update" lines | Findings without targets aren't actionable | Every finding maps to an artifact |
 | Marking every finding "Blocker" | Prioritization signal lost | At most ~10–20% of findings should be Blocker |
 | First-person framing ("I'll review...") | Convention is third-person agent description | "You are the X reviewer..." in agent body, third-person in description frontmatter |
-| "How to structure your output" missing the voice citation | Voice rules drift transitively through the synthesizing skill | Open the output block with `> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` |
+| "How to structure your output" missing the voice imperative in body prose | Voice rules drift transitively through the synthesizing skill — the load doesn't trigger | Add the imperative `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` as the opening prose paragraph of "How to structure your output," outside any fenced code block |
+| Voice citation literal placed inside the "How to structure your output" code block | Instructions in render templates leak verbatim into the synthesized chat output; users see `> Voice and density: ...` rendered | Remove the citation from the code block; the imperative belongs in body prose above the template, not inside it |
 | Finding render with `####` or `#####` headers | Header soup propagates to the synthesized chat output | Cap finding nesting at `###`; use bullets for sub-structure |
 | Narrative paragraphs instead of the six-field finding shape | Synthesizer can't merge non-canonical findings | Use the six-field block verbatim per [reviewer-output-shape matrix](../matrices/reviewer-output-shape.md) |

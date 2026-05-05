@@ -11,6 +11,10 @@ A **substrate audit report** at `docs/history/reviews/YYYY-MM-DD-<slug>-audit-su
 
 This skill is intentionally separate from `review-codebase` and `review-diff`. Those reviews dispatch reviewer agents and synthesize a thesis-led report; substrate audit is a single-pass scan that produces a missing-memory inventory. They share neither machinery nor output shape.
 
+## Voice
+
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+
 ## Hard constraints
 
 1. **Substrate discovery is a prereq; ask the user, don't guess.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, detecting prior discovery from session memory silently degrades. Open the turn with the canonical forced-choice question:
@@ -60,8 +64,6 @@ Walk each axis from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`. For e
 
 ```md
 # Substrate Audit
-
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Verdict:** Substrate sound / Substrate gaps / Substrate sparse
 
@@ -123,8 +125,6 @@ The skill renders a chat trailer (canonical verdict-led shape below) and persist
 
 ```md
 # Substrate Audit — <scope>
-
-> Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
 
 **Verdict:** Substrate sound / Substrate gaps / Substrate sparse
 

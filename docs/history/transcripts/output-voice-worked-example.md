@@ -70,8 +70,6 @@ Both renders below assume `discover-substrate` and the two reviewer agents have 
 
 > # Change Cohesion Review
 >
-> > Voice and density: ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md
->
 > **Verdict:** Pass with notes
 >
 > ## Main concern
@@ -96,13 +94,14 @@ Both renders below assume `discover-substrate` and the two reviewer agents have 
 
 **Why this works:**
 
-- Verdict appears in line 5 (after the title and the voice citation). Reader knows the answer immediately.
+- Verdict appears within the first three non-blank lines after the title (the frame the validator and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` use — counting non-blank lines, not raw line numbers, because the blank between title and verdict is a rendering choice). In this render it lands on the first non-blank line — the canonical shape; the three-line allowance accommodates skills that introduce a thesis line before the verdict. Reader knows the answer immediately.
+- No instruction lines in user-facing output. The voice guide that shaped this render was loaded from a body-level imperative in the skill — `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` — not from a citation inside the render template. Citations in render templates leak verbatim to users (the v0.1 pre-pivot mistake; see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` §"Correct pattern").
 - 3 levels of header nesting maximum, all `##` or `###`.
 - Findings are a table — `Severity / Area / Finding / Suggested substrate` per row, ranked by leverage. Reader scans the column they care about.
 - Single next-step recommendation, picked by verdict.
 - No reviewer attribution. The findings stand on their own.
 - No methodology recap. No hedge words. No pleasantries.
-- ~25 lines of chat render vs ~80 in the wordy version. Same information; different render.
+- ~22 lines of chat render vs ~80 in the wordy version. Same information; different render.
 
 ---
 
@@ -122,7 +121,7 @@ The cuts are not about saying less. They are about saying the same thing in a re
 
 ---
 
-## Captured transcripts (queued)
+## Captured transcripts (required before promoting voice-imperative to invariant)
 
 This file is an *authored* contrast — both renders were written for pedagogy. Every anti-pattern in the wordy render has been observed in real Cohesive runs, but the side-by-side itself is constructed.
 
@@ -132,9 +131,22 @@ The next substrate task in this area is to capture a *real* transcript from a do
 docs/history/transcripts/output-voice-captured-YYYY-MM-DD-<slug>.md
 ```
 
-A real capture carries more anchoring weight than an authored example because the anti-patterns it shows are observed-not-imagined, and the rationale-for-cuts can quote the actual generated output. Until a real capture lands, this authored transcript is the canonical reference; once a capture exists, the captured file becomes canonical and this authored file is preserved as the original pedagogical reference.
+A real capture carries two kinds of weight. **Pedagogical:** the anti-patterns it shows are observed-not-imagined, and the rationale-for-cuts can quote the actual generated output. **Empirical:** the capture is the gating artifact for the voice-imperative load-bearing claim. The post-pivot pattern (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` §"Correct pattern") rests on the assumption that a body-level `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.` imperative actually triggers a Read tool call at chat-render time. Until a captured transcript shows the Read call happening, the assumption is reasoned-but-unverified. The capture is one of the four promotion criteria documented in `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Why the voice imperative is convention-with-grep, not a named invariant"; without it, promotion is blocked.
 
-This task is queued substrate, not blocking. Track in the next dogfood pass.
+Until a real capture lands, this authored transcript is the canonical reference; once a capture exists, the captured file becomes canonical and this authored file is preserved as the original pedagogical reference.
+
+### Acceptance criteria for the captured transcript
+
+A captured transcript counts toward the empirical-load proof when **all four** of the following hold:
+
+1. **Source skill named.** The capture comes from a real, user-invoked run of `cohesive:review-diff`, `cohesive:review-codebase`, or `cohesive:audit-substrate` — one of the verdict-led skills the voice imperative governs. Authored or simulated runs do not count; the capture must be from a session the user actually initiated.
+2. **Tool-call evidence of the Read.** The transcript records a `Read` tool call invoked on `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` (or an equivalent absolute resolution of that path) by the rendering model, *between* the skill's invocation and the chat render. A transcript showing the imperative in the SKILL.md body but no corresponding Read call is empirical evidence the *opposite* way — the imperative is being treated as setup-only context — and disqualifies the rewrite from invariant promotion until the imperative wording is strengthened.
+3. **Voice-rule reflection in the rendered output.** The chat render in the same transcript reflects at least three voice rules from `output-voice.md` §"The five rules" — verdict-leads (rule 1), faithful-subset (rule 2), header-depth cap at `###` (rule 3), branchy content as bullets/tables (rule 4), or single recommended-next move (rule 5). "Reflects" means the rule is observably applied; absence of forbidden phrasings (per §"Forbidden phrasings") also counts. The capture is what proves the load *did the work*, not just that the file was read.
+4. **Persistence path.** The capture lives at `docs/history/transcripts/output-voice-captured-YYYY-MM-DD-<slug>.md` with a frontmatter block naming the source skill, the date, and the runtime context (model, harness version, plugin version). The frontmatter is what makes the capture auditable across release cycles — promotion criterion 1 in `output-voice.md` §"Why the voice imperative is convention-with-grep…" requires *two release cycles without rewording*; release-cycle delineation is reconstructed from frontmatter dates.
+
+A capture meeting all four criteria is sufficient on its own — multiple captures are not required for the empirical-proof gate (criterion 3 of the promotion list). The other three promotion criteria (no rewording across two release cycles, real regression caught by the validator, no rewording anticipated) remain independent gates.
+
+Disqualifying conditions: a capture that is partial (no tool-call log), reconstructed (assembled from multiple sessions), or simulated (the user faked a Read call to satisfy the criterion) does not count. The point of "captured-not-authored" is that the empirical claim is non-fiction; reconstructed evidence reintroduces the authored-fiction problem the gate exists to retire.
 
 ## Notes for future contributors
 
