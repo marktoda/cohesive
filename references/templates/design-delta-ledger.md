@@ -10,7 +10,7 @@ This ledger records *what changed* in the substrate during a `rewrite-specs` pas
 
 A scannable, verbatim-quotable summary of what this rewrite changes. `validate-rewrite` and its dispatched `spec-cohesion-reviewer` agent render this section verbatim into the validation review (after the Executive judgment, before the Blocking issues), so the reader of the validation review sees what's in the rewrite at decision time — what to implement, defer, or merge — without invoking another skill first.
 
-This section is the canonical home of the preamble's category list, authoring rules, and consumer rendering rules. `references/templates/cohesion-review.md`, `agents/spec-cohesion-reviewer.md` ("What you check" item 11), and `skills/validate-rewrite/SKILL.md` (Output format render template) cite this section rather than restate its contents — the single-source-of-truth shape closes the drift surface between author-side and consumer-side specifications.
+This section is the **canonical contract** for the preamble's category list, authoring rules, and consumer rendering rules. `references/templates/cohesion-review.md` §"Delta at a glance" is the *render slot* that quotes the ledger's preamble verbatim into a validation review document; this section is the *contract* that defines what the preamble carries and how consumers handle it. `agents/spec-cohesion-reviewer.md` ("What you check" item 11) and `skills/validate-rewrite/SKILL.md` (Output format render template) cite this section rather than restate its contents — the single-source-of-truth shape closes the drift surface between author-side and consumer-side specifications.
 
 ### Authoring rules
 
@@ -24,6 +24,8 @@ Render every bullet as a count-or-name list. When a category has no entries, ren
 - **Semantic linters:** <name1> (proposed, not yet implemented); <name2> (added) — or `none`
 - **Tests proposed:** <description> — or `none`
 - **Deferred (out of scope this pass):** <items> — or `none`
+
+The 8-category list above is also the substrate-shape input to `cohesive:implement-cohesively` Phase 1's coverage table — Phase 1 maps each delta-ledger entry to ≥1 implementation phase per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`. A future rename or addition of a category here updates Phase 1's coverage shape; treat the rename as a coupled change.
 
 ### Consumer rendering rules
 

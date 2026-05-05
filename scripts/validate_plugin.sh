@@ -426,14 +426,18 @@ fi
 # satisfy; otherwise the cutoff is stable.
 preamble_cutoff='2026-05-05'
 errors_before=$errors
+warnings_before_preamble=$warnings
 if [ -d docs/history/delta-ledgers ]; then
   preamble_check_count=0
   preamble_skipped_count=0
+  preamble_malformed_count=0
   for ledger in docs/history/delta-ledgers/*.md; do
     [ -e "$ledger" ] || continue
     base=$(basename "$ledger" .md)
     date_prefix=${base:0:10}
     if [[ ! "$date_prefix" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+      preamble_malformed_count=$((preamble_malformed_count + 1))
+      warn "$ledger has malformed filename (no leading YYYY-MM-DD prefix per docs/substrate/designs/substrate-layout.md §Naming); skipped from preamble check"
       continue
     fi
     if [[ "$date_prefix" < "$preamble_cutoff" ]]; then
@@ -447,9 +451,9 @@ if [ -d docs/history/delta-ledgers ]; then
   done
   if [ "$errors" -eq "$errors_before" ]; then
     if [ "$preamble_check_count" -eq 0 ]; then
-      ok "Delta at a glance preamble check: no ledgers dated >= $preamble_cutoff present yet (cutoff active; $preamble_skipped_count grandfathered)"
+      ok "Delta at a glance preamble check: no ledgers dated >= $preamble_cutoff present yet (cutoff active; $preamble_skipped_count grandfathered, $preamble_malformed_count malformed)"
     else
-      ok "Delta at a glance preamble present in all $preamble_check_count delta-ledger files dated >= $preamble_cutoff ($preamble_skipped_count grandfathered)"
+      ok "Delta at a glance preamble present in all $preamble_check_count delta-ledger files dated >= $preamble_cutoff ($preamble_skipped_count grandfathered, $preamble_malformed_count malformed)"
     fi
   fi
 fi
