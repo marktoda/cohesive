@@ -99,7 +99,7 @@ When `review-codebase`, `review-diff`, or `validate-rewrite` returns issues, use
 - **Medium** — substrate improvement worth making in the next pass
 - **Low** — taste-level observation; useful context but not actionable on its own
 
-This is the canonical severity vocabulary; reviewer agents (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions") and chat-rendered review outputs cite this list rather than restate it.
+This is the canonical severity vocabulary; reviewer agents (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions") and chat-rendered review outputs cite this list rather than restate it.
 
 ### Verdict → severity-floor mapping (validate-rewrite)
 
@@ -131,7 +131,7 @@ The 5-row table is total over the verdict→severity-floor mapping above: every 
 
 **User override.** The user can override the rule's recommendation ("just merge — I don't care about the Medium", or substrate-note the Low instead of close-inline). The override is a deliberate move against a published default, not a derivation from a menu. Overrides do not require general ledger annotation in v0.1, *except* substrate-note overrides per the section above (which use the ledger §"Remaining ambiguity" residue the rule already provides). The cost of unannotated overrides is observability: the team cannot count silent overrides per release cycle. Re-evaluation trigger: if more than 3 `validate-rewrite` passes in a single release cycle reveal the same finding repeatedly because it was silently overridden, promote a first-class override-residue surface (a §"Overrides applied" section in the ledger) in the next pass and update this clause.
 
-**Citations.** `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format", `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md` §"How to structure your output", `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Recommended next Cohesive skill", and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"When sections may differ" (the `validate-rewrite` deviation entry) all cite this section — including the `Canonical Disposition phrase` column for the literal phrase strings — rather than restate the table. Single canonical home prevents the same multi-surface drift that pre-`design/cohesion-review-cleanup` §"Delta at a glance" exhibited.
+**Citations.** `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format", `${CLAUDE_PLUGIN_ROOT}/agents/spec-cohesion-reviewer.md` §"How to structure your output", `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Recommended next Cohesive skill", and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"When sections may differ" (the `validate-rewrite` deviation entry) all cite this section — including the `Canonical Disposition phrase` column for the literal phrase strings — rather than restate the table. Single canonical home prevents the same multi-surface drift that pre-`design/cohesion-review-cleanup` §"Delta at a glance" exhibited.
 
 ## How findings become substrate
 

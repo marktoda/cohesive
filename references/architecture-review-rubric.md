@@ -17,7 +17,7 @@ In priority order, read what exists:
 2. `architecture.md`
 3. `README.md`
 4. `docs/design/**`, `docs/specs/**`, `docs/adr/**`
-5. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md`)
+5. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md`)
 
 Use `discover-substrate` (or its `scan_substrate.py` script) to enumerate. Don't glob.
 

@@ -1,4 +1,4 @@
-# Three-layer architecture
+# Three-tier architecture
 
 > Cohesive separates workflow orchestration (`skills/`), fresh-context review (`agents/`), and runtime-consumed content (`references/`) into three deliberate tiers. The separation is the load-bearing structural decision in the codebase.
 
@@ -50,15 +50,16 @@ Conflating any two of the three pushes content into the wrong tier and degrades 
 ## Consequences for adding new components
 
 **Adding a skill:**
-- Read [`docs/substrate/designs/skill-conventions.md`](skill-conventions.md). The conventions doc is the canonical shape.
+- Read [`docs/substrate/architecture/skills.md`](skills.md) (per-skill design layer) and [`docs/substrate/architecture/handoffs.md`](handoffs.md) (chain-transition contracts) first; the skill's purpose, ownership, and seams land there.
+- Then read [`docs/substrate/conventions/skill-shape.md`](../conventions/skill-shape.md). The conventions doc is the canonical SKILL.md shape.
 - Update [`ARCHITECTURE.md`](../../../ARCHITECTURE.md) only if the new skill changes the broad architectural shape (rare for an additional subskill).
 - Update [`README.md`](../../../README.md) §"What's in the box" and the on-disk parity check.
 - The skill body cites references and templates; it does not duplicate them.
 
 **Adding an agent:**
-- Read [`docs/substrate/designs/reviewer-agent-template.md`](reviewer-agent-template.md). The template is the canonical shape.
+- Read [`docs/substrate/conventions/reviewer-agent-shape.md`](../conventions/reviewer-agent-shape.md). The shape doc is canonical.
 - The agent's "Inputs you will receive" section names every path the agent will read. The agent does not glob.
-- The agent's "What you must not do" section includes the canonical fresh-eyes preamble (see [`agent-dispatch-protocol.md`](agent-dispatch-protocol.md)).
+- The agent's "What you must not do" section includes the canonical fresh-eyes preamble (see [`docs/substrate/conventions/dispatch-protocol.md`](../conventions/dispatch-protocol.md) for the contract; [`fresh-eyes-review.md`](fresh-eyes-review.md) for the property).
 - The dispatching skill body must be updated to invoke the new agent with the standard input shape.
 
 **Adding a reference:**
@@ -94,6 +95,9 @@ None of these apply in v0.1.
 ## Related substrate
 
 - [`docs/substrate/invariants/PLUGIN_ROOT_PATHS.md`](../invariants/PLUGIN_ROOT_PATHS.md) — every cross-tier reference uses `${CLAUDE_PLUGIN_ROOT}/`.
-- [`agent-dispatch-protocol.md`](agent-dispatch-protocol.md) — the cross-tier interface between skills and agents; describes fresh-eyes as a load-bearing property held by harness subprocess isolation plus convention reinforcement.
-- [`references/locality-over-centralization.md`](locality-over-centralization.md) — the principle this separation operationalizes.
+- [`fresh-eyes-review.md`](fresh-eyes-review.md) — the cross-tier interface between skills and agents; describes fresh-eyes as a load-bearing property held by harness subprocess isolation plus convention reinforcement.
+- [`docs/substrate/conventions/dispatch-protocol.md`](../conventions/dispatch-protocol.md) — the prescriptive contract enforcing fresh-eyes review.
+- [`skills.md`](skills.md) — the per-skill design layer above SKILL.md bodies.
+- [`handoffs.md`](handoffs.md) — chain-transition contracts and re-entry edges.
+- [`references/locality-over-centralization.md`](../../../references/locality-over-centralization.md) — the principle this separation operationalizes.
 - [`composition-with-superpowers.md`](composition-with-superpowers.md) — extends the same separation principle outward (Cohesive owns substrate; Superpowers owns implementation).

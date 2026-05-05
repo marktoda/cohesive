@@ -145,17 +145,22 @@ references/                         Runtime methodology cited by skills/agents
                                     claimed system shape, substrate discovery report
 
 docs/substrate/                     Contributor-facing rules about THIS repo:
-  designs/
-    skill-conventions.md            Canonical SKILL.md shape + v0.1 conventions
-    reviewer-agent-template.md      Canonical reviewer-agent shape
-    substrate-layout.md             Where this repo's artifacts live
-    three-layer-architecture.md     Plugin's architectural layout
+  architecture/                     Cross-cutting architecture (read when changing system shape):
+    three-tier-architecture.md      skills/agents/references separation
     composition-with-superpowers.md Plugin composition design (incl. implement-cohesively
                                     seam: tight composition with no fallback)
-    agent-dispatch-protocol.md      Reviewer-agent dispatch contract
+    fresh-eyes-review.md            The load-bearing review property
+    skills.md                       Per-skill design layer (one section per skill)
+    handoffs.md                     Chain transition contracts + re-entry edges
+  conventions/                      Prescriptive component rules (read when authoring):
+    skill-shape.md                  Canonical SKILL.md shape + when-to-edit-which-layer rule
+    reviewer-agent-shape.md         Canonical reviewer-agent shape
+    dispatch-protocol.md            Reviewer-agent dispatch-prompt contract
+    substrate-layout.md             Where this repo's artifacts live
   invariants/                       Named global rules: PLUGIN_ROOT_PATHS,
                                     VERDICT_BEFORE_EVIDENCE,
-                                    IMPLEMENTATION_PLAN_COVERS_DELTA
+                                    IMPLEMENTATION_PLAN_COVERS_DELTA,
+                                    SKILL_DESIGN_DOC_SECTION
   gotchas/                          Documented scars: soft-prereqs,
                                     discovery-vs-superpowers,
                                     wordy-output, style-guide-rot,

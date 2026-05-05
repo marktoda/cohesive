@@ -22,20 +22,20 @@ The matrix is normative. When a user request matches a row, the router must sele
 | R006 | Branch / working-changes review | "review my diff" / "review this branch" / "review my changes" | `review (diff)` | Skill detects diff via `git diff main...HEAD` | _none_ |
 | R007 | Substrate audit explicit | "what memory is missing" / "audit substrate" / "what specs/invariants should we have" | `audit (substrate)` | Invokes the standalone `audit-substrate` skill (single-pass scan, no reviewer-agent dispatch) | _none_ |
 | R008 | Rewrite-only with named direction | "rewrite the specs for [chosen Option C]" / "update design docs to reflect Y" | `rewrite-only` | User has chosen direction; skip brainstorm | _none_ |
-| R009 | Rewrite-only without named direction | "rewrite the specs for X" (no direction in input) | `rewrite-only` (with question) | Asks the canonical clarifying question per the clarifying-question convention in `docs/substrate/designs/skill-conventions.md`; user can answer "run brainstorm first" | _none_ |
+| R009 | Rewrite-only without named direction | "rewrite the specs for X" (no direction in input) | `rewrite-only` (with question) | Asks the canonical clarifying question per the clarifying-question convention in `docs/substrate/conventions/skill-shape.md`; user can answer "run brainstorm first" | _none_ |
 | R010 | Artifact request (V1 deferred) | "name an invariant" / "encode a behavior matrix" / "create a gotcha doc" | `artifact` | Returns template path + offers inline fill; dedicated artifact skills ship in V1 | _none_ |
 | R011 | Ambiguous "review X" with X being a small change set | "review the changes I just made" with <500 line diff | `review (diff)` | Default per resolution rule 3 (diff-shaped scope) | _none_ |
 | R012 | Ambiguous "review X" with X being whole repo | "review the project" / "review the system" | `review (codebase)` | Default per resolution rule 3 (whole-repo scope) | _none_ |
 | R013 | Ambiguous retrospective | "look at the auth code" with no scope hint | `audit (substrate)` | Default per resolution rule 4 (retrospective + ambiguous) | _none_ |
 | R014 | Ambiguous forward-looking | "thinking about how to handle Slack" | `design` | Default per resolution rule 4 (forward-looking + ambiguous) | _none_ |
 | R015 | Implement after approved rewrite | "implement the approved rewrite" / "land docs with implementation" / "implement-cohesively" / "drive implementation against the delta" / "ship the rewrite" | `implement` | Requires existing `validate-rewrite` Approved verdict + design delta ledger; dispatches `cohesive:implement-cohesively` (which composes `superpowers:writing-plans` + `superpowers:executing-plans` per phase). Closes the failure mode in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md`. | _none_ |
-| R016 | Implement-shaped request without approved rewrite | "implement now" / "let's ship this" / "land it" with no recent `validate-rewrite` Approved verdict | `implement` (with question) | Asks the canonical clarifying question per the clarifying-question convention in `docs/substrate/designs/skill-conventions.md`; user can answer "run the design route first" or pass an Approved verdict path. | _none_ |
+| R016 | Implement-shaped request without approved rewrite | "implement now" / "let's ship this" / "land it" with no recent `validate-rewrite` Approved verdict | `implement` (with question) | Asks the canonical clarifying question per the clarifying-question convention in `docs/substrate/conventions/skill-shape.md`; user can answer "run the design route first" or pass an Approved verdict path. | _none_ |
 
 ## Default cells (used when no specific row matches)
 
 | Cell ID | Scenario | Selected route | Why |
 |---|---|---|---|
-| R900 | Verb tense + scope hint both unclear | Ask the canonical clarifying question | Per the clarifying-question convention in `docs/substrate/designs/skill-conventions.md`; never default-route silently |
+| R900 | Verb tense + scope hint both unclear | Ask the canonical clarifying question | Per the clarifying-question convention in `docs/substrate/conventions/skill-shape.md`; never default-route silently |
 | R901 | User asks for two routes simultaneously ("design AND review X") | Pick one; user can ask twice | Per `cohesively/SKILL.md` Red flags |
 
 ## Rules
@@ -43,7 +43,7 @@ The matrix is normative. When a user request matches a row, the router must sele
 - Every cell has a stable ID (R001..R0NN). Once assigned, an ID is never reused even if the cell is removed.
 - Tests should be named after matrix cells where practical (`test_R007_substrate_audit_trigger`).
 - New routes added to the router require new cells *before* implementation.
-- The router's announcement (per the router-announcement convention in `docs/substrate/designs/skill-conventions.md`) names the selected cell ID for transcript-traceability when in doubt.
+- The router's announcement (per the router-announcement convention in `docs/substrate/conventions/skill-shape.md`) names the selected cell ID for transcript-traceability when in doubt.
 - When two cells could both apply, the resolution order from `cohesively/SKILL.md`'s "Routing decision logic" wins: explicit instruction → verb tense → scope hint → default.
 
 ## Dispatch prompt contract (per route)
@@ -87,7 +87,7 @@ This grid is normative. Adding a route or subskill requires updating this sectio
 
 ## Related substrate
 
-- **`docs/substrate/designs/skill-conventions.md`** §"Router conventions" — the router-announcement and clarifying-question conventions every cell selection complies with.
+- **`docs/substrate/conventions/skill-shape.md`** §"Router conventions" — the router-announcement and clarifying-question conventions every cell selection complies with.
 - **`skills/cohesively/SKILL.md`** — the router skill body. This matrix is the test artifact for that skill.
 
 ## History

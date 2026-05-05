@@ -8,7 +8,7 @@ description: Use after brainstorm-design has produced an approved direction and 
 ## What this skill produces
 
 - A **set of rewritten docs** that describe the system's chosen end state in present-tense, normative language
-- A **design delta ledger** at `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md`) recording every change
+- A **design delta ledger** at `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md`) recording every change
 - A handoff to `validate-rewrite` for fresh-eyes review
 
 This is one of Cohesive's flagship skills. Spec rewriting is the cheapest place to discover that a design is wrong, and the rewrite-then-review loop is what makes that discovery happen *before* code.
@@ -60,7 +60,7 @@ Announce in chat: "Working in worktree `.worktrees/cohesive-${slug}` on branch `
 
 ### 0. Resolve the artifact directory
 
-Before rewriting any docs, resolve where the design delta ledger will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` §"Artifact directory resolution" with artifact category `delta-ledgers/`:
+Before rewriting any docs, resolve where the design delta ledger will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Artifact directory resolution" with artifact category `delta-ledgers/`:
 
 1. If `docs/history/delta-ledgers/` exists, write there.
 2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `delta-ledgers/` subdir alongside it.
@@ -76,9 +76,25 @@ Inputs:
 - The substrate discovery from `discover-substrate` (existing specs/matrices/invariants and what was missing)
 - Pressure-test answers (which docs change, which concepts get renamed, which invariants are added)
 
-### 1a. Repair-pass mode (if the input is a validate-rewrite review)
+### 1a. Classify the rewrite
 
-When the input is a `validate-rewrite` review with a `Repair → re-validate` or `Close in same worktree → merge` disposition, "the recommended direction" is the enumerated repair list, not a brainstorm option. Skip Step 2's full doc-surface scan — the surface is already fixed by the review's findings. Each ranked repair already names a specific artifact (file:line, named invariant, gotcha, matrix); rewrite those surfaces to address the finding. The design delta ledger §"Per-file changes" entries cite the originating review finding by ID (e.g., `Closes B1`, `Closes I2`), and the §"Delta at a glance" preamble names the source review path so the next `validate-rewrite` reader sees this as a repair pass rather than a fresh rewrite.
+Before identifying the doc surface, classify whether the rewrite is:
+
+- **Pure implementation** — touches `${CLAUDE_PLUGIN_ROOT}/skills/<name>/SKILL.md` bodies and other implementation surfaces only. No skill purpose/ownership/seam/verdict changes. Skip the design layer; the rewrite proceeds against SKILL.md and the surrounding implementation surface.
+- **Design** — touches skill purpose, ownership, seams, verdicts, or the chain itself. Update `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` (per-skill section) and/or `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` (handoff contracts) **first** in this rewrite. SKILL.md changes follow.
+- **Mixed** — both. List the design-layer changes *first* in the delta ledger, then the implementation changes. Both land in the same delta ledger but the design layer is the substrate; the SKILL.md is the implementation of that substrate.
+
+Default to **Mixed** when ambiguous. The cost of over-classifying is one additional doc edit; the cost of under-classifying is a substrate-implementation collapse. The `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"When to edit SKILL.md alone, and when to edit the design layer first" rule names the criteria.
+
+The classification appears in the delta ledger's `## Delta at a glance` preamble explicitly:
+
+> "This rewrite is [Pure implementation / Design / Mixed]. Design-layer changes: [list]. Implementation changes: [list]."
+
+This classification is what `spec-cohesion-reviewer` reads (lens 1: substrate-first compliance) during `validate-rewrite` to verify the rewrite touched the right layer first.
+
+### 1b. Repair-pass mode (if the input is a validate-rewrite review)
+
+When the input is a `validate-rewrite` review with a `Repair → re-validate` or `Close in same worktree → merge` disposition, "the recommended direction" is the enumerated repair list, not a brainstorm option. Skip Step 2's full doc-surface scan — the surface is already fixed by the review's findings. Each ranked repair already names a specific artifact (file:line, named invariant, gotcha, matrix); rewrite those surfaces to address the finding. The design delta ledger §"Per-file changes" entries cite the originating review finding by ID (e.g., `Closes B1`, `Closes I2`), and the §"Delta at a glance" preamble names the source review path so the next `validate-rewrite` reader sees this as a repair pass rather than a fresh rewrite. Step 1a's classification still applies — a repair-pass rewrite is typically **Pure implementation** (textual fixes against named findings) but can be **Mixed** when the repair touches design-layer surfaces.
 
 ### 2. Identify the doc surface to rewrite
 
@@ -105,7 +121,7 @@ For each new doc, use the appropriate template:
 - Substrate map: `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-map.md`
 - Claimed system shape (Phase 1 of `cohesive:review-codebase`): `${CLAUDE_PLUGIN_ROOT}/references/templates/claimed-system-shape.md`
 
-Place new canonical artifacts (invariants, matrices, gotchas) under `docs/substrate/<category>/` per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md`. If the repo has its own convention (`docs/design/`, `docs/specs/`, `docs/adr/`, etc.), extend that — don't impose a parallel layout.
+Place new canonical artifacts (invariants, matrices, gotchas) under `docs/substrate/<category>/` per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md`. If the repo has its own convention (`docs/design/`, `docs/specs/`, `docs/adr/`, etc.), extend that — don't impose a parallel layout.
 
 ### 4. Update the substrate map
 

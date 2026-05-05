@@ -36,7 +36,7 @@ Each subskill that has `discover-substrate` as a prereq opens its turn with a sh
 
 > "I see we're about to run [subskill]. Has substrate discovery already happened for this change surface, or should I run `discover-substrate` first?"
 
-This complies with the clarifying-question convention in `docs/substrate/designs/skill-conventions.md`: a forced choice between two specific options. The user answers in one word ("yes" / "run it"), the subskill proceeds with explicit knowledge of the state, and no false-positive heuristic runs.
+This complies with the clarifying-question convention in `docs/substrate/conventions/skill-shape.md`: a forced choice between two specific options. The user answers in one word ("yes" / "run it"), the subskill proceeds with explicit knowledge of the state, and no false-positive heuristic runs.
 
 For the router-driven case, the router passes an explicit "discovery already done; here is the report" flag in its dispatch instruction, so the subskill skips the question.
 
@@ -44,7 +44,7 @@ Implementation outline (for the V1 enforcement pass):
 
 1. Update `skills/brainstorm-design/SKILL.md`, `skills/rewrite-specs/SKILL.md`, `skills/review-codebase/SKILL.md`, `skills/review-diff/SKILL.md`, and `skills/audit-substrate/SKILL.md` "Hard constraints" / "Process" sections to ask the canonical question whenever discovery output is not explicitly passed in. (Done in v0.1.)
 2. Update `skills/cohesively/SKILL.md` route definitions to pass an explicit "discovery already complete; report at <path>" instruction when the router has run discovery itself, codified in the "Dispatch prompt contract" section. (Done in v0.1.)
-3. Document the question form in `docs/substrate/designs/skill-conventions.md` under "Clarifying questions." (Done in v0.1.)
+3. Document the question form in `docs/substrate/conventions/skill-shape.md` under "Clarifying questions." (Done in v0.1.)
 
 ## Structured-artifact handoff is not this failure mode
 
@@ -56,8 +56,8 @@ The implementation belongs in the consuming skill body (e.g., `rewrite-specs` Ha
 
 ## Related conventions
 
-- **Clarifying-question convention** ([`docs/substrate/designs/skill-conventions.md`](../designs/skill-conventions.md) §"Clarifying questions") — the prereq detection question must be a forced choice, not a vague open prompt.
-- **Recommended-next-skill convention** ([`docs/substrate/designs/skill-conventions.md`](../designs/skill-conventions.md) §"Output format conventions") — when the user says "no, run it first," the subskill recommends `cohesive:discover-substrate` rather than fumbling forward.
+- **Clarifying-question convention** ([`docs/substrate/conventions/skill-shape.md`](../conventions/skill-shape.md) §"Clarifying questions") — the prereq detection question must be a forced choice, not a vague open prompt.
+- **Recommended-next-skill convention** ([`docs/substrate/conventions/skill-shape.md`](../conventions/skill-shape.md) §"Output format conventions") — when the user says "no, run it first," the subskill recommends `cohesive:discover-substrate` rather than fumbling forward.
 
 ## Tests / checks that preserve this
 

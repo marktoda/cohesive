@@ -25,7 +25,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ### 0. Resolve the artifact directory
 
-Before dispatching the reviewer agent, resolve where the validation report will be persisted. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
+Before dispatching the reviewer agent, resolve where the validation report will be persisted. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Artifact directory resolution" with artifact category `reviews/`:
 
 1. If `docs/history/reviews/` exists, write there.
 2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `reviews/` subdir alongside it.
@@ -79,7 +79,7 @@ Run the agent in the foreground — its result is what this skill returns.
 
 ### 3. Render the verdict and persist
 
-When the agent returns, surface its report in chat. By default, also write it to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md`. Reviews are append-only history per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/substrate-layout.md` — commit them.
+When the agent returns, surface its report in chat. By default, also write it to `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md`. Reviews are append-only history per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` — commit them.
 
 If the user passed `--no-write`, render in chat only and skip persistence. The router's dispatch prompt for the `design` route step 4 and the `rewrite-only` route step 2 includes the ledger path; persistence is the default in both router-driven and direct-invocation cases.
 

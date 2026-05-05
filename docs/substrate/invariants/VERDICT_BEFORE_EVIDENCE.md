@@ -13,7 +13,7 @@ For every Cohesive skill in the **verdict-led** scope below, the canonical "Outp
 
 The frame is **non-blank lines**, counted from the line after the outermost `#` title. The validator and the worked transcript at `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md` both use this frame; counting raw lines (including blanks) is not normative because the blank between title and verdict is a rendering choice, not a positional constraint.
 
-The voice guide (`${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`) is loaded via a body-level imperative in the skill prose (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions" rule 1), not via a citation in the Output format block — the Output format block is a render template, and instructions placed inside it leak verbatim into user-facing output.
+The voice guide (`${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`) is loaded via a body-level imperative in the skill prose (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" rule 1), not via a citation in the Output format block — the Output format block is a render template, and instructions placed inside it leak verbatim into user-facing output.
 
 The rule applies to:
 
@@ -39,7 +39,7 @@ Both surfaces are enforced by the validator grep (see "Enforcement" below) — t
 - `skills/discover-substrate/SKILL.md` — produces a substrate inventory, not a verdict
 - `skills/brainstorm-design/SKILL.md` — produces a recommendation; no controlled-vocabulary verdict (a "Recommendation" header is the analogue)
 - `skills/rewrite-specs/SKILL.md` — produces a delta ledger; no verdict
-- `agents/*.md` reviewer agents — produce findings, not verdicts; their per-finding shape opens with `**Severity:**` per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/reviewer-agent-template.md` §"Output format conventions"
+- `agents/*.md` reviewer agents — produce findings, not verdicts; their per-finding shape opens with `**Severity:**` per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions"
 - Documentation, references, templates, scripts — invariant is about skill-rendered output, not about every Markdown file
 
 ## Why this matters
@@ -86,7 +86,7 @@ When reviewing a change to a verdict-led skill (or adding one):
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` — the other named invariant; same enforcement surface (`validate_plugin.sh`)
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` — tracks per-skill verdict-leads compliance as a column
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/wordy-output.md` — the scar this invariant retires
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/skill-conventions.md` §"Output format conventions" — the canonical Output format shape this invariant pins
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" — the canonical Output format shape this invariant pins
 
 ## History
 

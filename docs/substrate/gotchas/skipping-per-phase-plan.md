@@ -31,7 +31,7 @@ Make `implement-cohesively` author TDD-shaped tasks itself, skipping `superpower
 
 Why it's wrong:
 
-- It violates the Cohesive↔Superpowers seam documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/composition-with-superpowers.md`. Cohesive owns *substrate-shape*; Superpowers owns *TDD-shape*. Collapsing one into the other reinvents Superpowers inside Cohesive.
+- It violates the Cohesive↔Superpowers seam documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`. Cohesive owns *substrate-shape*; Superpowers owns *TDD-shape*. Collapsing one into the other reinvents Superpowers inside Cohesive.
 - It removes the inspectable per-phase plan artifact. Branch auditors lose the ability to ask "what was this phase trying to accomplish?" without re-deriving from the diff.
 - It removes the planning gap from the cross-review. The reviewer can no longer flag "the plan didn't cover entry X" as distinct from "the implementation skipped entry X."
 - It scales badly: a Cohesive-authored TDD layer would have to track every Superpowers improvement to plan structure, branch hooks, baseline tests, etc. The composition seam exists precisely to avoid this.
@@ -48,9 +48,9 @@ Plan persistence is mandatory: every phase's plan is written to `docs/history/pl
 
 ## Related conventions
 
-- **Composition with Superpowers** ([`docs/substrate/designs/composition-with-superpowers.md`](../designs/composition-with-superpowers.md)) — the seam this gotcha protects. Cohesive owns substrate-shape; Superpowers owns TDD-shape.
+- **Composition with Superpowers** ([`docs/substrate/architecture/composition-with-superpowers.md`](../architecture/composition-with-superpowers.md)) — the seam this gotcha protects. Cohesive owns substrate-shape; Superpowers owns TDD-shape.
 - **Implementation plan coverage** ([`docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`](../invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md)) — the structural rule that every delta entry maps to a phase, and every phase has a plan.
-- **Agent dispatch protocol** ([`docs/substrate/designs/agent-dispatch-protocol.md`](../designs/agent-dispatch-protocol.md)) — the cross-review depends on paths-only inputs; the plan path is one of those inputs.
+- **Dispatch protocol** ([`docs/substrate/conventions/dispatch-protocol.md`](../conventions/dispatch-protocol.md)) — the cross-review depends on paths-only inputs; the plan path is one of those inputs.
 
 ## Tests / checks that preserve this
 

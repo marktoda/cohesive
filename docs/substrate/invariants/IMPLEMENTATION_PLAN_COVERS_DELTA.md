@@ -89,7 +89,7 @@ When reviewing a change to `implement-cohesively`, the phase-derivation matrix, 
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/phase-derivation.md` — the matrix that derives phases from delta-ledger sections
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md` — the user-reported scar this invariant retires
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/skipping-per-phase-plan.md` — the failure mode that breaks coverage when `writing-plans` is skipped
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/designs/composition-with-superpowers.md` — the seam this invariant pins between Cohesive and Superpowers
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md` — the seam this invariant pins between Cohesive and Superpowers
 
 ## History
 
