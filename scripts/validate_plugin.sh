@@ -125,13 +125,15 @@ if [ -d scripts ]; then
   [ "$warnings" -eq "$warnings_before" ] && ok "all $script_count scripts/ files are executable"
 fi
 
-# 8. v0.1 skill set: the 10 expected skills are present.
+# 8. v0.1 skill set: the 11 expected skills are present.
 # Locks in the verb-noun lexicon `discover-substrate -> brainstorm-design -> rewrite-specs -> validate-rewrite`
-# plus standalone diagnostics `review-codebase`, `review-diff`, `audit-substrate`, the router `cohesively`,
-# and the session-start orientation skill `using-cohesive` (added 2026-05-05 in skill-pack-flow-tightening).
+# plus standalone diagnostics `review-codebase`, `review-diff`, `audit-substrate`, the adoption skill `init`
+# (added 2026-05-06 in init-and-substrate-vocabulary), the router `cohesively`, and the session-start
+# orientation skill `using-cohesive` (added 2026-05-05 in skill-pack-flow-tightening).
 expected_skills=(
   using-cohesive
   cohesively
+  init
   discover-substrate
   brainstorm-design
   rewrite-specs
@@ -288,6 +290,7 @@ persisting_skills=(
   review-codebase
   review-diff
   audit-substrate
+  init
 )
 errors_before=$errors
 for s in "${persisting_skills[@]}"; do
@@ -351,6 +354,7 @@ voice_imperative_skills=(
   review-codebase
   review-diff
   audit-substrate
+  init
 )
 errors_before=$errors
 for s in "${voice_imperative_skills[@]}"; do

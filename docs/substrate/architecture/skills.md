@@ -1,6 +1,6 @@
 # Skills
 
-> Cohesive ships ten skills. The user-facing model is **three gates: Decide → Lock → Build**, with subskills running underneath. The agent-internal subskill order is `discover-substrate → brainstorm-design` (Decide), `rewrite-specs → validate-rewrite` (Lock, repair loop internal), `implement-cohesively` (Build). Three off-chain diagnostics (`review-codebase`, `review-diff`, `audit-substrate`) sit alongside the gates. One router (`cohesively`) selects the route; one session-start orientation skill (`using-cohesive`) sits upstream of the router. This doc is the per-skill design layer: what each skill is for, why the set has these skills and not others, and what each owns versus delegates. The SKILL.md body under `${CLAUDE_PLUGIN_ROOT}/skills/<name>/` is the implementation prompt; the section here is the substrate above it.
+> Cohesive ships eleven skills. The user-facing model is **three gates: Decide → Lock → Build**, with subskills running underneath. The agent-internal subskill order is `discover-substrate → brainstorm-design` (Decide), `rewrite-specs → validate-rewrite` (Lock, repair loop internal), `implement-cohesively` (Build). Three off-chain diagnostics (`review-codebase`, `review-diff`, `audit-substrate`) sit alongside the gates. One adoption skill (`init`) is the day-1 entry point for codebases with no existing substrate. One router (`cohesively`) selects the route; one session-start orientation skill (`using-cohesive`) sits upstream of the router. This doc is the per-skill design layer: what each skill is for, why the set has these skills and not others, and what each owns versus delegates. The SKILL.md body under `${CLAUDE_PLUGIN_ROOT}/skills/<name>/` is the implementation prompt; the section here is the substrate above it.
 
 ## Skill set at a glance
 
@@ -16,6 +16,7 @@ The user-facing surface for the flagship workflow is the gate vocabulary (Decide
 | `review-codebase` | _diagnostic_ | Architecture-altitude cohesion review | Multi-reviewer dispatch + synthesis | Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk |
 | `review-diff` | _diagnostic_ | Cohesion review of a PR or working changes | Two-reviewer dispatch on bounded surface | Pass / Pass with notes / Needs substrate / Risky / Block |
 | `audit-substrate` | _diagnostic_ | Find missing memory | Single-pass scan; no reviewer dispatch | Substrate sound / Substrate gaps / Substrate sparse |
+| `init` | _adoption_ | First-time substrate from a zero-substrate codebase, with translations that teach the vocabulary | Proto-substrate scan + Rosetta Stone translation; bounded draft directory | _none (utility)_ |
 | `cohesively` | _router_ | Convert intent into the right route | Route selection; prereq-state passing | _none (announces, dispatches)_ |
 | `using-cohesive` | _orientation_ | Advise Claude when Cohesive applies | When-to-enter-Cohesive decision; advisory routing to `cohesively` | _none (advisory)_ |
 
@@ -45,7 +46,7 @@ The skill set is the answer to several deliberate cuts. Each entry below explain
 
 **Why `review-codebase` and `review-diff` are two skills, not one with a `--scope` flag.** Different reviewer panels (4 reviewers vs 2), different rubrics (architecture-review-rubric vs cohesion-rubric), different output shapes (persisted report vs chat-only verdict). The shared concept is "fresh-eyes review against substrate"; the executions diverge enough that one skill body would be a configuration-laden mess.
 
-**Why `using-cohesive` is separate from `cohesively`.** `using-cohesive` teaches Claude *when Cohesive applies* — it fires at session start (or whenever its frontmatter trigger matches a substrate-shaped user request) and orients Claude toward the methodology vs Superpowers' implementation-discipline framing. `cohesively` *routes within Cohesive* once the user has signaled Cohesive-shaped work — it picks among the seven canonical routes and dispatches the first subskill. Collapsing them into one skill would force a single body to do both jobs at two different altitudes (orientation vs route selection), which is the failure shape the seam between the bootstrap and the router exists to prevent. The split is also the structural mitigation for `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` — without `using-cohesive`, first-time users with both plugins installed land in trigger competition between Cohesive's `discover-substrate`/`audit-substrate` and Superpowers' research/exploration skills.
+**Why `using-cohesive` is separate from `cohesively`.** `using-cohesive` teaches Claude *when Cohesive applies* — it fires at session start (or whenever its frontmatter trigger matches a substrate-shaped user request) and orients Claude toward the methodology vs Superpowers' implementation-discipline framing. `cohesively` *routes within Cohesive* once the user has signaled Cohesive-shaped work — it picks among the eight canonical routes and dispatches the first subskill. Collapsing them into one skill would force a single body to do both jobs at two different altitudes (orientation vs route selection), which is the failure shape the seam between the bootstrap and the router exists to prevent. The split is also the structural mitigation for `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` — without `using-cohesive`, first-time users with both plugins installed land in trigger competition between Cohesive's `discover-substrate`/`audit-substrate` and Superpowers' research/exploration skills.
 
 ## Per-skill sections
 
@@ -69,6 +70,7 @@ Per-skill sections in this doc carry one of three statuses, named explicitly in 
 | `review-codebase` | inherited | not yet validated against a forward rewrite |
 | `review-diff` | inherited | not yet validated against a forward rewrite |
 | `audit-substrate` | inherited | not yet validated against a forward rewrite |
+| `init` | newly-authored | authored 2026-05-06 in the init-and-substrate-vocabulary rewrite alongside its SKILL.md body; the design layer is genuinely prior substrate, but parity is not yet validated against a forward rewrite |
 | `cohesively` | inherited | not yet validated against a forward rewrite |
 | `using-cohesive` | newly-authored | authored 2026-05-05 in the skill-pack-flow-tightening rewrite alongside its SKILL.md body; the design layer is genuinely prior substrate, but parity is not yet validated against a forward rewrite |
 
@@ -244,10 +246,10 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 
 ### cohesively
 
-**Purpose.** Convert user intent into one of seven canonical routes (`design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`), announce the route, and dispatch the chain's first subskill with prereq state passed explicitly.
+**Purpose.** Convert user intent into one of eight canonical routes (`design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `init`, `artifact`), announce the route, and dispatch the chain's first subskill with prereq state passed explicitly.
 
 **Owns.**
-- Route selection per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` cells R001-R016.
+- Route selection per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` cells R001-R017.
 - Announcement of the chosen route in canonical form before any tool call.
 - Prereq-state and chosen-direction passing per the dispatch-prompt-contract grid in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`.
 
@@ -261,6 +263,29 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 **Outputs.** Canonical announcement sentence + first subskill dispatch. No persisted artifact, no verdict.
 
 **Why this shape.** A router rather than a workflow, because phase transitions are user-driven by design. A workflow router would hide what's running and remove the user's ability to re-enter the chain at any point. The canonical announcement makes the routing decision legible; the prereq-passing closes `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`.
+
+### init
+
+**Purpose.** First-time adoption on a codebase with no Cohesive substrate. Scans for proto-substrate signals (rules in comments, scars in test names, branchy code) and produces a draft substrate at `docs/substrate/init-draft/` with side-by-side translations explaining each Cohesive type in plain terms. Designed to teach the substrate vocabulary by translating the user's own code into it (the Rosetta Stone move). One-shot; refuses if substrate already exists.
+
+**Owns.**
+- The proto-substrate scan against the user's repo (extends `${CLAUDE_PLUGIN_ROOT}/scripts/scan_substrate.py` with grep-based pattern matching for `MUST` / `NEVER` / `FIXME` / `HACK` / regression-test-name patterns / branchy enum dispatches).
+- The side-by-side translation: rendering each proposed artifact with its Cohesive type's user-facing definition from `${CLAUDE_PLUGIN_ROOT}/references/substrate-vocabulary.md` inline, so the user learns what the type means while reviewing whether the proposal fits.
+- The bounded proposal count (≤5 per type, ≤20 total in v0.1) — init is for the first substrate, not the complete substrate.
+- The skeletal CLAUDE.md and ARCHITECTURE.md when neither exists. Augmenting existing top-level docs is out of scope.
+- The refusal-when-substrate-exists check (Hard constraint #1).
+
+**Does not own.**
+- Exhaustive substrate generation. `audit-substrate` finds what init missed (init is bounded; audit is not).
+- Auto-commit. Init writes draft files; the user reviews, edits, deletes, and `git mv`s manually.
+- Merging with existing substrate. Init refuses when substrate exists; the right skill for an existing-substrate codebase is `audit-substrate`.
+- Route selection. `cohesively` routes to `init` per cell R017 in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`.
+
+**Inputs.** The repo root; an optional `--brief` flag that suppresses inline translation paragraphs (default is verbose / pedagogical).
+
+**Outputs.** A draft directory at `docs/substrate/init-draft/` containing per-artifact draft files (each with evidence + translation + proposed artifact + decision checkbox). Optional skeletal CLAUDE.md and ARCHITECTURE.md if neither exists. Chat trailer with a count of drafts produced + 3 example translations + a "what to do next" pointer to `audit-substrate`. No verdict (utility skill, parallel to `discover-substrate`).
+
+**Why this shape.** Cohesive's value compounds over accumulated substrate, but on day 1 a fresh codebase has none. Without init, the user lands in `discover-substrate` → "Empty-substrate verdict: yes" → audit-substrate finds nothing because there's nothing there. Init breaks the chicken-and-egg by extracting the implicit substrate every codebase already carries (in comments, in test names, in branching logic) and translating it to the Cohesive vocabulary the first time the user encounters each type. The Rosetta Stone move (translation alongside the artifact) is what makes init pedagogical rather than just generative — the user develops the vocabulary by deciding what to keep on their own code, not by reading a glossary.
 
 ### using-cohesive
 

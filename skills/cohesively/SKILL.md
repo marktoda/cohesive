@@ -29,6 +29,12 @@ The gate vocabulary is the load-bearing chat-surface vocabulary per [`docs/subst
 | `cohesive:review-diff` | PR / branch / working-changes review |
 | `cohesive:audit-substrate` | What's missing from the docs and tests |
 
+## Adoption (one-shot)
+
+| Skill | Use for |
+|---|---|
+| `cohesive:init` | First-time adoption on a codebase with no Cohesive substrate. Scans for proto-substrate (rules in comments, scars in test names, branchy code) and produces a draft substrate with side-by-side translations explaining each Cohesive type in plain terms. The user reviews and keeps what fits. Runs once; refuses if substrate already exists. |
+
 ## Routes
 
 Read the user's request and map to one of the routes below. Trigger phrases are primary; topic and verb tense are secondary.
@@ -77,6 +83,14 @@ The user can decline the Build gate in favor of `superpowers:writing-plans` dire
 
 **Stops at:** A ranked list of artifacts to add (specs, invariants, matrices, gotchas) with file:line evidence and a sketch of what each artifact would say.
 
+### Route: init
+
+**When:** First-time adoption on a codebase with no Cohesive substrate. "Initialize cohesive", "set up substrate", "bootstrap cohesive", "we're new to cohesive", "first time using cohesive on this codebase", "init".
+
+**Stops at:** A draft substrate directory at `docs/substrate/init-draft/` containing proposed artifacts with side-by-side translations explaining each Cohesive type in plain terms. The user reviews each draft, edits or deletes, and `git mv`s kept drafts to canonical locations.
+
+The init route is one-shot — `init`'s Hard constraint #1 refuses if substrate already exists. For codebases with existing substrate, the right route is `audit (substrate)`.
+
 ### Route: artifact (V1 — deferred)
 
 **When:** "Name an invariant", "encode a behavior matrix", "create a gotcha doc".
@@ -100,6 +114,7 @@ Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, the router-d
 | `audit (substrate)` | "Discovery already complete; report at <path or 'inline above'>." | n/a |
 | `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first); ledger path passed to step 2 once `rewrite-specs` has produced it |
 | `implement` | "Validate-rewrite returned **Approved**; review at <path>." | "Design delta ledger at <path>. Branch: design/<slug>." Validation review path and ledger path are both required. |
+| `init` | n/a (init has no prereq; refuses if substrate exists per its Hard constraint #1) | n/a — optional `--brief` flag is the only argument |
 | `artifact` | n/a | "Artifact requested: <invariant / matrix / gotcha>" |
 
 Consumers:
@@ -115,7 +130,7 @@ Direct (non-router) invocation: the subskill asks its canonical question per `${
 
    > "<one-sentence outcome the user gets>."
 
-   The outcome leads with what the user receives, per the audience seam in [`docs/substrate/conventions/audience-separation.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md). The form is also documented in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Router conventions". The **internal route name** (one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`) is the dispatch key the router uses to pick its chain — it is agent-internal and does not appear in the announcement string. The chain (which subskills run underneath) is internal too; users see gates and outcomes, not subskill IDs. Per-route outcome sentences:
+   The outcome leads with what the user receives, per the audience seam in [`docs/substrate/conventions/audience-separation.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md). The form is also documented in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Router conventions". The **internal route name** (one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `init`, `artifact`) is the dispatch key the router uses to pick its chain — it is agent-internal and does not appear in the announcement string. The chain (which subskills run underneath) is internal too; users see gates and outcomes, not subskill IDs. Per-route outcome sentences:
 
    | Internal route | Announcement outcome sentence |
    |---|---|
@@ -125,6 +140,7 @@ Direct (non-router) invocation: the subskill asks its canonical question per `${
    | `audit (substrate)` | I'll find what's missing from the docs and tests. |
    | `rewrite-only` | I'll lock the chosen direction into specs and pressure-test the architecture. |
    | `implement` | I'll build the locked design and verify the code matches it. |
+   | `init` | I'll scan your codebase for proto-substrate and produce drafts you can review. |
    | `artifact` | I'll draft the artifact you asked for. |
 
 2. **Process before implementation.** If behavior or architecture is changing, route through the Decide gate before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives code against the design delta ledger via the phase loop. Freeform code-writing from this skill body is forbidden.
@@ -146,10 +162,11 @@ Direct (non-router) invocation: the subskill asks its canonical question per `${
 
 When the request is ambiguous, prefer this resolution order:
 
-1. **Explicit user instruction** ("review the codebase" → review/codebase). Always wins.
-2. **Verb tense and implementation cue.** Imperative implementation verbs against an existing approved rewrite ("implement", "land", "ship", "build it") → implement. Other forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
-3. **Scope hints.** Whole-repo / subsystem / "the codebase" → review (codebase). Diff / PR / branch / changes → review (diff). Missing / gaps / what's-not-there → audit (substrate).
-4. **Default.** When truly stuck, default to `audit (substrate)` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
+1. **Explicit user instruction** ("review the codebase" → review/codebase; "init" / "set up substrate" → init). Always wins.
+2. **Adoption signal.** "First time using cohesive", "we have no substrate", or running against a codebase where `discover-substrate` would return Empty-substrate verdict → init. The init route is one-shot at adoption time; do not route a returning user with existing substrate to init.
+3. **Verb tense and implementation cue.** Imperative implementation verbs against an existing approved rewrite ("implement", "land", "ship", "build it") → implement. Other forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
+4. **Scope hints.** Whole-repo / subsystem / "the codebase" → review (codebase). Diff / PR / branch / changes → review (diff). Missing / gaps / what's-not-there → audit (substrate).
+5. **Default.** When truly stuck, default to `audit (substrate)` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
 
 ## Output
 

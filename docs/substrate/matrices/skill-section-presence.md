@@ -6,7 +6,7 @@
 
 ## Purpose
 
-The ten Cohesive skills under `skills/` each carry a SKILL.md body. The canonical body sections — required and optional — are defined in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Required body sections" and §"Optional sections". Section drift across skill files is the kind of regression a reviewer happens to notice but no structural check catches.
+The eleven Cohesive skills under `skills/` each carry a SKILL.md body. The canonical body sections — required and optional — are defined in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Required body sections" and §"Optional sections". Section drift across skill files is the kind of regression a reviewer happens to notice but no structural check catches.
 
 This matrix tracks which canonical section each skill carries, in one grid. A cell of `✓` means the section is present at H2 (`##`). A cell of `~` means the skill uses a documented exemption (the deviation is named in `docs/substrate/conventions/skill-shape.md` §"When sections may differ"). A cell of `✗` means the section is absent without an exemption — that's the drift this matrix exists to surface.
 
@@ -26,6 +26,7 @@ Mirror skill: `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-sha
 | review-codebase | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | review-diff | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | audit-substrate | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| init | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The `Voice` column tracks the body-level imperative section added in the 2026-05-04 voice-citation-imperative pivot (per `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md`). For each non-router skill, the `## Voice` section appears between `## What this skill produces` and `## Hard constraints` (or before `## When to invoke` for `discover-substrate`) and contains the literal imperative `Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.`. The router (`cohesively`) is exempt — its render budget is 1–2 sentences and its dispatched subskills carry the voice load. Validator Check 13b greps each non-router SKILL.md body (outside fenced code blocks) for the imperative; this matrix tracks the section's *placement* (a stricter rule than the validator's grep) — drift in placement is a regression to file even if Check 13b passes.
 
@@ -43,6 +44,7 @@ The `Voice` column tracks the body-level imperative section added in the 2026-05
 | review-codebase | – | "Red flags" | ✓ | ✓ | – |
 | review-diff | – | "Red flags" | ✓ | ✓ | – |
 | audit-substrate | – | "Red flags" | ✓ | – | – |
+| init | – | "Red flags" | ✓ | – | – |
 
 A `–` means the section is intentionally absent (the skill genuinely doesn't need it). A `✓` means present.
 
@@ -81,3 +83,4 @@ These three exemptions are the only deviations accepted in v0.1. Any other devia
 - 2026-05-04 — Created during the v0.1 release-gate Phase 1+2 substrate repair pass. Promoted from finding #7 of `docs/history/reviews/2026-05-04-skill-quality-self-review.md`. The same pass added the canonical "What this skill is *not*" section to `validate-rewrite/SKILL.md`, which the matrix would otherwise have shown as a `✗`.
 - 2026-05-04 — Voice-citation-imperative pivot repair pass: added the `Voice` column to track the new mandatory `## Voice` section in 7 non-router skills (and the router exemption). See `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-04-voice-citation-imperative.md` §"Repair pass 1 (post validation)" — finding I1.
 - 2026-05-05 — `skill-pack-flow-tightening` rewrite: added rows for `implement-cohesively` (pre-existing drift fix — the row was absent despite the skill shipping in v0.1) and `using-cohesive` (newly authored session-start orientation skill); updated intro skill count 8 → 10; added the `using-cohesive` documented exemption. See `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-05-skill-pack-flow-tightening.md`.
+- 2026-05-06 — `init-and-substrate-vocabulary` rewrite: added `init` row in both required-sections and optional-sections grids (the new adoption skill for first-time substrate bootstrap, with side-by-side Rosetta Stone translations); updated intro skill count 10 → 11. See `${CLAUDE_PLUGIN_ROOT}/docs/history/delta-ledgers/2026-05-06-init-and-substrate-vocabulary.md`.
