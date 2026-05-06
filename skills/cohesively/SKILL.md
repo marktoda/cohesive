@@ -106,7 +106,7 @@ ${CLAUDE_PLUGIN_ROOT}/references/templates/<template>.md. I can fill it out with
 
 ## Dispatch prompt contract
 
-Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, the router-driven case requires explicit prereq-state passing — without it, subskills ask the canonical clarifying question on top of an already-routed turn. The table below is the per-route content the dispatch prompt must include. The matrix-side mirror (with the `validate-rewrite` exception) lives at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` §"Dispatch prompt contract"; update both in the same pass.
+Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, the router-driven case requires explicit prereq-state passing — without it, subskills ask the canonical clarifying question on top of an already-routed turn. The table below is the per-route content the dispatch prompt must include. The matrix-side mirror (with the `validate-rewrite` exception) lives at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` §"Dispatch prompt contract"; update both in the same pass. `scripts/validate_plugin.sh` Check 13i greps both surfaces and asserts route-name set equality (the route names — column 1 of each grid — must match across the two surfaces). Prereq-state-string parity across the two surfaces is a HANDOFF_VOCABULARY_PARITY-class check tracked as a deferred Check 13j candidate; for now, that parity is reviewer-judged.
 
 | Route | Prereq state to pass | Chosen-direction / artifact state to pass |
 |---|---|---|

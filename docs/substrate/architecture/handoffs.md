@@ -1,8 +1,8 @@
 # Skill handoffs
 
-> Every Cohesive transition is one of three shapes: a chain transition (verdict-gated, artifact-carrying), a router dispatch (`cohesively` → subskill, with prereq state), or off-chain re-entry (a review or audit finding back into the chain). This doc enumerates chain transitions and re-entry edges. Router dispatches live in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`; Cohesive↔Superpowers seams live in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`.
+> Every Cohesive transition is one of five shapes: a chain transition (verdict-gated, artifact-carrying), a router dispatch (`cohesively` → subskill, with prereq state), an off-chain re-entry (a review or audit finding back into the chain), an internal repair loop (a skill dispatching another Cohesive skill via the Skill tool inside its own Process), or session-start orientation (the bootstrap skill `using-cohesive` advising Claude to enter Cohesive at all). This doc enumerates chain transitions, re-entry edges, the one internal repair loop, and the session-start orientation seam. Router dispatches live in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`; Cohesive↔Superpowers seams live in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`.
 
-## The three transition shapes
+## The five transition shapes
 
 **1. Chain transition.** A skill produces an artifact carrying a verdict (or no verdict, in which case user approval gates the transition). The downstream skill consumes that artifact and runs. Four forward chain transitions form the linear chain.
 
@@ -11,6 +11,8 @@
 **3. Off-chain re-entry.** A diagnostic skill (`review-codebase`, `review-diff`, `audit-substrate`) produces findings that re-enter the chain at the appropriate skill. Re-entry is user-driven — the diagnostic recommends a next Cohesive skill in its output footer; the user invokes it. The Design Incoherent verdict from `validate-rewrite` is also treated as off-chain re-entry because it returns further back than the immediate predecessor (to `brainstorm-design`, not to `rewrite-specs`).
 
 **4. Internal repair loop.** A skill dispatches another Cohesive skill via the Skill tool *within its own Process*, consumes that skill's output, and re-dispatches a reviewer agent for the next pass. The loop is invisible to the user as a chain edge — the user sees pass-by-pass progress in chat but does not invoke the dispatched skill themselves. Currently there is one such loop: `validate-rewrite`'s Issues Found repair loop with `rewrite-specs` (see §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)" below).
+
+**5. Session-start orientation.** The bootstrap skill `using-cohesive` advises Claude when Cohesive-shaped work is the right framing. It carries no artifact and no verdict; its sole effect is to route the user's substrate-shaped requests to `cohesively` rather than to Superpowers' research/exploration framing. The seam exists because Cohesive needs a session-start surface that competes natively with `superpowers:using-superpowers` for the harness's bootstrap loading slot — without it, first-time users land in the trigger competition documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md`. See §"using-cohesive → cohesively (session-start orientation)" below for the per-handoff contract.
 
 ## The chain
 
@@ -26,6 +28,20 @@ Forward chain: four edges. The Issues Found verdict from `validate-rewrite` is *
 ## Per-handoff contracts
 
 Each handoff specifies: artifact crossing the seam, persistence shape, verdict gate (if any), what the downstream must not re-derive, and the failure mode if the contract drifts.
+
+### using-cohesive → cohesively (session-start orientation)
+
+**Transition shape.** Session-start orientation per §"The five transition shapes" #5. Not a chain edge, not a router dispatch (the router is the *target*, not the source), not an off-chain re-entry. `using-cohesive` is upstream of every other Cohesive skill — it advises Claude when to enter the methodology at all.
+
+**Artifact crossing.** None persisted. `using-cohesive`'s output is at most a 1–2 sentence orientation rendered in chat (when its frontmatter trigger fires) plus an internal advisory to invoke `cohesively` on the user's next substrate-shaped request. The orientation is a framing nudge, not a deliverable.
+
+**Persistence.** None. `using-cohesive` does not write a file; it does not maintain conversation state beyond the orientation message.
+
+**Verdict gate.** None. The skill is advisory; it has no verdict to gate downstream skills on.
+
+**What `cohesively` must not re-derive.** The orientation message itself. If the router renders its own session-start framing on top of `using-cohesive`'s, the user sees double-orientation and the seam's value (one canonical entry point) is lost. The router's announcement (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Router conventions") is the route announcement, not a re-orientation.
+
+**Failure mode if the contract drifts.** `using-cohesive`'s frontmatter trigger phrase widens to "explore the codebase" or similar generic surfaces; the harness picks `using-cohesive` for non-Cohesive-shaped requests; the orientation fires when it shouldn't. Detection: `validate_plugin.sh` Check 9b (negative-trigger lint) applies to `using-cohesive`'s frontmatter description on the same surface as every other Cohesive skill. The narrowing rule is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` §"Correct pattern", which `using-cohesive` cites by reference.
 
 ### discover-substrate → brainstorm-design
 
@@ -109,7 +125,7 @@ When `review-codebase` returns Drifting with findings naming spec-shape issues (
 
 ### audit-substrate → rewrite-specs
 
-When `audit-substrate` returns Gaps Found with named missing artifacts (an invariant that should exist; a behavior matrix the branchy logic deserves), the natural next skill is `rewrite-specs` to author the missing substrate. No brainstorm needed — the audit identified what's missing.
+When `audit-substrate` returns **Substrate gaps** with named missing artifacts (an invariant that should exist; a behavior matrix the branchy logic deserves), the natural next skill is `rewrite-specs` to author the missing substrate. No brainstorm needed — the audit identified what's missing.
 
 ### validate-rewrite → brainstorm-design (Design Incoherent re-entry)
 
@@ -173,7 +189,7 @@ When `validate-rewrite` returns **Design Incoherent**, the rewrite cannot be rep
 
 ## Adding a new chain skill or re-entry edge
 
-The canonical entry point for adding a new skill is `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` §"Adding a new skill" — its sequence drives all four substrate updates. This section's steps are subsumed by that sequence; follow the skills.md sequence and return here only when the skill genuinely is *not* a new chain participant (e.g., a new diagnostic skill that produces its own re-entry edges without new chain transitions).
+The canonical entry point for adding a new skill is `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` §"Adding a new skill" — its sequence drives all five substrate updates. This section's steps are subsumed by that sequence; follow the skills.md sequence and return here only when the skill genuinely is *not* a new chain participant (e.g., a new diagnostic skill that produces its own re-entry edges without new chain transitions). For non-chain skills (a new router shape, a new session-start orientation skill, or any addition outside the linear chain), follow skills.md Step 2's reference back to §"The five transition shapes" in this doc as the authoritative transition vocabulary, then add the skill's inbound/outbound contract under "Per-handoff contracts" naming the matching transition shape.
 
 For pure handoff-contract changes that don't add a skill (e.g., adding a re-entry edge, adjusting a verdict gate, refining a must-not-re-derive clause):
 

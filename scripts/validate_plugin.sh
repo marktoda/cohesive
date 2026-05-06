@@ -125,10 +125,12 @@ if [ -d scripts ]; then
   [ "$warnings" -eq "$warnings_before" ] && ok "all $script_count scripts/ files are executable"
 fi
 
-# 8. v0.1 skill set: the 9 expected skills are present.
+# 8. v0.1 skill set: the 10 expected skills are present.
 # Locks in the verb-noun lexicon `discover-substrate -> brainstorm-design -> rewrite-specs -> validate-rewrite`
-# plus standalone diagnostics `review-codebase`, `review-diff`, `audit-substrate`, and the router `cohesively`.
+# plus standalone diagnostics `review-codebase`, `review-diff`, `audit-substrate`, the router `cohesively`,
+# and the session-start orientation skill `using-cohesive` (added 2026-05-05 in skill-pack-flow-tightening).
 expected_skills=(
+  using-cohesive
   cohesively
   discover-substrate
   brainstorm-design
@@ -331,12 +333,14 @@ for s in "${verdict_led_skills[@]}"; do
 done
 [ "$errors" -eq "$errors_before" ] && ok "VERDICT_BEFORE_EVIDENCE: all ${#verdict_led_skills[@]} verdict-led skills lead Output format with **Verdict:**"
 
-# 13b. Voice-imperative grep, skills: every non-router skills/*/SKILL.md body (outside
-# fenced code blocks) contains the literal imperative directing the model to load the
-# voice guide before rendering chat output. Per references/output-voice.md and
-# docs/substrate/gotchas/style-guide-rot.md §"Correct pattern". Cohesively router is
-# exempt (its dispatched subskills carry the voice load; documented in
-# docs/substrate/invariants/PLUGIN_ROOT_PATHS.md §"Convention pins...").
+# 13b. Voice-imperative grep, skills: every non-router non-orientation skills/*/SKILL.md
+# body (outside fenced code blocks) contains the literal imperative directing the model
+# to load the voice guide before rendering chat output. Per references/output-voice.md
+# and docs/substrate/gotchas/style-guide-rot.md §"Correct pattern". TWO exemptions per
+# docs/substrate/conventions/skill-shape.md §"When sections may differ": the router
+# `cohesively` and the session-start orientation skill `using-cohesive` (both have
+# render budgets too small to need the imperative; their dispatched subskills carry
+# the voice load).
 voice_imperative_literal='Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.'
 voice_imperative_skills=(
   discover-substrate
@@ -498,6 +502,40 @@ if [ -d docs/history/delta-ledgers ]; then
     fi
   fi
 fi
+
+# 13i. DISPATCH_CONTRACT_MIRROR: skills/cohesively/SKILL.md §"Dispatch prompt contract"
+# and docs/substrate/matrices/router.md §"Dispatch prompt contract (per route)" must
+# enumerate the same set of routes. Per docs/substrate/architecture/handoffs.md and the
+# 2026-05-05 skill-pack-flow-tightening rewrite (closing review finding 1: prose-only
+# parity is one PR away from drift).
+extract_routes_from_section() {
+  local file="$1"
+  local heading="$2"  # exact heading text, e.g. "## Dispatch prompt contract"
+  awk -v h="$heading" '
+    $0 == h { in_section=1; next }
+    in_section && /^## / { in_section=0 }
+    in_section && /^[|] `[^`]+`/ {
+      if (match($0, /`[^`]+`/)) {
+        route = substr($0, RSTART+1, RLENGTH-2)
+        sub(/ [(]V1[)]$/, "", route)
+        print route
+      }
+    }
+  ' "$file"
+}
+errors_before=$errors
+cohesively_routes=$(extract_routes_from_section skills/cohesively/SKILL.md '## Dispatch prompt contract' | sort -u)
+router_routes=$(extract_routes_from_section docs/substrate/matrices/router.md '## Dispatch prompt contract (per route)' | sort -u)
+if [ -z "$cohesively_routes" ]; then
+  fail "DISPATCH_CONTRACT_MIRROR: extracted no routes from skills/cohesively/SKILL.md §\"Dispatch prompt contract\". The section heading or table format may have drifted. (Check 13i)"
+elif [ -z "$router_routes" ]; then
+  fail "DISPATCH_CONTRACT_MIRROR: extracted no routes from docs/substrate/matrices/router.md §\"Dispatch prompt contract (per route)\". The section heading or table format may have drifted. (Check 13i)"
+elif [ "$cohesively_routes" != "$router_routes" ]; then
+  cohesively_only=$(comm -23 <(echo "$cohesively_routes") <(echo "$router_routes") | tr '\n' ' ')
+  router_only=$(comm -13 <(echo "$cohesively_routes") <(echo "$router_routes") | tr '\n' ' ')
+  fail "DISPATCH_CONTRACT_MIRROR: dispatch-prompt-contract route sets differ between skills/cohesively/SKILL.md and docs/substrate/matrices/router.md. Only in cohesively/SKILL.md: [$cohesively_only]. Only in router.md: [$router_only]. Per docs/substrate/architecture/handoffs.md and the update-both-in-the-same-pass annotation in both surfaces. (Check 13i)"
+fi
+[ "$errors" -eq "$errors_before" ] && ok "DISPATCH_CONTRACT_MIRROR: route sets in cohesively/SKILL.md and matrices/router.md agree (Check 13i)"
 
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
 # Per docs/substrate/invariants/PLUGIN_ROOT_PATHS.md. Excludes lines inside fenced code
