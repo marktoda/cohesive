@@ -20,7 +20,7 @@ This rewrite is **Mixed** — primarily Design (new skill + new route + new arch
 - `ARCHITECTURE.md` — skill count updated from 10 to 11; init named with its purpose.
 - `scripts/validate_plugin.sh` — `expected_skills` array gains `init`; `persisting_skills` and `voice_imperative_skills` arrays gain `init`. Comment block updated to "11 expected skills" and to name init's role.
 
-- **Files:** 5 rewritten, 3 added (init/SKILL.md, substrate-vocabulary.md, this ledger), 0 removed
+- **Files:** 8 rewritten, 3 added (init/SKILL.md, substrate-vocabulary.md, this ledger), 0 removed. *(Forward pass: 5 rewritten — cohesively/SKILL.md, router.md, skills.md, validate_plugin.sh, README.md, ARCHITECTURE.md (counted as 6 in §"Files rewritten" since they are 6 distinct files, but the preamble bullet groups README+ARCHITECTURE.md adjacent so the original count was 5). Pass 2 added: `docs/substrate/architecture/handoffs.md` (new init handoff sections) and `docs/substrate/matrices/skill-section-presence.md` (new init row + lead update). Updated count: 8 rewritten files in total across the forward pass + pass 2 + pass 3 sweeps.)*
 - **Conceptual changes:** new "adoption" skill category (alongside chain / diagnostic / router / orientation); Rosetta Stone pedagogical pattern explicit in init's body (translation alongside generation); substrate vocabulary now has its own translation table parallel to verdict-vocabulary.md, completing the audience seam at the substrate-type layer.
 - **Named invariants:** none added / removed / changed; `IMPLEMENTATION_PLAN_COVERS_DELTA`, `VERDICT_BEFORE_EVIDENCE`, `PLUGIN_ROOT_PATHS`, `SKILL_DESIGN_DOC_SECTION` continue to hold (the latter is mechanically enforced and now passes for the new `init` section).
 - **Behavior matrices:** `docs/substrate/matrices/router.md` extended with cell R017 + new dispatch-prompt-contract row; cell IDs preserved per the immutability rule.
@@ -60,6 +60,16 @@ This rewrite is **Mixed** — primarily Design (new skill + new route + new arch
   - **Before:** "10 skills" with the 5+3+1+1 enumeration.
   - **After:** "11 skills" with the 5+3+1+1+1 enumeration; init named with its purpose summarized in one phrase.
   - **Reason:** Contributor-facing inventory; the count and the enumeration must agree with skills.md and the validator.
+
+- `docs/substrate/architecture/handoffs.md` *(added in pass 2)*
+  - **Before:** No `init` handoff sections; the doc enumerated five transition shapes and contracts for the chain skills + diagnostics + router + session-start orientation.
+  - **After:** Two new handoff sections — §"init → user-driven keep/reject (adoption)" naming a candidate sixth transition shape ("Adoption") with inbound (direct or R017), artifact crossing (draft directory), persistence (user-driven `git mv`), and failure modes; plus §"init → audit-substrate (often-followed-by edge)" naming the loose post-adoption hand-off.
+  - **Reason:** Closes pass-1 finding B2 (the per-handoff contract was mandated by skills.md "Adding a new skill" step 2 for non-chain skills but omitted in the forward pass).
+
+- `docs/substrate/matrices/skill-section-presence.md` *(added in pass 2)*
+  - **Before:** Lead said "ten Cohesive skills"; required-sections grid (8 columns) and optional-sections grid (5 columns) had 10 rows each.
+  - **After:** Lead says "eleven Cohesive skills"; both grids extended with an `init` row matching the canonical SKILL.md shape (all required sections present; Composition + Red flags optional sections present). History footer extended with a 2026-05-06 entry naming the init addition + skill-count update + delta-ledger citation.
+  - **Reason:** Closes pass-2 substrate gap finding (the matrix is the canonical per-skill section presence track and was named in skills.md "Adding a new skill" step 5 but omitted in the forward pass).
 
 ## Files added
 
@@ -152,6 +162,30 @@ None added or retired.
 - `docs/substrate/architecture/handoffs.md` — B2 (two new sections covering init's adoption transition + audit-substrate often-followed-by edge).
 - `skills/init/SKILL.md` — I1 (Hard constraint #1 split + step 0 rewrite + Output format conditional render block) + I3 (surface seam claim + acceptance criteria) + I4 (chat trailer signals scanned/surfaced lines).
 - `docs/substrate/matrices/skill-section-presence.md` — substrate gap (init row + lead update).
+
+## Repair pass 4
+
+**Pass:** 4
+**Source review:** `docs/history/reviews/2026-05-06-init-and-substrate-vocabulary-rewrite-validation-pass-3.md` (pass 3, Issues Found)
+**Closes:** B1 (preamble file count drift), B2 (skills.md cell range stale), I1 (handoffs.md "five shapes" lead), I2 (--brief parse point)
+**Classification of pass-4 repairs:** Pure implementation (textual fixes against named findings; the substantive repair is the preamble update in B1, which is a ledger self-fix). The underlying rewrite remains **Mixed** per §"Delta at a glance".
+
+### Repairs applied
+
+- **B1 — Preamble file count updated and §"Files rewritten" extended.** Preamble's `**Files:**` bullet updated from "5 rewritten" to "8 rewritten" with an inline parenthetical explaining the count's growth across forward + pass-2 + pass-3 sweeps. §"Files rewritten" extended with two new before/after blocks for `docs/substrate/architecture/handoffs.md` (the init handoff sections added in pass 2) and `docs/substrate/matrices/skill-section-presence.md` (the init row + lead update added in pass 2). Downstream Phase 1 coverage tables built from the preamble now reach the full file set.
+
+- **B2 — `skills.md:252` cell range updated to R001-R017.** Lens-13 mismatch closed: the `### cohesively` Owns clause now matches the matrix's actual cell range (R001-R017 since this rewrite added R017).
+
+- **I1 — handoffs.md "five transition shapes" lead qualified.** Lead paragraph updated to "five formalized shapes plus one provisional sixth", explicitly naming the adoption shape and citing the §"init → user-driven keep/reject" section where it's documented. Downstream readers landing on the lead paragraph alone now see the provisional sixth shape's existence without having to scroll to the init section.
+
+- **I2 — `--brief` parse point documented in Step 0.** Process Step 0 split into "Parse arguments and check substrate state" with an explicit `--brief` parse rule preceding the substrate-existence check. A future implementer reading Step 0 sees where the flag enters; a future agent dispatching init knows where to expect the flag's effect.
+
+### Repair-pass file changes
+
+- `docs/history/delta-ledgers/2026-05-06-init-and-substrate-vocabulary.md` — preamble file count + §"Files rewritten" extension (B1; this section).
+- `docs/substrate/architecture/skills.md` — `### cohesively` Owns clause cell range (B2).
+- `docs/substrate/architecture/handoffs.md` — lead paragraph qualifying language (I1).
+- `skills/init/SKILL.md` — Process Step 0 `--brief` parse rule (I2).
 
 ## Repair pass 3
 

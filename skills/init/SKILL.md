@@ -39,7 +39,11 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Process
 
-### 0. Refuse if substrate exists; warn-and-continue on agent-handoff files
+### 0. Parse arguments and check substrate state
+
+**Parse `--brief`.** If the dispatch prompt or user invocation includes the literal token `--brief`, set `verbose=false`; default `verbose=true`. The flag controls whether per-draft files render the §"What this is" translation paragraph (verbose default per Hard constraint #5).
+
+**Refuse if substrate exists; warn-and-continue on agent-handoff files.**
 
 Check for substrate-shaped paths (any of `docs/substrate/`, `docs/adr/`, `docs/design/`, `docs/decisions/` containing files). If any are present, halt with the directive error from Hard constraint #1. Init does not run incrementally on existing substrate.
 

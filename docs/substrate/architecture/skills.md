@@ -249,7 +249,7 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 **Purpose.** Convert user intent into one of eight canonical routes (`design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `init`, `artifact`), announce the route, and dispatch the chain's first subskill with prereq state passed explicitly.
 
 **Owns.**
-- Route selection per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` cells R001-R016.
+- Route selection per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` cells R001-R017.
 - Announcement of the chosen route in canonical form before any tool call.
 - Prereq-state and chosen-direction passing per the dispatch-prompt-contract grid in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`.
 
