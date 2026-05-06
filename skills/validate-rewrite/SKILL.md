@@ -270,7 +270,7 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 
 - **Always preceded by:** `rewrite-specs` (forward chain) or invoked by the user against an existing `design/<slug>` worktree.
 - **Internally dispatches:** `cohesive:rewrite-specs` (in repair mode) per pass of the Issues Found repair loop, until verdict converges or the loop terminates per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)".
-- **Followed by:** the disposition rule's recommendation per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings". For Approved with merge-ready disposition, the default-recommend implementation route in §"Output format" leads with `cohesive:implement-cohesively` and surfaces the alternatives (`superpowers:writing-plans` / land-specs-first / schedule-for-later) behind the `(other options)` disclosure. For Design Incoherent, `brainstorm-design`. For max-passes stall, `brainstorm-design` or manual repair.
+- **Followed by:** the disposition rule's recommendation per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings". For Approved with merge-ready disposition, the default-recommend implementation route in §"Output format" leads with `cohesive:implement-cohesively` and surfaces the alternatives (`superpowers:writing-plans` / land-specs-first / schedule-for-later / Re-decide) behind the `(other options)` disclosure. For Design Incoherent, `brainstorm-design`. For max-passes stall, `brainstorm-design` or manual repair.
 
 ## What this skill is *not*
 
