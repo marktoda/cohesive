@@ -151,15 +151,38 @@ None new. The convention's failure modes are covered by `style-guide-rot.md` (ru
 - Reviewer-agent internals (`agents/*-reviewer.md`): unchanged. Reviewers still produce six-field findings; the chat-trailer template renders the show-shape compression.
 - The cohesion-rubric verdict-floor mapping or disposition rules: unchanged. The agent-facing rubric continues to operate on internal verdict labels.
 
+## Repair pass 1
+
+**Source review:** `docs/history/reviews/2026-05-06-audience-seam-rewrite-validation.md` (Issues Found, 5 ranked findings)
+
+The forward rewrite advertised `### Recommended next Cohesive skill` → `### Next` as a clean sweep; pass-1 fresh-eyes review surfaced four citation sites the sweep missed plus one absent file. Repair pass 1 closes B1, B2, I1, I2, I3, I4, I5:
+
+- **Closes B1** — `references/templates/cohesion-review.md:87`: renamed `## Recommended next Cohesive skill` to `### Next`. The heading depth changed from `##` to `###` to match the centralized chat-trailer template's render shell. Prose updated to cite the centralized template at `references/templates/chat-trailer.md` and the audience seam in `docs/substrate/conventions/audience-separation.md`.
+- **Closes B2** — `references/cohesion-rubric.md:126,134`: replaced `§"Recommended next Cohesive skill"` citations to cohesion-review.md with `§"Next"` (matching the resolved heading).
+- **Closes I1** — `docs/substrate/architecture/handoffs.md:122`: replaced `### Recommended next Cohesive skill` with `### Next` in the §"review-codebase → brainstorm-design" entry.
+- **Closes I2** — `docs/substrate/matrices/reviewer-output-shape.md:51`: updated the `Handoff-carries-payload (5a)` column gloss to reference `### Next`. Added a parenthetical noting the rename happened in the audience-seam rewrite and `validate_plugin.sh` Check 12 greps the new heading.
+- **Closes I3** — `docs/history/brainstorms/2026-05-06-audience-seam.md`: brainstorm persisted in the worktree (the file existed in the main repo only; pass-1 reviewer correctly flagged the absence in the design worktree because the fresh-eyes Task subprocess reads the worktree, not the main repo). The brainstorm carries the four-option pressure-test (A/B/C/D) and the chosen-direction substance, closing the chosen-direction-not-re-derived seam structurally.
+- **Closes I4** — closed structurally by B1's repair (heading depth `###` matches across cohesion-review.md, validate-rewrite SKILL.md, and the centralized chat-trailer template).
+- **Closes I5** — this Repair pass 1 section is the substrate residue; it enumerates what the sweep missed and what was actually swept, so future reviewers reading the audit trail see the actual scope.
+
+The four citation sites (cohesion-review.md, cohesion-rubric.md, handoffs.md, reviewer-output-shape.md) plus the missing brainstorm artifact were the entire surface the pass-1 review flagged. No widening — the repair stayed in scope per the rewrite-specs §"Process Step 1b. Repair-pass mode" rule.
+
+**What this repair did NOT do:**
+
+- Re-derive the chosen direction. Option D is still the approved direction; the repairs are textual fixes against named findings, not a fresh design pass.
+- Touch the design layer. All five findings were implementation-shape (heading renames + a missing artifact persistence). The classification stays Pure implementation per Step 1a.
+- Sweep beyond the named findings. The forward rewrite's substrate citations were checked against the four flagged sites; no other latent legacy-heading references were found.
+
 ## Remaining ambiguity
 
 - **Check 13k validator backing.** Deferred per `style-guide-rot.md` promotion criteria. The centralized template is one file; reviewer-judged compliance is reasonable until a real regression motivates the grep target. Re-evaluate when (a) the chat-trailer template wording is unchanged across two release cycles, (b) a regression has been caught (a SKILL.md edit reintroduces substrate vocabulary into chat-render template), and (c) the captured-render transcript meets its acceptance criteria.
 - **`CHAT_TRAILER_VOCABULARY` named-invariant promotion.** Same gate as Check 13k. The structural seam (centralized template + content removal) does most of the work; named-invariant promotion is the final layer.
 - **Cross-iteration verdict-trajectory rendering in the implement-cohesively `## Phases` table.** Pre-rewrite, the phases table rendered `Cross-review: Covered` (internal vocabulary). Post-rewrite, the same column carries the same value. The user-facing translation (e.g., "Phase 1: passed cross-review" instead of "Phase 1: Covered") is left out of scope this pass — the column header `Cross-review` is short enough that the value is self-explanatory in context.
+- **pass-1 I3 — brainstorm absence in worktree:** Closed in repair pass 1 (file copied from main repo to worktree at `docs/history/brainstorms/2026-05-06-audience-seam.md`); the deferral surfaces here only because the fresh-eyes review read the worktree (the canonical scope) and the brainstorm needed to be there for the chosen-direction-not-re-derived seam to hold structurally. Future rewrites authored mid-conversation should persist the brainstorm in the worktree as part of the rewrite-specs forward pass, not after a reviewer flags the gap.
 
 ## Ready for fresh-eyes review?
 
-**Yes** — the rewrite is internally coherent, the validator passes (18/18 numbered checks), the worked transcript pair is in place, the centralized template is reviewable in one file, and the per-skill body-block specifications cite the §"Variants" rows accurately.
+**Yes** — the repair pass closes all five ranked findings; the validator passes 18/18 numbered checks; the four legacy-heading citation sites are resolved; the brainstorm is now in the worktree.
 
 ## How to read this ledger
 

@@ -84,9 +84,9 @@ Look for "should," "probably," "we will," "TODO," "TBD" in normative sections of
 2. <next>
 3. ...
 
-## Recommended next Cohesive skill
+### Next
 
-The recommendation is determined by the disposition rule in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which maps `(verdict, highest-severity-present)` to a single recommendation. The reviewer commits to one phrase; alternative options are not rendered.
+The recommendation is determined by the disposition rule in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which maps `(verdict, highest-severity-present)` to a single recommendation. The reviewer commits to one phrase; alternative options are not rendered. The decision-shaped sentence leads; the skill citation appears parenthetically in inline code; the payload follows — per the centralized chat-trailer template at `references/templates/chat-trailer.md` and the audience seam in `docs/substrate/conventions/audience-separation.md`.
 
 **Disposition:** <the literal string in the `Canonical Disposition phrase` column of the rubric table at `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", for the row whose `(Verdict, Highest severity present)` pair matches this review. The rubric is the single source of truth for the phrase string; this template cites rather than restates. Substrate-noting is a user override of the Approved + Low default per the rubric §"Substrate-note as user override", **not a separate Disposition phrase the agent renders**; the agent renders the rule's default and the user's override (if any) is a post-render move that lands in the ledger §"Remaining ambiguity".>
 

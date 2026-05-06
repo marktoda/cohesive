@@ -119,7 +119,7 @@ Diagnostic skills produce findings that re-enter the chain at the appropriate sk
 
 ### review-codebase → brainstorm-design
 
-When `review-codebase` returns Drifting or Incoherent with findings naming design-shape issues (wrong seams, missing concepts, structural drift from documented behavior), the appropriate next skill is `brainstorm-design` to propose a corrective direction. The review's `### Recommended next Cohesive skill` footer renders this recommendation per verdict.
+When `review-codebase` returns Drifting or Incoherent with findings naming design-shape issues (wrong seams, missing concepts, structural drift from documented behavior), the appropriate next skill is `brainstorm-design` to propose a corrective direction. The review's `### Next` footer renders this recommendation per verdict.
 
 ### review-codebase → rewrite-specs
 

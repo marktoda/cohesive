@@ -48,7 +48,7 @@ Three columns, applied to each Cohesive skill that renders findings or fixes to 
 
 - **Shows-not-names** (rule 2b) — every finding rendered in the skill's Output format chat trailer carries title + concrete evidence (file:line, quoted excerpt, or named artifact) + the specific change that closes it. Bare title with one-clause "why it matters" fails this column.
 - **Bookkeeping-displaced** (rule 2c) — the skill's Output format chat trailer carries no disposition matrix, no cross-iteration finding-ID continuity, no verdict-ratchet language. Bookkeeping content lives in the persisted file's history section.
-- **Handoff-carries-payload** (rule 5a) — the skill's Output format chat trailer's `### Recommended next Cohesive skill` clause names the concrete inputs the next skill operates on (files for rewrite-specs, scope for review-codebase / review-diff / audit-substrate, design question for brainstorm-design). Bare skill name + reason without payload fails this column.
+- **Handoff-carries-payload** (rule 5a) — the skill's Output format chat trailer's `### Next` clause names the concrete inputs the next skill operates on (files for rewrite-specs, scope for review-codebase / review-diff / audit-substrate, design question for brainstorm-design). Bare skill name + reason without payload fails this column. (The legacy `### Recommended next Cohesive skill` heading was renamed to `### Next` in the 2026-05-06 audience-seam rewrite per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`; `validate_plugin.sh` Check 12 greps the new heading.)
 
 | Skill | Shows-not-names (2b) | Bookkeeping-displaced (2c) | Handoff-carries-payload (5a) |
 |---|:-:|:-:|:-:|
