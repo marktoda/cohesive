@@ -138,17 +138,22 @@ Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boun
 
 > Iterative-review bookkeeping. This section is the canonical home for cross-pass audit content (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2c — bookkeeping displaces from chat to persisted file). Omit the section entirely on the first review of a scope; populate it on the second and subsequent reviews.
 
-### Predecessor
+### Predecessors
 
-- Predecessor review: `docs/history/reviews/<earlier-date>-<slug>-architecture-review.md`
-- Predecessor verdict: <value from vocabulary>
-- Predecessor finding count: <N total; B blockers / H highs / M mediums / L lows>
+One bullet per prior review of this scope, oldest first. The current review references the entire chain, not just the immediate predecessor — a reader of pass-4 needs to see how findings closed across passes 1→2→3 without leaving this section.
 
-### Disposition of predecessor findings
+- Pass 1 review: `docs/history/reviews/<earlier-date>-<slug>-architecture-review.md` — verdict: <value>; finding count: <N total; B blockers / H highs / M mediums / L lows>
+- Pass 2 review: `docs/history/reviews/<later-date>-<slug>-architecture-review.md` — verdict: <value>; finding count: <breakdown>
+- ...
 
-| Predecessor finding | Severity | Disposition this pass | Closing artifact / rationale |
-|---|---|---|---|
-| <ID. Title> | Blocker / High / Medium / Low | Closed / Promoted / Deferred (criterion: <name>) / Superseded | <commit, doc edit, or new finding ID that closes or replaces it> |
+### Disposition of prior findings
+
+One row per finding from any prior pass that has not been closed by an even-earlier pass's disposition row. The Origin column anchors the finding to its source pass; the Disposition column records this pass's action.
+
+| Origin | Finding | Severity | Disposition this pass | Closing artifact / rationale |
+|---|---|---|---|---|
+| Pass 1 | <ID. Title> | Blocker / High / Medium / Low | Closed / Promoted / Deferred (criterion: <name>) / Superseded | <commit, doc edit, or new finding ID that closes or replaces it> |
+| Pass 2 | <ID. Title> | <severity> | <disposition> | <closing artifact> |
 
 ### Verdict trajectory
 

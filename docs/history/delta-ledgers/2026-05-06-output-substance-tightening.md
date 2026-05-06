@@ -148,3 +148,45 @@ none — no executable test substrate is added in this rewrite. The substance co
 3. **Conceptual changes** lists the six concept shifts (rule 2 split, rule 5 sub-rule, per-finding shape, next-skill-footer shape, matrix extension, History section).
 4. **Files rewritten** carries before/after for each of 9 files. The two highest-leverage entries are `references/output-voice.md` (the contract) and `skills/review-codebase/SKILL.md` (the most acute offender, the skill whose chat trailer triggered the rewrite).
 5. **Remaining ambiguity** flags four items deferred to future passes (history-section-name unification, missing-memory vs top-fixes shape unification, brainstorm-design matrix coverage, SKILL.md grep). None block validation.
+
+## Repair pass 2
+
+**Source review:** `docs/history/reviews/2026-05-06-output-substance-tightening-rewrite-validation.md` (pass 1, Issues Found, 1 Blocker + 2 Mediums + 2 Lows)
+**Disposition picked from rubric:** Close in same worktree → merge.
+
+Closes findings B1, I1, I2, I3, I4 from the pass-1 review. Per `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` Step 1b, the repair scope is the enumerated repairs in the cited review; the chosen direction is unchanged.
+
+### B1 — closed
+
+`skills/audit-substrate/SKILL.md` line 124 (Output format opening prose) and line 160 (Persisted-report pointer in chat render template) updated from `<slug>-substrate-audit.md` to `<slug>-audit-substrate.md`. The skill body now uses the same form throughout (lines 10, 118, 124, 160). Sibling references in `docs/history/delta-ledgers/2026-05-04-skill-rename-v0.1-lexicon.md` and `docs/history/delta-ledgers/2026-05-04-substrate-collapse.md` are untouched — those are append-only history files recording past state, not normative substrate.
+
+### I1 — closed
+
+`docs/substrate/matrices/reviewer-output-shape.md` gains a §"Per-skill show-shape variations accepted" subsection (between the synthesizing-skill table and §"Why no validator grep here"). The subsection enumerates the four skill-specific layouts (review-codebase + review-diff: title + Evidence + Change; audit-substrate: title + Evidence the gap exists + What the artifact would say + Where it lives; discover-substrate: inlined one-line compression; validate-rewrite: canonical six-field shape per reviewer-agent-shape.md) and declares the matrix tests substance-presence not layout-uniformity. The deferral that lived only in the ledger's "Remaining ambiguity" §2 now lives as substrate.
+
+### I2 — closed
+
+`references/output-voice.md` §"Density budgets (guideline, not invariant)" table updated — `review-diff`, `review-codebase`, `validate-rewrite`, and `audit-substrate` rows now describe the show-shape budgets (e.g., `review-codebase`: "TL;DR (verdict + thesis + 3 show-shape findings + payload-bearing handoff); full body in the persisted file"; `validate-rewrite`: "½–¾ page" rather than "~½ page"). New trailing paragraph clarifies the budgets reflect show-shape minimums, not targets — a render shorter than the budget that achieves substance is fine; a render longer with bookkeeping is the rule 2c failure.
+
+### I3 — closed
+
+`references/templates/architecture-review-report.md` §"History" subsections renamed and reshaped:
+- `### Predecessor` (singular, one bullet) → `### Predecessors` (plural, one bullet per prior pass).
+- `### Disposition of predecessor findings` → `### Disposition of prior findings`. The table grows an "Origin" column (Pass N) so a reader of pass-4 sees how each finding closed across passes 1→2→3 in one table.
+
+### I4 — closed
+
+`references/output-voice.md` §"How this guide is used" — the "At review time" bullet now points readers at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Synthesizing-skill chat render shape" as the per-skill compliance check; reviewers check the matrix's Shows-not-names / Bookkeeping-displaced / Handoff-carries-payload columns before flagging a regression.
+
+### Files touched in pass 2
+
+- `skills/audit-substrate/SKILL.md` (B1)
+- `docs/substrate/matrices/reviewer-output-shape.md` (I1)
+- `references/output-voice.md` (I2 + I4)
+- `references/templates/architecture-review-report.md` (I3)
+- `docs/history/delta-ledgers/2026-05-06-output-substance-tightening.md` (this section)
+- `docs/history/reviews/2026-05-06-output-substance-tightening-rewrite-validation.md` (pass-1 persisted review, committed separately by `validate-rewrite` Step 3)
+
+### Remaining ambiguity after pass 2
+
+Item 1 (history-section-name unification across `architecture-review-report.md` and `validate-rewrite`'s pass-N file pattern) and Item 2 (discover-substrate Missing-memory shape vs audit-substrate Top-fixes shape unification — note: pass-1 finding I1 partially resolved this by adding a substrate-level note that the variation is intentional; the harder question of whether to converge them is still deferred) remain. Item 3 (brainstorm-design matrix coverage) and Item 4 (SKILL.md-level grep) remain unchanged. The pass-1 review surfaced no new ambiguities beyond what the forward rewrite recorded.

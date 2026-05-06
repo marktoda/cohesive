@@ -61,6 +61,17 @@ The cells reflect the state *after* the 2026-05-06 output-substance-tightening r
 
 The rule-grounding for each column lives in the voice guide; this matrix is the per-skill compliance surface a reviewer reads before flagging a regression. Drift in any cell is a substrate-alignment finding tracked here; the persisted file's `## History` section records the regression event and the recovery commit.
 
+### Per-skill show-shape variations accepted
+
+The Shows-not-names column tests for the substance contract — every chat finding or top-fix carries a title, concrete evidence, and the specific change (or artifact-content sketch) that closes it. The *field layout* expressing those three elements is allowed to differ across skills, by design:
+
+- `review-codebase` and `review-diff` render finding-shape with **Evidence** + **Change** (two labeled fields under each H3 finding title, or two columns in a Findings table).
+- `audit-substrate` renders artifact-addition-shape with **Evidence the gap exists** + **What the artifact would say** + **Where it lives** (three labeled fields, because the addition is a future artifact, not an edit to an existing one — the reader needs the path and the content sketch in addition to the gap evidence).
+- `discover-substrate` renders missing-memory items as inlined bullets carrying the same three elements compressed onto one line: `**name** — path:line — excerpt + artifact-shape that would close it`.
+- `validate-rewrite` renders the canonical six-field finding shape verbatim per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions" (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact to add or update); show-shape is a strict subset of this six-field shape.
+
+The variation is intentional: each skill's chat output kind determines its field layout (findings → title + Evidence + Change; artifact-additions → title + Evidence + Sketch + Path; inlined missing-memory → one-line compression). The contract the matrix tests is "title + concrete evidence + the-thing-that-closes-it appear together," not "the four labeled fields appear in this exact form." A reviewer flagging a per-skill render as non-compliant for using a different field layout (rather than for missing the substance contract) is over-applying the matrix; the test is substance-presence, not layout-uniformity.
+
 ### Why no validator grep here
 
 A grep for the failure modes is hard. "Output format template renders Top findings as title + one-clause why" is testable against the SKILL.md file directly (count Evidence references inside the Output format code block). But "the model produces a chat finding without an Evidence line" is testable only against captured chat — not against any file in the repo. The SKILL.md grep would catch render-template drift; it would not catch the model-to-render gap. As of v0.1, no captured-render lint ships; reviewer-output-shape matrix review is the enforcement, and `cohesive:review-codebase` of the skill pack itself is the periodic check. Promotion to grep enforcement is gated on a captured chat regression and a worked transcript, mirroring the criteria in `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Why the voice imperative is convention-with-grep, not a named invariant."

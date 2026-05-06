@@ -121,7 +121,7 @@ If the user passes `--no-write`, render in chat only.
 
 ## Output format
 
-The skill renders a chat trailer (canonical verdict-led shape below) and persists the full audit report to `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md` per step 3. The chat render is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2 and its sub-rules 2a / 2b / 2c). The persisted file is canonical and carries the full audit body and the cross-iteration history if this is a re-audit; the chat trailer renders this iteration's top fixes shown afresh, plus a payload-bearing handoff.
+The skill renders a chat trailer (canonical verdict-led shape below) and persists the full audit report to `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md` per step 3. The chat render is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2 and its sub-rules 2a / 2b / 2c). The persisted file is canonical and carries the full audit body and the cross-iteration history if this is a re-audit; the chat trailer renders this iteration's top fixes shown afresh, plus a payload-bearing handoff.
 
 ```md
 # Substrate Audit — <scope>
@@ -157,7 +157,7 @@ The skill renders a chat trailer (canonical verdict-led shape below) and persist
 **Where it lives:** `<path>`
 
 ## Persisted report
-`docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md`
+`docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md`
 
 ### Recommended next Cohesive skill
 

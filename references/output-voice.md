@@ -85,11 +85,13 @@ These are guidelines, not enforced limits. A density invariant would require a c
 | Router announcement (`cohesively`) | 1–2 sentences |
 | `discover-substrate` report | One scannable page; sections under `###` |
 | `brainstorm-design` recommendation | Verdict + table + 1-paragraph recommendation |
-| `review-diff` verdict | Verdict + table + one-paragraph main concern |
-| `review-codebase` chat render | TL;DR only; full body in the persisted file |
-| `validate-rewrite` verdict | Verdict + ledger-aligned findings; ~½ page |
-| `audit-substrate` chat render | TL;DR only; full body in the persisted file |
+| `review-diff` verdict | Verdict + table (3 show-shape rows: file:line + excerpt + Change column) + one-paragraph main concern |
+| `review-codebase` chat render | TL;DR (verdict + thesis + 3 show-shape findings + payload-bearing handoff); full body in the persisted file |
+| `validate-rewrite` verdict | Verdict + Delta-at-a-glance quote + show-shape findings (three fields per finding) + disposition + (Approved-only) implementation matrix; ½–¾ page |
+| `audit-substrate` chat render | TL;DR (verdict + headline + 3 show-shape top-fixes with title + Evidence + Sketch + Path + payload-bearing handoff); full body in the persisted file |
 | Reviewer agent (any) | ≤500 lines hard cap (existing reviewer rule) |
+
+The budget rows above assume show-shape findings (title + Evidence + Change, or the skill-specific analog in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Per-skill show-shape variations accepted"). A render that satisfies the substance contract is materially larger than the pre-rewrite title-only shape; the budgets reflect the show-shape minimum, not a target. A render shorter than the budget that achieves substance is fine; a render longer than the budget that adds bookkeeping is the failure mode rule 2c addresses.
 
 If a chat render exceeds the budget, the right move is usually one of:
 - Move detail into the persisted file; render only the trailer in chat.
@@ -121,7 +123,7 @@ When all three hold, promote. Until then, the rule lives as convention-with-grep
 ## How this guide is used
 
 - **At skill generation time.** Each non-router skill and reviewer agent body carries an imperative directing the model to Read this file before rendering chat output. The Read tool call is the loading mechanism; the imperative is what triggers it. The Output format / "How to structure your output" code block in each skill/agent is the render template the model reproduces in user-facing output — it does not carry the imperative, because instructions placed in render templates appear in user-facing output verbatim.
-- **At review time.** `cohesive:review-diff` flags chat-render bloat by reading this file and the persisted output side-by-side; `cohesive:review-codebase` flags drift across multiple skills.
+- **At review time.** `cohesive:review-diff` flags chat-render bloat by reading this file and the persisted output side-by-side; `cohesive:review-codebase` flags drift across multiple skills. `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Synthesizing-skill chat render shape" tracks per-skill compliance with rules 2b, 2c, and 5a; reviewers check the matrix's Shows-not-names / Bookkeeping-displaced / Handoff-carries-payload columns before flagging a regression.
 - **At skill authorship time.** Anyone adding or revising a skill reads this guide and the worked transcript before editing the body or the Output format block.
 
 If this guide changes, update the worked transcript in the same pass. Rules without examples are the failure mode of every style guide ever written (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md`).
