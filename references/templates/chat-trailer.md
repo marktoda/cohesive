@@ -30,7 +30,35 @@ This is normative for chat-rendered output across `review-codebase`, `review-dif
 - **`**Thesis:**`** — one or two sentences. Decision-shape: name what was found and what to do. For `review-diff` this slot is labeled `**Main concern:**` instead, by §"Variants". Skills with a structural body block where the thesis is implicit (`implement-cohesively`'s Phases table, `brainstorm-design`'s Recommendation) substitute or omit per §"Variants".
 - **body block** — per-skill content. Show-shape per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2b: every claim carries title + concrete evidence + the change that closes it (or the skill-specific analog per §"Variants"). Cap header depth at `###` (rule 3).
 - **`### Persisted record`** — one-line citation to the persisted file. Skills that render chat-only (`review-diff` by default) omit this section.
-- **`### Next`** — exactly one decision-shaped recommendation per verdict branch (rule 5; payload requirement per rule 5a). The decision-shaped sentence leads; the skill citation appears parenthetically; the payload follows. Skill name is `cohesive:<x>` or `superpowers:<y>` rendered as inline code; methodology framing ("Recommended next Cohesive skill", "the Cohesive workflow") does not appear in chat — see §"Why methodology naming is removed from chat" below.
+- **`### Next`** — exactly one decision-shaped recommendation per verdict branch (rule 5; payload requirement per rule 5a). The decision-shaped sentence leads; the skill citation appears parenthetically; the payload follows. Skill name is `cohesive:<x>` or `superpowers:<y>` rendered as inline code; methodology framing ("Recommended next Cohesive skill", "the Cohesive workflow") does not appear in chat — see §"Why methodology naming is removed from chat" below. When a verdict branch has multiple plausible next moves, render the one default and put the alternatives behind a `(other options)` disclosure per §"Default-recommend rule" below.
+
+## Render-only-non-empty rule
+
+The body-block sections specified per skill in §"Variants" are **rendered only when they have content**. A `## Locality concerns` heading with no bullets is ceremony, not substance — drop the heading along with the empty content. Apply this rule to every section under the body block, not just review categories: empty `## Substrate gaps`, empty `## Vague language to tighten`, empty `## What looked right` — all collapse out of chat render. The persisted file (where the audit trail lives) keeps the headings as scaffolding for future passes; chat is per-invocation and renders only what's load-bearing this invocation.
+
+The verdict line, the thesis (or skill-equivalent), and `### Next` always render. Body-block sections render iff they carry at least one finding, fix, concern, or note.
+
+## Default-recommend rule
+
+When a `### Next` verdict branch has more than one plausible follow-up move, the chat trailer renders **one default** and puts the alternatives behind a `(other options)` disclosure. The default is the move the skill expects most users to take in the modal case for that verdict; the alternatives surface only when the user expands the disclosure or asks. Forcing the user to choose between four equally-weighted rows is ceremony — it pushes synthesis the skill should have done onto the user.
+
+The disclosure shape:
+
+```md
+### Next
+
+<decision-shaped sentence naming the default>. *(`cohesive:<skill>`.)* **<Payload-kind>:** <payload>.
+
+<details>
+<summary>(other options)</summary>
+
+- <alternative 1 — decision-shape> *(`cohesive:<skill>`.)* — <when to pick>
+- <alternative 2 — decision-shape> *(`superpowers:<skill>`.)* — <when to pick>
+- ...
+</details>
+```
+
+Skills that render multi-row decision matrices (today's `validate-rewrite` Approved Implementation route is the canonical case) follow this shape: lead with the default, hide the alternatives.
 
 ## Vocabulary the chat trailer never uses
 
@@ -53,10 +81,10 @@ Each verdict-led skill specifies a body-block variant below. Per-skill SKILL.md 
 |---|---|---|---|
 | `review-codebase` | yes (5-vocabulary) | `**Thesis:**` | `## Top findings` — three show-shape findings, each: `### N. <title>` + `**Evidence:**` `<path>:<line>` + excerpt + `**Change:**` <specific edit> |
 | `review-diff` | yes (5-vocabulary) | `**Main concern:**` (one sentence) | `## Findings` — table with columns `Severity \| Area \| Evidence (file:line + excerpt) \| Change \| Doc to update`, ordered by leverage |
-| `validate-rewrite` | yes (3-vocabulary) | (omitted; review structure carries the thesis) | Full review per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` (Executive judgment / Delta at a glance / Blocking issues / etc.); after the review body, the `### Next` footer renders the **Disposition** phrase + (Approved-only) **Implementation route** matrix per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings" |
+| `validate-rewrite` | yes (3-vocabulary) | (omitted; review structure carries the thesis) | Approved verdict leads with `## Architectural reflection` (synthesis of how the architecture feels after the lock — what it makes easier downstream, what it makes harder, what depends on memory rather than structure); then only non-empty review sections per the render-only-non-empty rule (Executive judgment / Delta at a glance / Blocking issues / Important issues / Substrate gaps / Locality concerns / Future-fit concerns / Enforcement concerns / etc., per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`); the `### Next` footer renders the **Disposition** phrase + (Approved-only) **Implementation route** with the default-recommend rule applied — `cohesive:implement-cohesively` is the lead recommendation; alternatives sit behind a `(other options)` disclosure |
 | `audit-substrate` | yes (3-vocabulary) | `**Headline:**` (one or two sentences) | `## Top fixes` — three show-shape fixes, each: `### N. <artifact-to-add title>` + `**Evidence the gap exists:**` `<path>:<line>` + excerpt + `**What the artifact would say:**` <2-3 sentence sketch> + `**Where it lives:**` `<path>` |
 | `brainstorm-design` | no | (omitted) | `## Direction` — `**Direction:**` <chosen option name> + `**Main risk:**` <one sentence> + `**Structural mitigation:**` <test/type/constraint/linter — not "we'll be careful">. Optionally a `## Pressure test summary` table above when ≥3 options were considered |
-| `implement-cohesively` | yes (4-vocabulary) | `**Thesis:**` | `## Phases` table (`# \| Intent \| Delta entries \| Plan \| Cross-review`) + `## Delta coverage` (yes/no + uncovered list) + `## Final substrate review` (verdict + path) + `## Branch state` (branch + commits + plans count) |
+| `implement-cohesively` | yes (4-vocabulary) | `**Thesis:**` | `## Code matches locked design` slot — leads with `**Code matches locked design:** ✓` (Implemented verdict) or `**Drift detected:** ✗ <count> places` (Substrate Drift / Phase Drift verdicts), surfaced from the Phase 3 final `cohesive:review-diff` verdict — followed by `## Phases` table (`# \| Intent \| Delta entries \| Plan \| Cross-review`) + `## Branch state` (branch + commits + plans count). The Phase-3 final-review pointer renders inline beside the spec-coverage line as a path to the standalone persisted review file (`docs/history/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md`); long-form review detail lives in that file, not chat |
 
 `discover-substrate` is not in this table because it does not produce a chat trailer — it produces a discovery report rendered as one scannable page (per its SKILL.md §"Output format"). Its missing-memory entries follow the same show-shape principle (title + path:line + artifact-shape) but the report is not a verdict-led trailer.
 

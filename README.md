@@ -32,47 +32,54 @@ The pattern: **Cohesive shapes the substrate and the implementation phases; Supe
 
 ## Main commands
 
-The flagship workflow chain reads as five imperatives — `discover → brainstorm → rewrite → validate → implement` — paralleling and extending Superpowers' `brainstorm → plan → execute`. Three diagnostics sit off-chain.
+The user-facing model is **three gates: Decide → Lock → Build**, paralleling Superpowers' `brainstorm → plan → execute`. Subskills are agent-internal dispatch keys; users see gates and outcomes. Three diagnostics sit off-chain.
 
 ```text
 /cohesive:cohesively <task>        # Router — picks the right workflow
 
-# Workflow chain
-/cohesive:discover-substrate       # What does the codebase already remember?
+# The three gates (flagship workflow)
+# Decide  — recommended direction with main risk + structural mitigation
+#           (under: discover-substrate + brainstorm-design)
+# Lock    — direction pinned into specs + architectural reflection
+#           (under: rewrite-specs + validate-rewrite, repair loop internal)
+# Build   — code that matches the locked design, spec-coverage verified
+#           (under: implement-cohesively, composing superpowers:writing-plans
+#            + executing-plans per phase)
+
+# Direct invocation of a specific subskill (skips the router)
+/cohesive:discover-substrate       # Inventory existing substrate (silent prereq for most flows)
 /cohesive:brainstorm-design        # Options + pressure-test, grounded in substrate
 /cohesive:rewrite-specs            # Hard-rewrite docs to chosen end state (in worktree)
-/cohesive:validate-rewrite         # Fresh-eyes review of rewritten specs
-/cohesive:implement-cohesively     # Drive implementation phase-by-phase against the delta;
-                                   # composes superpowers:writing-plans + executing-plans
-                                   # per phase; per-phase delta-coverage cross-review.
+/cohesive:validate-rewrite         # Fresh-eyes review of the rewritten specs
+/cohesive:implement-cohesively     # Drive implementation phase-by-phase against the delta
 
 # Off-chain diagnostics
-/cohesive:review-codebase          # Full architecture review
+/cohesive:review-codebase          # Full architecture cohesion review
 /cohesive:review-diff              # PR / branch / working-changes review
-/cohesive:audit-substrate          # What memory is missing?
+/cohesive:audit-substrate          # What's missing from the docs and tests
 ```
 
 ## Workflows
 
-### Design rewrite
+### Decide → Lock → Build (the flagship workflow)
 
-The flagship Cohesive flow. For non-trivial features or refactors:
+For non-trivial features or refactors:
 
 ```text
 /cohesive:cohesively brainstorm a refactor of intake classification
 ```
 
-Behind the scenes: `discover-substrate` → `brainstorm-design` (with pressure-test) → user approves direction → `rewrite-specs` (in worktree) → `validate-rewrite`. After Approved, the user picks an implementation path from the decision matrix in the validate-rewrite footer (default: `implement-cohesively`).
+**Decide gate** — the user gets a recommended direction with main risk + structural mitigation. Many design conversations end here. Underneath: `discover-substrate` (silent) + `brainstorm-design` (with pressure-test).
 
-### Implementation against an approved rewrite
+After the user approves a direction:
 
-After `validate-rewrite` returns Approved:
+**Lock gate** — the chosen direction is pinned into specs in a worktree, then fresh-eyes-validated. The user gets an Architectural reflection on how the system feels after the lock — what's easier downstream, what's harder, what's load-bearing on memory rather than structure. Underneath: `rewrite-specs` + `validate-rewrite` (repair loop runs internally if the spec rewrite has issues).
 
-```text
-/cohesive:cohesively implement the approved rewrite
-```
+After the user approves the lock:
 
-Behind the scenes: `implement-cohesively` derives phases from the design delta ledger via the phase-derivation matrix, invokes `superpowers:writing-plans` and `superpowers:executing-plans` per phase, dispatches the `delta-coverage-reviewer` agent for per-phase cross-review, and runs `cohesive:review-diff` against the branch as the final substrate check before recommending `superpowers:finishing-a-development-branch`.
+**Build gate** — the locked design becomes code, with spec-coverage verified. The user gets a `Code matches locked design ✓` (or `Drift detected ✗`) verdict. Underneath: `implement-cohesively` derives phases from the design delta ledger, invokes `superpowers:writing-plans` and `superpowers:executing-plans` per phase, dispatches `delta-coverage-reviewer` for per-phase cross-review, and runs `cohesive:review-diff` against the branch as the final spec-coverage check.
+
+The user can stop at any gate. Each gate's chat trailer leads with the user-facing outcome, not the underlying subskill names.
 
 ### Architecture review
 

@@ -6,6 +6,34 @@
 
 **Status:** Approved / Issues Found / Design Incoherent
 
+## Architectural reflection
+
+**Render context:** This section is the lock→build handoff slot — the synthesis of the reviewer's locality, future-fit, and enforcement findings into a "now that the design is locked, how does the architecture feel?" view. It renders at the top of the chat trailer's body block on **Approved** verdicts (the gate where the user decides whether to proceed to Build). It is omitted on Issues Found and Design Incoherent verdicts — there the disposition is the architectural answer.
+
+The reflection is short — one paragraph followed by three bullets — and is structured as:
+
+- **One paragraph: How it feels now.** The architecture's overall shape after the lock. Specific to this design; not "looks good" or "well-structured."
+
+Then three bullets, each answering one question:
+
+- **Easier downstream:** what future change becomes cheaper or more predictable because of this lock. (Drawn from the reviewer's future-fit positives.)
+- **Harder downstream:** what becomes more expensive, or what new context a future change in this area requires. (Drawn from the reviewer's locality concerns and future-fit negatives.)
+- **Load-bearing on memory:** which rules in the locked design depend on reviewer attention rather than tests/types/linters/CI. (Drawn from the reviewer's enforcement concerns.) Omit when enforcement is fully structural.
+
+The render-only-non-empty rule applies per-bullet: drop a bullet entirely if there's nothing concrete to say. The "How it feels now" paragraph always renders (a reflection without it has no thesis). The persisted file keeps the section header + paragraph + bullet scaffolding for future review passes; chat renders only what's load-bearing this pass.
+
+**Persisted file format:**
+
+```md
+## Architectural reflection
+
+How it feels now: <one paragraph — concrete to this design>
+
+- **Easier downstream:** <what future change becomes cheaper>
+- **Harder downstream:** <what becomes more expensive; what context a future change requires>
+- **Load-bearing on memory:** <rules that depend on reviewer attention rather than structure>  *(omit when fully enforced)*
+```
+
 ## Executive judgment
 
 One paragraph. Could a future contributor — human or agent — read these rewritten specs and implement the system without needing the original architect's memory? If not, what's the single biggest gap?
@@ -86,11 +114,11 @@ Look for "should," "probably," "we will," "TODO," "TBD" in normative sections of
 
 ### Next
 
-This `### Next` block is the `validate-rewrite` variant per `references/templates/chat-trailer.md` §"Variants" — its **Disposition** + **Implementation route** matrix shape is the documented deviation in `docs/substrate/conventions/skill-shape.md` §"When sections may differ"; future verdict-led skills follow the chat-trailer template's canonical `### Next` shape, not this one. The `###` heading depth matches the centralized chat-trailer template's footer convention per `references/templates/chat-trailer.md` §"The shell". The recommendation is determined by the disposition rule in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which maps `(verdict, highest-severity-present)` to a single recommendation. The reviewer commits to one phrase; alternative options are not rendered.
+This `### Next` block is the `validate-rewrite` variant per `references/templates/chat-trailer.md` §"Variants" — the **Disposition** phrase + (Approved-only) **Implementation route** with the default-recommend rule applied per the centralized chat-trailer template's §"Default-recommend rule". The `###` heading depth matches the centralized chat-trailer template's footer convention per `references/templates/chat-trailer.md` §"The shell". The disposition phrase is determined by the rule in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings"; it is single-phrase by design.
 
 **Disposition:** <the literal string in the `Canonical Disposition phrase` column of the rubric table at `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", for the row whose `(Verdict, Highest severity present)` pair matches this review. The rubric is the single source of truth for the phrase string; this template cites rather than restates. Substrate-noting is a user override of the Approved + Low default per the rubric §"Substrate-note as user override", **not a separate Disposition phrase the agent renders**; the agent renders the rule's default and the user's override (if any) is a post-render move that lands in the ledger §"Remaining ambiguity".>
 
-**Implementation route:** [render iff verdict is `Approved`; otherwise omit] — the verdict-floor mapping in `references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)" guarantees `Approved` is merge-ready, so the dispatching `validate-rewrite` skill renders the implementation decision matrix from `skills/validate-rewrite/SKILL.md` §"Output format" unconditionally for Approved. Omit the matrix entirely for `Issues Found` and `Design Incoherent`.
+**Implementation route:** [render iff verdict is `Approved`; otherwise omit]. The verdict-floor mapping in `references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)" guarantees `Approved` is merge-ready. The route is rendered with the default-recommend rule per the chat-trailer template's §"Default-recommend rule": one default move (`cohesive:implement-cohesively` — drive code phase-by-phase against the delta ledger) leads, with the alternatives behind a `(other options)` disclosure. The full alternatives list is in `skills/validate-rewrite/SKILL.md` §"Output format". Omit the entire route slot for `Issues Found` and `Design Incoherent`.
 
 ## What looked right
 

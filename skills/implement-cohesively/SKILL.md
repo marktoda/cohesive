@@ -131,7 +131,18 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 
 **Verdict translation.** The internal verdict (`Implemented` / `Phase Drift` / `Substrate Drift` / `Aborted`) renders in the chat trailer as the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"implement-cohesively". The user-facing label preserves the internal token so dispatch grep targets still resolve.
 
-**Body block specification.** Per the §"Variants" `implement-cohesively` row of the centralized template: a `## Phases` table + `## Delta coverage` line + `## Final substrate review` pointer + `## Branch state`.
+**Body block specification.** Per the §"Variants" `implement-cohesively` row of the centralized template: a `## Code matches locked design` slot leads (synthesized from the Phase 3 final `cohesive:review-diff` verdict — this is the **build→done verification** the user reads first to know whether the code matches the locked design), followed by `## Phases` table and `## Branch state`. Long-form review detail (the full `cohesive:review-diff` body) lives in the persisted file, not chat. Render only non-empty sections per the chat-trailer template's §"Render-only-non-empty rule"; the per-section conditions are enumerated in the §"Render-conditional rules for the body block" subsection below.
+
+**Render-conditional rules for the body block.** The render template below is the agent's literal output template; it does not carry meta-instructions or comments inline (per the failure mode in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` §"Correct pattern" — instructions inside render templates leak into user-facing output). The render conditions live here, in prose, instead:
+
+- **`## Code matches locked design`** — the spec-coverage slot. Render exactly one of three shapes, matching the internal verdict:
+  - **Internal `Implemented`** (Phase 3 returned Pass / Pass with notes) — render `**Code matches locked design:** ✓` and omit the divergent-items list.
+  - **Internal `Phase Drift` or `Substrate Drift`** (Phase 3 returned Needs substrate / Risky / Block, or a per-phase cross-review hit the escalation rule) — render `**Drift detected:** ✗ <count> places` followed by a bulleted list of divergent items (file:line + what's divergent).
+  - **Internal `Aborted`** (the user paused before Phase 3 ran) — omit both lines and the divergent-items list; the slot collapses to its header. The Branch state section below carries the partial state.
+  - The Phase 3 review pointer (`Phase 3 review: <path>`) renders only when Phase 3 actually ran (Implemented / Phase Drift / Substrate Drift). Omit on Aborted.
+- **`## Phases`** — always renders; the table is non-empty by construction (Phase 1 derived ≥1 phase, otherwise the skill halted before reaching this trailer).
+- **`## Branch state`** — always renders.
+- **`### Next`** — renders one bullet, matching the internal verdict. The four `Internal <verdict>:` shapes below show the four possible renders; the chat trailer carries exactly one. This implements the per-verdict-branch recommendation rule in the chat-trailer template's §"How `### Next` carries payload" — the payload is the matching bullet, not the full set.
 
 ```md
 # Implementation Complete — <topic>
@@ -139,6 +150,12 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 **Verdict:** <user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"implement-cohesively" — e.g., **Implementation complete** / **A phase diverged from its plan** / **Implementation went beyond the design** / **Implementation paused**>
 
 **Thesis:** <one or two sentences — what landed and what it means, in decision-shape>
+
+## Code matches locked design
+
+<one of the three shapes per the prose rules above; omit the slot's content entirely on Aborted>
+
+Phase 3 review: `docs/history/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md`
 
 ## Phases
 
@@ -148,16 +165,6 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 | 2 | <intent> | <stable IDs> | `docs/history/plans/<...>-phase-2.md` | Covered |
 | ... | ... | ... | ... | ... |
 
-## Delta coverage
-
-Every delta entry mapped to ≥1 phase: **yes** / **no**
-- Uncovered entries: <none / list with stable IDs>
-
-## Final substrate review
-
-`docs/history/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md` (chat render or persisted file)
-**Verdict:** <user-facing label from `review-diff` per the verdict-vocabulary table>
-
 ## Branch state
 
 - Branch: `design/<slug>`
@@ -166,13 +173,15 @@ Every delta entry mapped to ≥1 phase: **yes** / **no**
 
 ### Next
 
-Per verdict (decision-shape leads, skill citation parenthetical, payload follows):
+<one decision-shaped bullet, matching the internal verdict — the four shapes are enumerated below; the chat trailer renders exactly one>
+```
+
+The four `### Next` bullet shapes (one renders per invocation, matching the internal verdict):
 
 - **Internal `Implemented`:** Substrate and code agree; ready to ship. *(`superpowers:finishing-a-development-branch`.)* **Scope:** the `design/<slug>` branch.
 - **Internal `Phase Drift`:** Repair the flagged phase, then resume. *(`cohesive:implement-cohesively` resume.)* **Scope:** phase `<N>` per the cross-review's findings.
 - **Internal `Substrate Drift`:** Extend the design to cover what the implementation introduced, or revert the divergent code. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerate the docs the substrate review flagged as needing extension>. Slug: `<derived-from-original-slug>-extension`.
 - **Internal `Aborted`:** Implementation paused at user request. *(No follow-up skill required.)* The branch state is whatever the last successful phase committed.
-```
 
 ## Anti-patterns (Red Flags)
 
