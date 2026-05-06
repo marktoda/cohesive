@@ -58,7 +58,7 @@ The disclosure shape:
 </details>
 ```
 
-Skills that render multi-row decision matrices (today's `validate-rewrite` Approved Implementation route is the canonical case) follow this shape: lead with the default, hide the alternatives.
+Skills that render multi-option decision points follow this shape: lead with the default, hide the alternatives. Today the canonical case is `validate-rewrite`'s Approved trailer Implementation route, with four alternatives behind the disclosure (`superpowers:writing-plans` / land-specs-first / schedule-for-later / Re-decide). Flat enumerations where each item is independently actionable — `audit-substrate`'s Top fixes, `review-codebase`'s Top findings, `review-diff`'s Findings table — deliberately don't apply this rule because there is no "default" to recommend; the user reads all items because all items are evidence, not options.
 
 ## Vocabulary the chat trailer never uses
 

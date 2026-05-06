@@ -142,6 +142,7 @@ The verdict line renders the user-facing label (translated via `${CLAUDE_PLUGIN_
 
 - **Always preceded by:** `discover-substrate` (scoped to changed files, or reuse of its output)
 - **Often followed by:** `rewrite-specs` (Needs substrate verdict), `cohesive:review-codebase` (Risky verdict), `brainstorm-design` (Block verdict), or `superpowers:writing-plans` (Pass / Pass with notes)
+- **Invocation contexts (four):** PR review (`gh pr diff <number>`); branch review (`git diff main...HEAD`); working-changes review (`git diff HEAD`); **post-implementation review against a Cohesive-locked design** — given a branch where code landed via a non-Cohesive path (the validate-rewrite Approved-trailer bypass option, a teammate writing code, or an external tool) and a `design/<slug>` rewrite the branch claims to implement, this skill is the verification entry point. Pass the design delta ledger path explicitly in the invocation so the substrate-alignment-reviewer reads the locked design as a primary input alongside discovery. Pattern documented in [`docs/substrate/architecture/handoffs.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md) §"Post-implementation review entry point".
 - **Compatible with:** Superpowers' `code-reviewer` for the implementation-quality lens after this skill's substrate lens. Run both for a high-stakes PR.
 - **Adjacent skills:** `cohesive:review-codebase` (full architecture) and `cohesive:audit-substrate` (missing memory inventory)
 
