@@ -133,6 +133,20 @@ When `audit-substrate` returns **Substrate gaps** with named missing artifacts (
 
 When `validate-rewrite` returns **Design Incoherent**, the rewrite cannot be repaired in place — the chosen direction itself is unsound. The footer recommends `brainstorm-design` to surface a different option and re-enter the chain from earlier.
 
+### validate-rewrite → brainstorm-design (Re-decide re-entry)
+
+When `validate-rewrite` returns **Approved** but the user reads the Architectural reflection and judges the locked design unsound (the reflection's Harder-downstream or Load-bearing-on-memory bullets reveal a structural problem the brainstorm missed), the user picks the **Re-decide** option from the Approved trailer's `(other options)` disclosure. This is distinct from Design Incoherent: the rewrite *did* lock coherently — the spec-cohesion-reviewer found no Blocker/High issues — but the user's architectural judgment after reading the reflection says the chosen direction has costs that weren't visible at brainstorm time. The reviewer can't catch this; only the user can, because it's a judgment on whether the design's tradeoffs fit the user's future priorities.
+
+**Artifact crossing.** The discarded brainstorm's `## Direction` block (chosen direction summary) plus the Architectural reflection bullets from the discarded `validate-rewrite` Approved trailer (Harder-downstream + Load-bearing-on-memory). These cross the seam as `brainstorm-design`'s "What we already tried" optional input category (per `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` §"Phase 1: Ground the brainstorm").
+
+**Persistence.** The discarded design's worktree is either dropped (`git worktree remove --force`) or kept for reference; the discarded `design/<slug>` branch survives in git history. The brainstorm input itself is in-conversation, derived from the persisted artifacts (the discarded brainstorm file under `docs/history/brainstorms/` and the discarded validation review under `docs/history/reviews/`).
+
+**Verdict gate.** **Approved + user override.** The verdict-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)" guarantees the Approved verdict is structurally merge-ready; the re-decide path is a user-driven override of the rubric's "merge-ready" framing on architectural-judgment grounds.
+
+**What `brainstorm-design` must not re-derive.** The discarded direction. If the new round of options surfaces the same direction that was just discarded, either the reflection's concerns weren't real or the brainstorm isn't using the "What we already tried" input as bias. Either way, the result is a re-decide loop that converges to the same lock; cap at 2-3 cycles per the convention in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Re-decide acknowledgment" — beyond that, the user has to commit to a direction or cut scope rather than continuing to brainstorm.
+
+**Failure mode if the contract drifts.** (a) The brainstorm runs without the "What we already tried" input and re-derives the discarded path — caught by reviewer attention plus the cap on cycles. (b) The user picks Re-decide on every Approved verdict reflexively, never letting any direction land — caught by the cap; if the cap is hit, the recommendation is to commit or cut scope, not to brainstorm again. (c) The re-decide acknowledgment line (per validate-rewrite SKILL.md) is omitted, so the user enters a re-decide cycle without the substrate inputs flowing — caught by reviewer attention on subsequent passes' brainstorm output (the new options should visibly engage with the discarded direction's concerns).
+
 ### review-diff → out of chain
 
 `review-diff` operates on a PR or working changes. Its findings re-enter the user's git workflow (fix the PR), not the Cohesive chain. The footer recommends specific fixes; the user makes them.
@@ -180,6 +194,37 @@ When `validate-rewrite` returns **Design Incoherent**, the rewrite cannot be rep
 **What the downstream must not re-derive.** N/a — Aborted is a leave-the-state-as-is verdict.
 
 **Failure mode if the contract drifts.** The skill auto-recovers (resumes phases unsolicited) when the user explicitly stopped. Detection: implement-cohesively's Phase 2c escalation rule explicitly stops at Phase Drift; Aborted is a user action surfaced to the user, not an internal recovery state.
+
+## Post-implementation review entry point
+
+Some implementation paths land code outside `cohesive:implement-cohesively`'s phase loop — the Approved-trailer bypass option (`superpowers:writing-plans` directly), a teammate writing code against a Cohesive-locked design, or an external tool (an autonomous agent, a code-generation pipeline) producing a branch claimed to match the locked design. In all three cases, the question "does the code match the locked design?" still needs an answer; the entry point for that answer is **`cohesive:review-diff` against the branch with the delta-ledger path as scope**.
+
+This is not a new skill — `review-diff` already exists and dispatches the substrate-alignment-reviewer + structure-reviewer agents against a diff. What this section does is name the *pattern* connecting a Cohesive-locked design to a non-Cohesive implementation, so future readers know where the verification entry point is when the implementation didn't run through `implement-cohesively`'s Phase 3.
+
+### Pattern: post-implementation review against a locked design
+
+**Trigger conditions** (any one fires the pattern):
+
+- The user picked the **Hand off to Superpowers without delta-coverage discipline** option in `cohesive:validate-rewrite`'s Approved trailer, code landed via `superpowers:writing-plans`, and the user wants to know if the implementation drifted from the rewrite.
+- A teammate (or a non-Cohesive AI session) landed a branch claimed to implement a `design/<slug>` rewrite, and the user wants to verify before merge.
+- An external tool produced a branch matching a Cohesive-locked delta ledger and the user is the human-in-the-loop verifier.
+
+**Artifact crossing.** Branch (the implementation under review) + design delta ledger path (the locked design being verified against) + optional substrate discovery report path (for context on the surrounding substrate).
+
+**Skill invoked.** `cohesive:review-diff` with scope set to the branch and the delta ledger explicitly named in the invocation. The skill's Phase 1 substrate-discovery (scoped to changed files) runs as usual; the delta ledger becomes a primary input to the dispatched substrate-alignment-reviewer alongside the normative substrate the discovery surfaces.
+
+**Verdict gate.** Same vocabulary as `review-diff`'s normal verdicts: **Pass** / **Pass with notes** / **Needs substrate** / **Risky** / **Block**. The user-facing labels translate per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"review-diff".
+
+**Where this is recommended in chat.** Two surfaces name this pattern:
+
+1. The bypass-acknowledgment line in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Bypass acknowledgment" carries the imperative: "Run `cohesive:review-diff` against the branch when implementation lands — bypass means accepting drift risk, not skipping verification."
+2. The `(other options)` disclosure on `validate-rewrite`'s Approved trailer (the bypass alternative) carries the same imperative inline.
+
+**What `review-diff` must not re-derive.** The locked design. The reviewer reads the delta ledger as the design's executive summary; re-deriving design intent from the implementation is exactly what this pattern exists to catch (the implementation that drifts produces design "intent" that contradicts the ledger).
+
+**Failure mode if the pattern drifts.** The user picks the bypass option, lands code, and merges without running `review-diff` — drift accumulates silently and the next architecture review catches it as substrate drift. Detection: the bypass-acknowledgment line is the substrate's explicit reminder; if the line is absent from the conversation transcript when implementation landed via the bypass path, the convention has been violated.
+
+This pattern is **not** a chain edge. The chain edge `validate-rewrite → implement-cohesively (Approved branch)` is the canonical path; this pattern is the named recovery for the off-canonical paths.
 
 ## What this doc does not cover
 
