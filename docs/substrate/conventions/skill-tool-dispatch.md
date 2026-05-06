@@ -80,10 +80,16 @@ You are <dispatched skill role> in <calling skill's loop or composition>. <One-s
 3. Commits follow <dispatching skill's template; cite the template by reference>.
 4. (If the loop re-dispatches reviewers) Per-pass paths-only on the next reviewer dispatch; do not pass this loop's conversation context.
 
-## Output
+## Output (persisted)
 
-<What the dispatched skill returns to the calling skill. For `rewrite-specs` in repair mode: the commits land on the branch and the dispatched skill's chat output is the repair-pass announcement. For `superpowers:writing-plans` per phase: the plan persisted at the phase plan path.>
+<The persisted artifact the dispatched skill returns. For `rewrite-specs` in repair mode: repair commits on `design/<slug>` following the repair-mode commit template (per the Skill-tool four-constraint contract, constraint 3). For `superpowers:writing-plans` per phase: the plan persisted at `docs/history/plans/<YYYY-MM-DD>-<slug>-phase-<N>.md`. For `superpowers:executing-plans` per phase: the implementation commits + test artifacts on the same branch.>
+
+## Output (chat trailer)
+
+<Optional. The dispatched skill's chat-rendered output, if any. For `rewrite-specs` repair mode: the standard pass-N announcement (one-line summary; the calling skill's loop renders the full pass-by-pass progress). For `superpowers:writing-plans` and `superpowers:executing-plans`: typically none, since the dispatching skill's loop owns the user-facing render.>
 ```
+
+The persisted output is the load-bearing return surface: it is what the calling skill consumes structurally (paths to artifacts; commit history). The chat trailer is advisory; the calling skill typically owns the user-facing render and the dispatched skill's chat output is structured for the loop's progress display, not for the user. When in doubt, omit the chat trailer field — the loop renders progress, not the dispatched skill.
 
 What the dispatch prompt **must not** contain:
 

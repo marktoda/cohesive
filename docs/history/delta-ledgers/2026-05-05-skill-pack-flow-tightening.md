@@ -202,6 +202,24 @@ For each file whose normative content changed:
 
 **Verification:** `bash scripts/validate_plugin.sh` clean (0 errors, 0 warnings) post-repair, including Check 13h (preamble preserved), Check 13i (route-name set equality holds — the annotation tightening is a prose change, not a route-name change).
 
+## Repair pass 4
+
+**Source review:** `docs/history/reviews/2026-05-05-skill-pack-flow-tightening-rewrite-validation-pass-3.md` (pass 3, Issues Found — 1 Blocker, 2 Medium, 1 Low; convergence trajectory holding).
+
+**Closed findings:**
+
+- **B1** (Blocker — `skills.md` §"Bootstrap status" cited non-existent "lens-2"): replaced "lens-2 (design-implementation agreement) and lens-14 (handoff contract consistency)" with "lens 13 (design-implementation agreement) and lens 14 (handoff contract consistency)" in the §"Bootstrap status" closing paragraph. The lens numbers now match handoffs.md and the spec-cohesion-reviewer agent's contract; spacing normalized for typographic consistency. Pre-existing typo inherited into the new prose; closed.
+- **I1** (Medium — `using-cohesive` Owns claim duplicated SKILL.md Hard Constraint #5 mechanism): tightened SKILL.md Hard Constraint #5 to reference the skills.md design-layer ownership claim and the validator checks (Check 9a / 9b) rather than restate the substrate-vocabulary-token list and forbidden-phrase list inline. The design layer is now the canonical site for the ownership claim; the validator is the canonical site for the mechanism; the SKILL.md body references both. The duplication-that-drifts-across-release-cycles failure mode is closed for this pair.
+- **I2** (Medium — Skill-tool dispatch §"Output" template field conflated persisted vs chat trailer): split the §"Output" template field in `skill-tool-dispatch.md` §"What the dispatch prompt must contain" into `## Output (persisted)` and `## Output (chat trailer)` sub-fields, with worked examples for each across the v0.1 dispatch sites (rewrite-specs repair mode; superpowers:writing-plans per phase; superpowers:executing-plans per phase). Added a clarifying paragraph after the prompt-template code block naming the persisted output as load-bearing and the chat trailer as advisory.
+
+**Deferred:**
+
+- **I3** (Low — Step 5 array enumeration drift watcher): no change this pass per the source review's recommendation. Already in §"Remaining ambiguity" item 3.
+
+**Repair classification:** Pure implementation. Three textual fixes against named findings; no skill purpose, ownership, seams, verdicts, or chain-shape changes. The I1 fix moves a phrasing from one site to another (SKILL.md → reference; skills.md and validator → canonical) without changing the underlying claim. The I2 fix splits one prose field into two with clarifying examples; no new contract surface.
+
+**Verification:** `bash scripts/validate_plugin.sh` clean (0 errors, 0 warnings) post-repair.
+
 ## Ready for fresh-eyes review?
 
 **Yes** — `bash scripts/validate_plugin.sh` passes clean (0 errors, 0 warnings) with all 13 checks (4 + 5 + 6 + 7 + 8 + 9a + 9b + 10 + 10b + 11 + 12 + 13a-i + 14 + 15) green, including the new Check 13i. The rewrite is structurally consistent and ready for `cohesive:validate-rewrite`.

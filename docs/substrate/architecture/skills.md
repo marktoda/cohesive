@@ -74,7 +74,7 @@ Per-skill sections in this doc carry one of three statuses, named explicitly in 
 | `cohesively` | inherited | not yet validated against a forward rewrite |
 | `using-cohesive` | newly-authored | authored 2026-05-05 in the skill-pack-flow-tightening rewrite alongside its SKILL.md body; the design layer is genuinely prior substrate, but parity is not yet validated against a forward rewrite |
 
-Both `inherited` and `newly-authored` sections may surface lens-2 (design-implementation agreement) and lens-14 (handoff contract consistency) drift on the first `validate-rewrite` pass that touches them — for `inherited` sections the drift is the predicted retroactive-claim mismatch, for `newly-authored` sections it is the predicted forward-rewrite mismatch. `spec-cohesion-reviewer` reads this table during dispatch (the agent's input set includes this doc) and applies extra skepticism to both statuses. When a section earns `validated` status, update the row in the same delta ledger that triggered the validation.
+Both `inherited` and `newly-authored` sections may surface lens 13 (design-implementation agreement) and lens 14 (handoff contract consistency) drift on the first `validate-rewrite` pass that touches them — for `inherited` sections the drift is the predicted retroactive-claim mismatch, for `newly-authored` sections it is the predicted forward-rewrite mismatch. `spec-cohesion-reviewer` reads this table during dispatch (the agent's input set includes this doc) and applies extra skepticism to both statuses. When a section earns `validated` status, update the row in the same delta ledger that triggered the validation.
 
 ### discover-substrate
 
