@@ -49,7 +49,7 @@ Brainstorms are not always persisted — many design conversations end at the re
 
 Use the discovery report (passed by the router or produced by Hard constraint #2's pre-check) as the starting material. If the discovery report carries `**Empty-substrate verdict: yes**`, broaden option-generation to fundamentals rather than grounding in nothing — this is a fresh-substrate codebase, not a mature one.
 
-Then, in chat, capture three things separately:
+Then, in chat, capture three things separately (plus a fourth optional category for re-decide cycles):
 
 #### Current scope
 What this change must accomplish. The behavior the user is asking for.
@@ -60,7 +60,20 @@ Things the user has hinted at or that the substrate suggests will matter later �
 #### Non-goals
 What this change explicitly does not do. Helps the options stay focused.
 
-If any of the three is unclear, ask **one** precise clarifying question. Suggested form: "Which future pressure should this design optimize for most: <option A>, <option B>, or <option C>?" — this gives the user a concrete forced choice rather than asking them to write a brief.
+#### What we already tried *(optional — re-decide cycles only)*
+
+When this brainstorm is invoked from a `cohesive:validate-rewrite` Approved trailer's **Re-decide** option (the user read the architectural reflection and judged the locked design unsound), capture the discarded direction and what made it feel wrong. This input is the substrate residue of a failed lock — without it, the next round of options re-derives the same path that just got discarded.
+
+The dispatching `validate-rewrite` invocation passes this input as part of the Skill-tool dispatch prompt. The shape:
+
+- **Discarded direction:** <option name + 1-2 sentence summary from the discarded brainstorm's `## Direction` block>
+- **Reflection's harder-downstream concerns:** <bullets from the discarded validate-rewrite Approved trailer's Architectural reflection §"Harder downstream">
+- **Reflection's load-bearing-on-memory concerns:** <bullets from the discarded validate-rewrite Approved trailer's Architectural reflection §"Load-bearing on memory">
+- **Re-decide pass count:** N (incrementing across the cycle; cap at 2-3 per the convention in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Re-decide acknowledgment")
+
+The brainstorm uses these inputs to bias option-generation: any new option must either resolve the harder-downstream concerns of the discarded direction or explicitly accept them with a different structural mitigation. Options that re-derive the discarded path without addressing its concerns are out of scope. The pressure-test battery in Phase 3 attacks the new options against the discarded reflection's concerns, not just against the substrate at large.
+
+If any of the four input categories is unclear, ask **one** precise clarifying question. Suggested forms: "Which future pressure should this design optimize for most: <option A>, <option B>, or <option C>?" (when future pressure is the unclear input) or "Which of the prior reflection's concerns is the most load-bearing for this re-decide: <concern A> or <concern B>?" (when re-decide-cycle inputs are unclear).
 
 ### Phase 2: Propose options
 

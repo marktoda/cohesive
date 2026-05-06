@@ -58,6 +58,8 @@ The seam is the same one rule 2a structurally implements — chat is decision-re
 
 The chain-rendering pattern (`<outcome>: skill-1 → skill-2 → skill-3`) was retired in the decide-lock-build rewrite. Chains are agent-internal — a user does not act on which subskill runs underneath a gate; they act on the gate's outcome and decide whether to proceed. Rendering the chain leaks dispatch machinery into the user's surface.
 
+**Gate-level reversal: Re-decide.** The user's flow runs forward (Decide → Lock → Build) by default but can run backward at two named gates: **Build → Lock** when implementation drifts (the existing Substrate Drift verdict from `implement-cohesively`); **Lock → Decide** when the user reads the architectural reflection and judges the locked design unsound, via the **Re-decide** option in `validate-rewrite`'s Approved trailer `(other options)` disclosure. The user-facing chat-surface vocabulary for the Lock → Decide reversal is "Re-decide" — a gate-level term in the user's surface. The agent-internal substrate calls this `validate-rewrite → brainstorm-design (Re-decide re-entry)` per [`docs/substrate/architecture/handoffs.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md) §"validate-rewrite → brainstorm-design (Re-decide re-entry)". The seam holds: user reads "Re-decide" in chat; agent reads the handoff contract in substrate.
+
 ## What about frontmatter, body prose, and AGENTS.md?
 
 The audience seam applies to **chat-render surfaces** only. Three other surfaces deliberately keep substrate vocabulary:
