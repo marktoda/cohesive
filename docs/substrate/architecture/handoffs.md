@@ -189,7 +189,7 @@ When `validate-rewrite` returns **Design Incoherent**, the rewrite cannot be rep
 
 ## Adding a new chain skill or re-entry edge
 
-The canonical entry point for adding a new skill is `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` §"Adding a new skill" — its sequence drives all four substrate updates. This section's steps are subsumed by that sequence; follow the skills.md sequence and return here only when the skill genuinely is *not* a new chain participant (e.g., a new diagnostic skill that produces its own re-entry edges without new chain transitions).
+The canonical entry point for adding a new skill is `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` §"Adding a new skill" — its sequence drives all five substrate updates. This section's steps are subsumed by that sequence; follow the skills.md sequence and return here only when the skill genuinely is *not* a new chain participant (e.g., a new diagnostic skill that produces its own re-entry edges without new chain transitions). For non-chain skills (a new router shape, a new session-start orientation skill, or any addition outside the linear chain), follow skills.md Step 2's reference back to §"The five transition shapes" in this doc as the authoritative transition vocabulary, then add the skill's inbound/outbound contract under "Per-handoff contracts" naming the matching transition shape.
 
 For pure handoff-contract changes that don't add a skill (e.g., adding a re-entry edge, adjusting a verdict gate, refining a must-not-re-derive clause):
 

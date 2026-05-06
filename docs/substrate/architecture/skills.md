@@ -267,7 +267,7 @@ Inherited sections may surface lens-2 (design-implementation agreement) and lens
 **Owns.**
 - Carrying the substrate-narrowed trigger phrases that distinguish Cohesive's framing (substrate-first, durable-judgment) from Superpowers' (implementation-discipline).
 - Producing a 1–2 sentence orientation message in chat when its trigger fires, naming `cohesively` as the canonical entry point.
-- Documenting the seam between Cohesive and Superpowers as the structural mitigation for `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md`.
+- Being the structural mitigation for the trigger competition documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` (the gotcha file documents the seam; this skill's existence — at the harness's session-start loading slot — is what closes it).
 
 **Does not own.**
 - Route selection — that's `cohesively`. `using-cohesive` advises *whether* to enter Cohesive; `cohesively` advises *which Cohesive workflow* to run.

@@ -10,7 +10,7 @@ This ledger records the substrate changes the rewrite made. The fresh-eyes revie
 
 This rewrite is **Mixed**. Design-layer changes: new skill `using-cohesive` (per-skill section in architecture/skills.md, handoff section in handoffs.md, exemption in skill-shape.md, row in skill-section-presence.md); restructured "Adding a new skill" sequence (3-step → 5-step) in architecture/skills.md. Implementation changes: spec drift fixes, new convention doc, validator extension, README/ARCHITECTURE updates, mirror-annotation citations.
 
-- **Files:** 14 rewritten, 3 added, 0 removed/deprecated
+- **Files:** 12 rewritten, 3 added, 0 removed/deprecated
 - **Conceptual changes:** session-start orientation as a 5th transition shape (handoffs.md); Skill-tool dispatch as a distinct contract from Task-tool dispatch (new conventions doc); validator-array updates as Step 5 of the "Adding a new skill" sequence (was implicit) — or `none` not applicable
 - **Named invariants:** none added, none strengthened, none weakened, none removed (`DISPATCH_CONTRACT_MIRROR` and `HANDOFF_VOCABULARY_PARITY` remain candidate invariants — promotion deferred per `style-guide-rot.md` criteria)
 - **Behavior matrices:** `skill-section-presence` (cells added: rows for `implement-cohesively` (pre-existing drift fix) and `using-cohesive` (new); intro skill count 8 → 10; new exemption entry); `router` (mirror-annotation citation updated to name Check 13i) — none added, none retired
@@ -166,6 +166,24 @@ For each file whose normative content changed:
 - `using-cohesive` frontmatter trigger calibration: the description carries the substrate-vocabulary tokens (substrate, cohesion, invariant, gotcha, behavior matrix, spec, rewrite) and avoids bare generic-review triggers, but how cleanly the harness picks `using-cohesive` over `superpowers:using-superpowers` for a given user request is empirical. The structural mitigation (substrate-narrowing per Check 9a/9b) is in place; calibration of trigger phrasing requires dogfood evidence, which this rewrite cannot produce on its own.
 - `using-cohesive` exemption shape vs growth pressure: the new exemption (cohesively router exemption + 3-section decision rule) covers the current shape, but if a future session-start surface needs a different structure, the §"When sections may differ" rule requires a new entry. The exemption is registered as a one-off, not a category.
 - The "Adding a new skill" Step 5 names six validator skill-set arrays; if a future array is added (or removed), Step 5 needs to update in the same pass to keep the sequence concrete. The §"Adding a new skill" entry says "consult those comments rather than guessing" — pointing at the validator's inline comments — but if those comments drift, Step 5 drifts with them. Watch for it on the next validator change.
+
+## Repair pass 2
+
+**Source review:** `docs/history/reviews/2026-05-05-skill-pack-flow-tightening-rewrite-validation.md` (pass 1, Issues Found).
+
+**Closed findings:**
+
+- **B1** (Blocker — preamble file count diverges from body): preamble first bullet updated `14 rewritten, 3 added, 0 removed/deprecated` → `12 rewritten, 3 added, 0 removed/deprecated`. The body's §"Files rewritten" was always 12; the preamble was the drift surface and is now consistent with body and §"How to read this ledger" item 4.
+- **I1** (Medium — handoffs.md "Adding a new chain skill" deference is now nuanced): the deference paragraph in `docs/substrate/architecture/handoffs.md` §"Adding a new chain skill or re-entry edge" extends with a sentence pointing non-chain skill authors at §"The five transition shapes" in the same doc as the authoritative transition vocabulary, plus instruction to add a contract section naming the matching transition shape. Aligns with skills.md Step 2's reference and removes the load-bearing-but-implicit nature of the five-shape model for non-chain additions.
+- **I2** (Low — using-cohesive ownership phrasing): the Owns bullet in `docs/substrate/architecture/skills.md` §"using-cohesive" replaces "Documenting the seam between Cohesive and Superpowers..." with "Being the structural mitigation for the trigger competition documented in...". The gotcha file documents the seam; the skill's existence at the harness session-start slot is what closes it. Phrasing now matches the gotcha's framing and the SKILL.md body's language.
+
+**Deferred:**
+
+- **I3** (Low — validator-array drift watcher): no change this pass per the source review's own recommendation. Carried forward in §"Remaining ambiguity" item 3.
+
+**Repair classification:** Pure implementation. Three textual fixes against named findings; no skill purpose, ownership, seams, verdicts, or chain-shape changes. The I2 fix is a phrasing tightening within the same ownership claim (the skill still owns being the mitigation; the language now reflects that the gotcha file documents the seam while the skill's existence closes it).
+
+**Verification:** `bash scripts/validate_plugin.sh` clean (0 errors, 0 warnings) post-repair, including Check 13h (preamble preserved on the updated ledger).
 
 ## Ready for fresh-eyes review?
 
