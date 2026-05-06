@@ -131,7 +131,7 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 
 **Verdict translation.** The internal verdict (`Implemented` / `Phase Drift` / `Substrate Drift` / `Aborted`) renders in the chat trailer as the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"implement-cohesively". The user-facing label preserves the internal token so dispatch grep targets still resolve.
 
-**Body block specification.** Per the §"Variants" `implement-cohesively` row of the centralized template: a `## Phases` table + `## Delta coverage` line + `## Final substrate review` pointer + `## Branch state`.
+**Body block specification.** Per the §"Variants" `implement-cohesively` row of the centralized template: a `## Code matches locked design` slot leads (synthesized from the Phase 3 final `cohesive:review-diff` verdict — this is the **build→done verification** the user reads first to know whether the code matches the locked design), followed by `## Phases` table and `## Branch state`. Long-form review detail (the full `cohesive:review-diff` body) lives in the persisted file, not chat. Render only non-empty sections per the chat-trailer template's §"Render-only-non-empty rule" (e.g., `## Phases` is always non-empty; per-phase metadata that's already in the persisted plans does not re-render in chat).
 
 ```md
 # Implementation Complete — <topic>
@@ -140,6 +140,16 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 
 **Thesis:** <one or two sentences — what landed and what it means, in decision-shape>
 
+## Code matches locked design
+
+**Code matches locked design:** ✓  *(rendered when Phase 3 final `cohesive:review-diff` returns Pass / Pass with notes — every delta entry has corresponding code, code introduces no behavior beyond the delta)*
+**Drift detected:** ✗ <count> places  *(rendered when Phase 3 returns Needs substrate / Risky / Block — name the divergent items inline below)*
+
+- <divergent item 1: file:line — what's in code that isn't in the locked design, or what's in the design but isn't in code>
+- <divergent item 2: ...>
+
+Phase 3 review: `docs/history/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md` *(persisted; chat omits the full body)*
+
 ## Phases
 
 | # | Intent (one clause) | Delta entries | Plan | Cross-review |
@@ -147,16 +157,6 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 | 1 | <intent> | <stable IDs> | `docs/history/plans/<...>-phase-1.md` | Covered |
 | 2 | <intent> | <stable IDs> | `docs/history/plans/<...>-phase-2.md` | Covered |
 | ... | ... | ... | ... | ... |
-
-## Delta coverage
-
-Every delta entry mapped to ≥1 phase: **yes** / **no**
-- Uncovered entries: <none / list with stable IDs>
-
-## Final substrate review
-
-`docs/history/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md` (chat render or persisted file)
-**Verdict:** <user-facing label from `review-diff` per the verdict-vocabulary table>
 
 ## Branch state
 

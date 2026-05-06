@@ -42,6 +42,22 @@ Five forcing functions, in order of structural strength:
 4. **Persisted-file templates remain substrate-shaped.** Skills that persist (`review-codebase`, `audit-substrate`, `validate-rewrite`, `implement-cohesively`, optionally `review-diff`) write to `${CLAUDE_PLUGIN_ROOT}/references/templates/<skill>-report.md` shapes that carry substrate vocabulary as load-bearing audit-trail content. The audience seam preserves the persisted-file layer rather than collapsing it.
 5. **Validator Check 13k path documented (deferred).** The eventual grep target is the centralized chat-trailer template literal: forbidden internal-vocabulary tokens (`Substrate gaps`, `Cohesive but under-enforced`, `Recommended next Cohesive skill`, etc.) inside `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` and inside any SKILL.md `## Output format` block. Lands when wording stabilizes per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` promotion criteria. Until then, single-file reviewer-judged compliance is the enforcement.
 
+## Gate vocabulary is the user-facing chat-surface vocabulary
+
+The user-facing model for Cohesive's flagship workflow is **three gates: Decide → Lock → Build** (per `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md` §"The three gates"). The gate vocabulary is what the chat trailer and router announcements lead with. Subskill IDs (`discover-substrate`, `brainstorm-design`, `rewrite-specs`, `validate-rewrite`, `implement-cohesively`) are agent-internal dispatch keys — they appear in `### Next` skill citations as inline-code parentheticals (`*(cohesive:rewrite-specs.)*`), but never as the lead of a chat-render surface.
+
+| Surface | Lead vocabulary |
+|---|---|
+| Router announcement | Outcome sentence — what the user gets from the gate (e.g., "I'll lock the chosen direction into specs and pressure-test the architecture.") |
+| Skill chat trailer | User-facing verdict label (translated via verdict-vocabulary.md) + decision-shape thesis + body block in show-shape |
+| `### Next` block | Decision-shape sentence + skill citation in inline code parenthetical + payload |
+| TodoWrite progress | Gate names (Decide / Lock / Build), not subskill IDs |
+| Persisted-file body | Substrate-shape: subskill IDs, internal verdict labels, finding IDs, named invariants, behavior matrices |
+
+The seam is the same one rule 2a structurally implements — chat is decision-render, persisted is substrate-render. The gate vocabulary is the explicit user-facing surface for the workflow's *shape*; the verdict-vocabulary table is the user-facing surface for verdict *labels*. Both feed the chat trailer; both stay out of persisted-file templates.
+
+The chain-rendering pattern (`<outcome>: skill-1 → skill-2 → skill-3`) was retired in the decide-lock-build rewrite. Chains are agent-internal — a user does not act on which subskill runs underneath a gate; they act on the gate's outcome and decide whether to proceed. Rendering the chain leaks dispatch machinery into the user's surface.
+
 ## What about frontmatter, body prose, and AGENTS.md?
 
 The audience seam applies to **chat-render surfaces** only. Three other surfaces deliberately keep substrate vocabulary:

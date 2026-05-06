@@ -423,19 +423,25 @@ if [ -d agents ]; then
 fi
 [ "$errors" -eq "$errors_before" ] && ok "no citation literals inside render templates across $template_check_count files (anti-citation lint)"
 
-# 13e. Decision-matrix presence in validate-rewrite Approved footer.
+# 13e. Implementation-path coverage in validate-rewrite Approved footer.
 # Per docs/substrate/gotchas/no-implementation-handoff.md and the validate-rewrite
-# Output format. The Approved verdict footer must render the four-row decision
-# matrix; without it, the user has no canonical choice between implementation
-# paths and Cohesive falls back to freeform code-writing.
+# Output format. The Approved verdict footer must document all four canonical
+# implementation paths (implement-now / land-specs-first / hand-off-to-Superpowers /
+# schedule-for-later) — without all four, the user loses a canonical choice and
+# Cohesive risks falling back to freeform code-writing. The render shape changed
+# in the decide-lock-build rewrite from a four-row table to a default-recommend
+# pattern (one default + alternatives behind a `(other options)` disclosure per
+# references/templates/chat-trailer.md §"Default-recommend rule"); the substantive
+# coverage requirement is preserved by greppable tokens that must appear in
+# either render shape.
 errors_before=$errors
-if grep -qF '| Implement now with delta-coverage discipline (default) | `cohesive:implement-cohesively` |' skills/validate-rewrite/SKILL.md \
-   && grep -qF '| Land specs first; implement separately later |' skills/validate-rewrite/SKILL.md \
-   && grep -qF '| Hand off to Superpowers without delta-coverage discipline | `superpowers:writing-plans` |' skills/validate-rewrite/SKILL.md \
-   && grep -qF '| Schedule for later | (no immediate action) |' skills/validate-rewrite/SKILL.md; then
-  ok "validate-rewrite Approved footer carries the four-row decision matrix"
+if grep -qF '`cohesive:implement-cohesively`' skills/validate-rewrite/SKILL.md \
+   && grep -qF 'Land specs first' skills/validate-rewrite/SKILL.md \
+   && grep -qF '`superpowers:writing-plans`' skills/validate-rewrite/SKILL.md \
+   && grep -qF 'Schedule for later' skills/validate-rewrite/SKILL.md; then
+  ok "validate-rewrite Approved footer covers all four canonical implementation paths"
 else
-  fail "skills/validate-rewrite/SKILL.md missing one or more rows of the implementation decision matrix (per docs/substrate/gotchas/no-implementation-handoff.md). All four canonical rows must be present: implement-now, land-specs-first, hand-off-to-Superpowers, schedule-for-later."
+  fail "skills/validate-rewrite/SKILL.md missing one or more of the canonical implementation paths (per docs/substrate/gotchas/no-implementation-handoff.md). All four must be documented (in either the table or default-recommend shape): cohesive:implement-cohesively, Land specs first, superpowers:writing-plans, Schedule for later."
 fi
 
 # 13f. implement-cohesively cites phase-derivation matrix + IMPLEMENTATION_PLAN_COVERS_DELTA.

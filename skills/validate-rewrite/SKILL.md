@@ -116,12 +116,14 @@ The loop never auto-pivots from Issues Found to `brainstorm-design`. That decisi
 
 Render the latest persisted review in chat per the Output format below. The recommendation is determined by the **disposition rule** in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which is the canonical home — this skill cites it rather than restate the table. The rule maps `(verdict, highest-severity-present)` to a single recommendation; the skill does not render a menu of options for the user to pick from.
 
-Two-step render for the **Approved** branch (which the rubric's verdict-floor mapping guarantees is merge-ready):
+Render shape for the **Approved** branch (which the rubric's verdict-floor mapping guarantees is merge-ready) — this is the **lock→build handoff**, the gate where the user decides whether to continue to Build:
 
-1. **Disposition recommendation** — one phrase derived from the rubric table: `Merge as-is — no findings` (Approved + none), `Close inline (≤2 lines per finding) → merge` (Approved + Low), or `Close in same worktree → merge` (Approved + Medium).
-2. **Implementation decision matrix** — render unconditionally for Approved. The verdict-floor mapping ensures `High` and `Blocker` findings produce `Issues Found`, not `Approved`, so an Approved verdict always reaches the matrix.
+1. **Architectural reflection** — at the top of the body block, render a `## Architectural reflection` section synthesizing the reviewer agent's locality / future-fit / enforcement findings into a "now that the design is locked, how does the architecture feel?" view. Format per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Architectural reflection": one paragraph + three bullets (easier downstream / harder downstream / load-bearing on memory). The reflection is the substantive answer to "should we proceed to Build?" — the user reads it and either approves or stops.
+2. **Body block** — render only non-empty review sections per the chat-trailer template's §"Render-only-non-empty rule". On a clean Approved verdict, most sections (Blocking issues, Important issues, Substrate gaps, etc.) are empty and disappear; the body block may be just the Architectural reflection + Delta at a glance.
+3. **Disposition recommendation** — one phrase derived from the rubric table: `Merge as-is — no findings` (Approved + none), `Close inline (≤2 lines per finding) → merge` (Approved + Low), or `Close in same worktree → merge` (Approved + Medium).
+4. **Implementation route** — render with the default-recommend rule per the chat-trailer template's §"Default-recommend rule". Lead with one default (`cohesive:implement-cohesively`); place alternatives behind a `(other options)` disclosure. The verdict-floor mapping ensures `High` and `Blocker` findings produce `Issues Found`, not `Approved`, so an Approved verdict always reaches this slot.
 
-For **Design Incoherent**, the disposition rule's recommendation is the entire next step — no implementation matrix renders. `Return to brainstorm-design`.
+For **Design Incoherent**, the disposition rule's recommendation is the entire next step — no Architectural reflection, no Implementation route renders. `Return to brainstorm-design`. The reflection is meaningful only on Approved, where the lock has actually held; on Design Incoherent, the architecture has not been locked successfully.
 
 For **max-passes stall** (terminal verdict is still Issues Found), render the latest pass's findings followed by a stall banner:
 
@@ -146,56 +148,67 @@ The skill's chat output (the agent's report, surfaced) follows the centralized c
 
 **Verdict:** <user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"validate-rewrite" — e.g., **Approved — ready to implement** / **Issues found — repair pass needed** / **Design needs revisiting** — the chosen direction is unsound>
 
+## Architectural reflection  *(Approved verdict only)*
+
+<one paragraph naming the architecture's overall shape after the lock — concrete to this design, not "looks good">
+
+- **Easier downstream:** <what future change becomes cheaper or more predictable because of this lock>
+- **Harder downstream:** <what becomes more expensive; what new context a future change requires>
+- **Load-bearing on memory:** <rules that depend on reviewer attention rather than tests/types/linters/CI>  *(omit when fully enforced)*
+
 ## Executive judgment
 <one paragraph>
 
 ## Delta at a glance
 <verbatim quote of the ledger's `## Delta at a glance` preamble per the consumer rendering rules in `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Delta at a glance" (which is the canonical home of the category list, authoring rules, and consumer rendering rules including missing-preamble and divergence handling). This section appears across all three verdicts (Approved / Issues Found / Design Incoherent), not just Approved — Issues Found and Design Incoherent readers also need decision-time context for whether to repair the rewrite or revisit `brainstorm-design`.>
 
-## Blocking issues
+<!-- Render only non-empty review sections per the chat-trailer template's §"Render-only-non-empty rule". On a clean Approved verdict, most of the sections below collapse out of chat entirely; the persisted file keeps them as scaffolding for future passes. -->
+
+## Blocking issues  *(rendered iff the review has Blocker/High findings)*
 ### B1. <title>
 <canonical six-field finding shape per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Blocking issues" and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions": Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact to add or update>
 
-## Important issues
+## Important issues  *(rendered iff non-empty)*
 ...
 
-## Substrate gaps
+## Substrate gaps  *(rendered iff non-empty)*
 ...
 
-## Locality concerns
+## Locality concerns  *(rendered iff non-empty — already synthesized into Architectural reflection on Approved)*
 ...
 
-## Future-fit concerns
+## Future-fit concerns  *(rendered iff non-empty — already synthesized into Architectural reflection on Approved)*
 ...
 
-## Enforcement concerns
+## Enforcement concerns  *(rendered iff non-empty — already synthesized into Architectural reflection on Approved)*
 ...
 
-## Behavior knowable outside implementation?
-<one paragraph: yes / partially / no, with the surfaces that fall short>
+## Behavior knowable outside implementation?  *(rendered iff a "no" or "partially" answer)*
+<one paragraph: with the surfaces that fall short>
 
-## Vague language to tighten
+## Vague language to tighten  *(rendered iff non-empty)*
 - <file>:<line> — "<phrase>"
 
-## Recommended repairs (ranked)
+## Recommended repairs (ranked)  *(rendered iff non-empty)*
 1. ...
 
-## What looked right
-- <calibration bullet — what the reviewer found load-bearing and well-shaped>
+## What looked right  *(persisted-file only — calibration for next reviewer; not chat)*
 - ...
 
 ### Next
 
 **Disposition:** <one phrase per the rubric's `Canonical Disposition phrase` column — e.g., `Merge as-is — no findings`, `Close inline (≤2 lines per finding) → merge`, `Close in same worktree → merge`, `Repair → re-validate`, `Return to brainstorm-design`>
 
-**Implementation route** — pick one:
+**Implementation route — default:** Build the locked design and verify the code matches it. *(`cohesive:implement-cohesively`.)* **Scope:** the design delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md` and branch `design/<slug>`.
 
-| Option | Skill | When to pick |
-|---|---|---|
-| Implement now with delta-coverage discipline (default) | `cohesive:implement-cohesively` | Substantial rewrites; the rewrite added named invariants, behavior matrices, or cross-cutting conceptual changes. Phase loop with per-phase cross-review against the delta. |
-| Land specs first; implement separately later | merge the `design/<slug>` branch first; later run `cohesive:implement-cohesively` against the merged delta ledger | Spec rewrite is independently valuable (e.g., for review by humans before code lands); the implementation has dependencies that aren't yet ready. |
-| Hand off to Superpowers without delta-coverage discipline | `superpowers:writing-plans` | Small rewrites where the delta is mostly cosmetic; user accepts that the implementation may drift from the rewrite. The bypass is documented per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md` §"Known bypass risks." |
-| Schedule for later | (no immediate action) | The rewrite is approved; implementation is not currently in scope. Re-invoke `cohesive:implement-cohesively` or `superpowers:writing-plans` when ready. |
+<details>
+<summary>(other options)</summary>
+
+- **Land specs first; implement separately later** — merge `design/<slug>`, then run `cohesive:implement-cohesively` against the merged delta later. Pick when the spec rewrite is independently valuable (e.g., for review by humans before code lands), or when implementation has dependencies that aren't yet ready.
+- **Hand off to Superpowers without delta-coverage discipline** — *(`superpowers:writing-plans`.)* Pick when the rewrite is small and the delta is mostly cosmetic; the user accepts that the implementation may drift from the rewrite. Bypass documented per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md` §"Known bypass risks."
+- **Schedule for later** — no immediate action. Pick when implementation is not currently in scope; re-invoke `cohesive:implement-cohesively` or `superpowers:writing-plans` when ready.
+
+</details>
 ```
 
 **Disposition derivation.** The Disposition phrase above is the literal string in the `Canonical Disposition phrase` column of the rubric table at `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", selected by matching the row whose `(Verdict, Highest severity present)` pair fits the review. The rubric table is the single source of truth for the phrase string; this skill cites rather than restates. Substrate-noting is a user override of the Approved + Low default per the rubric §"Substrate-note as user override", not a separate Disposition phrase the agent renders.

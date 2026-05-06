@@ -1,25 +1,23 @@
 # Skills
 
-> Cohesive ships ten skills. They form one chain (`discover-substrate → brainstorm-design → rewrite-specs → validate-rewrite → implement-cohesively`), three off-chain diagnostics (`review-codebase`, `review-diff`, `audit-substrate`), one router (`cohesively`), and one session-start orientation skill (`using-cohesive`) that sits upstream of the router. This doc is the per-skill design layer: what each skill is for, why the set has these skills and not others, and what each owns versus delegates. The SKILL.md body under `${CLAUDE_PLUGIN_ROOT}/skills/<name>/` is the implementation prompt; the section here is the substrate above it.
+> Cohesive ships ten skills. The user-facing model is **three gates: Decide → Lock → Build**, with subskills running underneath. The agent-internal subskill order is `discover-substrate → brainstorm-design` (Decide), `rewrite-specs → validate-rewrite` (Lock, repair loop internal), `implement-cohesively` (Build). Three off-chain diagnostics (`review-codebase`, `review-diff`, `audit-substrate`) sit alongside the gates. One router (`cohesively`) selects the route; one session-start orientation skill (`using-cohesive`) sits upstream of the router. This doc is the per-skill design layer: what each skill is for, why the set has these skills and not others, and what each owns versus delegates. The SKILL.md body under `${CLAUDE_PLUGIN_ROOT}/skills/<name>/` is the implementation prompt; the section here is the substrate above it.
 
 ## Skill set at a glance
 
-| Skill | Role | Owns | Output verdict |
-|---|---|---|---|
-| **Chain** | | | |
-| `discover-substrate` | Inventory existing substrate; flag missing memory | Substrate read; gap surfacing | _none (utility)_ |
-| `brainstorm-design` | Convert intent into chosen direction | Pressure-testing options against substrate | _none (user approves)_ |
-| `rewrite-specs` | Hard-rewrite docs to end state | Spec rewrite + delta ledger | _none (validate-rewrite verdicts)_ |
-| `validate-rewrite` | Fresh-eyes review of the rewrite | Coherence, completeness, enforceability check | Approved / Issues Found / Design Incoherent |
-| `implement-cohesively` | Land code that makes the rewrite true | Phase derivation; per-phase cross-review | Implemented / Phase Drift / Substrate Drift / Aborted |
-| **Off-chain** | | | |
-| `review-codebase` | Architecture-altitude cohesion review | Multi-reviewer dispatch + synthesis | Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk |
-| `review-diff` | Cohesion review of a PR or working changes | Two-reviewer dispatch on bounded surface | Pass / Pass with notes / Needs substrate / Risky / Block |
-| `audit-substrate` | Find missing memory | Single-pass scan; no reviewer dispatch | Substrate sound / Substrate gaps / Substrate sparse |
-| **Router** | | | |
-| `cohesively` | Convert intent into the right route | Route selection; prereq-state passing | _none (announces, dispatches)_ |
-| **Session-start orientation** | | | |
-| `using-cohesive` | Advise Claude when Cohesive applies | When-to-enter-Cohesive decision; advisory routing to `cohesively` | _none (advisory)_ |
+The user-facing surface for the flagship workflow is the gate vocabulary (Decide / Lock / Build). The Gate column below tells contributors which gate a subskill runs under; subskill names themselves do not appear in user-facing chat-render surfaces (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md` §"Gate vocabulary is the user-facing chat-surface vocabulary").
+
+| Skill | Gate | Role | Owns | Output verdict |
+|---|---|---|---|---|
+| `discover-substrate` | Decide (silent) | Inventory existing substrate; flag missing memory | Substrate read; gap surfacing | _none (utility)_ |
+| `brainstorm-design` | Decide | Convert intent into chosen direction | Pressure-testing options against substrate | _none (user approves)_ |
+| `rewrite-specs` | Lock | Hard-rewrite docs to end state | Spec rewrite + delta ledger | _none (validate-rewrite verdicts)_ |
+| `validate-rewrite` | Lock | Fresh-eyes review + architectural reflection at the lock→build handoff | Coherence, completeness, enforceability check; reflection synthesizing how the architecture feels after the lock | Approved / Issues Found / Design Incoherent |
+| `implement-cohesively` | Build | Land code that makes the rewrite true; verify spec-coverage | Phase derivation; per-phase cross-review; spec-coverage verdict | Implemented / Phase Drift / Substrate Drift / Aborted |
+| `review-codebase` | _diagnostic_ | Architecture-altitude cohesion review | Multi-reviewer dispatch + synthesis | Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk |
+| `review-diff` | _diagnostic_ | Cohesion review of a PR or working changes | Two-reviewer dispatch on bounded surface | Pass / Pass with notes / Needs substrate / Risky / Block |
+| `audit-substrate` | _diagnostic_ | Find missing memory | Single-pass scan; no reviewer dispatch | Substrate sound / Substrate gaps / Substrate sparse |
+| `cohesively` | _router_ | Convert intent into the right route | Route selection; prereq-state passing | _none (announces, dispatches)_ |
+| `using-cohesive` | _orientation_ | Advise Claude when Cohesive applies | When-to-enter-Cohesive decision; advisory routing to `cohesively` | _none (advisory)_ |
 
 ## What every Cohesive skill is
 

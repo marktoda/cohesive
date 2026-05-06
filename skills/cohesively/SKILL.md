@@ -7,71 +7,67 @@ description: Use when the user wants to plan, refactor, design, brainstorm, audi
 
 ## What this skill does
 
-Cohesive is a substrate-first methodology for senior engineers building durable codebases. Most user requests that touch behavior, architecture, invariants, tests, docs, or future product direction need more than one Cohesive subskill in sequence. This router classifies the request, picks the workflow, announces it, and dispatches.
+Classifies a Cohesive-shaped request, picks one workflow, announces it in one sentence, and dispatches. Cohesive distinguishes itself from Superpowers: **Superpowers optimizes for disciplined implementation; Cohesive optimizes for durable judgment.** Both can run in the same session, and Cohesive composes with Superpowers' `using-git-worktrees`, `code-reviewer`, and `finishing-a-development-branch` skills.
 
-Cohesive distinguishes itself from Superpowers: **Superpowers optimizes for disciplined implementation; Cohesive optimizes for durable judgment.** Both can run in the same session, and Cohesive composes with Superpowers' `using-git-worktrees`, `code-reviewer`, and `finishing-a-development-branch` skills.
+## The three gates (flagship workflow)
 
-## The user-facing skill set
+The user-facing model is three gates, not five subskills. Substrate plumbing is agent-internal.
 
-The flagship workflow chain reads as five imperatives — **discover → brainstorm → rewrite → validate → implement** — paralleling and extending Superpowers' `brainstorm → plan → execute`. Three standalone diagnostics sit off-chain.
-
-| | Skill | Role |
+| Gate | What the user gets | What runs underneath |
 |---|---|---|
-| 1 | `discover-substrate` | Inventory what the codebase already remembers |
-| 2 | `brainstorm-design` | Propose 2–4 options grounded in substrate; pressure-test |
-| 3 | `rewrite-specs` | Hard-rewrite docs to chosen end state in a worktree |
-| 4 | `validate-rewrite` | Fresh-eyes review of the rewritten specs |
-| 5 | `implement-cohesively` | Drive implementation phase-by-phase against the delta ledger; per-phase cross-review; final substrate review |
-| | `review-codebase` | Full architecture review |
-| | `review-diff` | PR / branch / working-changes review |
-| | `audit-substrate` | What memory is missing? |
+| **Decide** | A recommended direction with main risk + structural mitigation | `discover-substrate` (silent) + `brainstorm-design` |
+| **Lock** | The direction pinned into specs + an architectural reflection on how the system feels after | `rewrite-specs` + `validate-rewrite` (repair loop internal) |
+| **Build** | Code that matches the locked design, with spec-coverage verified | `implement-cohesively` |
+
+The gate vocabulary is the load-bearing chat-surface vocabulary per [`docs/substrate/conventions/audience-separation.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md). Subskill IDs stay the dispatch keys; the user sees gates.
+
+## The three diagnostics (standalone)
+
+| Diagnostic | Use for |
+|---|---|
+| `cohesive:review-codebase` | Whole-architecture cohesion review |
+| `cohesive:review-diff` | PR / branch / working-changes review |
+| `cohesive:audit-substrate` | What's missing from the docs and tests |
 
 ## Routes
 
-Read the user's request and map to one of these workflows. Use the trigger phrases as primary signal; use the topic and verb tense as secondary signal.
+Read the user's request and map to one of the routes below. Trigger phrases are primary; topic and verb tense are secondary.
 
-### Route: design
+### Route: design (Decide gate)
 
 **When:** Brainstorm or refactor a feature/subsystem. Forward-looking ("add", "refactor", "support", "build").
 
-**Chain:**
-1. `discover-substrate` — what does the codebase already remember about this area?
-2. `brainstorm-design` — propose 2–4 options grounded in substrate; pressure-test each
-3. (only if user approves a direction and the change is substantial enough to warrant a spec rewrite) `rewrite-specs` — hard-rewrite docs to chosen end state in a worktree
-4. (only if step 3 ran) `validate-rewrite` — fresh-eyes review of the rewritten specs
-
-**Default behavior:** Run steps 1–2. Pause for user approval before step 3. Many design conversations end at step 2 with a recommendation — don't escalate to spec rewrite unless the user wants it. Implementation is a separate route (`implement`); the design route does not auto-chain into implementation.
+**Stops at:** A recommended direction with main risk + structural mitigation. The user approves before the Lock gate runs; design conversations often end here.
 
 **Clarifying question (optional, max one):** "Which future pressure should this design optimize for most: <option A>, <option B>, <option C>?"
 
-### Route: implement
+### Route: rewrite-only (Lock gate)
 
-**When:** A spec rewrite has been validated (Approved verdict from `validate-rewrite`) and the user wants to land code that makes the rewrite true. "Implement the approved rewrite", "land docs with implementation", "implement-cohesively", "drive implementation against the delta", "ship the rewrite".
+**When:** A direction has been chosen (from a prior brainstorm, a review, or named by the user) and the user wants the design pinned into specs. "Rewrite the specs for X", "lock in the design for Y", "update the design docs to reflect Z".
 
-**Chain:**
-1. `implement-cohesively` — derive phases from the design delta ledger; per-phase invocation of `superpowers:writing-plans` and `superpowers:executing-plans`; per-phase `delta-coverage-reviewer` cross-review; final `cohesive:review-diff` against the branch.
+**Stops at:** Approved verdict + an Architectural reflection — synthesizing how the architecture feels after the lock and what it makes harder downstream. The user approves before the Build gate runs.
 
-**Clarifying question (required if the validation review path is not in the user's request):** "I see we're about to run implement. Has validate-rewrite returned **Approved** for a spec rewrite, or should I run the design route first?"
+**Clarifying question (required if no direction is named):** "Has a direction been chosen, or should we run brainstorm-design first?"
 
-The user can decline the implement route in favor of `superpowers:writing-plans` directly — this bypasses delta-coverage discipline (an option named in the `validate-rewrite` Approved footer's decision matrix), and the user accepts that the implementation may drift from the rewrite.
+### Route: implement (Build gate)
+
+**When:** A spec rewrite has been validated (Approved verdict from `validate-rewrite`) and the user wants code that matches it. "Implement the approved rewrite", "build it", "land docs with implementation", "ship the rewrite".
+
+**Stops at:** Code on the branch + a spec-coverage verdict (✓ code matches locked design / ✗ drift in N places).
+
+**Clarifying question (required if the validation review path is not in the user's request):** "Has validate-rewrite returned **Approved** for a spec rewrite, or should I run the design route first?"
+
+The user can decline the Build gate in favor of `superpowers:writing-plans` directly — this bypasses delta-coverage discipline (an option in the Lock gate's "(other options)" disclosure) and the user accepts that the implementation may drift from the rewrite.
 
 ### Route: review (codebase)
 
 **When:** Whole codebase or subsystem architecture review. "Review the architecture", "review the codebase", "is this codebase healthy".
 
-**Chain:**
-1. `discover-substrate` — get the substrate inventory
-2. `review-codebase` — four-phase architecture review
-
-**No clarifying question** — read normative docs first; the answers come from there.
+**Stops at:** A verdict with thesis + top findings + recommended next step.
 
 ### Route: review (diff)
 
 **When:** PR / branch / working-changes review. "Review my PR", "review this diff", "review the change".
-
-**Chain:**
-1. `discover-substrate` (scoped to changed files)
-2. `review-diff`
 
 **Clarifying question (only if needed):** "Which PR / branch / set of changes? I see <X> uncommitted changes; should I review those, or do you have a PR number?"
 
@@ -79,25 +75,13 @@ The user can decline the implement route in favor of `superpowers:writing-plans`
 
 **When:** "What memory is missing", "audit substrate", "what specs/invariants/gotchas should we have but don't".
 
-**Chain:**
-1. `discover-substrate`
-2. `audit-substrate` — single-pass scan of missing memory; not the same machinery as `review-codebase`.
-
-### Route: rewrite-only
-
-**When:** User has already chosen a direction (or has a brainstorm output from earlier) and wants the spec rewrite without re-brainstorming. "Rewrite the specs for X", "update the design docs to reflect Y".
-
-**Chain:**
-1. `rewrite-specs` (which sets up its own worktree; composes with `superpowers:using-git-worktrees` if installed)
-2. `validate-rewrite`
-
-**Clarifying question (required if no direction is named):** "Has a direction been chosen, or should we run brainstorm-design first?"
+**Stops at:** A ranked list of artifacts to add (specs, invariants, matrices, gotchas) with file:line evidence and a sketch of what each artifact would say.
 
 ### Route: artifact (V1 — deferred)
 
 **When:** "Name an invariant", "encode a behavior matrix", "create a gotcha doc".
 
-**Current behavior (until V1):** Return the relevant template path and offer to fill it out inline based on user input. The dedicated artifact skills (`create-invariant`, `create-matrix`) ship in V1.
+**Current behavior (until V1):** Return the relevant template path and offer to fill it out inline. Dedicated artifact skills (`create-invariant`, `create-matrix`) ship in V1.
 
 ```
 Cohesive v0.1 doesn't yet have a dedicated `<artifact>` skill. The template is at
@@ -127,22 +111,23 @@ Direct (non-router) invocation: the subskill asks its canonical question per `${
 
 ## Required behavior
 
-1. **Announce the route.** One sentence in chat before dispatching, in the canonical form:
-   > "<one-sentence outcome the user gets>. <chain rendered as: skill-1 → skill-2 → skill-3>."
+1. **Announce the route in one sentence.** The form is just the outcome — no chain rendering, no methodology framing:
 
-   The outcome sentence leads with what the user receives — not the methodology framing — per the audience seam in [`docs/substrate/conventions/audience-separation.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md). The form is also documented in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Router conventions". The **internal route name** (one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`) is the dispatch key the router uses to pick its chain — it is agent-internal and does not appear in the announcement string. Per-route outcome sentences:
+   > "<one-sentence outcome the user gets>."
+
+   The outcome leads with what the user receives, per the audience seam in [`docs/substrate/conventions/audience-separation.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md). The form is also documented in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Router conventions". The **internal route name** (one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`) is the dispatch key the router uses to pick its chain — it is agent-internal and does not appear in the announcement string. The chain (which subskills run underneath) is internal too; users see gates and outcomes, not subskill IDs. Per-route outcome sentences:
 
    | Internal route | Announcement outcome sentence |
    |---|---|
-   | `design` | I'll explore design tradeoffs and recommend a direction |
-   | `review (codebase)` | I'll review the architecture for cohesion |
-   | `review (diff)` | I'll review the change against the docs |
-   | `audit (substrate)` | I'll inventory what memory the codebase is missing |
-   | `rewrite-only` | I'll rewrite the docs to the chosen end state |
-   | `implement` | I'll drive code phase-by-phase against the approved design |
-   | `artifact` | I'll draft the artifact you asked for |
+   | `design` | I'll explore design tradeoffs and recommend a direction. |
+   | `review (codebase)` | I'll review the architecture for cohesion. |
+   | `review (diff)` | I'll review the change against the docs. |
+   | `audit (substrate)` | I'll find what's missing from the docs and tests. |
+   | `rewrite-only` | I'll lock the chosen direction into specs and pressure-test the architecture. |
+   | `implement` | I'll build the locked design and verify the code matches it. |
+   | `artifact` | I'll draft the artifact you asked for. |
 
-2. **Process skills run before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives implementation against the design delta ledger via the phase loop. Freeform code-writing from this skill body is forbidden.
+2. **Process before implementation.** If behavior or architecture is changing, route through the Decide gate before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives code against the design delta ledger via the phase loop. Freeform code-writing from this skill body is forbidden.
 
 3. **At most one clarifying question.** Per route (above). The question is a specific forced choice, never a vague "what do you want?" prompt — convention defined in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Clarifying questions".
 
@@ -155,51 +140,55 @@ Direct (non-router) invocation: the subskill asks its canonical question per `${
    - Implementation discipline: `superpowers:writing-plans` and `superpowers:executing-plans` (used per-phase by `implement-cohesively`); `superpowers:test-driven-development` is consumed indirectly via `executing-plans`
    - Branch finishing: `superpowers:finishing-a-development-branch` (recommended after `implement-cohesively` Implemented verdict; user-invoked, never auto-invoked from the router)
 
-7. **Track progress with TodoWrite** when chaining 3+ subskills. The user should see the chain as it executes.
+7. **Track progress with TodoWrite when chaining 3+ subskills.** The user should see the gates as they execute (Decide / Lock / Build), not the underlying subskill IDs.
 
 ## Routing decision logic
 
 When the request is ambiguous, prefer this resolution order:
 
 1. **Explicit user instruction** ("review the codebase" → review/codebase). Always wins.
-2. **Verb tense and implementation cue.** Imperative implementation verbs against an existing approved rewrite ("implement", "land", "ship") → implement. Other forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
+2. **Verb tense and implementation cue.** Imperative implementation verbs against an existing approved rewrite ("implement", "land", "ship", "build it") → implement. Other forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
 3. **Scope hints.** Whole-repo / subsystem / "the codebase" → review (codebase). Diff / PR / branch / changes → review (diff). Missing / gaps / what's-not-there → audit (substrate).
 4. **Default.** When truly stuck, default to `audit (substrate)` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
 
 ## Output
 
-The router itself produces minimal output: a single-sentence announcement before the first subskill is invoked. Per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets," the router's render budget is 1–2 sentences — it has no `#` title and is exempt from the voice-citation grep that applies to longer-rendered skills (documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` §"Convention pins enforced alongside this invariant"). The announcement leads with what the user gets — not the methodology framing — per the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+The router produces a single-sentence announcement before the first subskill is invoked. Per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets," the router's render budget is 1 sentence — it has no `#` title and is exempt from the voice-citation grep that applies to longer-rendered skills. The announcement leads with what the user gets — not the methodology framing, not the subskill chain — per the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
 
 The canonical announcement template:
 
 ```
-<one-sentence outcome the user gets, drawn from the per-route table in §"Required behavior" Required behavior #1>: <subskill-1> → <subskill-2> → <subskill-3>.
+<one-sentence outcome from the per-route table in §"Required behavior" #1>
 ```
 
 Concrete examples:
 
-- design route: `I'll explore design tradeoffs and recommend a direction: discover-substrate → brainstorm-design.`
-- review (codebase) route: `I'll review the architecture for cohesion: discover-substrate → review-codebase.`
-- implement route: `I'll drive code phase-by-phase against the approved design: implement-cohesively.`
+- design route: `I'll explore design tradeoffs and recommend a direction.`
+- review (codebase) route: `I'll review the architecture for cohesion.`
+- rewrite-only route: `I'll lock the chosen direction into specs and pressure-test the architecture.`
+- implement route: `I'll build the locked design and verify the code matches it.`
 
-Then the router invokes the first subskill. Each subskill produces its own output (carrying its own voice citation) and recommends the next. The user can stop the chain at any subskill boundary.
+Then the router invokes the first subskill. Each subskill produces its own output and recommends the next. The user can stop at any gate boundary.
 
 ## Acceptance criteria
 
 - The router classifies every Cohesive-relevant request to exactly one route.
-- The route is announced before any subskill runs.
+- The route is announced before any subskill runs, in one sentence, with no chain rendering or methodology framing.
 - At most one clarifying question is asked, and it is precise (not vague).
 - Code is not produced from the router.
-- Long chains (3+ subskills) are tracked with TodoWrite.
+- The user-facing chat-surface vocabulary is the gate vocabulary (Decide / Lock / Build); subskill IDs are agent-internal.
+- Long chains (3+ subskills) are tracked with TodoWrite using gate names.
 - The dispatch prompt contract is honored — subskills receive prereq/direction state explicitly.
 
 ## Red flags
 
+- Rendering the subskill chain (`: skill-1 → skill-2 → skill-3`) in the announcement. Users see gates and outcomes, not subskill IDs.
 - Asking "what do you want?" or "can you tell me more?" — both are too vague. If a question is needed, it must be a specific forced choice.
 - Routing to multiple workflows in parallel ("I'll do both a design and a review"). Pick one. If the user really wants both, they can ask twice.
 - Producing implementation suggestions or code in the router itself. The router routes; subskills do work.
-- Dispatching subskills without the announcement. Users need to know which workflow they're in.
+- Dispatching subskills without the announcement. Users need to know which gate they're in.
 - Dispatching subskills without the prereq/direction context the dispatch contract requires. Subskills will then ask their canonical question on top of an already-routed turn.
+- Using "substrate" as a user-facing chat-surface term in announcements or trailers. Substrate is agent-internal vocabulary; the user-facing surface is the gate vocabulary.
 
 ## What this skill is *not*
 
