@@ -172,8 +172,8 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 
 (Each Missing memory item is a concrete defect with file:line evidence and the artifact-shape that would close it. Cross-iteration references like "review finding 6 family" or "the X deferred items" are bookkeeping shorthand; if a prior review identified a gap that still holds, restate the gap concretely with current evidence — do not reference its ID. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md`.)
 
-### Recommended next Cohesive skill
-- `cohesive:<skill-name>` — <reason>. **Payload:** <the change surface (for design / review / rewrite-specs), the design question (for brainstorm-design), or the audit scope (for audit-substrate) — concrete enough that the next skill begins work without re-deriving>.
+### Next
+- <decision-shaped sentence — what the user gets next>. *(`cohesive:<skill-name>`.)* **Payload:** <the change surface (for design / review / rewrite-specs), the design question (for brainstorm-design), or the audit scope (for audit-substrate) — concrete enough that the next skill begins work without re-deriving>.
 ```
 
 ## Acceptance criteria
@@ -183,8 +183,8 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 - The output does not treat docs, tests, comments, and linters as interchangeable enforcement — each has its own line.
 - "Missing memory" is ranked by leverage (what would prevent the most predictable future bug), not by alphabetical order.
 - Every Missing memory item carries `<path>:<line>` (or a named pattern when no single line carries the gap) plus the artifact-shape that would close it. Bare "<highest-leverage gap first>" or finding-ID family references are render failures per rule 2b.
-- The "Recommended next Cohesive skill" carries payload (change surface, design question, or audit scope) per rule 5a — not just a skill name and reason.
-- Exactly one "Recommended next Cohesive skill" is named.
+- The "Next" footer carries payload (change surface, design question, or audit scope) per rule 5a — not just a skill name and reason.
+- Exactly one next-skill recommendation is named in the `### Next` footer.
 
 ## What this skill is *not*
 
@@ -199,4 +199,4 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 - Recommending more than one next skill. Pick one. The router can route again later.
 - Mentioning the implementation files before the spec/test files. Substrate discovery reads normative docs first.
 - Missing memory items rendered as bare phrases without file:line evidence ("invariant for token TTL is missing") or as cross-iteration finding-ID references ("review finding 6 family"). Violates rule 2b — see [`docs/substrate/gotchas/naming-instead-of-showing.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md).
-- Recommended next Cohesive skill names a skill plus a reason without naming the change surface, design question, or scope. Violates rule 5a.
+- `### Next` names a skill plus a reason without naming the change surface, design question, or scope. Violates rule 5a.

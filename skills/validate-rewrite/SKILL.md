@@ -137,12 +137,14 @@ The stall banner is the only verdict-output shape that surfaces `Issues Found` t
 
 ## Output format
 
-The skill's chat output (the agent's report, surfaced) is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2 and its sub-rules 2a / 2b / 2c). The persisted file (each pass at `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md`) is canonical and carries the full review and the cross-pass audit trail (which findings closed in which pass, verdict trajectory across passes); the chat trailer renders this pass's findings shown afresh in the canonical six-field shape, plus the disposition recommendation and (for Approved) the implementation-route matrix. Findings already satisfy rule 2b structurally because the six-field shape (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) is show-shape by construction; the failure mode to guard against is cross-pass bookkeeping creep — finding-ID continuity between passes, "the prior pass's deferred items" annotations, verdict-ratchet language. None of that appears in chat; pass-N's persisted file is where the audit trail lives.
+The skill's chat output (the agent's report, surfaced) follows the centralized chat-trailer template at `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` per its §"Variants" `validate-rewrite` row: the full cohesion-review body (per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`) renders as the body block, and the `### Next` footer carries the **Disposition** phrase + (Approved-only) **Implementation route** matrix. The chat render is the decision-rendering of the persisted body per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c) and the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`. The persisted file (each pass at `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md`) is canonical and carries the full review and the cross-pass audit trail (which findings closed in which pass, verdict trajectory across passes); the chat trailer renders this pass's findings in the canonical six-field shape, plus the disposition recommendation and (for Approved) the implementation-route matrix. Findings already satisfy rule 2b structurally because the six-field shape (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) is show-shape by construction; the failure mode to guard against is cross-pass bookkeeping creep — finding-ID continuity between passes, "the prior pass's deferred items" annotations, verdict-ratchet language. None of that appears in chat; pass-N's persisted file is where the audit trail lives.
+
+**Verdict translation.** The internal verdict (`Approved` / `Issues Found` / `Design Incoherent`) renders in the chat trailer as the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"validate-rewrite". The user-facing label preserves the internal token (e.g., `**Approved — ready to implement**`) so the dispatch logic and rubric grep targets still resolve.
 
 ```md
 # Rewrite Validation Review — <topic>
 
-**Verdict:** Approved / Issues Found / Design Incoherent
+**Verdict:** <user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"validate-rewrite" — e.g., **Approved — ready to implement** / **Issues found — repair pass needed** / **Design needs revisiting** — the chosen direction is unsound>
 
 ## Executive judgment
 <one paragraph>
@@ -182,9 +184,9 @@ The skill's chat output (the agent's report, surfaced) is substance, not bookkee
 - <calibration bullet — what the reviewer found load-bearing and well-shaped>
 - ...
 
-### Recommended next Cohesive skill
+### Next
 
-**Disposition:** <one phrase>
+**Disposition:** <one phrase per the rubric's `Canonical Disposition phrase` column — e.g., `Merge as-is — no findings`, `Close inline (≤2 lines per finding) → merge`, `Close in same worktree → merge`, `Repair → re-validate`, `Return to brainstorm-design`>
 
 **Implementation route** — pick one:
 

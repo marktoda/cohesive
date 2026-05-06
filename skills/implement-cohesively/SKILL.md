@@ -127,12 +127,18 @@ Announce the verdict and the recommended next step. Do not invoke `superpowers:f
 
 ## Output format
 
+The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md`. The chat render is the decision-rendering of what landed per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c) and the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+
+**Verdict translation.** The internal verdict (`Implemented` / `Phase Drift` / `Substrate Drift` / `Aborted`) renders in the chat trailer as the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"implement-cohesively". The user-facing label preserves the internal token so dispatch grep targets still resolve.
+
+**Body block specification.** Per the §"Variants" `implement-cohesively` row of the centralized template: a `## Phases` table + `## Delta coverage` line + `## Final substrate review` pointer + `## Branch state`.
+
 ```md
 # Implementation Complete — <topic>
 
-**Verdict:** Implemented / Phase Drift / Substrate Drift / Aborted
+**Verdict:** <user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"implement-cohesively" — e.g., **Implementation complete** / **A phase diverged from its plan** / **Implementation went beyond the design** / **Implementation paused**>
 
-**Thesis:** <one or two sentences — what landed and what it means>
+**Thesis:** <one or two sentences — what landed and what it means, in decision-shape>
 
 ## Phases
 
@@ -150,7 +156,7 @@ Every delta entry mapped to ≥1 phase: **yes** / **no**
 ## Final substrate review
 
 `docs/history/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md` (chat render or persisted file)
-**Verdict:** <from review-diff vocabulary>
+**Verdict:** <user-facing label from `review-diff` per the verdict-vocabulary table>
 
 ## Branch state
 
@@ -158,14 +164,14 @@ Every delta entry mapped to ≥1 phase: **yes** / **no**
 - Commits: <count>
 - Plans persisted: <count> at `docs/history/plans/`
 
-### Recommended next Cohesive skill
+### Next
 
-Per verdict:
+Per verdict (decision-shape leads, skill citation parenthetical, payload follows):
 
-- **Implemented** — `superpowers:finishing-a-development-branch` — substrate and code agree; ready to merge.
-- **Phase Drift** — `cohesive:implement-cohesively` (resume) — repair the flagged phase, re-dispatch `delta-coverage-reviewer`.
-- **Substrate Drift** — `cohesive:rewrite-specs` — extend the rewrite to cover the implementation that landed, or revert the divergent code.
-- **Aborted** — none; user stopped before completion.
+- **Internal `Implemented`:** Substrate and code agree; ready to ship. *(`superpowers:finishing-a-development-branch`.)* **Scope:** the `design/<slug>` branch.
+- **Internal `Phase Drift`:** Repair the flagged phase, then resume. *(`cohesive:implement-cohesively` resume.)* **Scope:** phase `<N>` per the cross-review's findings.
+- **Internal `Substrate Drift`:** Extend the design to cover what the implementation introduced, or revert the divergent code. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerate the docs the substrate review flagged as needing extension>. Slug: `<derived-from-original-slug>-extension`.
+- **Internal `Aborted`:** Implementation paused at user request. *(No follow-up skill required.)* The branch state is whatever the last successful phase committed.
 ```
 
 ## Anti-patterns (Red Flags)

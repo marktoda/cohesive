@@ -12,31 +12,31 @@ Cohesive's substrate work is rigorous. Cohesive's chat output is not the place t
 
 1. **Verdict before evidence.** Every chat-rendered output that has a verdict opens with the verdict line. Pinned as the named invariant `VERDICT_BEFORE_EVIDENCE` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`).
 
-2. **The chat render is substance, not bookkeeping.** Persisted artifacts (architecture reviews, brainstorms, delta ledgers, audit reports) carry the full body and the audit trail. Chat shows the verdict, the thesis, the top findings, and the next step — and *shows* them, not just names them. The persisted file is canonical; the chat render is its substantive trailer.
+2. **The chat render is substance, not bookkeeping.** Persisted artifacts (architecture reviews, brainstorms, delta ledgers, audit reports) carry the full body, the audit trail, and the substrate-shape vocabulary the agent uses to do its work. Chat shows the verdict (in user-facing form), the thesis, the top findings, and the next step — and *shows* them, not just names them. The persisted file is canonical; the chat render is its decision-shaped trailer.
 
    This rule has three sub-rules, each independently testable.
 
-   **2a. Faithful subset.** The chat render is a subset of the persisted file. Test set: (a) the verdict matches; (b) every claim in the chat render appears in the persisted file; (c) the chat render does not introduce findings, recommendations, or facts absent from the persisted file.
+   **2a. Decision-render of the persisted body.** The chat render is the decision-rendering of the persisted file, not a literal subset. Every claim in the chat render has a source line in the persisted file, but chat is rendered in user-facing vocabulary (decision-shape: architectural decisions, tradeoffs, risks, concrete next moves) while the persisted file is rendered in agent-facing vocabulary (substrate-shape: specs, named invariants, behavior matrices, gotchas, semantic linters, finding IDs, disposition history). The vocabulary seam between the two surfaces is canonicalized in [`docs/substrate/conventions/audience-separation.md`](../docs/substrate/conventions/audience-separation.md); the centralized chat-trailer template at [`references/templates/chat-trailer.md`](templates/chat-trailer.md) is what every verdict-led skill cites. Test set: (a) the verdict in chat matches the user-facing label per [`references/verdict-vocabulary.md`](verdict-vocabulary.md) for the internal verdict the persisted file records; (b) every claim in the chat render appears in the persisted file (possibly translated through verdict-vocabulary or rephrased in decision-shape); (c) the chat render does not introduce findings, recommendations, or facts absent from the persisted file.
 
    **2b. Findings are shown, not named.** Each finding rendered in chat carries three things together: a title, concrete evidence (a `path:line` reference, a quoted excerpt, or a named artifact), and the specific change that closes it. A bare title with a one-clause "why it matters" is not a finding; it is a label pointing at one. Cross-iteration references — "promote finding 7," "see finding N family," "the prior pass's deferred items," "review finding 6 family" — are bookkeeping shorthand that names process state; a fresh reader cannot act on them. The chat render quotes the substance afresh each invocation. Bookkeeping references stay in the persisted file, where a reader following the audit trail across iterations has the prior reviews open.
 
    **2c. Bookkeeping displaces to the persisted file.** Promote/defer disposition matrices, verdict-ratchet language ("verdict improved from X to Y," "ratchets to ⬆"), per-iteration finding-ID continuity, "deferral criterion still holds" annotations, and disposition tables ("Promote (5) / Defer (8)") are audit-trail content. They belong in the persisted file — exactly the surface a reader tracking progress across iterations reads. The chat render is per-invocation; it shows the architectural findings of *this* invocation in show-not-name form. If the synthesizer wants to record cross-iteration disposition, it does so in the persisted file's history section and not in the chat trailer.
 
-   Faithful-subset test set extends accordingly: (d) every chat finding satisfies 2b (title + evidence + change); (e) the chat trailer carries no bookkeeping per 2c.
+   Decision-render test set extends accordingly: (d) every chat finding satisfies 2b (title + evidence + change); (e) the chat trailer carries no bookkeeping per 2c; (f) the chat trailer carries no substrate-shape vocabulary the audience seam in [`docs/substrate/conventions/audience-separation.md`](../docs/substrate/conventions/audience-separation.md) names — substrate concerns appear only in the persisted-file template each skill writes alongside.
 
 3. **Cap header depth at `###` in chat-rendered output.** No `####`, no `#####`. If a section needs sub-structure, use a bulleted list or a small table. Header soup is the most common form of ceremony.
 
 4. **Render branchy content as bullets or tables, not narrative phases.** "Phase 1: Read normative substrate. Phase 2: Spec-prior gate. Phase 3: Dispatch four reviewers..." reads like a procedure manual. A small table or bullet list says the same thing in a third the lines.
 
-5. **Recommend exactly one next move, and carry the payload it needs.** "Recommended next Cohesive skill" is one entry per verdict-branch (the cardinality rule), and that entry names the concrete inputs the next skill operates on (the payload rule). Multiple recommendations means the reader has to re-derive *which*; an empty payload means the reader has to re-derive *what*. Do both derivations in the skill, not in the user's head.
+5. **Recommend exactly one next move, and carry the payload it needs.** The chat trailer renders one `### Next` entry per verdict-branch (the cardinality rule), and that entry names the concrete inputs the next skill operates on (the payload rule). Multiple recommendations means the reader has to re-derive *which*; an empty payload means the reader has to re-derive *what*. Do both derivations in the skill, not in the user's head. The methodology framing — "Recommended next Cohesive skill" as a section heading, "the Cohesive workflow" as a user-facing label — does not appear in chat per the audience seam in [`docs/substrate/conventions/audience-separation.md`](../docs/substrate/conventions/audience-separation.md); the skill citation appears parenthetically in code form (e.g. `cohesive:rewrite-specs`) after the decision-shaped sentence that leads.
 
    **5a. The recommendation carries actionable payload.** Three shapes apply by next-skill kind:
 
-   - `cohesive:rewrite-specs` — name the files to edit and the specific change in each. "Rewrite-specs to close the 5 promoted findings" is empty. "Rewrite-specs: edit `references/output-voice.md` rule 2 to add show-not-name; edit `skills/review-codebase/SKILL.md` Output format to require Evidence per finding" is a payload.
-   - `cohesive:brainstorm-design` — name the design question to revisit. "Brainstorm to reconsider the direction" is empty. "Brainstorm: should chat-render bookkeeping promote to a named invariant, or stay convention?" is a payload.
-   - `cohesive:review-codebase` / `cohesive:review-diff` / `cohesive:audit-substrate` — name the scope. "Review the codebase" is empty. "Review the codebase scoped to the merged delta in `design/<slug>`" is a payload.
+   - `cohesive:rewrite-specs` — name the files to edit and the specific change in each. "Rewrite-specs to close the 5 promoted findings" is empty. "Edit `references/output-voice.md` rule 2 to add show-not-name; edit `skills/review-codebase/SKILL.md` Output format to require Evidence per finding" is a payload.
+   - `cohesive:brainstorm-design` — name the design question to revisit. "Brainstorm to reconsider the direction" is empty. "Should chat-render bookkeeping promote to a named invariant, or stay convention?" is a payload.
+   - `cohesive:review-codebase` / `cohesive:review-diff` / `cohesive:audit-substrate` / `superpowers:writing-plans` / `superpowers:executing-plans` — name the scope. "Review the codebase" is empty. "Review the codebase scoped to the merged delta in `design/<slug>`" is a payload.
 
-   The chat render of the recommendation appears as one block: the skill, then the payload, then a one-clause reason. Bare skill-name + reason without payload is a render failure tracked in the synthesizing-skill section of [`docs/substrate/matrices/reviewer-output-shape.md`](../docs/substrate/matrices/reviewer-output-shape.md).
+   The chat render of the recommendation appears as a `### Next` block under the canonical chat-trailer shell at [`references/templates/chat-trailer.md`](templates/chat-trailer.md): the decision-shaped sentence first, the skill citation parenthetically (in inline code), the payload last. Bare skill-name + reason without payload is a render failure tracked in the synthesizing-skill section of [`docs/substrate/matrices/reviewer-output-shape.md`](../docs/substrate/matrices/reviewer-output-shape.md).
 
 ## Do / Don't
 
@@ -67,6 +67,8 @@ These produce wordiness without information:
 - "Promote finding N" / "Close finding N" / "Finding N from the prior pass" / "Review finding N family" / "the X deferred items" — bare ID references without showing the substance (violates rule 2b — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md`)
 - "Verdict ratchets to ⬆" / "verdict improved from X to Y" / "Disposition: Promote (N) / Defer (M)" — bookkeeping the chat does not need (violates rule 2c)
 - "Next: rewrite-specs to close N findings" / "Recommended: brainstorm-design to revisit the direction" — handoffs without payload (violates rule 5a)
+- "Recommended next Cohesive skill" (as a section heading in chat) / "Cohesive workflow" / "Cohesive route" / "substrate-shaped work" (as user-facing labels) — methodology framing the chat does not carry (violates rule 2a — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`); the chat trailer renders `### Next` as the section heading, with the skill name appearing parenthetically in inline code
+- "Required substrate before implementation" / "Substrate artifact to add or update" / "Suggested substrate" / "substrate gaps" / "substrate sound" (as user-facing chat labels uncited from `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md`) — substrate-shape vocabulary leaking into chat (violates rule 2a — substrate concerns belong in persisted-file templates, not the chat trailer)
 
 ## Tone
 
@@ -82,14 +84,17 @@ These are guidelines, not enforced limits. A density invariant would require a c
 
 | Skill / output type | Chat-render budget (rough) |
 |---|---|
-| Router announcement (`cohesively`) | 1–2 sentences |
+| Router announcement (`cohesively`) | 1–2 sentences (decision-shape: leads with what the user gets, not the methodology name; see `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md` §"Output") |
 | `discover-substrate` report | One scannable page; sections under `###` |
-| `brainstorm-design` recommendation | Verdict + table + 1-paragraph recommendation |
-| `review-diff` verdict | Verdict + table (3 show-shape rows: file:line + excerpt + Change column) + one-paragraph main concern |
-| `review-codebase` chat render | TL;DR (verdict + thesis + 3 show-shape findings + payload-bearing handoff); full body in the persisted file |
-| `validate-rewrite` verdict | Verdict + Delta-at-a-glance quote + show-shape findings (six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions": Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) + disposition + (Approved-only) implementation matrix; ½–¾ page |
-| `audit-substrate` chat render | TL;DR (verdict + headline + 3 show-shape top-fixes with title + Evidence + Sketch + Path + payload-bearing handoff); full body in the persisted file |
+| `brainstorm-design` recommendation | Pressure-test summary table (when ≥3 options) + 1-paragraph Recommendation (Direction + Main risk + Structural mitigation) per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` §"Variants" |
+| `review-diff` verdict | User-facing verdict + table (3 show-shape rows: file:line + excerpt + Change column + Doc-to-update column) + one-paragraph main concern |
+| `review-codebase` chat render | User-facing verdict + thesis + 3 show-shape findings + payload-bearing `### Next`; full body in the persisted file |
+| `validate-rewrite` verdict | User-facing verdict + Delta-at-a-glance quote + show-shape findings (six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions": Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) + disposition + (Approved-only) implementation matrix; ½–¾ page |
+| `audit-substrate` chat render | User-facing verdict + headline + 3 show-shape top-fixes with title + Evidence + Sketch + Path + payload-bearing `### Next`; full body in the persisted file |
+| `implement-cohesively` chat render | User-facing verdict + thesis + Phases table + Delta coverage line + Final substrate review pointer + Branch state + payload-bearing `### Next` per verdict |
 | Reviewer agent (any) | ≤500 lines hard cap (existing reviewer rule) |
+
+The user-facing verdict labels in the rows above are translated from internal labels via `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md`; the persisted file keeps the internal label.
 
 The budget rows above assume show-shape findings (title + Evidence + Change, or the skill-specific analog in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Per-skill show-shape variations accepted"). A render that satisfies the substance contract is materially larger than the pre-rewrite title-only shape; the budgets reflect the show-shape minimum, not a target. A render shorter than the budget that achieves substance is fine; a render longer than the budget that adds bookkeeping is the failure mode rule 2c addresses.
 
@@ -137,9 +142,13 @@ If this guide changes, update the worked transcript in the same pass. Rules with
 ## Related substrate
 
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` — the one rule from this guide promoted to invariant
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md` — the seam between chat-render (decision-shape) and persisted file (substrate-shape) that rule 2a structurally implements
+- `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` — the centralized chat-render template every verdict-led skill cites
+- `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` — internal-label → user-facing-label mapping consumed by the chat-trailer's `**Verdict:**` slot
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/wordy-output.md` — the ceremony scar; addressed by rules 3 and 4
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md` — the substance scar; addressed by rules 2b, 2c, and 5a
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` — the trap this guide must avoid
-- `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md` — the worked example
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" — canonical Output format shape (cites this guide)
+- `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md` — the worked example for verdict-leads / show-shape / payload-carrying
+- `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/2026-05-06-audience-seam.md` — the worked example pair for substrate-shape vs decision-shape rendering
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" — canonical Output format shape (cites this guide and the chat-trailer template)
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions" — canonical reviewer-agent shape (cites this guide)

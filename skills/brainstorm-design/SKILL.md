@@ -93,13 +93,26 @@ Refuse to recommend an option until every applicable question has a concrete ans
 
 ### Phase 4: Recommend
 
-Recommend exactly one option, or a named hybrid. The recommendation must:
-- State the **main risk** of the chosen option in one sentence
-- State the **structural mitigation** for that risk (not "we'll be careful")
-- List the **substrate that must exist before implementation** (specs, matrices, invariants, tests, linters)
-- State whether the recommendation is ready for `rewrite-specs` or needs another brainstorm round
+Recommend exactly one option, or a named hybrid. The recommendation surfaces:
+- The **main risk** of the chosen option in one sentence
+- The **structural mitigation** for that risk (not "we'll be careful")
+- A list of **substrate that must exist before implementation** (specs, matrices, invariants, tests, linters) — in the persisted brainstorm file, agent-facing; not in the chat trailer
+- Whether the recommendation is ready for `rewrite-specs` or needs another brainstorm round
+
+The agent-facing substrate list is what `rewrite-specs` reads as input — it's load-bearing for the next chain step. It belongs in the persisted brainstorm file (substrate-shape vocabulary the agent uses to do the rewrite). The chat trailer renders the user-facing `## Direction` block — Direction + Main risk + Structural mitigation — which is what the user reads to decide whether to approve. The two surfaces carry the same recommendation in different shapes per the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
 
 ## Output format
+
+The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` — without the verdict slot (brainstorm is not verdict-led; per the §"Variants" `brainstorm-design` row, the body block carries `## Direction` instead). When the brainstorm persists, the persisted file at `docs/history/brainstorms/YYYY-MM-DD-<slug>.md` carries the full substrate-shape body — agent-facing.
+
+**Body block specification (chat trailer).** Per the §"Variants" `brainstorm-design` row of the centralized template: `## Direction` block — `**Direction:**` <chosen option name> + `**Main risk:**` <one sentence> + `**Structural mitigation:**` <test/type/constraint/linter — not "we'll be careful">. Optionally a `## Pressure test summary` table renders above when ≥3 options were considered.
+
+**`### Next` block (chat trailer).** One entry, decision-shape leading, skill citation parenthetical, payload following:
+
+- **Ready for spec rewrite:** Rewrite the docs to make this direction true. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerate the docs/matrices/invariants the chosen direction touches, with the specific change in each>. Slug: `<derived-from-topic>`. Classification: <Pure implementation / Design / Mixed>.
+- **Needs another round:** Refine the design before writing it down. *(`cohesive:brainstorm-design`.)* **Design question:** <name the unresolved question — e.g., "should X be one concept or two given the future pressure of Y">.
+
+**Persisted file shape (substrate-shape, agent-facing).** When the recommendation is accepted, the persisted brainstorm file uses the full substrate-shape body below — what `rewrite-specs` consumes:
 
 ```md
 # Brainstorm — <topic>
@@ -164,12 +177,12 @@ For each option (or just the recommended one if the others are clearly out):
 - Gotchas: ...
 - Semantic linters (proposed): ...
 
-### Recommended next Cohesive skill
+### Next
 
-`cohesive:rewrite-specs` — proceed to spec rewrite in a design worktree
-or
-`cohesive:brainstorm-design` — another round; <reason>
+<decision-shaped sentence>. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerated>. Slug: `<derived-from-topic>`.
 ```
+
+The persisted file's `## Recommendation` block carries the substrate-shape "Required substrate before implementation" list — agent-facing, consumed by `rewrite-specs` as input. The chat trailer renders only the `## Direction` decision-shape block; the substrate list does not appear in chat per the audience seam.
 
 ## Persistence
 
@@ -179,7 +192,7 @@ When the user accepts a recommendation (or after Phase 4 if the chain proceeds t
 docs/history/brainstorms/YYYY-MM-DD-<slug>.md
 ```
 
-The file uses the same shape as the chat output above. This lets `rewrite-specs` consume the chosen direction as a path rather than asking the user to re-state it from conversation memory — closing the soft-prereqs hand-off gap that previously made `brainstorm-design → rewrite-specs` rely on human memory.
+The persisted file uses the substrate-shape body in §"Output format" — agent-facing, with the full substrate list, breakage analysis, pressure-test detail, and the `## Recommendation` block including "Required substrate before implementation." The chat trailer rendered to the user is decision-shape (per the centralized chat-trailer template's `brainstorm-design` variant). This lets `rewrite-specs` consume the chosen direction as a path rather than asking the user to re-state it from conversation memory — closing the soft-prereqs hand-off gap that previously made `brainstorm-design → rewrite-specs` rely on human memory.
 
 If the user declines persistence (one-shot brainstorm, no rewrite intended), the skill is conversation-only.
 
