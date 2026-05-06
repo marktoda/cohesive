@@ -45,6 +45,36 @@ Each handoff specifies: artifact crossing the seam, persistence shape, verdict g
 
 **Failure mode if the contract drifts.** `using-cohesive`'s frontmatter trigger phrase widens to "explore the codebase" or similar generic surfaces; the harness picks `using-cohesive` for non-Cohesive-shaped requests; the orientation fires when it shouldn't. Detection: `validate_plugin.sh` Check 9b (negative-trigger lint) applies to `using-cohesive`'s frontmatter description on the same surface as every other Cohesive skill. The narrowing rule is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` §"Correct pattern", which `using-cohesive` cites by reference.
 
+### init → user-driven keep/reject (adoption)
+
+**Transition shape.** Adoption — distinct from chain transition (no verdict carries forward), router dispatch (`init` is the dispatched skill, not the source), off-chain re-entry (`init` doesn't re-enter the chain — it's the entry surface for users with no chain to re-enter yet), or session-start orientation (`init` runs once at adoption time, not at every session start). A new transition shape, named here, that the §"The five transition shapes" section may want to formalize as a sixth shape after init has run against multiple real codebases.
+
+**Inbound — direct invocation or router cell R017.** The user invokes `cohesive:init` directly when they know their codebase has no Cohesive substrate, or the `cohesively` router dispatches `init` per cell R017 (`docs/substrate/matrices/router.md`) when the user's request matches first-time-adoption trigger phrases ("initialize cohesive" / "set up substrate" / "we're new to cohesive" / "init"). No prereq state passes; init has no Cohesive prereq.
+
+**Artifact crossing — outbound to user.** A draft directory at `docs/substrate/init-draft/` containing per-artifact draft files (each with evidence + side-by-side translation + proposed artifact + decision checkbox). Optional skeletal CLAUDE.md and ARCHITECTURE.md if neither exists.
+
+**Persistence.** Init writes the draft directory and stops. The user reviews each draft, edits or deletes, and `git mv`s kept drafts to canonical locations (`docs/substrate/invariants/`, `docs/substrate/gotchas/`, `docs/substrate/matrices/`, etc.). The user owns the keep/reject decision and the move; init does not auto-commit or auto-merge.
+
+**Verdict gate.** None. Init is a utility skill (parallel to `discover-substrate`); it produces drafts, not judgments.
+
+**What the user must not skip.** The translation step. Each draft file carries the substrate-type's user-facing definition inline; opening the file *is* the pedagogical moment. A user who `git mv`s without opening the file misses the Rosetta Stone — which is recoverable (the file is preserved in canonical location) but defeats init's primary purpose.
+
+**Failure mode if the contract drifts.** (a) Init proposes drafts overlapping with existing substrate it failed to detect — caught by Hard constraint #1's substrate-shaped-paths refusal list. (b) The user accepts every draft without reading the translations — hard to detect mechanically; mitigation is the chat trailer's "what to do next" pointer naming the review step explicitly. (c) Init's draft directory persists beyond adoption (becomes ambient cruft) — mitigation is convention: the draft directory lives at `docs/substrate/init-draft/` and is cleaned up by the user as part of the keep/reject pass.
+
+### init → audit-substrate (often-followed-by edge)
+
+**Transition shape.** Off-chain user-driven re-entry — init is bounded (≤20 drafts); audit-substrate is exhaustive. After kept drafts are committed and the codebase is no longer empty-substrate, audit finds what init missed.
+
+**Artifact crossing.** No formal artifact; the user's claim that "kept drafts are committed to canonical locations" is the implicit prereq. Audit-substrate runs its own discover-substrate pass and finds the now-non-empty substrate to audit.
+
+**Persistence.** N/a — the transition is user-driven; audit's own persistence rules apply once it runs.
+
+**Verdict gate.** None at the seam. Audit's verdict (Substrate sound / Substrate gaps / Substrate sparse) gates *its own* downstream `### Next` recommendation, not this transition.
+
+**What `audit-substrate` must not re-derive.** The drafts init already proposed and the user already kept. Audit reads the substrate as-committed; it does not re-extract proto-signals from the same comments init scanned. (In practice: audit will sometimes re-flag a comment init missed; that's expected — the bounded-init / exhaustive-audit seam is the design.)
+
+**Failure mode if the contract drifts.** Init produces drafts that overlap with what audit-substrate will later flag — wasted reviewer attention. Mitigation: init caps at 20 and is signal-grep based; audit operates against the kept substrate. The categories are distinct enough that overlap is rare.
+
 ### discover-substrate → brainstorm-design
 
 **Artifact crossing.** Substrate discovery report.

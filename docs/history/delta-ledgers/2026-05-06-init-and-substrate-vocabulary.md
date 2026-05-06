@@ -121,4 +121,34 @@ None added or retired.
 
 - **Init's interaction with partially-bootstrapped codebases.** Init refuses on any existing substrate signal (CLAUDE.md, AGENTS.md, docs/substrate/, docs/specs/, docs/adr/, docs/design/, docs/decisions/). This is intentionally strict for v0.1 — overlapping with existing substrate is a class of bug we don't want to ship. But there's a real case the strict refusal forecloses: a codebase with a CLAUDE.md but no Cohesive substrate. Today such a codebase can't run init. The fix would be to relax the refusal to "no docs/substrate/" only, which is plausible but defers to v0.2 once init has run against enough real codebases to surface the relaxation criterion.
 - **Pattern-matching specificity for proto-substrate signals.** Init's body describes signal patterns (`MUST` / `NEVER` / `FIXME` / `*regression*` test names / branchy enum dispatches). Real codebases have local conventions that won't match these patterns — a Java codebase's `assert` statements are proto-invariants but don't say "MUST"; a Rust codebase's `unsafe` blocks are proto-gotchas but don't say "FIXME"; a Python codebase's `match` statements are proto-matrices but the script doesn't yet detect them. The pattern set will need extension as init runs against more languages and codebases. v0.1 ships with the English-comment-and-test-name baseline and explicitly defers the multi-language extension.
-- **Bounded proposal count's interaction with the user's expectation.** Init caps at ≤20 drafts. A codebase with 200 proto-invariants will leave 180 unsurfaced; the user has no signal that init was bounded. The chat trailer's "what to do next" pointer recommends `audit-substrate` for the deeper inventory, but a stronger structural mitigation would be to surface "init found N total proto-signals; produced top 20 drafts; run audit-substrate for the rest" in the chat output. Deferred for v0.1.
+- **Bounded proposal count's interaction with the user's expectation.** Init caps at ≤20 drafts. A codebase with 200 proto-invariants will leave 180 unsurfaced; the user has no signal that init was bounded. *(Closed in pass-2: chat trailer now renders "Signals scanned: N total; Drafts surfaced: M (capped at 20)" lines.)*
+
+## Repair pass 2
+
+**Pass:** 2
+**Source review:** `docs/history/reviews/2026-05-06-init-and-substrate-vocabulary-rewrite-validation.md` (pass 1, Issues Found)
+**Closes:** B1, B2, I1, I2, I3, I4, plus the substrate gap (skill-section-presence row missing)
+**Classification of pass-2 repairs:** Pure implementation (textual fixes against named findings, plus one architecture/handoffs.md addition that was mandated by the existing skills.md "Adding a new skill" step 2 — extending substrate, not reshaping it). The underlying rewrite remains **Mixed** per §"Delta at a glance".
+
+### Repairs applied
+
+- **B1 — `scope.md` forward-reference dropped.** `references/substrate-vocabulary.md`'s opening paragraph now lists two consumers (init today; chat trailer in sub-pass B) and explicitly defers the negative-space doc to sub-pass B without naming a path that doesn't exist. Closes the 404 a future reader would have hit.
+
+- **B2 — `init` handoff section added to `docs/substrate/architecture/handoffs.md`.** New section §"init → user-driven keep/reject (adoption)" plus §"init → audit-substrate (often-followed-by edge)". The first section names a new transition shape ("Adoption — distinct from chain transition / router dispatch / off-chain re-entry / session-start orientation") and notes that §"The five transition shapes" may want to formalize a sixth shape after init runs against multiple real codebases. Inbound, outbound, persistence, verdict gate, must-not-skip, and failure modes all named per the canonical handoff contract shape.
+
+- **I1 — Refusal list narrowed to substrate-shaped paths only.** `init/SKILL.md` Hard constraint #1 now refuses on `docs/substrate/`, `docs/adr/`, `docs/design/`, `docs/decisions/` (Cohesive-shaped substrate). `CLAUDE.md` and `AGENTS.md` are demoted to detect-and-warn: init proceeds, surfaces a warning line in the chat trailer, and step 4's skeletal-CLAUDE.md generation continues to skip when one exists. Process step 0 split into "refuse on substrate" + "warn on agent-handoff" sub-steps. Output format gains a §"Detected existing files" conditional render for the warning case.
+
+- **I2 — "What it earns" column contract clarified.** Column renamed from "What it earns over a 'rule'" to "What this earns" (drops the implicit-comparison framing). §"How to read this table" now names the convention row's inversion explicitly (the discriminator is "over a named invariant", not "over a rule"). Two weak rows (semantic linter, spec) rewritten to name the discriminator concretely: semantic linter earns "pattern-shaped enforcement" (cheaper than tests for grep-shaped rules); spec earns "scope altitude" (the surface a contributor reads to understand subsystem promises, with invariants/matrices below). Convention row's prose still inverts but now does so with explicit framing.
+
+- **I3 — Rosetta Stone chat-vs-file surface seam made explicit.** `init/SKILL.md` §"What this skill produces" now states: "The pedagogical move lives in the *draft files the user opens*, not in the chat trailer — chat shows an index of drafts produced + 3 example type labels with one-line summaries, while each draft file carries the full translation paragraph." Acceptance criteria line restated: chat renders an index in show-shape (file:line + type label + 1-line summary + draft path), not full translation paragraphs. The full translation lives in the draft file the user opens.
+
+- **I4 — Truncation signal surfaced in chat.** `init/SKILL.md` Output format §"Drafts produced" now leads with "**Signals scanned:** N total" and "**Drafts surfaced:** M (capped at 20; for the rest, run audit-substrate after the kept drafts are committed)". User-expectation gap closed.
+
+- **Substrate gap — skill-section-presence row added.** `docs/substrate/matrices/skill-section-presence.md` gains an `init` row in both the required-sections grid (all `✓`) and the optional-sections grid (Red flags + Composition `✓`). Lead updated from "ten Cohesive skills" to "eleven."
+
+### Repair-pass file changes
+
+- `references/substrate-vocabulary.md` — B1 (drop scope.md reference) + I2 (column rename + how-to-read clarification + 3 row tightenings).
+- `docs/substrate/architecture/handoffs.md` — B2 (two new sections covering init's adoption transition + audit-substrate often-followed-by edge).
+- `skills/init/SKILL.md` — I1 (Hard constraint #1 split + step 0 rewrite + Output format conditional render block) + I3 (surface seam claim + acceptance criteria) + I4 (chat trailer signals scanned/surfaced lines).
+- `docs/substrate/matrices/skill-section-presence.md` — substrate gap (init row + lead update).
