@@ -124,7 +124,7 @@ Render each fix in show-shape per `${CLAUDE_PLUGIN_ROOT}/references/output-voice
 (same fields)
 
 ### Recommended next Cohesive skill
-`cohesive:rewrite-specs` — turn the highest-leverage missing-memory entries into actual artifacts. **Files to add:** <enumerate the artifact paths from the Highest-leverage fixes above>. Slug: `<scope>-substrate-additions`.
+`cohesive:rewrite-specs` — turn the highest-leverage missing-memory entries into actual artifacts. **Files to add:** <enumerate the artifact paths from the Highest-leverage fixes above>. Slug: `<derived-from-audit-scope>`.
 ```
 
 ### 4. Persist
@@ -175,7 +175,7 @@ The skill renders a chat trailer (canonical verdict-led shape below) and persist
 
 ### Recommended next Cohesive skill
 
-`cohesive:rewrite-specs` — turn the highest-leverage missing-memory entries into actual artifacts. **Files to add:** <enumerate the artifact paths from the Top fixes above; rewrite-specs creates them as new artifacts under `docs/substrate/<category>/`>. Slug: `<scope>-substrate-additions`.
+`cohesive:rewrite-specs` — turn the highest-leverage missing-memory entries into actual artifacts. **Files to add:** <enumerate the artifact paths from the Top fixes above; rewrite-specs creates them as new artifacts under `docs/substrate/<category>/`>. Slug: `<derived-from-audit-scope>`.
 ```
 
 The render template above is the canonical chat trailer. Three rules apply:

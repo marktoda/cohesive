@@ -12,21 +12,21 @@
 
 **Thesis:** <one or two sentences — the codebase's overall shape, the highest-leverage risk, whether the system can scale development without founder memory>
 
-### Top findings
+**Top findings**
 
-#### 1. <Finding title>
+### 1. <Finding title>
 
 **Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
 
 **Change:** <the specific edit that closes this finding>
 
-#### 2. <Finding title>
+### 2. <Finding title>
 
 **Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
 
 **Change:** <the specific edit>
 
-#### 3. <Finding title>
+### 3. <Finding title>
 
 **Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
 
@@ -139,7 +139,7 @@ Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boun
 ### Gotchas to document
 - ...
 
-## Recommended roadmap
+## Phased roadmap
 
 ### First: repair substrate
 1. ...
@@ -175,6 +175,8 @@ One bullet per prior review of this scope, oldest first. The current review refe
 ### Disposition of prior findings
 
 One row per finding from any prior pass that has not been closed by an even-earlier pass's disposition row. The Origin column anchors the finding to its source pass; the Disposition column records this pass's action.
+
+The vocabulary in this Disposition column is the **review-pass vocabulary** {`Closed`, `Promoted`, `Deferred`, `Superseded`} — about whether a prior review's finding remains open across iterative architecture reviews of the same scope. It is distinct from the **validation-review disposition phrase** vocabulary in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings" ({`Merge as-is — no findings`, `Close inline → merge`, `Close in same worktree → merge`, `Repair → re-validate`, `Return to brainstorm-design`}), which lives in `validate-rewrite` review trailers and answers a different question (per-review next-step). The two vocabularies operate on different artifacts and never appear in the same column.
 
 | Origin | Finding | Severity | Disposition this pass | Closing artifact / rationale |
 |---|---|---|---|---|

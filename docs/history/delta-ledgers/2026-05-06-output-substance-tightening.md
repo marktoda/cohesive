@@ -225,3 +225,39 @@ Closes findings B1, I1, I2 from the pass-2 review and the optional substrate-gap
 ### Remaining ambiguity after pass 3
 
 The four items from §"Remaining ambiguity" (history-section-name unification; missing-memory vs top-fixes shape convergence; brainstorm-design matrix coverage; SKILL.md-level grep) all remain in the same state as after pass 2. The pass-2 review surfaced no new ambiguities beyond those.
+
+## Close-inline pass (post-pass-3 Approved)
+
+**Source review:** `docs/history/reviews/2026-05-06-output-substance-tightening-rewrite-validation-pass-3.md` (pass 3, Approved, 1 Medium + 2 Lows + 2 substrate-gap notes)
+**Disposition picked from rubric:** Close in same worktree → merge.
+
+The pass-3 verdict is Approved with Medium-and-below findings, which the rubric maps to "Close in same worktree → merge" — close the named findings inline in this worktree (no re-validation), then the rewrite is ready to merge. This section records the inline closures.
+
+### I1 — closed inline (post-pass-3)
+
+`skills/audit-substrate/SKILL.md` lines 127 and 178 — slug literal `<scope>-substrate-additions` replaced with placeholder `<derived-from-audit-scope>` to match the placeholder convention used by `review-codebase` (`<derived-from-scope>`) and `review-diff` (`<derived-from-diff>`). The slug pattern is now uniformly placeholder-shaped across all synthesizing skills.
+
+### I2 — closed inline (post-pass-3)
+
+`docs/substrate/gotchas/wordy-output.md` Correct pattern layer 1 — phrasing updated from "chat renders may be a faithful subset of persisted files" to "the chat render is substance, not bookkeeping (the faithful-subset test is sub-rule 2a per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2)" — gotcha now cites the rewrite's primary rule name and references the original faithful-subset test as the sub-rule it became.
+
+### I3 — closed inline (post-pass-3)
+
+`references/templates/architecture-review-report.md` TL;DR section — `### Top findings` demoted to bold prose `**Top findings**`; `#### 1./2./3.` finding titles promoted to `### 1./2./3.`; `### Recommended next Cohesive skill` retained at depth 3. The TL;DR now caps at `###`, so the chat-render verbatim quote of the TL;DR satisfies `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 3 (cap header depth at `###` in chat-rendered output).
+
+### Substrate-gap closures (post-pass-3)
+
+- `references/templates/architecture-review-report.md` — `## Recommended roadmap` renamed to `## Phased roadmap` to match the skill body's vocabulary in `skills/review-codebase/SKILL.md` Phase 4 step 7. Section name now consistent across skill body and template.
+- `references/templates/architecture-review-report.md` §"History" §"Disposition of prior findings" — added a one-paragraph note distinguishing the two disposition vocabularies (review-pass vocabulary {`Closed`, `Promoted`, `Deferred`, `Superseded`} for iterative architecture reviews vs the validation-review disposition-phrase vocabulary in the rubric for `validate-rewrite` trailers). The two operate on different artifacts and are now structurally non-conflictable.
+
+### Files touched in close-inline pass
+
+- `skills/audit-substrate/SKILL.md` (I1)
+- `docs/substrate/gotchas/wordy-output.md` (I2)
+- `references/templates/architecture-review-report.md` (I3 + both substrate-gap closures)
+- `docs/history/delta-ledgers/2026-05-06-output-substance-tightening.md` (this section)
+- `docs/history/reviews/2026-05-06-output-substance-tightening-rewrite-validation-pass-3.md` (pass-3 persisted review, committed separately by `validate-rewrite` Step 3)
+
+### Final state
+
+The rewrite is ready to merge. Validator passes (0 warnings); all pass-1, pass-2, pass-3 findings are closed; the optional substrate-gap items from pass 3 are also closed; remaining ambiguity items 1–4 (history-section-name unification, missing-memory vs top-fixes shape convergence, brainstorm-design matrix coverage, SKILL.md-level grep) remain explicitly deferred per their criteria, none blocking.
