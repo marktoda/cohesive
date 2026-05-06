@@ -457,16 +457,18 @@ else
 fi
 
 # 13g. Literal bypass-acknowledgment string in validate-rewrite.
-# Per docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md §Known bypass risks
-# and docs/substrate/gotchas/no-implementation-handoff.md "Tests / checks that
-# preserve this" bullet 4. The SKILL body must carry the literal string the
-# Output format renders to the transcript when the bypass row is picked.
+# Per docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md §Known bypass risks,
+# docs/substrate/gotchas/no-implementation-handoff.md "Tests / checks that preserve
+# this" bullet 4, and docs/substrate/architecture/handoffs.md §"Post-implementation
+# review entry point". The SKILL body must carry the literal string the Output
+# format renders to the transcript when the bypass option is picked, including the
+# post-implementation verification imperative added in the post-lock-escape rewrite.
 errors_before=$errors
-bypass_string='Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.'
+bypass_string='Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply. Run cohesive:review-diff against the branch when implementation lands — bypass means accepting drift risk, not skipping verification.'
 if grep -qF "$bypass_string" skills/validate-rewrite/SKILL.md; then
-  ok "validate-rewrite carries the literal bypass-acknowledgment string"
+  ok "validate-rewrite carries the literal bypass-acknowledgment string (with post-impl verification imperative)"
 else
-  fail "skills/validate-rewrite/SKILL.md missing the literal bypass-acknowledgment string (per docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md §Known bypass risks). Expected the string '$bypass_string' to appear in the SKILL body."
+  fail "skills/validate-rewrite/SKILL.md missing the literal bypass-acknowledgment string (per docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md §Known bypass risks and docs/substrate/architecture/handoffs.md §'Post-implementation review entry point'). Expected the full string '$bypass_string' to appear in the SKILL body."
 fi
 
 # 13h. "Delta at a glance" preamble in delta-ledger files dated on or after the cutoff.
@@ -542,6 +544,24 @@ elif [ "$cohesively_routes" != "$router_routes" ]; then
   fail "DISPATCH_CONTRACT_MIRROR: dispatch-prompt-contract route sets differ between skills/cohesively/SKILL.md and docs/substrate/matrices/router.md. Only in cohesively/SKILL.md: [$cohesively_only]. Only in router.md: [$router_only]. Per docs/substrate/architecture/handoffs.md and the update-both-in-the-same-pass annotation in both surfaces. (Check 13i)"
 fi
 [ "$errors" -eq "$errors_before" ] && ok "DISPATCH_CONTRACT_MIRROR: route sets in cohesively/SKILL.md and matrices/router.md agree (Check 13i)"
+
+# 13l. Chain-rendering anti-pattern in cohesively/SKILL.md.
+# Per the decide-lock-build rewrite (docs/history/delta-ledgers/2026-05-06-decide-lock-build.md
+# §"Conceptual changes" row 2 and skills/cohesively/SKILL.md Red flags) and
+# docs/substrate/conventions/audience-separation.md §"Gates and reversals". Chain
+# rendering — concrete subskill IDs joined by → arrows — was retired from router
+# announcements in favor of one-sentence outcome sentences. The check greps for
+# "→ <subskill-id>" patterns where subskill-id is one of the eight Cohesive
+# subskills; matches outside the Red flags anti-pattern reference fail. The Red
+# flag uses generic placeholders (skill-1 / skill-2) so it doesn't match.
+errors_before=$errors
+subskill_chain_pattern='→ (discover-substrate|brainstorm-design|rewrite-specs|validate-rewrite|implement-cohesively|review-codebase|review-diff|audit-substrate)'
+chain_violations=$(grep -nE "$subskill_chain_pattern" skills/cohesively/SKILL.md 2>/dev/null || true)
+if [ -n "$chain_violations" ]; then
+  fail "Chain-rendering anti-pattern in skills/cohesively/SKILL.md (Check 13l): subskill IDs joined by → arrows render dispatch machinery in user-facing chat output. Lines: $(echo "$chain_violations" | tr '\n' ';'). Retire to one-sentence outcome announcements per skills/cohesively/SKILL.md §\"Output\" canonical announcement template."
+else
+  ok "Chain-rendering anti-pattern absent from cohesively/SKILL.md (Check 13l)"
+fi
 
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
 # Per docs/substrate/invariants/PLUGIN_ROOT_PATHS.md. Excludes lines inside fenced code
