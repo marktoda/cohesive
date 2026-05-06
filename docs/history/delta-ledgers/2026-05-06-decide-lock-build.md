@@ -149,7 +149,7 @@ None added or retired. The chain-rendering anti-pattern is named in `skills/cohe
 **Pass:** 2
 **Source review:** `docs/history/reviews/2026-05-06-decide-lock-build-rewrite-validation.md` (pass 1, Issues Found)
 **Closes:** B1, B2, I1, I2, I3
-**Classification:** Pure implementation (textual fixes against named findings; one design-layer file edit to close B1's stale claim).
+**Classification of pass-2 repairs:** Pure implementation (textual fixes against named findings; one design-layer file edit to close B1's stale claim). The underlying rewrite remains **Mixed** per §"Delta at a glance" — the per-pass classification narrows scope only for that pass's repair commits and does not alter the rewrite's overall classification.
 
 ### Repairs applied
 
@@ -173,3 +173,23 @@ None added or retired. The chain-rendering anti-pattern is named in `skills/cohe
 - `docs/substrate/architecture/skills.md` — one edit closing B1.
 - `references/templates/cohesion-review.md` — one edit closing I1.
 - `references/templates/chat-trailer.md` — one edit closing I2.
+
+## Repair pass 3
+
+**Pass:** 3
+**Source review:** `docs/history/reviews/2026-05-06-decide-lock-build-rewrite-validation-pass-2.md` (pass 2, Issues Found)
+**Closes:** B1 (pass-2), I1 (pass-2), I2 (pass-2)
+**Classification of pass-3 repairs:** Pure implementation (textual fixes against named findings; no design-layer change). The underlying rewrite remains **Mixed** per §"Delta at a glance".
+
+### Repairs applied
+
+- **B1 (pass-2) — Render-conditional parentheticals extracted from `implement-cohesively/SKILL.md` Output format render template.** Mirrored the prose-subsection pattern applied to `validate-rewrite/SKILL.md` in pass 2. Added a new §"Render-conditional rules for the body block" prose subsection preceding the render template; documents the three shapes for the `## Code matches locked design` slot per internal verdict (Implemented → ✓ line; Phase Drift / Substrate Drift → ✗ + drift items list; Aborted → header collapses, no Phase 3 ran). Stripped all `*(rendered when …)*` parentheticals from inside the ```md fence; the fenced template now carries only the literal output the model is meant to reproduce, with `<one of the three shapes per the prose rules above; omit the slot's content entirely on Aborted>` as the placeholder.
+
+- **I1 (pass-2) — Four-bullet `### Next` resolved to render only the matching verdict.** Lifted the per-verdict branching to the same prose §"Render-conditional rules for the body block" subsection; added a `### Next` rule: "renders one bullet, matching the internal verdict. The four `Internal <verdict>:` shapes show the four possible renders; the chat trailer carries exactly one." The fenced render template now carries `<one decision-shaped bullet, matching the internal verdict — the four shapes are enumerated below; the chat trailer renders exactly one>` as the placeholder; the four bullet shapes are enumerated as a prose list immediately after the closing ```. This implements the per-verdict-branch recommendation rule in the chat-trailer template's §"How `### Next` carries payload" — the rendered payload is the matching bullet, not the full set.
+
+- **I2 (pass-2) — Pass-2 classification line in delta ledger annotated.** Replaced `**Classification:** Pure implementation (textual fixes against named findings; one design-layer file edit to close B1's stale claim).` with `**Classification of pass-2 repairs:** Pure implementation (...). The underlying rewrite remains **Mixed** per §"Delta at a glance" — the per-pass classification narrows scope only for that pass's repair commits and does not alter the rewrite's overall classification.` Pass-3 classification line above adopts the same annotated shape (`Classification of pass-3 repairs:`).
+
+### Repair-pass file changes
+
+- `skills/implement-cohesively/SKILL.md` — Output format restructured: new §"Render-conditional rules for the body block" prose subsection added; render template stripped of parentheticals; `### Next` block reshaped to render one matching bullet (closes B1, I1).
+- `docs/history/delta-ledgers/2026-05-06-decide-lock-build.md` — pass-2 classification line annotated; pass-3 section appended (closes I2; this section).
