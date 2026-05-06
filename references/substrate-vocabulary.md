@@ -86,4 +86,5 @@ When `cohesive:init` runs against a codebase, it doesn't just propose artifacts 
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md` — the seam this table implements at the substrate-type layer (parallel to verdict-vocabulary.md at the verdict layer).
 - `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` — the analogous table for verdict labels.
 - `${CLAUDE_PLUGIN_ROOT}/skills/init/SKILL.md` — the skill that consumes this table to render translated drafts.
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/scope.md` §"What Cohesive can extend" → "New substrate types" — the canonical cap on category count (six types in v0.1) and the promotion criterion for adding a seventh: it must capture a distinct failure mode the existing six don't, with a clear discriminator in the "What this earns" column.
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` — promotion criteria for convention → invariant.
