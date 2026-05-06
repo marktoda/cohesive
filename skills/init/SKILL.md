@@ -25,9 +25,9 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
    or cohesive:review-codebase for full architecture review.
    ```
 
-   `CLAUDE.md` and `AGENTS.md` are agent-handoff files present in most mature codebases — they signal "an agent has worked here," not "Cohesive substrate exists." Detect them and *warn* in the chat trailer ("Detected existing CLAUDE.md / AGENTS.md; init will not overwrite. Skeletal generation in step 4 skipped accordingly."), but do not refuse. Step 4's skeletal-CLAUDE.md generation already correctly checks for existence and skips.
+   `CLAUDE.md` and `AGENTS.md` are agent-handoff files present in most mature codebases — they signal "an agent has worked here," not "Cohesive substrate exists." `docs/specs/` similarly is a generic spec directory that may exist independent of Cohesive adoption (e.g., a codebase that already maintained behavioral specs before adopting Cohesive). All three are detect-and-warn, not refuse: init proceeds, surfaces a warning line in the chat trailer ("Detected existing CLAUDE.md / AGENTS.md / docs/specs/; init will not overwrite or propose overlapping drafts."), and step 4's skeletal-CLAUDE.md generation continues to skip when one exists. Step 2's signal scan does not propose drafts that overlap with existing `docs/specs/` content.
 
-   Do not invent a way to merge with existing substrate; do not propose drafts that overlap with what's already there. The first-time use-case is the entire scope of the refusal — but the refusal trigger is "Cohesive substrate exists," not "any agent file exists."
+   Do not invent a way to merge with existing substrate; do not propose drafts that overlap with what's already there. The first-time use-case is the entire scope of the refusal — but the refusal trigger is "Cohesive-shaped substrate exists" (the four substrate-shaped paths above), not "any spec or agent file exists."
 
 2. **Never auto-commit.** Init produces a draft directory the user explicitly reviews and moves. The skill does not `git add` or `git commit`; it writes the draft files and stops. Auto-commit would let confidently-wrong proposals enter the canonical substrate without review.
 
@@ -43,7 +43,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 Check for substrate-shaped paths (any of `docs/substrate/`, `docs/adr/`, `docs/design/`, `docs/decisions/` containing files). If any are present, halt with the directive error from Hard constraint #1. Init does not run incrementally on existing substrate.
 
-Separately, check for agent-handoff files (`CLAUDE.md` / `AGENTS.md` / `docs/specs/`). If any are present, do not refuse — proceed to step 1, but capture their existence so the chat trailer renders a warning line ("Detected existing CLAUDE.md; init will not overwrite. Skeletal CLAUDE.md generation in step 4 skipped accordingly.") and step 4's skeletal generation skips them.
+Separately, check for agent-handoff or spec paths (`CLAUDE.md` / `AGENTS.md` / `docs/specs/`). If any are present, do not refuse — proceed to step 1, but capture their existence so the chat trailer renders a warning line ("Detected existing CLAUDE.md / AGENTS.md / docs/specs/; init will not overwrite or propose overlapping drafts.") and step 4's skeletal generation skips them. Step 2's signal scan also avoids proposing drafts that would overlap with existing `docs/specs/` content (per Hard constraint #1's "do not propose drafts that overlap with what's already there").
 
 ### 1. Resolve the draft directory
 
@@ -80,7 +80,7 @@ For each ranked proposal, write a draft file at `docs/substrate/init-draft/<cate
 
 <the substrate type's user-facing translation paragraph from `${CLAUDE_PLUGIN_ROOT}/references/substrate-vocabulary.md`>
 
-**What it earns over a "rule":** <the corresponding column from the vocabulary table>
+**What this earns:** <the corresponding column from the vocabulary table; for the convention substrate type the discriminator is "over a named invariant" not "over a rule" — see `${CLAUDE_PLUGIN_ROOT}/references/substrate-vocabulary.md` §"How to read this table">
 
 ## Evidence the codebase already implies this
 

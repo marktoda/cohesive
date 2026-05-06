@@ -46,7 +46,7 @@ The skill set is the answer to several deliberate cuts. Each entry below explain
 
 **Why `review-codebase` and `review-diff` are two skills, not one with a `--scope` flag.** Different reviewer panels (4 reviewers vs 2), different rubrics (architecture-review-rubric vs cohesion-rubric), different output shapes (persisted report vs chat-only verdict). The shared concept is "fresh-eyes review against substrate"; the executions diverge enough that one skill body would be a configuration-laden mess.
 
-**Why `using-cohesive` is separate from `cohesively`.** `using-cohesive` teaches Claude *when Cohesive applies* — it fires at session start (or whenever its frontmatter trigger matches a substrate-shaped user request) and orients Claude toward the methodology vs Superpowers' implementation-discipline framing. `cohesively` *routes within Cohesive* once the user has signaled Cohesive-shaped work — it picks among the seven canonical routes and dispatches the first subskill. Collapsing them into one skill would force a single body to do both jobs at two different altitudes (orientation vs route selection), which is the failure shape the seam between the bootstrap and the router exists to prevent. The split is also the structural mitigation for `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` — without `using-cohesive`, first-time users with both plugins installed land in trigger competition between Cohesive's `discover-substrate`/`audit-substrate` and Superpowers' research/exploration skills.
+**Why `using-cohesive` is separate from `cohesively`.** `using-cohesive` teaches Claude *when Cohesive applies* — it fires at session start (or whenever its frontmatter trigger matches a substrate-shaped user request) and orients Claude toward the methodology vs Superpowers' implementation-discipline framing. `cohesively` *routes within Cohesive* once the user has signaled Cohesive-shaped work — it picks among the eight canonical routes and dispatches the first subskill. Collapsing them into one skill would force a single body to do both jobs at two different altitudes (orientation vs route selection), which is the failure shape the seam between the bootstrap and the router exists to prevent. The split is also the structural mitigation for `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` — without `using-cohesive`, first-time users with both plugins installed land in trigger competition between Cohesive's `discover-substrate`/`audit-substrate` and Superpowers' research/exploration skills.
 
 ## Per-skill sections
 
@@ -246,7 +246,7 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 
 ### cohesively
 
-**Purpose.** Convert user intent into one of seven canonical routes (`design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`), announce the route, and dispatch the chain's first subskill with prereq state passed explicitly.
+**Purpose.** Convert user intent into one of eight canonical routes (`design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `init`, `artifact`), announce the route, and dispatch the chain's first subskill with prereq state passed explicitly.
 
 **Owns.**
 - Route selection per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` cells R001-R016.

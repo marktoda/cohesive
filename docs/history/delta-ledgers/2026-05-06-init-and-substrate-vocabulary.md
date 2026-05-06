@@ -152,3 +152,32 @@ None added or retired.
 - `docs/substrate/architecture/handoffs.md` — B2 (two new sections covering init's adoption transition + audit-substrate often-followed-by edge).
 - `skills/init/SKILL.md` — I1 (Hard constraint #1 split + step 0 rewrite + Output format conditional render block) + I3 (surface seam claim + acceptance criteria) + I4 (chat trailer signals scanned/surfaced lines).
 - `docs/substrate/matrices/skill-section-presence.md` — substrate gap (init row + lead update).
+
+## Repair pass 3
+
+**Pass:** 3
+**Source review:** `docs/history/reviews/2026-05-06-init-and-substrate-vocabulary-rewrite-validation-pass-2.md` (pass 2, Issues Found)
+**Closes:** B1, B2, B3, I1, I2, I3 (all sweep failures from pass 2 — places already named in §"Files rewritten" but not actually edited).
+**Classification of pass-3 repairs:** Pure implementation (textual sweep fixes against named findings; no design-layer change beyond closing literal contradictions). The underlying rewrite remains **Mixed** per §"Delta at a glance".
+
+### Repairs applied
+
+- **B1 — ARCHITECTURE.md three-tier paragraph fixed.** Line 11 updated from "and eight workflow subskills make ten skills total" to "the adoption skill (`init`), and eight workflow subskills make eleven skills total." Now agrees with line 86 (the `## v0.1 scope` paragraph) and the validator's `expected_skills`.
+
+- **B2 — `### cohesively` section in skills.md updated.** Both occurrences of "seven canonical routes" replaced with "eight canonical routes"; the §"### cohesively" Purpose route enumeration updated to include `init` between `implement` and `artifact` (matching the cohesively SKILL.md body's per-route table order). Lens-14 mismatch closed.
+
+- **B3 — README skills tree extended.** `init/` added between `cohesively/` and `discover-substrate/` with a one-line gloss naming proto-substrate scanning and the Rosetta Stone translation. Skill count in §"What's in the box" now matches the validator's 11.
+
+- **I1 — skill-section-presence.md History entry added.** New 2026-05-06 entry naming the init row addition + skill count 10 → 11 update + delta-ledger citation.
+
+- **I2 — Draft template column name synced.** `init/SKILL.md` Process Step 3 draft-file render template literal updated from `**What it earns over a "rule":**` to `**What this earns:**` matching the vocabulary table's column. The convention-row inversion is handled inline in the template's parenthetical so the user reading a convention draft sees the correct framing.
+
+- **I3 — `docs/specs/` classification explicit in Hard constraint #1.** The Hard constraint now names CLAUDE.md / AGENTS.md / `docs/specs/` together as detect-and-warn, with a parallel update in Process Step 0. The refusal trigger is named explicitly: "Cohesive-shaped substrate exists" (the four `docs/substrate/`-and-ADR-shape paths), not "any spec or agent file exists."
+
+### Repair-pass file changes
+
+- `ARCHITECTURE.md` — line 11 skill count fix (B1).
+- `docs/substrate/architecture/skills.md` — `### cohesively` section route enumeration update + two occurrences of "seven canonical routes" → "eight canonical routes" (B2).
+- `README.md` — skills tree extended with `init/` (B3).
+- `docs/substrate/matrices/skill-section-presence.md` — History footer 2026-05-06 entry (I1).
+- `skills/init/SKILL.md` — draft template column rename + Hard constraint #1 docs/specs clarification + Process Step 0 parallel clarification (I2 + I3).

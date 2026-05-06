@@ -127,6 +127,8 @@ Single-pass scan. Inventories missing memory: implicit rules, branchy behavior w
 skills/
   using-cohesive/                   Session-start orientation — when does Cohesive apply?
   cohesively/                       Router — picks the right Cohesive workflow
+  init/                             First-time adoption — scans for proto-substrate, produces
+                                    drafts with side-by-side translations (Rosetta Stone)
   discover-substrate/               Substrate inventory
   brainstorm-design/                Options + pressure-test
   rewrite-specs/                    Hard spec rewrite (in worktree)
