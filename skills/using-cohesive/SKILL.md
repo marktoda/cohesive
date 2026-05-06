@@ -54,7 +54,7 @@ Then invoke `cohesive:cohesively` (or recommend the user do so, depending on har
 
 ## Required behavior
 
-1. **Orient at most once per session per request shape.** Render the orientation message when the trigger fires for the first substrate-shaped request. Subsequent substrate-shaped requests in the same session do not need re-orientation if the user is already inside a Cohesive workflow; the user has already been routed.
+1. **Orient at most once per session per request shape.** Render the orientation message when the trigger fires for a request whose shape has not been oriented yet in this session. Track the request shape to detect repeats; the deferral for "already inside a Cohesive workflow" lives in Hard Constraint #4 below, not here.
 2. **Defer cleanly when Superpowers fits better.** When the request is implementation-discipline-shaped, do not orient toward Cohesive. Do not render an apologetic "Cohesive doesn't apply here" message — the absence of orientation is the right signal. Superpowers' bootstrap handles the implementation-discipline framing.
 3. **Never invoke a chain skill or diagnostic directly.** The only Cohesive skill this skill ever names as a next step is `cohesive:cohesively`. Naming a chain skill (e.g., `cohesive:discover-substrate`) bypasses route selection and reproduces the failure mode this skill exists to close.
 4. **Never re-orient over an already-running route.** If `cohesively` has already announced a route in this session, or a Cohesive subskill is currently executing, do not render an orientation message — the user is already inside Cohesive and re-orientation would be ceremony.

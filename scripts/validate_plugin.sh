@@ -333,12 +333,14 @@ for s in "${verdict_led_skills[@]}"; do
 done
 [ "$errors" -eq "$errors_before" ] && ok "VERDICT_BEFORE_EVIDENCE: all ${#verdict_led_skills[@]} verdict-led skills lead Output format with **Verdict:**"
 
-# 13b. Voice-imperative grep, skills: every non-router skills/*/SKILL.md body (outside
-# fenced code blocks) contains the literal imperative directing the model to load the
-# voice guide before rendering chat output. Per references/output-voice.md and
-# docs/substrate/gotchas/style-guide-rot.md §"Correct pattern". Cohesively router is
-# exempt (its dispatched subskills carry the voice load; documented in
-# docs/substrate/invariants/PLUGIN_ROOT_PATHS.md §"Convention pins...").
+# 13b. Voice-imperative grep, skills: every non-router non-orientation skills/*/SKILL.md
+# body (outside fenced code blocks) contains the literal imperative directing the model
+# to load the voice guide before rendering chat output. Per references/output-voice.md
+# and docs/substrate/gotchas/style-guide-rot.md §"Correct pattern". TWO exemptions per
+# docs/substrate/conventions/skill-shape.md §"When sections may differ": the router
+# `cohesively` and the session-start orientation skill `using-cohesive` (both have
+# render budgets too small to need the imperative; their dispatched subskills carry
+# the voice load).
 voice_imperative_literal='Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output.'
 voice_imperative_skills=(
   discover-substrate
