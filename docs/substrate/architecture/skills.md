@@ -102,9 +102,11 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 
 **Owns.**
 - Reading the substrate discovery report to ground proposals.
-- Producing 2-4 design options with named tradeoffs.
-- Pressure-testing each option through the design-pressure-testing rubric (see `${CLAUDE_PLUGIN_ROOT}/references/design-pressure-testing.md`).
-- Recommending one option and surfacing remaining ambiguity for the user to resolve.
+- Identifying axes of disagreement and selecting mode (autonomous one-shot vs conversational multi-turn dialog) per Phase 2's auto-detect gate.
+- In autonomous mode: producing 2–4 design options with named tradeoffs.
+- In conversational mode: walking axes one at a time as verdict-led picks, surfacing a leaf-direction summary, routing sub-decisions as Pick / Confirm / Default tags, and opening Phase 4's pressure-test with a cross-branch graft check.
+- Pressure-testing through the design-pressure-testing rubric (see `${CLAUDE_PLUGIN_ROOT}/references/design-pressure-testing.md`) — applied to every option in autonomous mode, applied to the assembled leaf in conversational mode.
+- Recommending one option (or named hybrid) and surfacing remaining ambiguity for the user to resolve.
 
 **Does not own.**
 - Writing the rewrite — that's `rewrite-specs` after a direction is approved.
@@ -113,9 +115,11 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 
 **Inputs.** User intent + substrate discovery report (passed by router or freshly invoked).
 
-**Outputs.** Approved direction (option name, summary paragraph, named main risk, structural mitigation). User-approved; no automated verdict.
+**Outputs.** Approved direction (option name, summary paragraph, named main risk, structural mitigation). User-approved; no automated verdict. When conversational mode ran, the persisted file additionally carries a `## Decision dialog` section recording axes walked, sub-decision outcomes, and the cross-branch graft check result.
 
 **Why this shape.** The design choice is the load-bearing decision of the chain. Pressure-testing before approval is what makes the rewrite worth running; without it, `rewrite-specs` writes specs against a half-pressured direction and `validate-rewrite` finds incoherence. The skill exists to *spend more turns on design* rather than rushing to specs.
+
+**Why two modes.** A one-shot trailer is right for shallow option spaces (single-axis decisions, naming, placement within an established pattern) — the user gets a recommendation efficiently. A branching design space (≥2 distinct structural axes, or option space touching ≥2 substrate kinds) is where the user's taste should shape the leaf direction; the conversational dialog gives them participation per axis with verdict-led picks they can ratify or redirect. Auto-detect by axis count keeps the autonomous path fast for trivial cases and opens the dialog only where the option space actually forks. The pressure-test rigor and the recommendation shape are mode-shared — conversational mode is more participation, not less rigor.
 
 ### rewrite-specs
 
