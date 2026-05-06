@@ -8,7 +8,7 @@ This rewrite is **Pure implementation** per `${CLAUDE_PLUGIN_ROOT}/skills/rewrit
 
 ## Delta at a glance
 
-- **Files:** 9 rewritten, 1 added, 0 removed/deprecated
+- **Files:** 10 rewritten, 1 added, 0 removed/deprecated
 - **Conceptual changes:** rule 2 split into 2a (faithful subset) / 2b (findings shown not named) / 2c (bookkeeping displaced); rule 5 sharpened with sub-rule 5a (handoff carries payload); chat-render contract is "substance, not bookkeeping" rather than "faithful subset"; per-finding chat shape unified across review-codebase, review-diff, audit-substrate, discover-substrate, validate-rewrite as `title + Evidence + Change` (or its skill-specific analog for audit-substrate's artifact-additions); recommended-next-skill clauses carry payload by next-skill kind (files for rewrite-specs, design question for brainstorm-design, scope for review/audit, scope for superpowers handoffs); persisted-file `## History` section is the canonical home for cross-iteration audit content
 - **Named invariants:** none
 - **Behavior matrices:** `reviewer-output-shape` (extended — added §"Synthesizing-skill chat render shape" with three columns: Shows-not-names / Bookkeeping-displaced / Handoff-carries-payload, tracking five synthesizing skills)
@@ -190,3 +190,38 @@ Closes findings B1, I1, I2, I3, I4 from the pass-1 review. Per `${CLAUDE_PLUGIN_
 ### Remaining ambiguity after pass 2
 
 Item 1 (history-section-name unification across `architecture-review-report.md` and `validate-rewrite`'s pass-N file pattern) and Item 2 (discover-substrate Missing-memory shape vs audit-substrate Top-fixes shape unification — note: pass-1 finding I1 partially resolved this by adding a substrate-level note that the variation is intentional; the harder question of whether to converge them is still deferred) remain. Item 3 (brainstorm-design matrix coverage) and Item 4 (SKILL.md-level grep) remain unchanged. The pass-1 review surfaced no new ambiguities beyond what the forward rewrite recorded.
+
+## Repair pass 3
+
+**Source review:** `docs/history/reviews/2026-05-06-output-substance-tightening-rewrite-validation-pass-2.md` (pass 2, Issues Found, 1 Blocker + 2 Mediums + 1 substrate-gap)
+**Disposition picked from rubric:** Repair → re-validate.
+
+Closes findings B1, I1, I2 from the pass-2 review and the optional substrate-gap item about the architecture-review-report TL;DR block. Per `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` Step 1b, the repair scope is the enumerated repairs in the cited review; the chosen direction is unchanged.
+
+### B1 — closed
+
+`docs/history/delta-ledgers/2026-05-06-output-substance-tightening.md` Delta-at-a-glance preamble line updated from `**Files:** 9 rewritten, 1 added, 0 removed/deprecated` to `**Files:** 10 rewritten, 1 added, 0 removed/deprecated`. The body section §"Files rewritten" enumerates 10 entries; the preamble now matches.
+
+### I1 — closed
+
+`skills/audit-substrate/SKILL.md` Process Step 3 §"Highest-leverage fixes (ranked)" replaced — the bare numbered-list shape (`<substrate artifact to add; one-clause justification>`) is gone; in its place the persisted-file body renders the same show-shape the chat trailer renders (title + **Evidence the gap exists** + **What the artifact would say** + **Where it lives**). A short prose preamble names the render template once (in §"Output format") and the body section reproduces it verbatim, so the persisted file and the chat trailer describe the same artifact. The §"Recommended next Cohesive skill" line in Step 3 is also updated to carry payload (`**Files to add:**`) per rule 5a, matching the Output format render.
+
+### I2 — closed
+
+`references/output-voice.md` Density-budget table row for `validate-rewrite` updated from `show-shape findings (three fields per finding)` to `show-shape findings (six-field shape per ${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md §"Output format conventions": Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact)`. The descriptor now matches the actual canonical shape validate-rewrite findings use.
+
+### Substrate-gap item — closed
+
+`references/templates/architecture-review-report.md` opening structure aligned with its blockquote claim. The blockquote previously declared "Output starts with the TL;DR block ... verdict + 2-3 sentence thesis + top 3 findings (each in show-shape: title + Evidence + Change) + recommended next skill (with payload)" but the template body opened with `## Verdict` + `## Executive thesis` separately, with no TL;DR section carrying the show-shape top findings. The repair adds a `## TL;DR` section opening with `**Verdict:**` + `**Thesis:**` + `### Top findings` (3 H4 show-shape blocks) + `### Recommended next Cohesive skill` (with payload-kind), matching the chat-render template in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" rule 3. The §"Executive thesis" section is retained (longer form than the TL;DR `**Thesis:**` line) and tagged accordingly.
+
+### Files touched in pass 3
+
+- `docs/history/delta-ledgers/2026-05-06-output-substance-tightening.md` (B1 + this section)
+- `skills/audit-substrate/SKILL.md` (I1)
+- `references/output-voice.md` (I2)
+- `references/templates/architecture-review-report.md` (substrate-gap)
+- `docs/history/reviews/2026-05-06-output-substance-tightening-rewrite-validation-pass-2.md` (pass-2 persisted review, committed separately by `validate-rewrite` Step 3)
+
+### Remaining ambiguity after pass 3
+
+The four items from §"Remaining ambiguity" (history-section-name unification; missing-memory vs top-fixes shape convergence; brainstorm-design matrix coverage; SKILL.md-level grep) all remain in the same state as after pass 2. The pass-2 review surfaced no new ambiguities beyond those.

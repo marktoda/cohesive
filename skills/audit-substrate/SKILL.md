@@ -105,12 +105,26 @@ Walk each axis from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`. For e
 
 ## Highest-leverage fixes (ranked)
 
-1. <substrate artifact to add; one-clause justification>
-2. ...
-3. ...
+Render each fix in show-shape per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2b — the persisted body uses the same shape as the chat trailer rendered by §"Output format" below (title + Evidence the gap exists + What the artifact would say + Where it lives). The render template lives once in §"Output format"; this section of the audit body reproduces that render verbatim, not a different shape.
+
+### 1. <Artifact name to add>
+
+**Evidence the gap exists:** <path>:<line> — <quoted excerpt or named pattern>
+
+**What the artifact would say:** <2-3 sentence sketch>
+
+**Where it lives:** <path>
+
+### 2. <Artifact name to add>
+
+(same fields)
+
+### 3. <Artifact name to add>
+
+(same fields)
 
 ### Recommended next Cohesive skill
-`cohesive:rewrite-specs` — most audit findings are substrate-shaped; the rewrite skill is the right vehicle to turn the highest-leverage entries into actual artifacts (named invariants, gotcha docs, behavior matrices).
+`cohesive:rewrite-specs` — turn the highest-leverage missing-memory entries into actual artifacts. **Files to add:** <enumerate the artifact paths from the Highest-leverage fixes above>. Slug: `<scope>-substrate-additions`.
 ```
 
 ### 4. Persist

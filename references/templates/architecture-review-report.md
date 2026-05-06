@@ -4,15 +4,41 @@
 **Scope:** <whole repo / subsystem name>
 **Reviewer:** `cohesive:review-codebase`
 
-> Output starts with the TL;DR block per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" rule 3 — verdict + 2-3 sentence thesis + top 3 findings (each in show-shape: title + Evidence + Change) + recommended next skill (with payload) — rendered before any longer body. The TL;DR is what renders in chat as the substantive trailer; the persisted body below carries the full audit content including the cohesion scorecard, the per-reviewer raw findings, and the cross-iteration `## History` section. Bookkeeping content (finding-ID continuity across passes, disposition matrices, verdict trajectory) lives in §"History" of this persisted file, not in the chat TL;DR — see `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2c.
+> The persisted body opens with the TL;DR section per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" rule 3 — verdict + 2-3 sentence thesis + top 3 findings (each in show-shape: title + Evidence + Change) + recommended next skill (with payload). The TL;DR is what `cohesive:review-codebase` quotes verbatim into chat as the substantive trailer; the rest of the persisted body carries the full audit content including the cohesion scorecard, the per-reviewer raw findings, and the cross-iteration `## History` section. Bookkeeping content (finding-ID continuity across passes, disposition matrices, verdict trajectory) lives in §"History" of this persisted file, not in the chat TL;DR — see `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2c.
 
-## Verdict
+## TL;DR
 
-**Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk**
+**Verdict:** Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk
+
+**Thesis:** <one or two sentences — the codebase's overall shape, the highest-leverage risk, whether the system can scale development without founder memory>
+
+### Top findings
+
+#### 1. <Finding title>
+
+**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
+
+**Change:** <the specific edit that closes this finding>
+
+#### 2. <Finding title>
+
+**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
+
+**Change:** <the specific edit>
+
+#### 3. <Finding title>
+
+**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
+
+**Change:** <the specific edit>
+
+### Recommended next Cohesive skill
+
+`cohesive:<skill-name>` — <one-clause reason>. **<Payload-kind>:** <files / scope / design question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Recommended-next-skill footer">.
 
 ## Executive thesis
 
-One paragraph. The codebase's overall shape, the highest-leverage risk, and whether the system can scale development without founder memory. Concrete and specific to this codebase — not generic.
+One paragraph (longer form than the TL;DR `**Thesis:**` line). The codebase's overall shape, the highest-leverage risk, and whether the system can scale development without founder memory. Concrete and specific to this codebase — not generic.
 
 ## Spec-prior review
 

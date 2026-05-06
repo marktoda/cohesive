@@ -87,7 +87,7 @@ These are guidelines, not enforced limits. A density invariant would require a c
 | `brainstorm-design` recommendation | Verdict + table + 1-paragraph recommendation |
 | `review-diff` verdict | Verdict + table (3 show-shape rows: file:line + excerpt + Change column) + one-paragraph main concern |
 | `review-codebase` chat render | TL;DR (verdict + thesis + 3 show-shape findings + payload-bearing handoff); full body in the persisted file |
-| `validate-rewrite` verdict | Verdict + Delta-at-a-glance quote + show-shape findings (three fields per finding) + disposition + (Approved-only) implementation matrix; ½–¾ page |
+| `validate-rewrite` verdict | Verdict + Delta-at-a-glance quote + show-shape findings (six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions": Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) + disposition + (Approved-only) implementation matrix; ½–¾ page |
 | `audit-substrate` chat render | TL;DR (verdict + headline + 3 show-shape top-fixes with title + Evidence + Sketch + Path + payload-bearing handoff); full body in the persisted file |
 | Reviewer agent (any) | ≤500 lines hard cap (existing reviewer rule) |
 
