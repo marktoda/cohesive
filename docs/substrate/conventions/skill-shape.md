@@ -101,11 +101,11 @@ For skills whose output names a verdict (`review-codebase`, `review-diff`, `vali
 
 Skills without a controlled-vocabulary verdict (`cohesively`, `discover-substrate`, `brainstorm-design`, `rewrite-specs`) are out of scope for this rule but still carry the voice imperative in their body (the router is exempt per rule 1).
 
-### 3. The chat render is a faithful subset of the persisted file
+### 3. The chat render is substance, not bookkeeping
 
-Skills that write a persisted artifact (architecture review, brainstorm, audit report, change cohesion review) render only the trailer in chat: verdict, thesis, top findings, next step. The persisted file is canonical and carries the full body. The chat render does not duplicate the persisted body — it points at it.
+Skills that write a persisted artifact (architecture review, brainstorm, audit report, change cohesion review) render only the substantive trailer in chat: verdict, thesis, top findings *shown* (not named), next step *with payload*. The persisted file is canonical and carries the full body, the cross-iteration audit trail (disposition history, finding-ID continuity across passes, verdict trajectory), and the appendices. The chat render does not duplicate the persisted body — it shows this iteration's substance and points at the persisted file for everything else.
 
-"Faithful subset" is defined in [`output-voice.md`](../../../references/output-voice.md) §"The five rules" rule 2: the verdict matches; every claim in chat appears in the persisted file; the chat render does not introduce findings, recommendations, or facts absent from the persisted file.
+The full rule lives in [`output-voice.md`](../../../references/output-voice.md) §"The five rules" rule 2 with three sub-rules: 2a faithful subset (every chat claim appears in the persisted file; chat introduces no facts absent from it); 2b findings shown not named (each chat finding carries title + Evidence + Change); 2c bookkeeping displaced (cross-iteration finding-ID references, disposition matrices, verdict-ratchet language belong in the persisted file's `## History` section). Rule 5a extends the next-step requirement: the recommended-next-skill clause carries payload (files, scope, or design question), not just a name + reason.
 
 The canonical chat-render shape for verdict-led, persisted-output skills:
 
@@ -117,20 +117,35 @@ The canonical chat-render shape for verdict-led, persisted-output skills:
 **Thesis:** <one or two sentences — headline finding + highest-leverage move>
 
 ## Top findings
-1. <title> — <one clause: why it matters>
-2. <title> — <one clause>
-3. <title> — <one clause>
+
+### 1. <Finding title>
+
+**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
+
+**Change:** <the specific edit, file rename, invariant promotion, matrix cell, or test that closes this finding>
+
+### 2. <Finding title>
+
+**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
+
+**Change:** <the specific edit>
+
+### 3. <Finding title>
+
+**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
+
+**Change:** <the specific edit>
 
 ## <Persisted file pointer>
 `<persisted-path>`
 
 ### Recommended next Cohesive skill
-`cohesive:<skill-name>` — <one-clause reason>
+`cohesive:<skill-name>` — <one-clause reason>. **<Payload-kind>:** <concrete payload — files for rewrite-specs, design question for brainstorm-design, scope for review-codebase / review-diff / audit-substrate>.
 ```
 
 The render opens with the outermost `#` title, then `**Verdict:**` on the next non-blank line — matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). The `VERDICT_BEFORE_EVIDENCE` grep verifies the verdict appears within the first three non-blank lines after the `#` title (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` §"Enforcement"). The voice-citation literal does not appear in the template — it would render to the user. The voice guide is loaded via the body-level imperative (rule 1).
 
-Skills with chat-only output (`review-diff`) render this shape as their entire output, with no separate persisted file.
+Skills with chat-only output (`review-diff`) render this shape as their entire output, with no separate persisted file. Skills whose findings render in a table form (`review-diff`) carry an Evidence column (file:line + quoted excerpt) and a Change column per sub-rule 2b — bare title + Severity + Area row is a render failure tracked in [`docs/substrate/matrices/reviewer-output-shape.md`](../matrices/reviewer-output-shape.md) §"Synthesizing-skill chat render shape." Skills whose top items are not findings but artifact-additions (`audit-substrate`) render an analogous show-shape — title + Evidence the gap exists + What the artifact would say + Where it lives — per the same rule.
 
 ### 4. Cap header depth at `###` in chat-rendered output
 
@@ -142,20 +157,29 @@ Multi-step processes, multi-option comparisons, multi-finding lists, and multi-c
 
 ### Recommended-next-skill footer
 
-The skill's "Output format" section ends with:
+The skill's "Output format" section ends with the canonical shape, and per rule 5a (`output-voice.md`) the entry carries payload:
 
 ```md
 ### Recommended next Cohesive skill
-`cohesive:<skill-name>` — <reason>
+`cohesive:<skill-name>` — <one-clause reason>. **<Payload-kind>:** <concrete payload>.
 ```
 
-If the skill has multiple verdict-branches (e.g. `validate-rewrite` returns Approved / Issues Found / Design Incoherent), provide one recommended-next per branch. When the appropriate next step is outside Cohesive, the entry names the non-Cohesive action explicitly:
+The payload-kind label and content depend on the next skill:
+
+- **For `cohesive:rewrite-specs`** — `**Files to edit:**` followed by an enumeration of the specific docs/matrices/invariants to edit, with the specific change in each. Plus the slug.
+- **For `cohesive:brainstorm-design`** — `**Design question:**` followed by the specific architectural question to revisit (named, not "the structural shape").
+- **For `cohesive:review-codebase` / `cohesive:review-diff` / `cohesive:audit-substrate`** — `**Scope:**` followed by the subsystem, file set, change surface, or repo region to review.
+- **For `superpowers:writing-plans` / `superpowers:executing-plans`** — `**Scope:**` followed by the change surface or implementation target.
+
+If the skill has multiple verdict-branches (e.g. `validate-rewrite` returns Approved / Issues Found / Design Incoherent, `review-codebase` has five verdicts), provide one recommended-next per branch — each carrying its own payload. When the appropriate next step is outside Cohesive, the entry names the non-Cohesive action explicitly:
 
 ```md
-`<next non-Cohesive action>` — <reason>
+`<next non-Cohesive action>` — <reason>. **<Payload-kind>:** <concrete payload>.
 ```
 
 The router (`cohesively`) is exempt: its output is a one-sentence announcement, not a workflow output. It is also exempt from the voice imperative per rule 1 — its dispatched subskills carry the voice load.
+
+A bare skill name + reason ("rewrite-specs to close 5 findings") without payload is a regression against rule 5a, tracked in [`docs/substrate/matrices/reviewer-output-shape.md`](../matrices/reviewer-output-shape.md) §"Synthesizing-skill chat render shape." See [`docs/substrate/gotchas/naming-instead-of-showing.md`](../gotchas/naming-instead-of-showing.md) for the failure mode.
 
 ## Path discipline
 
@@ -268,6 +292,10 @@ The distinction matters for skill authors: a future Cohesive skill that wants to
 | Chat render duplicates the full persisted body | Defeats the chat-trailer model; ceremony without information | Render verdict + thesis + top findings + next step in chat; point at the persisted file |
 | Header nesting reaches `####` or `#####` in chat output | Header soup is the most common form of ceremony | Cap at `###`; use a bullet list or table for sub-structure |
 | Multiple "Recommended next Cohesive skill" entries without verdict-branching | Pushes the choice back to the user | One entry per verdict-branch; if the skill has one verdict, one recommendation |
+| Top findings rendered as title + one-clause why (no Evidence, no Change) | Names the finding, doesn't show it; reproduces failure mode in [`gotchas/naming-instead-of-showing.md`](../gotchas/naming-instead-of-showing.md) | Each chat finding carries title + Evidence (file:line + excerpt) + Change (specific edit) per rule 2b |
+| Recommended-next-skill clause is bare skill-name + reason ("rewrite-specs to close 5 findings") | Empty handoff; user re-derives what was already known; violates rule 5a | Each clause carries payload: files for rewrite-specs, design question for brainstorm-design, scope for review-* / audit-substrate |
+| Cross-iteration finding-ID continuity in chat ("promote finding 7 from prior pass") | Bookkeeping shorthand a fresh chat reader cannot act on; violates rule 2c | Restate the gap concretely with current evidence in chat; preserve the audit trail in the persisted file's `## History` section |
+| Promote/defer disposition matrix or verdict-ratchet language ("ratchets to ⬆") in chat trailer | Audit-trail content crowding out per-invocation substance; violates rule 2c | Move the disposition matrix and ratchet trajectory to the persisted file's `## History` section |
 
 ## Process when adding a new skill
 

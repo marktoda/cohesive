@@ -12,15 +12,31 @@ Cohesive's substrate work is rigorous. Cohesive's chat output is not the place t
 
 1. **Verdict before evidence.** Every chat-rendered output that has a verdict opens with the verdict line. Pinned as the named invariant `VERDICT_BEFORE_EVIDENCE` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md`).
 
-2. **The chat render is a faithful subset of the persisted file.** Persisted artifacts (architecture reviews, brainstorms, delta ledgers) carry the full body. Chat shows the verdict, the thesis, the top findings, and the next step. The persisted file is canonical; the chat render is its trailer.
+2. **The chat render is substance, not bookkeeping.** Persisted artifacts (architecture reviews, brainstorms, delta ledgers, audit reports) carry the full body and the audit trail. Chat shows the verdict, the thesis, the top findings, and the next step — and *shows* them, not just names them. The persisted file is canonical; the chat render is its substantive trailer.
 
-   "Faithful subset" is testable: (a) the verdict matches; (b) every claim in the chat render appears in the persisted file; (c) the chat render does not introduce findings, recommendations, or facts absent from the persisted file. A reviewer applying these three tests can answer "is this a faithful subset?" without judgment calls.
+   This rule has three sub-rules, each independently testable.
+
+   **2a. Faithful subset.** The chat render is a subset of the persisted file. Test set: (a) the verdict matches; (b) every claim in the chat render appears in the persisted file; (c) the chat render does not introduce findings, recommendations, or facts absent from the persisted file.
+
+   **2b. Findings are shown, not named.** Each finding rendered in chat carries three things together: a title, concrete evidence (a `path:line` reference, a quoted excerpt, or a named artifact), and the specific change that closes it. A bare title with a one-clause "why it matters" is not a finding; it is a label pointing at one. Cross-iteration references — "promote finding 7," "see finding N family," "the prior pass's deferred items," "review finding 6 family" — are bookkeeping shorthand that names process state; a fresh reader cannot act on them. The chat render quotes the substance afresh each invocation. Bookkeeping references stay in the persisted file, where a reader following the audit trail across iterations has the prior reviews open.
+
+   **2c. Bookkeeping displaces to the persisted file.** Promote/defer disposition matrices, verdict-ratchet language ("verdict improved from X to Y," "ratchets to ⬆"), per-iteration finding-ID continuity, "deferral criterion still holds" annotations, and disposition tables ("Promote (5) / Defer (8)") are audit-trail content. They belong in the persisted file — exactly the surface a reader tracking progress across iterations reads. The chat render is per-invocation; it shows the architectural findings of *this* invocation in show-not-name form. If the synthesizer wants to record cross-iteration disposition, it does so in the persisted file's history section and not in the chat trailer.
+
+   Faithful-subset test set extends accordingly: (d) every chat finding satisfies 2b (title + evidence + change); (e) the chat trailer carries no bookkeeping per 2c.
 
 3. **Cap header depth at `###` in chat-rendered output.** No `####`, no `#####`. If a section needs sub-structure, use a bulleted list or a small table. Header soup is the most common form of ceremony.
 
 4. **Render branchy content as bullets or tables, not narrative phases.** "Phase 1: Read normative substrate. Phase 2: Spec-prior gate. Phase 3: Dispatch four reviewers..." reads like a procedure manual. A small table or bullet list says the same thing in a third the lines.
 
-5. **Recommend exactly one next move.** "Recommended next Cohesive skill" is one entry per verdict-branch. Multiple recommendations means the reader has to re-derive what to do; do that derivation in the skill, not in the user's head.
+5. **Recommend exactly one next move, and carry the payload it needs.** "Recommended next Cohesive skill" is one entry per verdict-branch (the cardinality rule), and that entry names the concrete inputs the next skill operates on (the payload rule). Multiple recommendations means the reader has to re-derive *which*; an empty payload means the reader has to re-derive *what*. Do both derivations in the skill, not in the user's head.
+
+   **5a. The recommendation carries actionable payload.** Three shapes apply by next-skill kind:
+
+   - `cohesive:rewrite-specs` — name the files to edit and the specific change in each. "Rewrite-specs to close the 5 promoted findings" is empty. "Rewrite-specs: edit `references/output-voice.md` rule 2 to add show-not-name; edit `skills/review-codebase/SKILL.md` Output format to require Evidence per finding" is a payload.
+   - `cohesive:brainstorm-design` — name the design question to revisit. "Brainstorm to reconsider the direction" is empty. "Brainstorm: should chat-render bookkeeping promote to a named invariant, or stay convention?" is a payload.
+   - `cohesive:review-codebase` / `cohesive:review-diff` / `cohesive:audit-substrate` — name the scope. "Review the codebase" is empty. "Review the codebase scoped to the merged delta in `design/<slug>`" is a payload.
+
+   The chat render of the recommendation appears as one block: the skill, then the payload, then a one-clause reason. Bare skill-name + reason without payload is a render failure tracked in the synthesizing-skill section of [`docs/substrate/matrices/reviewer-output-shape.md`](../docs/substrate/matrices/reviewer-output-shape.md).
 
 ## Do / Don't
 
@@ -30,6 +46,9 @@ Cohesive's substrate work is rigorous. Cohesive's chat output is not the place t
 | State the thesis in 1–2 sentences | Restate the methodology before the finding |
 | Use bullets and tables for branchy content | Number phases narratively in chat |
 | Reference file:line for evidence | "There may be issues in some areas of the code" |
+| Show each finding (title + evidence + change) | Name findings by ID ("promote finding 7"); list bare titles with one-clause why |
+| Carry the next-skill payload (files, scope, or design question) | "Next: rewrite-specs to close 5 findings" |
+| Persist bookkeeping (disposition matrices, verdict ratchets, cross-iteration IDs) to the file | Render promote/defer matrices, verdict ⬆ ratchet language, or deferral-criterion annotations in chat |
 | One forced-choice question per turn | "Anything else I should know?" |
 | Say what you're about to do in one sentence | Narrate every tool call as you make it |
 | Recommend one next skill per verdict | "You could also try..." with three more |
@@ -45,6 +64,9 @@ These produce wordiness without information:
 - "It's worth noting that..." / "It's important to mention that..."
 - "I hope this helps!" / "Let me know if you have any questions!"
 - "What do you want to focus on?" / "Tell me more about your goals." / "Anything else I should know?" (these violate the forced-choice clarifying-question rule in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions")
+- "Promote finding N" / "Close finding N" / "Finding N from the prior pass" / "Review finding N family" / "the X deferred items" — bare ID references without showing the substance (violates rule 2b — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md`)
+- "Verdict ratchets to ⬆" / "verdict improved from X to Y" / "Disposition: Promote (N) / Defer (M)" — bookkeeping the chat does not need (violates rule 2c)
+- "Next: rewrite-specs to close N findings" / "Recommended: brainstorm-design to revisit the direction" — handoffs without payload (violates rule 5a)
 
 ## Tone
 
@@ -73,6 +95,9 @@ If a chat render exceeds the budget, the right move is usually one of:
 - Move detail into the persisted file; render only the trailer in chat.
 - Replace narrative with bullets or a table.
 - Drop the methodology recap (the user already invoked the skill; they know what it does).
+- Drop bookkeeping (disposition tables, finding-ID continuity, verdict-ratchet language) from chat per rule 2c — that content belongs in the persisted file's history.
+
+Density and substance are independent failure modes. A render under budget that catalogs finding IDs and disposition matrices fails rule 2b/2c just as a render over budget that re-narrates methodology fails rule 4. The substance test is: can a fresh reader, reading only the chat, name the architectural defect and the change that closes it? If not, the chat is naming, not showing.
 
 ## The worked transcript
 
@@ -110,7 +135,8 @@ If this guide changes, update the worked transcript in the same pass. Rules with
 ## Related substrate
 
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` — the one rule from this guide promoted to invariant
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/wordy-output.md` — the scar this guide retires
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/wordy-output.md` — the ceremony scar; addressed by rules 3 and 4
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md` — the substance scar; addressed by rules 2b, 2c, and 5a
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` — the trap this guide must avoid
 - `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/output-voice-worked-example.md` — the worked example
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" — canonical Output format shape (cites this guide)

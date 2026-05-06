@@ -4,7 +4,7 @@
 **Scope:** <whole repo / subsystem name>
 **Reviewer:** `cohesive:review-codebase`
 
-> Output starts with the TL;DR block per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"TL;DR convention" — verdict + 2-3 sentence thesis + top 3 findings + recommended next skill — rendered before any longer body.
+> Output starts with the TL;DR block per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" rule 3 — verdict + 2-3 sentence thesis + top 3 findings (each in show-shape: title + Evidence + Change) + recommended next skill (with payload) — rendered before any longer body. The TL;DR is what renders in chat as the substantive trailer; the persisted body below carries the full audit content including the cohesion scorecard, the per-reviewer raw findings, and the cross-iteration `## History` section. Bookkeeping content (finding-ID continuity across passes, disposition matrices, verdict trajectory) lives in §"History" of this persisted file, not in the chat TL;DR — see `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2c.
 
 ## Verdict
 
@@ -133,3 +133,37 @@ Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boun
   - structure: `path/to/...`
   - library-native: `path/to/...`
   - agent-readiness: `path/to/...`
+
+## History
+
+> Iterative-review bookkeeping. This section is the canonical home for cross-pass audit content (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2c — bookkeeping displaces from chat to persisted file). Omit the section entirely on the first review of a scope; populate it on the second and subsequent reviews.
+
+### Predecessor
+
+- Predecessor review: `docs/history/reviews/<earlier-date>-<slug>-architecture-review.md`
+- Predecessor verdict: <value from vocabulary>
+- Predecessor finding count: <N total; B blockers / H highs / M mediums / L lows>
+
+### Disposition of predecessor findings
+
+| Predecessor finding | Severity | Disposition this pass | Closing artifact / rationale |
+|---|---|---|---|
+| <ID. Title> | Blocker / High / Medium / Low | Closed / Promoted / Deferred (criterion: <name>) / Superseded | <commit, doc edit, or new finding ID that closes or replaces it> |
+
+### Verdict trajectory
+
+| Pass | Date | Verdict | Highest-leverage observation |
+|---|---|---|---|
+| 1 | <YYYY-MM-DD> | <verdict> | <one-clause> |
+| 2 | <YYYY-MM-DD> | <verdict> | <one-clause> |
+
+### New findings introduced this pass
+
+A short list of finding IDs added this pass (not present in the predecessor) with their severity. The full finding bodies live in §"Highest-leverage findings" above; this list is the audit-trail anchor pointing to them.
+
+- Finding <ID> (<Severity>) — <title>
+- ...
+
+### Notes for the next iteration
+
+Anything the next reviewer needs to know that doesn't fit elsewhere — e.g., a deferral whose criterion is close to satisfied, an external dependency the next pass should re-check, a planned rewrite that should land before the next review.

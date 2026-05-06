@@ -137,7 +137,7 @@ The stall banner is the only verdict-output shape that surfaces `Issues Found` t
 
 ## Output format
 
-The skill's chat output (the agent's report, surfaced):
+The skill's chat output (the agent's report, surfaced) is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2 and its sub-rules 2a / 2b / 2c). The persisted file (each pass at `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md`) is canonical and carries the full review and the cross-pass audit trail (which findings closed in which pass, verdict trajectory across passes); the chat trailer renders this pass's findings shown afresh in the canonical six-field shape, plus the disposition recommendation and (for Approved) the implementation-route matrix. Findings already satisfy rule 2b structurally because the six-field shape (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) is show-shape by construction; the failure mode to guard against is cross-pass bookkeeping creep — finding-ID continuity between passes, "the prior pass's deferred items" annotations, verdict-ratchet language. None of that appears in chat; pass-N's persisted file is where the audit trail lives.
 
 ```md
 # Rewrite Validation Review — <topic>
@@ -229,6 +229,7 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 - Verdict of "Issues Found" with all issues marked blocking. If everything is blocking, the prioritization is failing.
 - The reviewer reading implementation files. Specs only.
 - Rendering an options menu (e.g., "Three options: repair pass / substrate-note / persist-and-pause") in place of the disposition recommendation. The disposition rule in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings" picks; the agent does not. Forcing the user to choose between dispositions violates `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule #5 ("Recommend exactly one next move") and reproduces the failure mode this skill's substrate is designed against.
+- Rendering cross-pass bookkeeping in chat — finding-ID continuity between passes ("finding B1 from pass-2 is now closed"), verdict-ratchet language ("verdict ratcheted from Issues Found pass-2 to Approved pass-3"), or disposition tables tracking which findings closed in which pass. Violates rule 2c — pass-N's persisted file `## History` section carries the audit trail; chat trailer is per-pass substance. See [`docs/substrate/gotchas/naming-instead-of-showing.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md).
 
 ## Composition
 
