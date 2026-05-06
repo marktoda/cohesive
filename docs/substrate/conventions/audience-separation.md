@@ -77,6 +77,30 @@ The audience seam applies to **chat-render surfaces** only. Three other surfaces
 
 The seam is render-surface-specific. Pre-render content (triggers, body prose, contributor docs) keeps substrate vocabulary; render content (chat trailer) does not.
 
+## Surface-by-surface translation: substrate types
+
+The audience seam has two parallel translation surfaces:
+
+| Translation layer | Persisted / agent-internal name | User-facing translation source |
+|---|---|---|
+| **Verdict labels** | Internal verdict tokens (`Approved`, `Issues Found`, `Substrate gaps`, `Pass`, etc.) | [`references/verdict-vocabulary.md`](${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md) — one row per skill's verdict vocabulary |
+| **Substrate types** | Internal type tokens (`Named invariant`, `Behavior matrix`, `Gotcha`, `Semantic linter`, `Spec`, `Convention`) | [`references/substrate-vocabulary.md`](${CLAUDE_PLUGIN_ROOT}/references/substrate-vocabulary.md) — one row per substrate type, with a multi-paragraph "User-facing translation" column whose first phrase is the colloquial used in chat |
+
+Both translation surfaces are canonical: when a chat-rendered surface needs to refer to either a verdict or a substrate type, the user-facing label comes from the corresponding table. The agent-internal name appears only in persisted-file templates, skill body prose, agent dispatch prompts, and substrate docs.
+
+The colloquial first-phrase rule (substrate types): when a chat-render template needs to *name* a substrate type, render the first phrase of the row's "User-facing translation" paragraph rather than the agent-internal name. Examples:
+
+- `Named invariant` → "a rule the code is *guaranteed* to follow" (or compressed: "an enforced rule")
+- `Behavior matrix` → "a decision table"
+- `Gotcha` → "a scar"
+- `Semantic linter` → "a custom check that fails CI when a specific pattern shows up"
+- `Spec` → "a doc that says what the system does"
+- `Convention` → "a rule we agree on but don't enforce structurally"
+
+**Documented exemption: artifact-naming surfaces.** Skills whose primary deliverable is *naming the artifact to add* — `cohesive:init`'s draft files, `cohesive:audit-substrate`'s Top fixes — render the agent-internal substrate-type name as the artifact label, paired with the user-facing translation. The pedagogical move (init's Rosetta Stone) requires showing the substrate vocabulary alongside the colloquial; the audit's deliverable IS the substrate-shape thing the user should add. These exemptions are by-design; `audit-substrate/SKILL.md` Acceptance criteria item 3 ("Top fixes body block uses substrate-shape vocabulary in the *content* of each fix") is the cited substrate.
+
+Outside those exemptions, the colloquial rule applies. A future chat-render surface that mentions a substrate type without being an artifact-naming surface uses the user-facing translation, not the agent-internal name.
+
 ## Promotion path to validator enforcement
 
 The convention lives as convention-with-template (the structural property) and reviewer-judgment (the per-pass check) until promotion criteria are met:

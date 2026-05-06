@@ -2,10 +2,11 @@
 
 The agent-internal vocabulary Cohesive uses precisely (named invariants, behavior matrices, gotchas, semantic linters, specs, conventions) and the user-facing translation that explains each in plain terms a non-Cohesive-native engineer can act on.
 
-This file is the canonical translation table. It feeds two surfaces today:
+This file is the canonical translation table. It feeds three surfaces:
 
 1. **`cohesive:init`** renders the per-row translation inline when proposing a draft artifact, so users learn the vocabulary by watching their own code get translated into it.
-2. **Chat trailers** (Phase 1 sub-pass B, planned) will translate substrate-shape internal labels to user-facing labels per the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`. Sub-pass B extends the centralized chat-trailer template to consume this table; today the only consumer is init.
+2. **Chat trailers** translate substrate-shape internal labels to user-facing labels per the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md` §"Surface-by-surface translation: substrate types." When a chat-render surface needs to refer to a substrate type, it uses the colloquial first-phrase from this table's "User-facing translation" column; the agent-internal name (`Named invariant`, `Behavior matrix`, etc.) appears only in persisted-file templates and skill body prose. The canonical consumer today is `cohesive:init`'s draft-file render template; future skills with chat-render surfaces that mention substrate types follow the same pattern.
+3. **The negative-space doc** at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/scope.md` (what Cohesive does and doesn't do) cites the user-facing definitions when explaining what each substrate type is for and what the methodology overbuilds vs underbuilds.
 
 The audience seam this file implements: persisted-file vocabulary keeps the precise term (so agent reasoning stays sharp); chat-render vocabulary uses the translation (so non-Cohesive-natives don't bounce on jargon).
 
