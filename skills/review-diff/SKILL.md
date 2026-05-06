@@ -56,7 +56,7 @@ The dispatch prompt includes the same fresh-eyes prose as in codebase mode: "The
 
 ### 4. Render verdict in chat
 
-Use this format:
+Use the format below. Two rules apply at render time, each grounded in `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`: every Findings-table row carries Evidence (file:line + quoted excerpt or named artifact) and a Change column (the specific edit that closes it) per rule 2b; the Recommended next Cohesive skill clause carries payload (files for rewrite-specs, scope for review-codebase, design question for brainstorm-design) per rule 5a.
 
 ```md
 # Change Cohesion Review
@@ -68,9 +68,9 @@ Use this format:
 
 ## Findings
 
-| Severity | Area | Finding | Suggested substrate |
-|---|---|---|---|
-| Blocking | Invariant | <name> | <artifact> |
+| Severity | Area | Finding (with file:line + excerpt) | Change | Suggested substrate |
+|---|---|---|---|---|
+| Blocking | Invariant | `<path>:<line>` — "<excerpt>" — <one-sentence why it matters> | <specific edit that closes it> | <artifact> |
 
 ## Behavior/spec alignment
 ...
@@ -85,14 +85,17 @@ Use this format:
 ...
 
 ## Highest-leverage fix
-<one specific recommendation>
+<one specific recommendation — file:line + the specific change>
 
 ### Recommended next Cohesive skill
-- **Pass:** `superpowers:writing-plans` — substrate is preserved; ready for implementation discipline.
-- **Pass with notes:** `superpowers:writing-plans` — proceed; the notes are advisory, not gating.
-- **Needs substrate:** `cohesive:rewrite-specs` — the change implies substrate updates that should land before merge.
-- **Risky:** `cohesive:review-codebase` — risk straddles the diff boundary; broader review is warranted before a fix.
-- **Block:** `cohesive:brainstorm-design` — the change conflicts with the substrate at a level that requires re-deciding direction, not just rewriting docs.
+
+Per verdict, with concrete payload:
+
+- **Pass:** `superpowers:writing-plans` — substrate is preserved; ready for implementation discipline. **Scope:** the change surface in the diff (`<branch>` or `<PR-URL>`).
+- **Pass with notes:** `superpowers:writing-plans` — proceed; the notes are advisory, not gating. **Scope:** same as Pass; the §"Findings" notes can be addressed inline or deferred.
+- **Needs substrate:** `cohesive:rewrite-specs` — the change implies substrate updates that should land before merge. **Files to edit:** <enumerate the specific docs/matrices/invariants the diff implies should be added or updated, with the specific change in each>. Slug: `<derived-from-diff>`.
+- **Risky:** `cohesive:review-codebase` — risk straddles the diff boundary; broader review is warranted. **Scope:** <name the subsystem or set of files where the diff's risk leaks beyond the changed-files boundary>.
+- **Block:** `cohesive:brainstorm-design` — the change conflicts with the substrate at a level that requires re-deciding direction. **Design question:** <name the specific architectural question the diff surfaced, e.g. "should X be one concept or two?">.
 ```
 
 ### 5. Don't persist by default
@@ -101,7 +104,7 @@ Diff reviews are usually conversation-scoped. User can `--persist` if needed; th
 
 ## Output format
 
-The canonical render produced in step 4:
+The canonical render produced in step 4. The chat render is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2 and its sub-rules 2a / 2b / 2c). Diff reviews don't produce a persisted file by default, so all substance lives in the chat — but bookkeeping content (cross-iteration finding-ID continuity, disposition matrices, verdict-ratchet language) does not appear here either; diff review is per-invocation by design.
 
 ```md
 # Change Cohesion Review
@@ -113,26 +116,32 @@ The canonical render produced in step 4:
 
 ## Findings
 
-| Severity | Area | Finding | Suggested substrate |
-|---|---|---|---|
-| Blocking | Invariant | <name> | <artifact> |
+| Severity | Area | Finding (with file:line + excerpt) | Change | Suggested substrate |
+|---|---|---|---|---|
+| Blocking | Invariant | `<path>:<line>` — "<excerpt>" — <one-sentence why it matters> | <specific edit that closes it> | <artifact> |
 
 ## Highest-leverage fix
-<one specific recommendation>
+<one specific recommendation — file:line + the specific change>
 
 ### Recommended next Cohesive skill
-- **Pass / Pass with notes:** `superpowers:writing-plans` — substrate is preserved; ready for implementation discipline.
-- **Needs substrate:** `cohesive:rewrite-specs` — the change implies substrate updates that should land before merge.
-- **Risky:** `cohesive:review-codebase` — risk straddles the diff boundary; broader review is warranted.
-- **Block:** `cohesive:brainstorm-design` — the change conflicts with the substrate at a level that requires re-deciding direction.
+
+Per verdict, with concrete payload:
+
+- **Pass / Pass with notes:** `superpowers:writing-plans` — substrate is preserved; ready for implementation discipline. **Scope:** the change surface in the diff (`<branch>` or `<PR-URL>`).
+- **Needs substrate:** `cohesive:rewrite-specs` — the change implies substrate updates that should land before merge. **Files to edit:** <enumerate the specific docs/matrices/invariants the diff implies should be added or updated, with the specific change in each>. Slug: `<derived-from-diff>`.
+- **Risky:** `cohesive:review-codebase` — risk straddles the diff boundary; broader review is warranted. **Scope:** <name the subsystem or set of files where the diff's risk leaks beyond the changed-files boundary>.
+- **Block:** `cohesive:brainstorm-design` — the change conflicts with the substrate at a level that requires re-deciding direction. **Design question:** <name the specific architectural question the diff surfaced>.
 ```
 
-Don't bury the verdict. Findings are ranked by leverage. Optional sections from step 4 (`## Behavior/spec alignment`, `## Invariant preservation`, `## Test guarantee gaps`, `## Locality and abstraction concerns`) may be added under `## Findings` if they earn their place; omit any that don't.
+Don't bury the verdict. Findings are ranked by leverage. Every Findings row carries Evidence (file:line + quoted excerpt) and Change (the specific edit) per rule 2b — bare title + Severity + Area is a render failure. Optional sections from step 4 (`## Behavior/spec alignment`, `## Invariant preservation`, `## Test guarantee gaps`, `## Locality and abstraction concerns`) may be added under `## Findings` if they earn their place; omit any that don't.
 
 ## Output discipline
 
 - **Verdict first, then evidence.** Don't bury the lede.
 - **Findings ranked by leverage.** Not alphabetical.
+- **Every Findings row shows, not names.** File:line + quoted excerpt + the specific change is the minimum row shape per rule 2b.
+- **Handoff carries payload.** The recommended-next-skill clause names the files / scope / design question, not just the skill name and a count.
+- **No bookkeeping in chat.** Cross-iteration finding-ID continuity, disposition matrices, verdict-ratchet language don't appear here. Diff review is per-invocation.
 - **Every finding maps to a substrate artifact.** If a finding has no substrate target, ask whether it's preference rather than a real cohesion issue.
 - **Concrete file:line references.** Vague findings get rejected.
 
@@ -156,6 +165,8 @@ Don't bury the verdict. Findings are ranked by leverage. Optional sections from 
 - Dispatching reviewers sequentially instead of in parallel.
 - Producing a finding list with no verdict.
 - Findings without substrate artifacts.
+- Findings table row carries only Severity + Area + a bare title — no file:line, no excerpt, no Change column. Violates rule 2b — see [`docs/substrate/gotchas/naming-instead-of-showing.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md).
+- Recommended next Cohesive skill names a skill plus a count or a clause without the file list / scope / design question. Violates rule 5a.
 
 ## Composition
 

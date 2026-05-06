@@ -105,12 +105,26 @@ Walk each axis from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`. For e
 
 ## Highest-leverage fixes (ranked)
 
-1. <substrate artifact to add; one-clause justification>
-2. ...
-3. ...
+Render each fix in show-shape per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2b — the persisted body uses the same shape as the chat trailer rendered by §"Output format" below (title + Evidence the gap exists + What the artifact would say + Where it lives). The render template lives once in §"Output format"; this section of the audit body reproduces that render verbatim, not a different shape.
+
+### 1. <Artifact name to add>
+
+**Evidence the gap exists:** <path>:<line> — <quoted excerpt or named pattern>
+
+**What the artifact would say:** <2-3 sentence sketch>
+
+**Where it lives:** <path>
+
+### 2. <Artifact name to add>
+
+(same fields)
+
+### 3. <Artifact name to add>
+
+(same fields)
 
 ### Recommended next Cohesive skill
-`cohesive:rewrite-specs` — most audit findings are substrate-shaped; the rewrite skill is the right vehicle to turn the highest-leverage entries into actual artifacts (named invariants, gotcha docs, behavior matrices).
+`cohesive:rewrite-specs` — turn the highest-leverage missing-memory entries into actual artifacts. **Files to add:** <enumerate the artifact paths from the Highest-leverage fixes above>. Slug: `<derived-from-audit-scope>`.
 ```
 
 ### 4. Persist
@@ -121,7 +135,7 @@ If the user passes `--no-write`, render in chat only.
 
 ## Output format
 
-The skill renders a chat trailer (canonical verdict-led shape below) and persists the full audit report to `docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md` per step 3. The chat render is a faithful subset of the persisted file (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2).
+The skill renders a chat trailer (canonical verdict-led shape below) and persists the full audit report to `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md` per step 3. The chat render is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2 and its sub-rules 2a / 2b / 2c). The persisted file is canonical and carries the full audit body and the cross-iteration history if this is a re-audit; the chat trailer renders this iteration's top fixes shown afresh, plus a payload-bearing handoff.
 
 ```md
 # Substrate Audit — <scope>
@@ -131,16 +145,44 @@ The skill renders a chat trailer (canonical verdict-led shape below) and persist
 **Headline:** <one or two sentences — highest-leverage missing memory and why the codebase is at risk because of it>
 
 ## Top fixes
-1. <substrate artifact to add; one-clause justification>
-2. <substrate artifact to add; one-clause justification>
-3. <substrate artifact to add; one-clause justification>
+
+### 1. <Artifact name to add — e.g., "Named invariant: USER_AUTH_SESSION_TOKEN_TTL">
+
+**Evidence the gap exists:** `<path>:<line>` — <quoted excerpt of the implicit rule, the unmatricized branch, the comment-as-rule, or the stale doc; or a named pattern observation if no single line carries it>
+
+**What the artifact would say:** <2-3 sentences sketching the artifact's core claim — concrete enough that a reader could begin drafting it. For an invariant: the rule and the proxy. For a matrix: the columns and ~3 sample rows. For a gotcha: symptom and correct pattern.>
+
+**Where it lives:** `docs/substrate/<category>/<filename>.md` — <category: invariants / matrices / gotchas / specs / tests / linters>
+
+### 2. <Artifact name to add>
+
+**Evidence the gap exists:** `<path>:<line>` — <excerpt>
+
+**What the artifact would say:** <sketch>
+
+**Where it lives:** `<path>`
+
+### 3. <Artifact name to add>
+
+**Evidence the gap exists:** `<path>:<line>` — <excerpt>
+
+**What the artifact would say:** <sketch>
+
+**Where it lives:** `<path>`
 
 ## Persisted report
-`docs/history/reviews/YYYY-MM-DD-<slug>-substrate-audit.md`
+`docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md`
 
 ### Recommended next Cohesive skill
-`cohesive:rewrite-specs` — most audit findings are substrate-shaped; the rewrite skill is the right vehicle to turn the highest-leverage entries into actual artifacts.
+
+`cohesive:rewrite-specs` — turn the highest-leverage missing-memory entries into actual artifacts. **Files to add:** <enumerate the artifact paths from the Top fixes above; rewrite-specs creates them as new artifacts under `docs/substrate/<category>/`>. Slug: `<derived-from-audit-scope>`.
 ```
+
+The render template above is the canonical chat trailer. Three rules apply:
+
+1. **Top fixes render show-shape** (rule 2b). Each fix carries a title (the artifact to add), Evidence the gap exists (file:line + excerpt or named pattern), What the artifact would say (a 2-3 sentence sketch concrete enough to seed drafting), and Where it lives (the path the rewrite would create). Bare "substrate artifact to add; one-clause justification" is a render failure tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Synthesizing-skill chat render shape."
+2. **Bookkeeping is displaced to the persisted file** (rule 2c). If this is a re-audit, the persisted file carries a `## History` section with the prior audit's recommendations, which are now real artifacts vs. still-missing, and any deferral criteria. Chat trailer is per-invocation.
+3. **Recommended next Cohesive skill carries payload** (rule 5a). The clause names the artifact paths to create, not just "rewrite-specs to turn audit entries into artifacts."
 
 ## Acceptance criteria
 
@@ -158,6 +200,8 @@ The skill renders a chat trailer (canonical verdict-led shape below) and persist
 - Recommending more substrate where the codebase clearly has not earned the rules yet. Premature substrate is its own form of debt.
 - Skipping `discover-substrate` because "I can read the directory listing myself." The script's bucketing is the audit's baseline.
 - Dispatching reviewer agents. This skill does not dispatch.
+- Top fixes render as `<artifact to add; one-clause justification>` with no Evidence, no artifact-content sketch, no path. Violates rule 2b — see [`docs/substrate/gotchas/naming-instead-of-showing.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md).
+- Recommended next Cohesive skill names `rewrite-specs` without enumerating the artifact paths. Violates rule 5a.
 
 ## Composition
 

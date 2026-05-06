@@ -110,13 +110,14 @@ Token discipline: each reviewer agent already declares its own output budget (�
 
 Don't concatenate. Synthesize:
 
-1. **TL;DR** — verdict + 3-line thesis + top 3 findings + recommended next skill, in this order, as the very first content in chat. The TL;DR convention is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"TL;DR convention" and applies to every persisted skill output.
+1. **TL;DR** — verdict + 3-line thesis + top 3 findings (each in show-shape per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2b: title + Evidence + Change) + recommended next skill (with payload per rule 5a), in this order, as the very first content in chat. The TL;DR convention is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"TL;DR convention" and applies to every persisted skill output.
 2. **Thesis** — one paragraph naming the codebase's overall shape, the highest-leverage risk, and whether the system can scale development without founder memory. Concrete; specific to this codebase.
 3. **Verdict** — one of: Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk
-4. **Cohesion scorecard** — 9-axis ratings from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`
-5. **Highest-leverage findings** — ranked by leverage × severity, format from rubric (canonical six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md`)
-6. **Substrate improvements** — specs to rewrite, matrices to add, semantic linters to add, gotchas to document
-7. **Phased roadmap** — first repair substrate, then simplify architecture, then strengthen enforcement
+4. **Cohesion scorecard** — 9-axis ratings from `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` (persisted-file only)
+5. **Highest-leverage findings** — ranked by leverage × severity, format from rubric (canonical six-field shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Per-agent finding shape"). Persisted-file uses six-field full shape; chat trailer renders the top-3 in title + Evidence + Change (the show-shape compression of the six fields).
+6. **Substrate improvements** — specs to rewrite, matrices to add, semantic linters to add, gotchas to document (persisted-file only)
+7. **Phased roadmap** — first repair substrate, then simplify architecture, then strengthen enforcement (persisted-file only)
+8. **History** — when this is an iterative review (a prior architecture review of the same scope exists), the persisted file carries a `## History` section recording: which prior findings closed in the interval, which deferrals still hold and on which criterion, verdict trajectory across passes, and disposition tables. Chat trailer does not render this section per rule 2c — it is bookkeeping content, important to preserve in the audit trail but absent from the per-invocation substance render.
 
 Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-review-report.md`.
 
@@ -128,7 +129,7 @@ If `docs/history/reviews/` doesn't exist, create it. Reviews are append-only his
 
 ## Output format
 
-The skill renders a chat trailer (the canonical verdict-led shape below) and persists the full report to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-review-report.md`. The chat render is a faithful subset of the persisted file (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2).
+The skill renders a chat trailer (the canonical verdict-led shape below) and persists the full report to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-review-report.md`. The chat render is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2 and its sub-rules 2a / 2b / 2c). The persisted file is canonical and carries the full body, the cross-iteration audit trail (disposition history, finding-ID continuity across review passes, verdict trajectory), the cohesion scorecard, the appendices, and the per-reviewer raw findings. The chat trailer carries this iteration's findings shown afresh, plus a payload-bearing handoff.
 
 ```md
 # Architecture Review — <scope>
@@ -138,26 +139,51 @@ The skill renders a chat trailer (the canonical verdict-led shape below) and per
 **Thesis:** <one or two sentences — the codebase's overall shape, the highest-leverage risk, whether the system can scale development without founder memory>
 
 ## Top findings
-1. <finding title> — <one-clause why it matters>
-2. <finding title> — <one-clause why it matters>
-3. <finding title> — <one-clause why it matters>
+
+### 1. <Finding title>
+
+**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
+
+**Change:** <the specific edit, file rename, invariant promotion, matrix cell, or test that closes this finding — concrete enough that a reader could begin work>
+
+### 2. <Finding title>
+
+**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
+
+**Change:** <the specific edit>
+
+### 3. <Finding title>
+
+**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
+
+**Change:** <the specific edit>
 
 ## Persisted report
 `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md`
 
 ### Recommended next Cohesive skill
 
-Per verdict:
-- **Healthy / Mostly healthy:** `superpowers:writing-plans` — substrate is sound; implementation work can proceed.
-- **Cohesive but under-enforced:** `cohesive:rewrite-specs` — promote convention to enforcement where leverage is highest.
-- **Spec drift risk:** `cohesive:rewrite-specs` — repair the substrate before further code changes.
-- **Architecture risk:** `cohesive:brainstorm-design` — the structural shape itself needs revisiting.
+Per verdict, with concrete payload:
+
+- **Healthy / Mostly healthy:** `superpowers:writing-plans` — substrate is sound; implementation work can proceed against the change surface in §"Target change surface" of the substrate discovery report.
+- **Cohesive but under-enforced:** `cohesive:rewrite-specs` — promote convention to enforcement. **Files to edit:** <enumerate the specific docs/matrices/invariants the review flagged for promotion, with the specific change in each>. Slug: `<derived-from-scope>`.
+- **Spec drift risk:** `cohesive:rewrite-specs` — repair the substrate. **Files to edit:** <enumerate the specs flagged as drifting, with the specific repair in each>. Slug: `<derived-from-scope>`.
+- **Architecture risk:** `cohesive:brainstorm-design` — the structural shape itself needs revisiting. **Design question:** <name the specific architectural question the review surfaced as load-bearing, e.g. "should X be one concept or two?">.
 ```
+
+The render template above is the canonical chat trailer. Three rules apply, each grounded in `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`:
+
+1. **Top findings render show-shape** (rule 2b). Each finding carries a title, Evidence (file:line + quoted excerpt or named artifact), and Change (the specific edit, not "promote convention to enforcement"). Bare title with one-clause "why" is a render failure tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Synthesizing-skill chat render shape."
+2. **Bookkeeping is displaced to the persisted file** (rule 2c). Cross-iteration finding-ID references ("promote finding 7 from the prior pass"), promote/defer disposition matrices, verdict-ratchet language ("verdict ratchets to ⬆"), and "deferral criterion still holds" annotations belong in the persisted file's `## History` section, not in the chat trailer. The chat trailer renders this iteration's findings only, with no cross-iteration ID continuity.
+3. **Recommended next Cohesive skill carries payload** (rule 5a). Each verdict-branch names the concrete inputs the next skill operates on — files for `rewrite-specs`, design question for `brainstorm-design`, scope for `superpowers:writing-plans`. A bare skill-name + reason without payload reproduces the failure mode in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md`.
 
 ## Output discipline
 
 - **Verdict first, then evidence.** Don't bury the lede.
 - **Findings ranked by leverage.** Not alphabetical, not by file location.
+- **Every finding shows, not names.** Title + Evidence + Change is the minimum chat-render shape per rule 2b. Bare title with a one-clause why is a regression.
+- **Bookkeeping persists, doesn't render.** Promote/defer disposition tables, cross-iteration finding-ID references, and verdict-ratchet language live in the persisted file's `## History` section. Chat trailer is per-invocation substance.
+- **Handoff carries payload.** The recommended-next-skill clause names the files / scope / design question, not just the skill name and a count.
 - **Every finding maps to a substrate artifact.** If a finding has no substrate target, ask whether it's preference rather than a real cohesion issue.
 - **Concrete file:line references.** Vague findings ("the architecture is unclear") get rejected.
 
@@ -188,6 +214,10 @@ Architecture reviews can burn a lot of tokens. Constraints:
 - Skipping the spec-prior gate (Phase 2 must run before Phase 3).
 - More than 100 findings. If you have that many, ranking is failing.
 - Findings without substrate artifacts. Either add the artifact or drop the finding.
+- Chat trailer renders Top findings as title + one-clause why (no Evidence, no Change). Violates rule 2b — see [`docs/substrate/gotchas/naming-instead-of-showing.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md).
+- Chat trailer carries a promote/defer disposition matrix or cross-iteration finding-ID continuity ("finding 7 from the prior pass"). Violates rule 2c — disposition history belongs in the persisted file's `## History` section.
+- Chat trailer's Recommended next Cohesive skill names a skill plus a count ("rewrite-specs to close 5 findings") without enumerating the files or design question. Violates rule 5a.
+- Chat trailer renders verdict-ratchet language ("Mostly healthy ⬆ from Cohesive but under-enforced"). The trajectory is bookkeeping; the persisted file's `## History` carries it.
 
 ## Composition
 
