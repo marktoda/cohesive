@@ -37,6 +37,13 @@ The user-facing model is **three gates: Decide → Lock → Build**, paralleling
 ```text
 /cohesive:cohesively <task>        # Router — picks the right workflow
 
+# Adoption (one-shot at day 1)
+/cohesive:init                     # First-time substrate from a zero-substrate codebase.
+                                   # Scans for rules-in-comments / scars-in-test-names /
+                                   # branchy code, produces drafts with side-by-side
+                                   # translations explaining each Cohesive type in plain
+                                   # terms. Runs once; refuses if substrate already exists.
+
 # The three gates (flagship workflow)
 # Decide  — recommended direction with main risk + structural mitigation
 #           (under: discover-substrate + brainstorm-design)
