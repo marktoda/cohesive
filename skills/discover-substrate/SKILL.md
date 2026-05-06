@@ -173,7 +173,7 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 (Each Missing memory item is a concrete defect with file:line evidence and the artifact-shape that would close it. Cross-iteration references like "review finding 6 family" or "the X deferred items" are bookkeeping shorthand; if a prior review identified a gap that still holds, restate the gap concretely with current evidence — do not reference its ID. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md`.)
 
 ### Next
-- <decision-shaped sentence — what the user gets next>. *(`cohesive:<skill-name>`.)* **Payload:** <the change surface (for design / review / rewrite-specs), the design question (for brainstorm-design), or the audit scope (for audit-substrate) — concrete enough that the next skill begins work without re-deriving>.
+- <decision-shaped sentence — what the user gets next>. *(`cohesive:<skill-name>`.)* **<Payload-kind>:** <payload — substitute the appropriate kind from `references/templates/chat-trailer.md` §"How `### Next` carries payload": `**Files to edit:**` for `cohesive:rewrite-specs`, `**Design question:**` for `cohesive:brainstorm-design`, `**Scope:**` for `cohesive:review-codebase` / `cohesive:review-diff` / `cohesive:audit-substrate` / `superpowers:writing-plans`>.
 ```
 
 ## Acceptance criteria
