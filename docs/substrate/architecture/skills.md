@@ -145,7 +145,7 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 - Dispatching `spec-cohesion-reviewer` in a Task subprocess with no inherited context — once per pass, fresh eyes preserved across passes.
 - Returning one of three verdicts: **Approved**, **Issues Found**, **Design Incoherent**.
 - The internal repair loop: on Issues Found, dispatching `rewrite-specs` in repair mode via the Skill tool, persisting the per-pass review, and re-dispatching the reviewer for the next pass — up to `MAX_REPAIR_PASSES` (default 5).
-- Rendering the per-verdict decision matrix on terminal verdicts (Approved → implementation options; Design Incoherent → re-brainstorm; max-passes stall → user direction).
+- Rendering the per-verdict next step on terminal verdicts (Approved → default-recommend implementation route per the chat-trailer template's §"Default-recommend rule"; Design Incoherent → re-brainstorm; max-passes stall → user direction).
 
 **Does not own.**
 - Re-reading the brainstorm output. The reviewer reads only the rewritten specs and the delta ledger.

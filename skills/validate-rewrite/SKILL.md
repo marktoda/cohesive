@@ -19,7 +19,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 1. **Always dispatch the `spec-cohesion-reviewer` agent via Task tool.** The skill itself never renders the verdict from in-conversation reading — it dispatches and surfaces the agent's report. The Task subprocess provides the structural fresh-eyes fence; this skill's job is the dispatch and the synthesis. This applies **per pass** of the repair loop, not just on the first pass.
 2. **Inputs must be paths, not summaries.** Pass the agent file paths to read; don't pre-summarize the design for it. The dispatch prompt's content is the entire context the agent has, so any summary the dispatching skill writes into it bypasses fresh-eyes — the harness fence prevents conversation inheritance, but it can't prevent prompt contamination. This applies per pass: the pass-N reviewer is dispatched with paths only, never with the pass-(N-1) review as context.
-3. **The review can block implementation.** Verdicts gate implementation per the verdict→severity-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)": `Issues Found` (highest severity High or Blocker) drives the internal repair loop (Hard constraint #4), and `Design Incoherent` exits the loop and routes to `brainstorm-design`. `Approved` (highest severity Medium, Low, or none) terminates the loop and unlocks the implementation route; the user picks among the rows of the implementation decision matrix in the Output format block, and the disposition rule in the rubric specifies what (if anything) to close before merge.
+3. **The review can block implementation.** Verdicts gate implementation per the verdict→severity-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)": `Issues Found` (highest severity High or Blocker) drives the internal repair loop (Hard constraint #4), and `Design Incoherent` exits the loop and routes to `brainstorm-design`. `Approved` (highest severity Medium, Low, or none) terminates the loop and unlocks the implementation route; the trailer leads with one default move (`cohesive:implement-cohesively`) and surfaces alternatives behind a `(other options)` disclosure per the chat-trailer template's §"Default-recommend rule". The disposition rule in the rubric specifies what (if anything) to close before merge.
 4. **The Issues Found repair loop runs internally.** When the reviewer returns `Issues Found`, the skill dispatches `cohesive:rewrite-specs` in repair mode via the Skill tool, then re-dispatches `spec-cohesion-reviewer` for the next pass — up to `MAX_REPAIR_PASSES` (default 5). The user does not invoke `rewrite-specs` themselves except after a max-passes stall or a Design Incoherent exit. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)", the loop terminates on Approved, Design Incoherent, or max-passes; do not loop past the ceiling, and do not auto-pivot to `brainstorm-design` on max-passes (that is a user decision).
 
 ## Process
@@ -139,61 +139,78 @@ The stall banner is the only verdict-output shape that surfaces `Issues Found` t
 
 ## Output format
 
-The skill's chat output (the agent's report, surfaced) follows the centralized chat-trailer template at `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` per its §"Variants" `validate-rewrite` row: the full cohesion-review body (per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`) renders as the body block, and the `### Next` footer carries the **Disposition** phrase + (Approved-only) **Implementation route** matrix. The chat render is the decision-rendering of the persisted body per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c) and the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`. The persisted file (each pass at `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md`) is canonical and carries the full review and the cross-pass audit trail (which findings closed in which pass, verdict trajectory across passes); the chat trailer renders this pass's findings in the canonical six-field shape, plus the disposition recommendation and (for Approved) the implementation-route matrix. Findings already satisfy rule 2b structurally because the six-field shape (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) is show-shape by construction; the failure mode to guard against is cross-pass bookkeeping creep — finding-ID continuity between passes, "the prior pass's deferred items" annotations, verdict-ratchet language. None of that appears in chat; pass-N's persisted file is where the audit trail lives.
+The skill's chat output (the agent's report, surfaced) follows the centralized chat-trailer template at `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` per its §"Variants" `validate-rewrite` row: the cohesion-review body (per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`) renders as the body block with only non-empty review sections (per the chat-trailer template's §"Render-only-non-empty rule"), and the `### Next` footer carries the **Disposition** phrase + (Approved-only) **Implementation route** rendered with the chat-trailer template's §"Default-recommend rule" (one default + alternatives behind a `(other options)` disclosure). The chat render is the decision-rendering of the persisted body per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c) and the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`. The persisted file (each pass at `docs/history/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md`) is canonical and carries the full review and the cross-pass audit trail (which findings closed in which pass, verdict trajectory across passes); the chat trailer renders this pass's findings in the canonical six-field shape, plus the disposition recommendation and (for Approved) the default + disclosure implementation route. Findings already satisfy rule 2b structurally because the six-field shape (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) is show-shape by construction; the failure mode to guard against is cross-pass bookkeeping creep — finding-ID continuity between passes, "the prior pass's deferred items" annotations, verdict-ratchet language. None of that appears in chat; pass-N's persisted file is where the audit trail lives.
 
 **Verdict translation.** The internal verdict (`Approved` / `Issues Found` / `Design Incoherent`) renders in the chat trailer as the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"validate-rewrite". The user-facing label preserves the internal token (e.g., `**Approved — ready to implement**`) so the dispatch logic and rubric grep targets still resolve.
+
+**Render-conditional rules for the body block.** The render template below is the agent's literal output template; it does not carry meta-instructions or comments inline (per the failure mode in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` — instructions inside render templates leak into user-facing output). The render conditions live here, in prose, instead:
+
+- **`## Architectural reflection`** — renders only when the verdict is `Approved` (the lock→build handoff). Omitted entirely on `Issues Found` and `Design Incoherent`. Format per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Architectural reflection".
+- **`## Executive judgment`** and **`## Delta at a glance`** — always render across all three verdicts. The Delta at a glance is verbatim-quoted from the ledger preamble per the consumer rendering rules in `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Delta at a glance".
+- **`## Blocking issues`**, **`## Important issues`**, **`## Substrate gaps`**, **`## Vague language to tighten`**, **`## Recommended repairs (ranked)`** — render only when the section has at least one entry, per the chat-trailer template's §"Render-only-non-empty rule". A clean Approved verdict typically collapses all of these out.
+- **`## Locality concerns`**, **`## Future-fit concerns`**, **`## Enforcement concerns`** — render only when non-empty AND the verdict is not `Approved`. On `Approved`, the Architectural reflection synthesizes these three into one decision-shaped block; rendering both surfaces would duplicate the same content in chat.
+- **`## Behavior knowable outside implementation?`** — renders only when the answer is "no" or "partially". A "yes" answer is the modal Approved case and adds no information.
+- **`## What looked right`** — persisted-file only (calibration for next reviewer); never renders in chat.
+
+The persisted file keeps every section header as scaffolding for future review passes; the render-conditional rules above apply to chat only.
 
 ```md
 # Rewrite Validation Review — <topic>
 
 **Verdict:** <user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"validate-rewrite" — e.g., **Approved — ready to implement** / **Issues found — repair pass needed** / **Design needs revisiting** — the chosen direction is unsound>
 
-## Architectural reflection  *(Approved verdict only)*
+## Architectural reflection
 
 <one paragraph naming the architecture's overall shape after the lock — concrete to this design, not "looks good">
 
 - **Easier downstream:** <what future change becomes cheaper or more predictable because of this lock>
 - **Harder downstream:** <what becomes more expensive; what new context a future change requires>
-- **Load-bearing on memory:** <rules that depend on reviewer attention rather than tests/types/linters/CI>  *(omit when fully enforced)*
+- **Load-bearing on memory:** <rules that depend on reviewer attention rather than tests/types/linters/CI>
 
 ## Executive judgment
+
 <one paragraph>
 
 ## Delta at a glance
-<verbatim quote of the ledger's `## Delta at a glance` preamble per the consumer rendering rules in `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Delta at a glance" (which is the canonical home of the category list, authoring rules, and consumer rendering rules including missing-preamble and divergence handling). This section appears across all three verdicts (Approved / Issues Found / Design Incoherent), not just Approved — Issues Found and Design Incoherent readers also need decision-time context for whether to repair the rewrite or revisit `brainstorm-design`.>
 
-<!-- Render only non-empty review sections per the chat-trailer template's §"Render-only-non-empty rule". On a clean Approved verdict, most of the sections below collapse out of chat entirely; the persisted file keeps them as scaffolding for future passes. -->
+<verbatim quote of the ledger's `## Delta at a glance` preamble>
 
-## Blocking issues  *(rendered iff the review has Blocker/High findings)*
+## Blocking issues
+
 ### B1. <title>
 <canonical six-field finding shape per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Blocking issues" and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions": Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact to add or update>
 
-## Important issues  *(rendered iff non-empty)*
+## Important issues
+
 ...
 
-## Substrate gaps  *(rendered iff non-empty)*
+## Substrate gaps
+
 ...
 
-## Locality concerns  *(rendered iff non-empty — already synthesized into Architectural reflection on Approved)*
+## Locality concerns
+
 ...
 
-## Future-fit concerns  *(rendered iff non-empty — already synthesized into Architectural reflection on Approved)*
+## Future-fit concerns
+
 ...
 
-## Enforcement concerns  *(rendered iff non-empty — already synthesized into Architectural reflection on Approved)*
+## Enforcement concerns
+
 ...
 
-## Behavior knowable outside implementation?  *(rendered iff a "no" or "partially" answer)*
+## Behavior knowable outside implementation?
+
 <one paragraph: with the surfaces that fall short>
 
-## Vague language to tighten  *(rendered iff non-empty)*
+## Vague language to tighten
+
 - <file>:<line> — "<phrase>"
 
-## Recommended repairs (ranked)  *(rendered iff non-empty)*
-1. ...
+## Recommended repairs (ranked)
 
-## What looked right  *(persisted-file only — calibration for next reviewer; not chat)*
-- ...
+1. ...
 
 ### Next
 
@@ -213,9 +230,9 @@ The skill's chat output (the agent's report, surfaced) follows the centralized c
 
 **Disposition derivation.** The Disposition phrase above is the literal string in the `Canonical Disposition phrase` column of the rubric table at `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", selected by matching the row whose `(Verdict, Highest severity present)` pair fits the review. The rubric table is the single source of truth for the phrase string; this skill cites rather than restates. Substrate-noting is a user override of the Approved + Low default per the rubric §"Substrate-note as user override", not a separate Disposition phrase the agent renders.
 
-**Conditional implementation route.** Render the implementation decision matrix iff the verdict is `Approved` (which by the verdict-floor mapping in the rubric §"Verdict → severity-floor mapping" guarantees the disposition is merge-ready). Omit the matrix entirely for `Issues Found` and `Design Incoherent` — in those cases the Disposition phrase is the complete next step.
+**Conditional implementation route.** Render the implementation route slot iff the verdict is `Approved` (which by the verdict-floor mapping in the rubric §"Verdict → severity-floor mapping" guarantees the disposition is merge-ready). Omit the slot entirely for `Issues Found` and `Design Incoherent` — in those cases the Disposition phrase is the complete next step.
 
-**Bypass acknowledgment.** When the user picks the third row (`superpowers:writing-plans` directly), the skill renders the literal acknowledgment line `Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.` in chat *before* invoking `superpowers:writing-plans`. The acknowledgment lands in the conversation transcript, making the bypass legible. No file is written, no flag is required — the convention is the line itself, and skipping it is a substrate violation reviewed in `cohesive:review-codebase`.
+**Bypass acknowledgment.** When the user picks the **Hand off to Superpowers without delta-coverage discipline** option (one of the alternatives in the `(other options)` disclosure — invokes `superpowers:writing-plans` directly), the skill renders the literal acknowledgment line `Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.` in chat *before* invoking `superpowers:writing-plans`. The acknowledgment lands in the conversation transcript, making the bypass legible. No file is written, no flag is required — the convention is the line itself, and skipping it is a substrate violation reviewed in `cohesive:review-codebase`.
 
 ## Why fresh eyes matter here
 
@@ -250,7 +267,7 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 
 - **Always preceded by:** `rewrite-specs` (forward chain) or invoked by the user against an existing `design/<slug>` worktree.
 - **Internally dispatches:** `cohesive:rewrite-specs` (in repair mode) per pass of the Issues Found repair loop, until verdict converges or the loop terminates per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)".
-- **Followed by:** the disposition rule's recommendation per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings". For Approved with merge-ready disposition, the implementation decision matrix in §"Output format" picks among `cohesive:implement-cohesively` / `superpowers:writing-plans` / land-specs-first / schedule-for-later. For Design Incoherent, `brainstorm-design`. For max-passes stall, `brainstorm-design` or manual repair.
+- **Followed by:** the disposition rule's recommendation per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings". For Approved with merge-ready disposition, the default-recommend implementation route in §"Output format" leads with `cohesive:implement-cohesively` and surfaces the alternatives (`superpowers:writing-plans` / land-specs-first / schedule-for-later) behind the `(other options)` disclosure. For Design Incoherent, `brainstorm-design`. For max-passes stall, `brainstorm-design` or manual repair.
 
 ## What this skill is *not*
 

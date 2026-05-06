@@ -10,14 +10,17 @@
 
 **Render context:** This section is the lock→build handoff slot — the synthesis of the reviewer's locality, future-fit, and enforcement findings into a "now that the design is locked, how does the architecture feel?" view. It renders at the top of the chat trailer's body block on **Approved** verdicts (the gate where the user decides whether to proceed to Build). It is omitted on Issues Found and Design Incoherent verdicts — there the disposition is the architectural answer.
 
-The reflection is short (1 paragraph + 3 bullets) and answers three questions concretely:
+The reflection is short — one paragraph followed by three bullets — and is structured as:
 
-- **How it feels now:** one paragraph naming the architecture's overall shape after the lock. Specific to this design; not "looks good" or "well-structured."
-- **What this makes easier downstream:** what future change becomes cheaper or more predictable because of this lock. (Drawn from the reviewer's future-fit positives.)
-- **What this makes harder downstream:** what becomes more expensive, or what new context a future change in this area requires. (Drawn from the reviewer's locality concerns and future-fit negatives.)
-- **What's load-bearing on memory rather than structure:** which rules in the locked design depend on reviewer attention rather than tests/types/linters/CI. (Drawn from the reviewer's enforcement concerns.) Empty when enforcement is fully structural.
+- **One paragraph: How it feels now.** The architecture's overall shape after the lock. Specific to this design; not "looks good" or "well-structured."
 
-The render-only-non-empty rule applies per-bullet: drop a bullet entirely if there's nothing concrete to say. The persisted file keeps the section header + bullets as scaffolding for future review passes; chat renders only what's load-bearing this pass.
+Then three bullets, each answering one question:
+
+- **Easier downstream:** what future change becomes cheaper or more predictable because of this lock. (Drawn from the reviewer's future-fit positives.)
+- **Harder downstream:** what becomes more expensive, or what new context a future change in this area requires. (Drawn from the reviewer's locality concerns and future-fit negatives.)
+- **Load-bearing on memory:** which rules in the locked design depend on reviewer attention rather than tests/types/linters/CI. (Drawn from the reviewer's enforcement concerns.) Omit when enforcement is fully structural.
+
+The render-only-non-empty rule applies per-bullet: drop a bullet entirely if there's nothing concrete to say. The "How it feels now" paragraph always renders (a reflection without it has no thesis). The persisted file keeps the section header + paragraph + bullet scaffolding for future review passes; chat renders only what's load-bearing this pass.
 
 **Persisted file format:**
 

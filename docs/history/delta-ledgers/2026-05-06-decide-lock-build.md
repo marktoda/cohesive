@@ -143,3 +143,33 @@ None added or retired. The chain-rendering anti-pattern is named in `skills/cohe
 - **Verdict-vocabulary alignment with gate vocabulary.** Should `implement-cohesively`'s "Implementation complete" become "Build complete — code matches locked design"? Should `validate-rewrite`'s "Approved — ready to implement" become "Locked — ready to build"? Decision deferred; tracked above.
 - **using-cohesive body prose.** The orientation message (the user-facing surface) is already decision-shape; the body prose uses substrate-shape vocabulary deliberately per the audience seam. Whether to also gate-frame the body prose for contributors — making "substrate-first work" / "five triggers" more legible — is open.
 - **Future-fit pressure on the gate vocabulary.** "Decide → Lock → Build" parallels "brainstorm → plan → execute" but is not identical; if a future skill emerges that fits between Lock and Build (e.g., "validate the implementation plan before execution"), the gate name would need to be re-thought. The rewrite is committed to three gates as the v0.1 user-facing surface; future pressure may motivate a fourth.
+
+## Repair pass 2
+
+**Pass:** 2
+**Source review:** `docs/history/reviews/2026-05-06-decide-lock-build-rewrite-validation.md` (pass 1, Issues Found)
+**Closes:** B1, B2, I1, I2, I3
+**Classification:** Pure implementation (textual fixes against named findings; one design-layer file edit to close B1's stale claim).
+
+### Repairs applied
+
+- **B1 / B2 — Matrix/rows residue swept across `validate-rewrite/SKILL.md` and `skills.md`.** The Approved-branch implementation route is now described consistently as "default-recommend per the chat-trailer template's §'Default-recommend rule' (one default + alternatives behind a `(other options)` disclosure)" everywhere. Specific edits:
+  - `skills/validate-rewrite/SKILL.md` Hard constraint #3 — replaced "the user picks among the rows of the implementation decision matrix" with "the trailer leads with one default move (`cohesive:implement-cohesively`) and surfaces alternatives behind a `(other options)` disclosure per the chat-trailer template's §'Default-recommend rule'".
+  - `skills/validate-rewrite/SKILL.md` §"Output format" preamble — replaced "the `### Next` footer carries the **Disposition** phrase + (Approved-only) **Implementation route** matrix" with the same default + disclosure language; cited the chat-trailer template's §"Render-only-non-empty rule" alongside.
+  - `skills/validate-rewrite/SKILL.md` §"Conditional implementation route" — replaced "Render the implementation decision matrix iff the verdict is `Approved`" with "Render the implementation route slot iff the verdict is `Approved`"; "Omit the matrix entirely" → "Omit the slot entirely".
+  - `skills/validate-rewrite/SKILL.md` §"Bypass acknowledgment" — replaced "When the user picks the third row (`superpowers:writing-plans` directly)" with "When the user picks the **Hand off to Superpowers without delta-coverage discipline** option (one of the alternatives in the `(other options)` disclosure — invokes `superpowers:writing-plans` directly)" — naming the option by its decision-shape phrase rather than its render position.
+  - `skills/validate-rewrite/SKILL.md` §"Composition" Followed-by row — replaced "the implementation decision matrix in §'Output format' picks among …" with "the default-recommend implementation route in §'Output format' leads with `cohesive:implement-cohesively` and surfaces the alternatives … behind the `(other options)` disclosure".
+  - `docs/substrate/architecture/skills.md` `### validate-rewrite` Owns — replaced "Rendering the per-verdict decision matrix on terminal verdicts" with "Rendering the per-verdict next step on terminal verdicts (Approved → default-recommend implementation route per the chat-trailer template's §'Default-recommend rule'; Design Incoherent → re-brainstorm; max-passes stall → user direction)". Closes the lens-13 design-layer drift.
+
+- **I1 — Architectural reflection prose vs format mismatch in `cohesion-review.md`.** Replaced the "answers three questions concretely:" + four-bullet shape with an aligned shape: one paragraph (How it feels now) + three bullets (Easier / Harder / Load-bearing). Prose now matches the persisted-file format block at lines 22-32.
+
+- **I2 — Phase 3 review persistence shape in `chat-trailer.md`.** Updated the Variants row for `implement-cohesively`: replaced "long-form review detail lives in the persisted `## Final substrate review` section, not chat" with "The Phase-3 final-review pointer renders inline beside the spec-coverage line as a path to the standalone persisted review file (`docs/history/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md`); long-form review detail lives in that file, not chat". Aligned with the standalone-file shape in `implement-cohesively/SKILL.md`.
+
+- **I3 — Render-conditional parentheticals extracted from `validate-rewrite/SKILL.md` Output format render template.** Added a new prose subsection §"Render-conditional rules for the body block" preceding the render template; this subsection enumerates the per-section render conditions (Architectural reflection: Approved-only; Locality/Future-fit/Enforcement concerns: only when non-empty AND not Approved; What looked right: persisted-file only; etc.). Stripped all `*(rendered iff non-empty …)*` parentheticals and the HTML comment from inside the ```md fence; the render template now contains only the literal output the model is meant to reproduce. The `## What looked right` section is omitted from the chat render template entirely (persisted-file only per the new prose rules).
+
+### Repair-pass file changes
+
+- `skills/validate-rewrite/SKILL.md` — five edits closing B1 (one), B2 (four), I3 (one).
+- `docs/substrate/architecture/skills.md` — one edit closing B1.
+- `references/templates/cohesion-review.md` — one edit closing I1.
+- `references/templates/chat-trailer.md` — one edit closing I2.
