@@ -271,9 +271,4 @@ The distinction matters for skill authors: a future Cohesive skill that wants to
 
 ## Process when adding a new skill
 
-1. Read the closest existing skill in `skills/` — choose the one whose role most resembles yours.
-2. Copy its top-level structure; do not invent new section names.
-3. Update `/ARCHITECTURE.md` only if the new skill changes the broad architectural shape (rare for an additional subskill).
-4. Update `README.md` §"What's in the box" to reflect the new on-disk reality.
-5. Run `bash scripts/validate_plugin.sh`. The validator must pass.
-6. Run `cohesive:review-diff` on your branch.
+The canonical end-to-end sequence for adding a new skill is `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` §"Adding a new skill" — five steps in order: design layer (skills.md → handoffs.md → router.md), implementation layer (the new SKILL.md), enforcement layer (validator arrays + skill-section-presence row + run validator). This convention doc (`skill-shape.md`) governs **step 4** of that sequence — the canonical SKILL.md body shape: required and optional sections, frontmatter, output format conventions, dispatch discipline, clarifying-question discipline, router conventions, and the anti-patterns table. When authoring a new SKILL.md body, follow this doc's section order and conventions; for the design-layer and enforcement-layer steps that surround SKILL.md authoring, follow `skills.md` §"Adding a new skill" — these two surfaces are deliberately complementary, not duplicated, and `skills.md` is canonical for the sequence.

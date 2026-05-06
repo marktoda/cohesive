@@ -55,7 +55,11 @@ Each section follows the same shape: Purpose, Owns, Does not own, Inputs, Output
 
 ### Bootstrap status
 
-The per-skill design layer was authored retroactively against existing SKILL.md bodies during the 2026-05-05 architecture refactor. Every section in this doc started life as a *claim* about what the SKILL.md said, not a *spec* the SKILL.md was authored against. Sections earn **validated** status when a `cohesive:rewrite-specs` pass on that skill's purpose, ownership, or seams has run *with the design layer as prior substrate* — confirming that the skills.md claim and the SKILL.md body agree under fresh-eyes review.
+Per-skill sections in this doc carry one of three statuses, named explicitly in the table below:
+
+- **`inherited`** — the section was authored *retroactively* against a pre-existing SKILL.md (most v0.1 skills' sections were authored this way during the 2026-05-05 architecture refactor; the design-layer claim was extracted from the SKILL.md body, not used to author it).
+- **`newly-authored`** — the section was authored *forward*, alongside (or before) the SKILL.md body it governs. The design layer is genuinely the prior substrate, not a retroactive claim — but no `validate-rewrite` pass has yet confirmed parity under fresh-eyes review.
+- **`validated`** — a `cohesive:rewrite-specs` pass on that skill's purpose, ownership, or seams has run *with the design layer as prior substrate* and `validate-rewrite` confirmed parity under fresh-eyes review (specifically `spec-cohesion-reviewer` lens 13).
 
 | Section | Status | Notes |
 |---|---|---|
@@ -68,9 +72,9 @@ The per-skill design layer was authored retroactively against existing SKILL.md 
 | `review-diff` | inherited | not yet validated against a forward rewrite |
 | `audit-substrate` | inherited | not yet validated against a forward rewrite |
 | `cohesively` | inherited | not yet validated against a forward rewrite |
-| `using-cohesive` | inherited | newly authored 2026-05-05 in the skill-pack-flow-tightening rewrite; not yet validated against a forward rewrite |
+| `using-cohesive` | newly-authored | authored 2026-05-05 in the skill-pack-flow-tightening rewrite alongside its SKILL.md body; the design layer is genuinely prior substrate, but parity is not yet validated against a forward rewrite |
 
-Inherited sections may surface lens-2 (design-implementation agreement) and lens-14 (handoff contract consistency) drift on the first forward rewrite that touches them — this is the predicted bootstrap drift, not a defect of the inherited section. `spec-cohesion-reviewer` reads this table during dispatch (the agent's input set includes this doc) and applies extra skepticism to inherited-status sections. When a section earns validated status, update the row in the same delta ledger that triggered the validation.
+Both `inherited` and `newly-authored` sections may surface lens-2 (design-implementation agreement) and lens-14 (handoff contract consistency) drift on the first `validate-rewrite` pass that touches them — for `inherited` sections the drift is the predicted retroactive-claim mismatch, for `newly-authored` sections it is the predicted forward-rewrite mismatch. `spec-cohesion-reviewer` reads this table during dispatch (the agent's input set includes this doc) and applies extra skepticism to both statuses. When a section earns `validated` status, update the row in the same delta ledger that triggered the validation.
 
 ### discover-substrate
 
@@ -285,7 +289,7 @@ Inherited sections may surface lens-2 (design-implementation agreement) and lens
 
 When the brainstorm pressure surfaces a new skill, the change touches the design layer first, then the implementation layer, then the validator. Five steps in order:
 
-1. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md`** (this doc) — add the per-skill section, add a row in the at-a-glance table, add the "why this skill, not a mode of X" entry under §"Why these skills, not others", add a row to the §"Bootstrap status" table with status `inherited` (newly authored sections are not yet validated against a forward rewrite).
+1. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md`** (this doc) — add the per-skill section, add a row in the at-a-glance table, add the "why this skill, not a mode of X" entry under §"Why these skills, not others", add a row to the §"Bootstrap status" table with status `newly-authored` (the section is being authored forward alongside the SKILL.md body, not retroactively against an existing one — `inherited` is reserved for retroactive sections; see §"Bootstrap status" prose for the distinction).
 2. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md`** — add the inbound and outbound handoff contracts. For non-chain skills (router, session-start orientation), add a brief contract section naming the transition shape (per §"The five transition shapes") even when no chain edge is involved.
 3. **`${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`** — if the skill is router-dispatchable, add a cell with stable ID and update the dispatch-prompt-contract grid. If the skill is upstream of the router (session-start orientation) or otherwise outside route selection, no router-matrix change is needed.
 4. **`${CLAUDE_PLUGIN_ROOT}/skills/<name>/SKILL.md`** — author the skill body per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md`. The named invariant `SKILL_DESIGN_DOC_SECTION` (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/SKILL_DESIGN_DOC_SECTION.md`) enforces that every directory under `skills/` has a `### <name>` section in this doc; the validator's mechanical grep catches a missing section.
