@@ -13,7 +13,7 @@
 #     cohesion-narrowing language)
 #   - Canonical prereq-detection question in subskills with a discover-substrate prereq
 #   - Fresh-eyes preamble bullet verbatim across reviewer agents
-#   - "Recommended next Cohesive skill" footer in every persisting skill body
+#   - "### Next" footer in every persisting skill body (renamed from "Recommended next Cohesive skill" in audience-seam rewrite)
 #   - Component dirs at plugin root, not nested under .claude-plugin/
 #   - Referenced files exist (warn-level)
 #   - Scripts are executable (warn-level)
@@ -276,7 +276,7 @@ if [ -d agents ]; then
   [ "$errors" -eq "$errors_before" ] && ok "all $agent_count reviewer agents carry the fresh-eyes preamble bullet verbatim"
 fi
 
-# 12. "Recommended next Cohesive skill" footer in every persisting skill body.
+# 12. "### Next" footer in every persisting skill body (renamed from "Recommended next Cohesive skill" in the audience-seam rewrite per docs/substrate/conventions/audience-separation.md).
 # Per docs/substrate/conventions/skill-shape.md §"Recommended-next-skill footer".
 # The router (cohesively) is exempt: its output is a one-sentence announcement.
 persisting_skills=(
@@ -293,11 +293,11 @@ errors_before=$errors
 for s in "${persisting_skills[@]}"; do
   skill_md="skills/$s/SKILL.md"
   [ -f "$skill_md" ] || continue
-  if ! grep -qE '^### Recommended next Cohesive skill' "$skill_md"; then
-    fail "skills/$s/SKILL.md missing '### Recommended next Cohesive skill' footer (per docs/substrate/conventions/skill-shape.md §Recommended-next-skill footer)"
+  if ! grep -qE '^### Next$' "$skill_md"; then
+    fail "skills/$s/SKILL.md missing '### Next' footer (per docs/substrate/conventions/skill-shape.md §Next-step footer; renamed from 'Recommended next Cohesive skill' in the audience-seam rewrite — see docs/substrate/conventions/audience-separation.md)"
   fi
 done
-[ "$errors" -eq "$errors_before" ] && ok "all ${#persisting_skills[@]} persisting skills have the 'Recommended next Cohesive skill' footer"
+[ "$errors" -eq "$errors_before" ] && ok "all ${#persisting_skills[@]} persisting skills have the '### Next' footer"
 
 # 13a. VERDICT_BEFORE_EVIDENCE: verdict-led skills' Output format block opens with **Verdict:**
 # within the first 3 non-blank lines after the outermost # title in a code block.

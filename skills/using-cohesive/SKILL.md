@@ -45,7 +45,7 @@ The seam between Cohesive and Superpowers is documented in `${CLAUDE_PLUGIN_ROOT
 When Cohesive applies, render the orientation in this canonical form:
 
 ```
-This is substrate-shaped work. I'll route through `cohesive:cohesively` to pick the right Cohesive workflow.
+I'll route this through `cohesive:cohesively` to pick the right approach.
 ```
 
 Then invoke `cohesive:cohesively` (or recommend the user do so, depending on harness conventions). The router announces the route and dispatches the first subskill of that route. Phase transitions inside Cohesive are user-driven; the user can stop the chain at any subskill boundary.
@@ -65,7 +65,7 @@ Then invoke `cohesive:cohesively` (or recommend the user do so, depending on har
 A 1–2 sentence orientation message naming `cohesive:cohesively` as the entry point, rendered when the trigger fires and the user's request is substrate-shaped per §"When Cohesive applies". No persisted artifact, no verdict, no per-route dispatch.
 
 ```
-This is substrate-shaped work. I'll route through `cohesive:cohesively` to pick the right Cohesive workflow.
+I'll route this through `cohesive:cohesively` to pick the right approach.
 ```
 
 When the request is implementation-discipline-shaped or otherwise outside Cohesive's framing, the skill produces no output.

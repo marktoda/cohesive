@@ -29,6 +29,8 @@ Forward chain: four edges. The Issues Found verdict from `validate-rewrite` is *
 
 Each handoff specifies: artifact crossing the seam, persistence shape, verdict gate (if any), what the downstream must not re-derive, and the failure mode if the contract drifts.
 
+**Verdict labels are agent-facing.** Edge entries below name verdicts using their **internal labels** (`Approved`, `Issues Found`, `Substrate gaps`, `Pass`, `Cohesive but under-enforced`, etc.) — these are the dispatch keys the routing logic and the cohesion rubric operate on. The user-facing verdict labels rendered in chat are translated from these internal labels per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md`; the translation happens once, in the centralized chat-trailer template at `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md`. Handoff contracts here, the cohesion rubric in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md`, and `spec-cohesion-reviewer`'s lens-14 checks all keep working with the internal labels — they are the substrate-shape vocabulary, the agent's tool. The audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md` documents the boundary.
+
 ### using-cohesive → cohesively (session-start orientation)
 
 **Transition shape.** Session-start orientation per §"The five transition shapes" #5. Not a chain edge, not a router dispatch (the router is the *target*, not the source), not an off-chain re-entry. `using-cohesive` is upstream of every other Cohesive skill — it advises Claude when to enter the methodology at all.
@@ -117,7 +119,7 @@ Diagnostic skills produce findings that re-enter the chain at the appropriate sk
 
 ### review-codebase → brainstorm-design
 
-When `review-codebase` returns Drifting or Incoherent with findings naming design-shape issues (wrong seams, missing concepts, structural drift from documented behavior), the appropriate next skill is `brainstorm-design` to propose a corrective direction. The review's `### Recommended next Cohesive skill` footer renders this recommendation per verdict.
+When `review-codebase` returns Drifting or Incoherent with findings naming design-shape issues (wrong seams, missing concepts, structural drift from documented behavior), the appropriate next skill is `brainstorm-design` to propose a corrective direction. The review's `### Next` footer renders this recommendation per verdict.
 
 ### review-codebase → rewrite-specs
 

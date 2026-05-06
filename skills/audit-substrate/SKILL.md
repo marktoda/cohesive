@@ -123,8 +123,8 @@ Render each fix in show-shape per `${CLAUDE_PLUGIN_ROOT}/references/output-voice
 
 (same fields)
 
-### Recommended next Cohesive skill
-`cohesive:rewrite-specs` — turn the highest-leverage missing-memory entries into actual artifacts. **Files to add:** <enumerate the artifact paths from the Highest-leverage fixes above>. Slug: `<derived-from-audit-scope>`.
+### Next
+Turn the highest-leverage missing-memory entries into actual artifacts. *(`cohesive:rewrite-specs`.)* **Files to add:** <enumerate the artifact paths from the Highest-leverage fixes above>. Slug: `<derived-from-audit-scope>`.
 ```
 
 ### 4. Persist
@@ -135,12 +135,18 @@ If the user passes `--no-write`, render in chat only.
 
 ## Output format
 
-The skill renders a chat trailer (canonical verdict-led shape below) and persists the full audit report to `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md` per step 3. The chat render is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2 and its sub-rules 2a / 2b / 2c). The persisted file is canonical and carries the full audit body and the cross-iteration history if this is a re-audit; the chat trailer renders this iteration's top fixes shown afresh, plus a payload-bearing handoff.
+The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` and persists the full audit report to `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md` per step 3. The chat render is the decision-rendering of the persisted body per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c) and the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`. The persisted file is canonical and carries the full audit body, the substrate-shape vocabulary (specs, named invariants, behavior matrices, gotchas, semantic linters proposed for addition), and the cross-iteration history if this is a re-audit; the chat trailer renders this iteration's top fixes in user-facing decision-shape.
+
+**Verdict translation.** The internal verdict (`Substrate sound` / `Substrate gaps` / `Substrate sparse`) renders in the chat trailer as the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"audit-substrate".
+
+**Body block specification.** Per the §"Variants" `audit-substrate` row of the centralized template: a `## Top fixes` section with three show-shape fixes, each: `### N. <artifact-to-add title>` + `**Evidence the gap exists:**` `<path>:<line>` + excerpt + `**What the artifact would say:**` <2-3 sentence sketch> + `**Where it lives:**` `<path>`. The "Headline" slot in the chat-trailer shell is filled with one or two sentences naming the highest-leverage missing memory and why the codebase is at risk because of it.
+
+**Sample chat-trailer render** (canonical shape; the centralized template is the single source of truth):
 
 ```md
 # Substrate Audit — <scope>
 
-**Verdict:** Substrate sound / Substrate gaps / Substrate sparse
+**Verdict:** <user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"audit-substrate">
 
 **Headline:** <one or two sentences — highest-leverage missing memory and why the codebase is at risk because of it>
 
@@ -148,41 +154,41 @@ The skill renders a chat trailer (canonical verdict-led shape below) and persist
 
 ### 1. <Artifact name to add — e.g., "Named invariant: USER_AUTH_SESSION_TOKEN_TTL">
 
-**Evidence the gap exists:** `<path>:<line>` — <quoted excerpt of the implicit rule, the unmatricized branch, the comment-as-rule, or the stale doc; or a named pattern observation if no single line carries it>
+**Evidence the gap exists:** `<path>:<line>` — <quoted excerpt or named pattern>
 
-**What the artifact would say:** <2-3 sentences sketching the artifact's core claim — concrete enough that a reader could begin drafting it. For an invariant: the rule and the proxy. For a matrix: the columns and ~3 sample rows. For a gotcha: symptom and correct pattern.>
+**What the artifact would say:** <2-3 sentences sketching the artifact's core claim>
 
-**Where it lives:** `docs/substrate/<category>/<filename>.md` — <category: invariants / matrices / gotchas / specs / tests / linters>
+**Where it lives:** `<path>`
 
 ### 2. <Artifact name to add>
-
-**Evidence the gap exists:** `<path>:<line>` — <excerpt>
-
-**What the artifact would say:** <sketch>
-
-**Where it lives:** `<path>`
+...
 
 ### 3. <Artifact name to add>
+...
 
-**Evidence the gap exists:** `<path>:<line>` — <excerpt>
-
-**What the artifact would say:** <sketch>
-
-**Where it lives:** `<path>`
-
-## Persisted report
+### Persisted record
 `docs/history/reviews/YYYY-MM-DD-<slug>-audit-substrate.md`
 
-### Recommended next Cohesive skill
+### Next
 
-`cohesive:rewrite-specs` — turn the highest-leverage missing-memory entries into actual artifacts. **Files to add:** <enumerate the artifact paths from the Top fixes above; rewrite-specs creates them as new artifacts under `docs/substrate/<category>/`>. Slug: `<derived-from-audit-scope>`.
+<decision-shaped sentence per the verdict>. *(`cohesive:rewrite-specs`.)* **Files to add:** <enumerate the artifact paths>. Slug: `<derived-from-audit-scope>`.
 ```
 
-The render template above is the canonical chat trailer. Three rules apply:
+**`### Next` block.** Audit-substrate has a single primary recommendation regardless of verdict (the audit identifies missing memory; turning the entries into artifacts is what closes them):
 
-1. **Top fixes render show-shape** (rule 2b). Each fix carries a title (the artifact to add), Evidence the gap exists (file:line + excerpt or named pattern), What the artifact would say (a 2-3 sentence sketch concrete enough to seed drafting), and Where it lives (the path the rewrite would create). Bare "substrate artifact to add; one-clause justification" is a render failure tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Synthesizing-skill chat render shape."
+- **Internal `Substrate sound`:** No artifacts needed; substrate is well-shaped. *(No follow-up skill required.)*
+- **Internal `Substrate gaps`:** Turn the highest-leverage missing-memory entries into actual artifacts. *(`cohesive:rewrite-specs`.)* **Files to add:** <enumerate the artifact paths from the Top fixes above; rewrite-specs creates them as new artifacts under `docs/substrate/<category>/` or the repo's native equivalent>. Slug: `<derived-from-audit-scope>`.
+- **Internal `Substrate sparse`:** Author the foundational docs the audit named as missing. *(`cohesive:rewrite-specs`.)* **Files to add:** <foundational doc paths — usually CLAUDE.md, ARCHITECTURE.md, or the substrate skeleton>. Slug: `<derived-from-audit-scope>`.
+
+The decision-shaped sentence leads each entry; the skill citation appears parenthetically in inline code; the payload follows.
+
+Three rules apply:
+
+1. **Top fixes render show-shape** (rule 2b). Each fix carries a title (the artifact to add), Evidence the gap exists (file:line + excerpt or named pattern), What the artifact would say (a 2-3 sentence sketch concrete enough to seed drafting), and Where it lives (the path the rewrite would create). Bare "artifact to add; one-clause justification" is a render failure tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Synthesizing-skill chat render shape."
 2. **Bookkeeping is displaced to the persisted file** (rule 2c). If this is a re-audit, the persisted file carries a `## History` section with the prior audit's recommendations, which are now real artifacts vs. still-missing, and any deferral criteria. Chat trailer is per-invocation.
-3. **Recommended next Cohesive skill carries payload** (rule 5a). The clause names the artifact paths to create, not just "rewrite-specs to turn audit entries into artifacts."
+3. **`### Next` carries payload** (rule 5a + the audience seam). The clause names the artifact paths to create with the decision-shaped sentence leading; methodology framing ("Recommended next Cohesive skill") does not appear in chat per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+
+The "Top fixes" body block uses substrate-shape vocabulary in the *content* of each fix (artifact name, what-it-would-say sketch, where-it-lives path). This is the audience seam's recognized exception: artifact-addition skills name the artifacts they want added, and the artifacts themselves are substrate-shape — that's what an audit produces. The methodology framing around them stays decision-shape (the user-facing verdict, the headline, the `### Next`).
 
 ## Acceptance criteria
 
@@ -191,7 +197,7 @@ The render template above is the canonical chat trailer. Three rules apply:
 - Every finding maps to a substrate artifact to add or update.
 - Findings are ranked by leverage (what would prevent the most predictable future bug), not alphabetical.
 - Output is persisted to `docs/history/reviews/` unless `--no-write` is passed.
-- Output ends with a `### Recommended next Cohesive skill` footer.
+- Output ends with a `### Next` footer rendered per the centralized chat-trailer template.
 
 ## Red flags
 
@@ -201,7 +207,8 @@ The render template above is the canonical chat trailer. Three rules apply:
 - Skipping `discover-substrate` because "I can read the directory listing myself." The script's bucketing is the audit's baseline.
 - Dispatching reviewer agents. This skill does not dispatch.
 - Top fixes render as `<artifact to add; one-clause justification>` with no Evidence, no artifact-content sketch, no path. Violates rule 2b — see [`docs/substrate/gotchas/naming-instead-of-showing.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md).
-- Recommended next Cohesive skill names `rewrite-specs` without enumerating the artifact paths. Violates rule 5a.
+- Chat trailer's `### Next` names `rewrite-specs` without enumerating the artifact paths. Violates rule 5a.
+- Chat trailer renders methodology framing ("Recommended next Cohesive skill") instead of `### Next` with the skill citation parenthetical. Violates the audience seam — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
 
 ## Composition
 

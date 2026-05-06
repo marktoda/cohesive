@@ -6,10 +6,11 @@
 
 ## Purpose
 
-The five reviewer agents under `agents/` each produce findings, and the synthesizing skills (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`, `discover-substrate`) render those findings to chat. Two shape contracts apply, in two layers:
+The five reviewer agents under `agents/` each produce findings, and the synthesizing skills (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`, `discover-substrate`) render those findings to chat. Three shape contracts apply, in three layers:
 
 - **Per-agent finding shape** — six fields per finding (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact), defined in `docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions". The §"Per-agent finding shape" section below tracks compliance.
 - **Per-synthesizing-skill chat render shape** — substance-not-bookkeeping rules per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rules 2b, 2c, and 5a (findings shown not named; bookkeeping displaced to the persisted file; handoff carries payload). The §"Synthesizing-skill chat render shape" section below tracks compliance.
+- **Audience seam compliance** — every verdict-led skill cites `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` (the centralized chat shell) and specifies only its body block per the template's §"Variants". Substrate vocabulary stays in the persisted-file template; chat carries decision-shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`. The §"Audience seam compliance" section below tracks per-skill citation and body-block specification.
 
 Both layers must hold for the user-facing chat to produce critique rather than an audit log of process. Drift in either layer reproduces the failure mode in [`docs/substrate/gotchas/naming-instead-of-showing.md`](../gotchas/naming-instead-of-showing.md). A cell of `✓` means compliant; `✗` means a tracked regression; `~` means renamed or partial (cell text names the deviation).
 
@@ -47,7 +48,7 @@ Three columns, applied to each Cohesive skill that renders findings or fixes to 
 
 - **Shows-not-names** (rule 2b) — every finding rendered in the skill's Output format chat trailer carries title + concrete evidence (file:line, quoted excerpt, or named artifact) + the specific change that closes it. Bare title with one-clause "why it matters" fails this column.
 - **Bookkeeping-displaced** (rule 2c) — the skill's Output format chat trailer carries no disposition matrix, no cross-iteration finding-ID continuity, no verdict-ratchet language. Bookkeeping content lives in the persisted file's history section.
-- **Handoff-carries-payload** (rule 5a) — the skill's Output format chat trailer's `### Recommended next Cohesive skill` clause names the concrete inputs the next skill operates on (files for rewrite-specs, scope for review-codebase / review-diff / audit-substrate, design question for brainstorm-design). Bare skill name + reason without payload fails this column.
+- **Handoff-carries-payload** (rule 5a) — the skill's Output format chat trailer's `### Next` clause names the concrete inputs the next skill operates on (files for rewrite-specs, scope for review-codebase / review-diff / audit-substrate, design question for brainstorm-design). Bare skill name + reason without payload fails this column. (The legacy `### Recommended next Cohesive skill` heading was renamed to `### Next` in the 2026-05-06 audience-seam rewrite per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`; `validate_plugin.sh` Check 12 greps the new heading.)
 
 | Skill | Shows-not-names (2b) | Bookkeeping-displaced (2c) | Handoff-carries-payload (5a) |
 |---|:-:|:-:|:-:|
@@ -75,6 +76,26 @@ The variation is intentional: each skill's chat output kind determines its field
 ### Why no validator grep here
 
 A grep for the failure modes is hard. "Output format template renders Top findings as title + one-clause why" is testable against the SKILL.md file directly (count Evidence references inside the Output format code block). But "the model produces a chat finding without an Evidence line" is testable only against captured chat — not against any file in the repo. The SKILL.md grep would catch render-template drift; it would not catch the model-to-render gap. As of v0.1, no captured-render lint ships; reviewer-output-shape matrix review is the enforcement, and `cohesive:review-codebase` of the skill pack itself is the periodic check. Promotion to grep enforcement is gated on a captured chat regression and a worked transcript, mirroring the criteria in `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Why the voice imperative is convention-with-grep, not a named invariant."
+
+## Audience seam compliance
+
+After the 2026-05-06 audience-seam rewrite, every verdict-led skill cites `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` and specifies only its body block per the template's §"Variants" — instead of duplicating the chat-render shell. The pre-rewrite state was six SKILL.md files re-implementing the same shell; the post-rewrite state is one centralized template. Substrate-vocabulary discipline (no `**Required substrate before implementation:**`, no `**Substrate artifact to add or update:**`, no `Cohesive workflow` rendered in chat) is enforced by the centralized template's content per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+
+Cell legend: `✓` — skill body cites the centralized template by reference and specifies only its body-block variant; `✗` — tracked regression (skill body duplicates the chat-render shell or carries substrate-vocabulary tokens in its render template).
+
+| Skill | Cites chat-trailer.md | Body-block per Variants table | Verdict translation cited | `### Next` heading (not legacy `### Recommended next Cohesive skill`) |
+|---|:-:|:-:|:-:|:-:|
+| review-codebase | ✓ | ✓ (Top findings — show-shape) | ✓ | ✓ |
+| review-diff | ✓ | ✓ (Findings table with Doc-to-update column) | ✓ | ✓ |
+| validate-rewrite | ✓ | ✓ (full cohesion-review body + Approved-only matrix) | ✓ | ✓ |
+| audit-substrate | ✓ | ✓ (Top fixes — title + Evidence + Sketch + Path) | ✓ | ✓ |
+| brainstorm-design | ✓ | ✓ (Direction block — no verdict slot) | n/a (not verdict-led) | ✓ |
+| implement-cohesively | ✓ | ✓ (Phases table + Delta coverage + Final review + Branch state) | ✓ | ✓ |
+| discover-substrate | n/a (not a chat-trailer skill — produces a discovery report) | n/a | n/a | ✓ (`### Next` heading present per legacy substrate-discovery shape) |
+
+Pre-rewrite cells would have been ✗ across the board. The rewrite landed in `docs/history/delta-ledgers/2026-05-06-audience-seam.md`; the worked transcript at `${CLAUDE_PLUGIN_ROOT}/docs/history/transcripts/2026-05-06-audience-seam.md` shows substrate-shape vs decision-shape rendering side-by-side.
+
+The eventual validator Check 13k (deferred) will grep the centralized chat-trailer template literal for forbidden internal-vocabulary tokens. Until then: reviewer-judged compliance per the citation column above. The §"Per-skill show-shape variations accepted" clause earlier in this doc describes the body-block variants that are acceptable per skill; the audience seam adds the constraint that the *shell* is shared.
 
 ## Rules
 

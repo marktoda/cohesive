@@ -101,51 +101,21 @@ For skills whose output names a verdict (`review-codebase`, `review-diff`, `vali
 
 Skills without a controlled-vocabulary verdict (`cohesively`, `discover-substrate`, `brainstorm-design`, `rewrite-specs`) are out of scope for this rule but still carry the voice imperative in their body (the router is exempt per rule 1).
 
-### 3. The chat render is substance, not bookkeeping
+### 3. The chat render is substance, not bookkeeping; substrate vocabulary stays in the persisted file
 
-Skills that write a persisted artifact (architecture review, brainstorm, audit report, change cohesion review) render only the substantive trailer in chat: verdict, thesis, top findings *shown* (not named), next step *with payload*. The persisted file is canonical and carries the full body, the cross-iteration audit trail (disposition history, finding-ID continuity across passes, verdict trajectory), and the appendices. The chat render does not duplicate the persisted body — it shows this iteration's substance and points at the persisted file for everything else.
+Skills that write a persisted artifact (architecture review, brainstorm, audit report, change cohesion review) render only the decision-shaped trailer in chat: a user-facing verdict (translated from the internal verdict via [`references/verdict-vocabulary.md`](../../../references/verdict-vocabulary.md)), thesis, top findings *shown* (not named), next step *with payload*. The persisted file is canonical and carries the full body, the cross-iteration audit trail (disposition history, finding-ID continuity across passes, verdict trajectory), the substrate-shape vocabulary (specs, named invariants, behavior matrices, gotchas, semantic linters), and the appendices. The chat render does not duplicate the persisted body — it shows this iteration's substance in user-facing form and points at the persisted file for everything else. The audience seam between the two surfaces is canonicalized in [`audience-separation.md`](audience-separation.md).
 
-The full rule lives in [`output-voice.md`](../../../references/output-voice.md) §"The five rules" rule 2 with three sub-rules: 2a faithful subset (every chat claim appears in the persisted file; chat introduces no facts absent from it); 2b findings shown not named (each chat finding carries title + Evidence + Change); 2c bookkeeping displaced (cross-iteration finding-ID references, disposition matrices, verdict-ratchet language belong in the persisted file's `## History` section). Rule 5a extends the next-step requirement: the recommended-next-skill clause carries payload (files, scope, or design question), not just a name + reason.
+The full rule lives in [`output-voice.md`](../../../references/output-voice.md) §"The five rules" rule 2 with three sub-rules: 2a decision-render of the persisted body (every chat claim appears in the persisted file, possibly translated from substrate-shape to decision-shape; chat introduces no facts absent from it); 2b findings shown not named (each chat finding carries title + Evidence + Change); 2c bookkeeping displaced (cross-iteration finding-ID references, disposition matrices, verdict-ratchet language belong in the persisted file's `## History` section). Rule 5a extends the next-step requirement: the `### Next` clause carries payload (files, scope, or design question), not just a name + reason.
 
-The canonical chat-render shape for verdict-led, persisted-output skills:
+#### The canonical chat-render shape lives in the centralized template
 
-```md
-# <Skill output title>
+The canonical chat-trailer shape for every verdict-led skill (`review-codebase`, `review-diff`, `validate-rewrite`, `audit-substrate`, `brainstorm-design`, `implement-cohesively`) lives once at [`references/templates/chat-trailer.md`](../../../references/templates/chat-trailer.md) — the centralized template containing the shell (Verdict slot, Thesis slot, body block, `### Persisted record` pointer, `### Next`) and a §"Variants" table specifying each skill's per-skill body block. SKILL.md `## Output format` blocks **cite** this template by reference and specify only the per-skill body block — they do not duplicate the shell.
 
-**Verdict:** <value from vocabulary>
+This collapses the duplicated chat-render templates from six SKILL.md files into one centralized artifact. Substrate-vocabulary discipline (no `**Required substrate:**`, no `**Substrate artifact to add or update:**`, no `Cohesive workflow` or `Recommended next Cohesive skill` rendered in chat) is enforced by the centralized template's content, not by a rule the model must remember at every render. Rule-far-from-template style-guide-rot (the failure mode the voice-citation imperative had to work around) is structurally avoided because the chat-trailer template *is* the point of generation. Methodology naming (the words `Cohesive`, `substrate`, `route`, `workflow` as user-facing labels) is a content-removal target — those tokens stay in skill body prose, AGENTS.md, README, and persisted-file templates per the audience seam, but do not appear in chat-render templates.
 
-**Thesis:** <one or two sentences — headline finding + highest-leverage move>
+The render opens with the outermost `#` title, then `**Verdict:**` on the next non-blank line — matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md) and the substrate-vs-decision-shape transcript at [`docs/history/transcripts/2026-05-06-audience-seam.md`](../../history/transcripts/2026-05-06-audience-seam.md). The `VERDICT_BEFORE_EVIDENCE` grep verifies the verdict appears within the first three non-blank lines after the `#` title (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` §"Enforcement"). The voice-citation literal does not appear in the template — it would render to the user. The voice guide is loaded via the body-level imperative (rule 1).
 
-## Top findings
-
-### 1. <Finding title>
-
-**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
-
-**Change:** <the specific edit, file rename, invariant promotion, matrix cell, or test that closes this finding>
-
-### 2. <Finding title>
-
-**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
-
-**Change:** <the specific edit>
-
-### 3. <Finding title>
-
-**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
-
-**Change:** <the specific edit>
-
-## <Persisted file pointer>
-`<persisted-path>`
-
-### Recommended next Cohesive skill
-`cohesive:<skill-name>` — <one-clause reason>. **<Payload-kind>:** <concrete payload — files for rewrite-specs, design question for brainstorm-design, scope for review-codebase / review-diff / audit-substrate>.
-```
-
-The render opens with the outermost `#` title, then `**Verdict:**` on the next non-blank line — matching the worked transcript at [`docs/history/transcripts/output-voice-worked-example.md`](../../history/transcripts/output-voice-worked-example.md). The `VERDICT_BEFORE_EVIDENCE` grep verifies the verdict appears within the first three non-blank lines after the `#` title (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md` §"Enforcement"). The voice-citation literal does not appear in the template — it would render to the user. The voice guide is loaded via the body-level imperative (rule 1).
-
-Skills with chat-only output (`review-diff`) render this shape as their entire output, with no separate persisted file. Skills whose findings render in a table form (`review-diff`) carry an Evidence column (file:line + quoted excerpt) and a Change column per sub-rule 2b — bare title + Severity + Area row is a render failure tracked in [`docs/substrate/matrices/reviewer-output-shape.md`](../matrices/reviewer-output-shape.md) §"Synthesizing-skill chat render shape." Skills whose top items are not findings but artifact-additions (`audit-substrate`) render an analogous show-shape — title + Evidence the gap exists + What the artifact would say + Where it lives — per the same rule.
+Skills with chat-only output (`review-diff`) render the chat-trailer shape as their entire output, with no separate persisted file. Skills whose findings render in a table form (`review-diff`) carry an Evidence column (file:line + quoted excerpt) and a Change column per sub-rule 2b — bare title + Severity + Area row is a render failure tracked in [`docs/substrate/matrices/reviewer-output-shape.md`](../matrices/reviewer-output-shape.md) §"Synthesizing-skill chat render shape." Skills whose top items are not findings but artifact-additions (`audit-substrate`) render an analogous show-shape — title + Evidence the gap exists + What the artifact would say + Where it lives — per the same rule.
 
 ### 4. Cap header depth at `###` in chat-rendered output
 
@@ -155,31 +125,32 @@ No `####`, no `#####`. If a section needs sub-structure, use a bulleted list or 
 
 Multi-step processes, multi-option comparisons, multi-finding lists, and multi-cell matrices render as bullets or tables. Narrative-phase rendering ("Phase 1... Phase 2... Phase 3...") is for the SKILL.md Process section — not for the chat render. The chat render of a four-phase review is a four-row table or a four-bullet list, not four prose paragraphs.
 
-### Recommended-next-skill footer
+### Next-step footer (`### Next`)
 
-The skill's "Output format" section ends with the canonical shape, and per rule 5a (`output-voice.md`) the entry carries payload:
+The skill's "Output format" section ends with the chat-trailer's `### Next` block, and per rule 5a (`output-voice.md`) the entry carries payload. The shape is canonical at [`references/templates/chat-trailer.md`](../../../references/templates/chat-trailer.md):
 
 ```md
-### Recommended next Cohesive skill
-`cohesive:<skill-name>` — <one-clause reason>. **<Payload-kind>:** <concrete payload>.
+### Next
+
+<decision-shaped sentence naming the architectural action>. *(`cohesive:<skill>` or `superpowers:<skill>`.)* **<Payload-kind>:** <concrete payload — files, scope, design question, or branch>.
 ```
 
-The payload-kind label and content depend on the next skill:
+The decision-shaped sentence leads. The skill citation appears parenthetically in inline code. The payload-kind label and content depend on the next skill:
 
 - **For `cohesive:rewrite-specs`** — `**Files to edit:**` followed by an enumeration of the specific docs/matrices/invariants to edit, with the specific change in each. Plus the slug.
 - **For `cohesive:brainstorm-design`** — `**Design question:**` followed by the specific architectural question to revisit (named, not "the structural shape").
 - **For `cohesive:review-codebase` / `cohesive:review-diff` / `cohesive:audit-substrate`** — `**Scope:**` followed by the subsystem, file set, change surface, or repo region to review.
 - **For `superpowers:writing-plans` / `superpowers:executing-plans`** — `**Scope:**` followed by the change surface or implementation target.
 
-If the skill has multiple verdict-branches (e.g. `validate-rewrite` returns Approved / Issues Found / Design Incoherent, `review-codebase` has five verdicts), provide one recommended-next per branch — each carrying its own payload. When the appropriate next step is outside Cohesive, the entry names the non-Cohesive action explicitly:
+If the skill has multiple verdict-branches (e.g. `validate-rewrite` returns Approved / Issues Found / Design Incoherent, `review-codebase` has five verdicts), provide one `### Next` per branch — each carrying its own payload. When the appropriate next step is outside Cohesive, the entry names the non-Cohesive action explicitly:
 
 ```md
-`<next non-Cohesive action>` — <reason>. **<Payload-kind>:** <concrete payload>.
+<decision-shaped sentence>. *(`<next non-Cohesive skill or action>`.)* **<Payload-kind>:** <concrete payload>.
 ```
 
-The router (`cohesively`) is exempt: its output is a one-sentence announcement, not a workflow output. It is also exempt from the voice imperative per rule 1 — its dispatched subskills carry the voice load.
+The router (`cohesively`) is exempt: its output is a one-sentence announcement, not a workflow output. It is also exempt from the voice imperative per rule 1 — its dispatched subskills carry the voice load. The `### Recommended next Cohesive skill` heading was retired in the audience-seam rewrite; it carried methodology-name framing the chat trailer no longer surfaces. The new heading is `### Next`, with the skill name appearing parenthetically per the centralized template; legacy SKILL.md bodies that still carry the old heading are tracked in [`docs/substrate/matrices/reviewer-output-shape.md`](../matrices/reviewer-output-shape.md) §"Synthesizing-skill chat render shape" until swept.
 
-A bare skill name + reason ("rewrite-specs to close 5 findings") without payload is a regression against rule 5a, tracked in [`docs/substrate/matrices/reviewer-output-shape.md`](../matrices/reviewer-output-shape.md) §"Synthesizing-skill chat render shape." See [`docs/substrate/gotchas/naming-instead-of-showing.md`](../gotchas/naming-instead-of-showing.md) for the failure mode.
+A bare skill name + reason ("rewrite-specs to close 5 findings") without payload is a regression against rule 5a, tracked in the same matrix. See [`docs/substrate/gotchas/naming-instead-of-showing.md`](../gotchas/naming-instead-of-showing.md) for the failure mode.
 
 ## Path discipline
 
@@ -260,11 +231,11 @@ These deviations are observed and accepted in v0.1:
 
 - The router (`cohesively`) replaces "Process" with "Routes" and adds a "Routing decision logic" section. Routers route; they don't have a single linear process. The router may also use "Required behavior" instead of "Hard constraints" given its different shape.
 - The router (`cohesively`) omits the `## Voice` section. Its render budget is 1–2 sentences and its dispatched subskills carry the voice load on its behalf — see §"Output format conventions" rule 1. The matrix at [`docs/substrate/matrices/skill-section-presence.md`](../matrices/skill-section-presence.md) records this exemption with a `~` cell in the `Voice` column.
-- The session-start orientation skill (`using-cohesive`) carries the same `## Voice` exemption as the router (render budget too small to need the imperative; its dispatched subskill — `cohesively` — carries the voice load on its behalf), and the same "Output" / "Required behavior" naming exemptions as the router. Unlike the router, it does not select routes; instead of "Routes" + "Routing decision logic" it carries a 3-section decision rule: "When Cohesive applies", "When to defer to Superpowers", "How to enter Cohesive". The "Composition" section is omitted because its only downstream is `cohesively` itself — naming the universal entry point as a composition target would be circular. The "Recommended next Cohesive skill" footer is also exempt: the skill is purely advisory; its only downstream recommendation, when it makes one, is `cohesive:cohesively` rendered inline as part of the orientation message rather than as a trailing H3 footer.
+- The session-start orientation skill (`using-cohesive`) carries the same `## Voice` exemption as the router (render budget too small to need the imperative; its dispatched subskill — `cohesively` — carries the voice load on its behalf), and the same "Output" / "Required behavior" naming exemptions as the router. Unlike the router, it does not select routes; instead of "Routes" + "Routing decision logic" it carries a 3-section decision rule: "When Cohesive applies", "When to defer to Superpowers", "How to enter Cohesive". The "Composition" section is omitted because its only downstream is `cohesively` itself — naming the universal entry point as a composition target would be circular. The `### Next` footer is also exempt: the skill is purely advisory; its only downstream recommendation, when it makes one, is `cohesive:cohesively` rendered inline as part of the orientation message rather than as a trailing H3 footer.
 - The substrate-discovery skill (`discover-substrate`) uses "When to invoke" + "Inputs" + "Process" instead of "Hard constraints" + "Process." It is a no-dispatch utility skill that has prereq-shaped guidance to give rather than process-internal constraints to enforce. The "When to invoke" section is the load-bearing one for callers.
 - A skill may add a "## Token discipline" section if its outputs can grow large.
 - The `implement-cohesively` skill adds a "## Branch shape" section because its branch model — implementation lands on the rewrite's `design/<slug>` branch by default, with an alternative `implement/<slug>` shape for split-merge cases — is normative behavior the skill body must specify.
-- The `validate-rewrite` skill places the canonical `### Recommended next Cohesive skill` heading inside its Output format's rendered review template (after the review body, where the verdict-branch recommendation lives) rather than as a standalone trailing heading. This is acceptable because `validate-rewrite`'s output *is* a review document with its own internal structure, not the skill's own chat trailer; the recommended-next branching is per-verdict and lives where the verdict is rendered. Under the heading, `validate-rewrite` renders a **Disposition** phrase (derived from the disposition rule in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which maps `(verdict, highest-severity-present)` to a single recommendation) followed conditionally by an **Implementation route** matrix (rendered iff verdict is `Approved` — the verdict-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)" guarantees `Approved` is merge-ready, so no further disposition gate is needed). The footer convention is satisfied because the canonical heading is present and per-verdict recommendations follow it; no other skill should adopt this shape without an entry here.
+- The `validate-rewrite` skill places the canonical `### Next` heading inside its Output format's rendered review template (after the review body, where the verdict-branch recommendation lives) rather than as a standalone trailing heading. This is acceptable because `validate-rewrite`'s output *is* a review document with its own internal structure, not the skill's own chat trailer; the recommended-next branching is per-verdict and lives where the verdict is rendered. Under the heading, `validate-rewrite` renders a **Disposition** phrase (derived from the disposition rule in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Disposition rule for validation-review findings", which maps `(verdict, highest-severity-present)` to a single recommendation) followed conditionally by an **Implementation route** matrix (rendered iff verdict is `Approved` — the verdict-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)" guarantees `Approved` is merge-ready, so no further disposition gate is needed). The footer convention is satisfied because the canonical heading is present and per-verdict recommendations follow it; no other skill should adopt this shape without an entry here.
 
 These deviations are documented; new deviations require explicit discussion and an entry in this section before adoption.
 
@@ -279,7 +250,10 @@ The distinction matters for skill authors: a future Cohesive skill that wants to
 | Anti-pattern | Why it's wrong | Fix |
 |---|---|---|
 | Hardcoded paths in the body (`/home/...`, `references/...` without `${CLAUDE_PLUGIN_ROOT}`) | Breaks portability; `validate_plugin.sh` fails | Always prefix with `${CLAUDE_PLUGIN_ROOT}/` |
-| Missing "Recommended next Cohesive skill" footer | Workflow legibility breaks; user has to re-derive next step | Add the footer; if multiple verdicts, one per verdict |
+| Missing `### Next` footer in the chat trailer | Workflow legibility breaks; user has to re-derive next step | Add the footer per the chat-trailer template; if multiple verdicts, one per verdict |
+| `### Recommended next Cohesive skill` heading used in chat-render template (legacy) | Methodology-name framing the audience seam removes from chat-render surfaces | Rename to `### Next`; cite the skill in inline code parenthetically after the decision-shaped sentence (per [`audience-separation.md`](audience-separation.md)) |
+| Substrate-vocabulary tokens (`**Required substrate before implementation:**`, `**Substrate artifact to add or update:**`, `**Suggested substrate:**`) inside a SKILL.md `## Output format` block | Substrate-shape vocabulary leaking into chat-render template; users see the methodology's machinery instead of the architectural decision | Move substrate-shape content to the persisted-file template (`references/templates/<skill>-report.md`) and the chat trailer's body block stays decision-shape per the centralized template |
+| `## Output format` duplicates the chat-trailer shell instead of citing it | Drift surface across six SKILL.md bodies; substrate-vocabulary discipline becomes per-skill-author concern | Cite [`references/templates/chat-trailer.md`](../../../references/templates/chat-trailer.md) by reference; specify only the per-skill body block per its §"Variants" |
 | Vague clarifying question | Wastes a turn; reroutes design responsibility back to the user | Pre-can the question as a forced choice |
 | "Hard constraints" as a bulleted list of vibes | Constraints must be enforceable | Each constraint is a one-sentence rule + rationale |
 | "Anti-patterns" as a bulleted list | Conventionally a table in this repo | Use the three-column Anti-pattern / Why / Fix table |
@@ -291,7 +265,7 @@ The distinction matters for skill authors: a future Cohesive skill that wants to
 | Verdict-led skill buries the verdict under a setup paragraph | Violates `VERDICT_BEFORE_EVIDENCE`; reader can't scan the answer | Lead the Output format block with `**Verdict:**` within the first three non-blank lines |
 | Chat render duplicates the full persisted body | Defeats the chat-trailer model; ceremony without information | Render verdict + thesis + top findings + next step in chat; point at the persisted file |
 | Header nesting reaches `####` or `#####` in chat output | Header soup is the most common form of ceremony | Cap at `###`; use a bullet list or table for sub-structure |
-| Multiple "Recommended next Cohesive skill" entries without verdict-branching | Pushes the choice back to the user | One entry per verdict-branch; if the skill has one verdict, one recommendation |
+| Multiple `### Next` entries without verdict-branching | Pushes the choice back to the user | One entry per verdict-branch; if the skill has one verdict, one recommendation |
 | Top findings rendered as title + one-clause why (no Evidence, no Change) | Names the finding, doesn't show it; reproduces failure mode in [`gotchas/naming-instead-of-showing.md`](../gotchas/naming-instead-of-showing.md) | Each chat finding carries title + Evidence (file:line + excerpt) + Change (specific edit) per rule 2b |
 | Recommended-next-skill clause is bare skill-name + reason ("rewrite-specs to close 5 findings") | Empty handoff; user re-derives what was already known; violates rule 5a | Each clause carries payload: files for rewrite-specs, design question for brainstorm-design, scope for review-* / audit-substrate |
 | Cross-iteration finding-ID continuity in chat ("promote finding 7 from prior pass") | Bookkeeping shorthand a fresh chat reader cannot act on; violates rule 2c | Restate the gap concretely with current evidence in chat; preserve the audit trail in the persisted file's `## History` section |

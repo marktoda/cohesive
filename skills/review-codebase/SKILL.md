@@ -62,8 +62,8 @@ Before judging coherence, check whether there is enough substrate to review at a
 
 This codebase fell below the empty-substrate threshold in `discover-substrate` step 7 (fewer than 5 normative documents in total, or no `CLAUDE.md`/`AGENTS.md`/`ARCHITECTURE.md`/`docs/` at all). An architecture review against near-empty substrate would hallucinate findings rather than judge alignment.
 
-### Recommended next Cohesive skill
-`cohesive:audit-substrate` — produce a missing-memory inventory; the audit is the right tool for "what substrate doesn't yet exist." Once the highest-leverage entries become real artifacts (named invariants, gotcha docs, behavior matrices) and the doc surface has substantive normative content, re-run `cohesive:review-codebase`.
+### Next
+Inventory what memory the codebase is missing; the audit is the right tool for "what substrate doesn't yet exist." Once the highest-leverage entries become real artifacts and the doc surface has substantive normative content, re-run `cohesive:review-codebase`. *(`cohesive:audit-substrate`.)* **Scope:** the same scope as this review.
 ```
 
 If substrate is rich enough to review, proceed to Phase 2.
@@ -129,12 +129,16 @@ If `docs/history/reviews/` doesn't exist, create it. Reviews are append-only his
 
 ## Output format
 
-The skill renders a chat trailer (the canonical verdict-led shape below) and persists the full report to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-review-report.md`. The chat render is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2 and its sub-rules 2a / 2b / 2c). The persisted file is canonical and carries the full body, the cross-iteration audit trail (disposition history, finding-ID continuity across review passes, verdict trajectory), the cohesion scorecard, the appendices, and the per-reviewer raw findings. The chat trailer carries this iteration's findings shown afresh, plus a payload-bearing handoff.
+The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` and persists the full report to `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/architecture-review-report.md`. The chat render is the decision-rendering of the persisted body per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with its sub-rules 2b / 2c) and the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`. The persisted file is canonical and carries the full body, the cross-iteration audit trail (disposition history, finding-ID continuity across review passes, verdict trajectory), the cohesion scorecard, the substrate-shape vocabulary (specs, named invariants, behavior matrices, gotchas, semantic linters flagged for promotion), the appendices, and the per-reviewer raw findings. The chat trailer carries this iteration's findings in user-facing decision-shape, plus a payload-bearing `### Next` handoff.
+
+**Body block specification.** Per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` §"Variants" `review-codebase` row: a `## Top findings` section with three show-shape findings, each: `### N. <title>` + `**Evidence:**` `<path>:<line>` + excerpt + `**Change:**` <specific edit>.
+
+**Sample chat-trailer render** (canonical shape; the centralized template is the single source of truth):
 
 ```md
 # Architecture Review — <scope>
 
-**Verdict:** Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk
+**Verdict:** <user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"review-codebase">
 
 **Thesis:** <one or two sentences — the codebase's overall shape, the highest-leverage risk, whether the system can scale development without founder memory>
 
@@ -144,47 +148,46 @@ The skill renders a chat trailer (the canonical verdict-led shape below) and per
 
 **Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
 
-**Change:** <the specific edit, file rename, invariant promotion, matrix cell, or test that closes this finding — concrete enough that a reader could begin work>
+**Change:** <the specific edit, file rename, invariant promotion, matrix cell, or test that closes this finding>
 
 ### 2. <Finding title>
-
-**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
-
-**Change:** <the specific edit>
+...
 
 ### 3. <Finding title>
+...
 
-**Evidence:** `<path>:<line>` — <quoted excerpt or named artifact>
-
-**Change:** <the specific edit>
-
-## Persisted report
+### Persisted record
 `docs/history/reviews/YYYY-MM-DD-<slug>-architecture-review.md`
 
-### Recommended next Cohesive skill
+### Next
 
-Per verdict, with concrete payload:
-
-- **Healthy / Mostly healthy:** `superpowers:writing-plans` — substrate is sound; implementation work can proceed against the change surface in §"Target change surface" of the substrate discovery report.
-- **Cohesive but under-enforced:** `cohesive:rewrite-specs` — promote convention to enforcement. **Files to edit:** <enumerate the specific docs/matrices/invariants the review flagged for promotion, with the specific change in each>. Slug: `<derived-from-scope>`.
-- **Spec drift risk:** `cohesive:rewrite-specs` — repair the substrate. **Files to edit:** <enumerate the specs flagged as drifting, with the specific repair in each>. Slug: `<derived-from-scope>`.
-- **Architecture risk:** `cohesive:brainstorm-design` — the structural shape itself needs revisiting. **Design question:** <name the specific architectural question the review surfaced as load-bearing, e.g. "should X be one concept or two?">.
+<decision-shaped sentence per the verdict>. *(`cohesive:<skill>` or `superpowers:<skill>`.)* **<Payload-kind>:** <concrete payload>.
 ```
 
-The render template above is the canonical chat trailer. Three rules apply, each grounded in `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`:
+**Verdict translation.** The internal verdict (`Healthy` / `Mostly healthy` / `Cohesive but under-enforced` / `Spec drift risk` / `Architecture risk`) renders in the chat trailer as the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"review-codebase". The internal label stays in the persisted file's body (the cohesion scorecard and the verdict gate are agent-facing).
+
+**`### Next` per verdict.** The chat-trailer `### Next` block renders one entry for the verdict the review returned, with payload per rule 5a. The decision-shaped sentence leads each entry; the skill citation appears parenthetically in inline code; the payload follows:
+
+- **Internal `Healthy` or `Mostly healthy`:** Substrate is sound; implementation can proceed. *(`superpowers:writing-plans`.)* **Scope:** the change surface in §"Target change surface" of the substrate discovery report.
+- **Internal `Cohesive but under-enforced`:** Promote a few rules from convention to structural enforcement. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerate the specific docs/matrices/invariants the review flagged for promotion, with the specific change in each>. Slug: `<derived-from-scope>`.
+- **Internal `Spec drift risk`:** Repair the docs to match what the code actually does. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerate the specs flagged as drifting, with the specific repair in each>. Slug: `<derived-from-scope>`.
+- **Internal `Architecture risk`:** The structural shape itself needs revisiting. *(`cohesive:brainstorm-design`.)* **Design question:** <name the specific architectural question the review surfaced as load-bearing, e.g. "should X be one concept or two?">.
+
+Three rules apply at render time:
 
 1. **Top findings render show-shape** (rule 2b). Each finding carries a title, Evidence (file:line + quoted excerpt or named artifact), and Change (the specific edit, not "promote convention to enforcement"). Bare title with one-clause "why" is a render failure tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md` §"Synthesizing-skill chat render shape."
 2. **Bookkeeping is displaced to the persisted file** (rule 2c). Cross-iteration finding-ID references ("promote finding 7 from the prior pass"), promote/defer disposition matrices, verdict-ratchet language ("verdict ratchets to ⬆"), and "deferral criterion still holds" annotations belong in the persisted file's `## History` section, not in the chat trailer. The chat trailer renders this iteration's findings only, with no cross-iteration ID continuity.
-3. **Recommended next Cohesive skill carries payload** (rule 5a). Each verdict-branch names the concrete inputs the next skill operates on — files for `rewrite-specs`, design question for `brainstorm-design`, scope for `superpowers:writing-plans`. A bare skill-name + reason without payload reproduces the failure mode in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md`.
+3. **`### Next` carries payload and leads with the decision** (rule 5a + the audience seam). Each verdict-branch names the architectural action first, then cites the skill in inline code parenthetically, then the payload. Methodology framing ("Recommended next Cohesive skill") does not appear in chat per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
 
 ## Output discipline
 
-- **Verdict first, then evidence.** Don't bury the lede.
+- **Verdict first, then evidence.** Don't bury the lede. The verdict line renders the user-facing label (translated from the internal label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md`).
 - **Findings ranked by leverage.** Not alphabetical, not by file location.
 - **Every finding shows, not names.** Title + Evidence + Change is the minimum chat-render shape per rule 2b. Bare title with a one-clause why is a regression.
 - **Bookkeeping persists, doesn't render.** Promote/defer disposition tables, cross-iteration finding-ID references, and verdict-ratchet language live in the persisted file's `## History` section. Chat trailer is per-invocation substance.
-- **Handoff carries payload.** The recommended-next-skill clause names the files / scope / design question, not just the skill name and a count.
-- **Every finding maps to a substrate artifact.** If a finding has no substrate target, ask whether it's preference rather than a real cohesion issue.
+- **`### Next` carries payload.** The clause names the files / scope / design question, not just the skill name and a count. The decision-shaped sentence leads; the skill citation is parenthetical.
+- **No substrate vocabulary in chat.** "Required substrate before implementation", "Substrate artifact to add or update", "Cohesive workflow", "Recommended next Cohesive skill" are persisted-file vocabulary; the chat trailer renders decision-shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+- **Every finding maps to a substrate artifact in the persisted file.** If a finding has no substrate target, ask whether it's preference rather than a real cohesion issue.
 - **Concrete file:line references.** Vague findings ("the architecture is unclear") get rejected.
 
 ## Token discipline
@@ -204,7 +207,7 @@ Architecture reviews can burn a lot of tokens. Constraints:
 - Synthesis produces a thesis, not a stitched concatenation.
 - The review persists to `docs/history/reviews/`.
 - Every finding names the substrate artifact to add or update.
-- Output ends with a per-verdict "Recommended next Cohesive skill" footer.
+- Output ends with a per-verdict `### Next` footer rendered per the centralized chat-trailer template.
 
 ## Red flags
 
@@ -216,7 +219,8 @@ Architecture reviews can burn a lot of tokens. Constraints:
 - Findings without substrate artifacts. Either add the artifact or drop the finding.
 - Chat trailer renders Top findings as title + one-clause why (no Evidence, no Change). Violates rule 2b — see [`docs/substrate/gotchas/naming-instead-of-showing.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md).
 - Chat trailer carries a promote/defer disposition matrix or cross-iteration finding-ID continuity ("finding 7 from the prior pass"). Violates rule 2c — disposition history belongs in the persisted file's `## History` section.
-- Chat trailer's Recommended next Cohesive skill names a skill plus a count ("rewrite-specs to close 5 findings") without enumerating the files or design question. Violates rule 5a.
+- Chat trailer's `### Next` names a skill plus a count ("rewrite-specs to close 5 findings") without enumerating the files or design question. Violates rule 5a.
+- Chat trailer renders substrate-vocabulary tokens ("Required substrate", "Substrate artifact to add or update", "Cohesive workflow") instead of decision-shape. Violates the audience seam — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
 - Chat trailer renders verdict-ratchet language ("Mostly healthy ⬆ from Cohesive but under-enforced"). The trajectory is bookkeeping; the persisted file's `## History` carries it.
 
 ## Composition

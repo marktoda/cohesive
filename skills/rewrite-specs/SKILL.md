@@ -202,8 +202,8 @@ The skill's chat output (separate from the file changes) is short:
 ### Remaining ambiguity
 - <thing the rewrite couldn't fully resolve>
 
-### Recommended next Cohesive skill
-`cohesive:validate-rewrite` — fresh-eyes review of the rewritten specs against the substrate model and approved direction.
+### Next
+Fresh-eyes review of the rewritten specs against the design and approved direction. *(`cohesive:validate-rewrite`.)* **Scope:** the design delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md` and the rewritten specs on branch `design/<slug>`.
 ```
 
 ## Anti-patterns (Red Flags)

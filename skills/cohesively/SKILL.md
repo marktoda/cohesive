@@ -128,9 +128,19 @@ Direct (non-router) invocation: the subskill asks its canonical question per `${
 ## Required behavior
 
 1. **Announce the route.** One sentence in chat before dispatching, in the canonical form:
-   > "I'm treating this as a Cohesive **<route>** workflow: <chain>. Reason: <one short clause>."
+   > "<one-sentence outcome the user gets>. <chain rendered as: skill-1 → skill-2 → skill-3>."
 
-   The form is the convention named in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Router conventions". `<route>` is one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`.
+   The outcome sentence leads with what the user receives — not the methodology framing — per the audience seam in [`docs/substrate/conventions/audience-separation.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md). The form is also documented in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Router conventions". The **internal route name** (one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `artifact`) is the dispatch key the router uses to pick its chain — it is agent-internal and does not appear in the announcement string. Per-route outcome sentences:
+
+   | Internal route | Announcement outcome sentence |
+   |---|---|
+   | `design` | I'll explore design tradeoffs and recommend a direction |
+   | `review (codebase)` | I'll review the architecture for cohesion |
+   | `review (diff)` | I'll review the change against the docs |
+   | `audit (substrate)` | I'll inventory what memory the codebase is missing |
+   | `rewrite-only` | I'll rewrite the docs to the chosen end state |
+   | `implement` | I'll drive code phase-by-phase against the approved design |
+   | `artifact` | I'll draft the artifact you asked for |
 
 2. **Process skills run before implementation skills.** If behavior or architecture is changing, route through substrate discovery before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives implementation against the design delta ledger via the phase loop. Freeform code-writing from this skill body is forbidden.
 
@@ -158,13 +168,19 @@ When the request is ambiguous, prefer this resolution order:
 
 ## Output
 
-The router itself produces minimal output: a single-sentence announcement before the first subskill is invoked. Per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets," the router's render budget is 1–2 sentences — it has no `#` title and is exempt from the voice-citation grep that applies to longer-rendered skills (documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` §"Convention pins enforced alongside this invariant").
+The router itself produces minimal output: a single-sentence announcement before the first subskill is invoked. Per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets," the router's render budget is 1–2 sentences — it has no `#` title and is exempt from the voice-citation grep that applies to longer-rendered skills (documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/PLUGIN_ROOT_PATHS.md` §"Convention pins enforced alongside this invariant"). The announcement leads with what the user gets — not the methodology framing — per the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
 
 The canonical announcement template:
 
 ```
-I'm treating this as a Cohesive <route> workflow: <subskill-1> → <subskill-2> → <subskill-3>. Reason: <one short clause>.
+<one-sentence outcome the user gets, drawn from the per-route table in §"Required behavior" Required behavior #1>: <subskill-1> → <subskill-2> → <subskill-3>.
 ```
+
+Concrete examples:
+
+- design route: `I'll explore design tradeoffs and recommend a direction: discover-substrate → brainstorm-design.`
+- review (codebase) route: `I'll review the architecture for cohesion: discover-substrate → review-codebase.`
+- implement route: `I'll drive code phase-by-phase against the approved design: implement-cohesively.`
 
 Then the router invokes the first subskill. Each subskill produces its own output (carrying its own voice citation) and recommends the next. The user can stop the chain at any subskill boundary.
 
