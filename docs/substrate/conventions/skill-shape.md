@@ -172,6 +172,12 @@ The dispatching skill body explicitly states, in prose, that the reviewer reads 
 
 A skill turn asks **at most one** clarifying question. The question is a specific forced choice (e.g., "Should I review the codebase or the diff?"), never a vague open prompt. Forbidden phrasings include "What do you want?", "Can you tell me more?", "What are you trying to accomplish?", "Anything else I should know?".
 
+### Per turn, not per invocation
+
+The at-most-one rule is per turn, not per skill invocation. A skill that runs as a multi-turn dialog (e.g., `brainstorm-design` in conversational mode) asks one forced-choice question per turn across the dialog — not one across the whole invocation. The constraint is forced-choice form, not single-turn dialog. The router's announcement turn likewise asks at most one forced-choice question before dispatching the subskill; subskills with multi-turn modes carry their own per-turn budget after dispatch.
+
+Skills citing this convention rather than restating it: `cohesively/SKILL.md` §"Required behavior" #3, `brainstorm-design/SKILL.md` Hard constraint #5, `references/output-voice.md` §"Multi-turn dialog skills".
+
 ### Canonical prereq-detection question
 
 When a skill has `discover-substrate` or `brainstorm-design` as a prereq, it cannot reliably detect prior-skill output from session memory — the heuristic produces false positives. Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, ask the user. The canonical form:

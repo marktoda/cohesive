@@ -145,7 +145,7 @@ Direct (non-router) invocation: the subskill asks its canonical question per `${
 
 2. **Process before implementation.** If behavior or architecture is changing, route through the Decide gate before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives code against the design delta ledger via the phase loop. Freeform code-writing from this skill body is forbidden.
 
-3. **At most one clarifying question.** Per route (above). The question is a specific forced choice, never a vague "what do you want?" prompt — convention defined in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Clarifying questions".
+3. **At most one clarifying question per turn.** The router's announcement turn asks at most one forced-choice question per route (forms above) before dispatching the subskill. Per [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Clarifying questions" → §"Per turn, not per invocation": subskills with multi-turn dialogs (e.g., `brainstorm-design` conversational mode) carry their own per-turn budget after dispatch. Question form is always a specific forced choice, never a vague "what do you want?" prompt.
 
 4. **Do not implement code from the router itself.** The router routes; subskills work. Implementation is delegated to the `implement` route, which dispatches `implement-cohesively`. That skill in turn composes `superpowers:writing-plans` and `superpowers:executing-plans` per phase — it does not write code itself either. Cohesive's only code-producing surface is `superpowers:executing-plans` invoked from inside `implement-cohesively`'s phase loop.
 
@@ -191,7 +191,7 @@ Then the router invokes the first subskill. Each subskill produces its own outpu
 
 - The router classifies every Cohesive-relevant request to exactly one route.
 - The route is announced before any subskill runs, in one sentence, with no chain rendering or methodology framing.
-- At most one clarifying question is asked, and it is precise (not vague).
+- At most one clarifying question is asked per turn, and each is precise (not vague). Subskills with multi-turn conversational modes carry the per-turn budget through the dispatched dialog.
 - Code is not produced from the router.
 - The user-facing chat-surface vocabulary is the gate vocabulary (Decide / Lock / Build); subskill IDs are agent-internal.
 - Long chains (3+ subskills) are tracked with TodoWrite using gate names.

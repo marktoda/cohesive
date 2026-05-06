@@ -65,6 +65,8 @@ The chain-rendering pattern (`<outcome>: skill-1 → skill-2 → skill-3`) was r
 
 The user-facing chat-surface vocabulary uses the reversal name ("Substrate Drift" appears as a user-facing verdict label; "Re-decide" appears as the option name in the Approved trailer disclosure). Reversal names sit alongside gate names in chat but the count of *gates* stays at three. A future contributor authoring a third reversal adds an edge, not a gate; gate vocabulary is the user-facing model's shape, reversal vocabulary is the user-facing model's escape routes.
 
+**Gate-token reuse is forbidden in adjacent chat vocabulary.** The tokens **Decide**, **Lock**, and **Build** are reserved for gate-shaped meaning at the user-facing surface. A skill that introduces a new chat-rendered classification system (e.g., sub-decision tags, finding categories, status badges) must not reuse a gate token as a label — the user reading `[Decide]` on a sub-decision plausibly parses it as the gate, overloading the most load-bearing token in the methodology with a second meaning inside a single render. Sub-decision tags in `brainstorm-design` Phase 3b use **Pick / Confirm / Default** for exactly this reason.
+
 The seam holds across both surfaces: user reads gate names + reversal names in chat; agent reads gate→subskill mappings in `skills.md` and gate-to-gate handoff contracts in `handoffs.md`.
 
 ## What about frontmatter, body prose, and AGENTS.md?

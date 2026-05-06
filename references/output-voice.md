@@ -78,6 +78,14 @@ These produce wordiness without information:
 - No emojis. No exclamation points except in pull quotes from sources.
 - Short sentences over long ones. A clear one-clause sentence beats a clause-clause-clause sentence.
 
+## Multi-turn dialog skills
+
+`brainstorm-design` conversational mode (per its Hard constraint #5) is the only multi-turn skill in v0.1. The five rules apply **per turn**: verdict-led picks, show-don't-name evidence, one forced-choice question per turn (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions" → §"Per turn, not per invocation"), forbidden phrasings still forbidden per turn, one next move per turn.
+
+The genuinely new constraint specific to multi-turn skills: **conversational-mode turns are not mini-trailers** — they do not carry the verdict-line / thesis / `### Next` shell. The full chat trailer renders once per skill invocation, after the dialog converges; mid-dialog turns are short verdict-led exchanges (1-2 sentences per axis pick + counter-pressure + forced choice; the leaf-direction summary turn is 3-5 lines).
+
+Generalize this section only when a second multi-turn skill needs the conventions.
+
 ## Density budgets (guideline, not invariant)
 
 These are guidelines, not enforced limits. A density invariant would require a chosen proxy (word count, paragraph count, header count, line count) and every proxy is flawed individually. `wordy-output.md` discusses why density stays convention rather than promoting to a named invariant. Use the budgets below as a sanity check on chat output:
