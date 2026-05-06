@@ -78,7 +78,7 @@ Each row carries:
 
 The single highest-leverage thing this table does: **pin the convention/invariant boundary**. Most non-Cohesive-native teams use "rule" and "convention" interchangeably; Cohesive's distinctive value is in saying "this rule has earned mechanical enforcement; that one hasn't yet." The table makes that distinction legible without requiring the user to read 5 conventions to discover it.
 
-When `cohesive:init` runs against a codebase, it doesn't just propose artifacts — it surfaces this distinction by saying, for each finding: "this comment looks like an invariant, but it has no enforcement structure. Promote to a named invariant *and* add a check, or document it as a convention with a known promotion path." The user learns the distinction by deciding it, on their own code.
+When `cohesive:init` runs against a codebase, it doesn't just propose artifacts — it draws the convention/invariant distinction implicitly via the choice of category in each draft, plus the §"What this is" translation paragraph that surfaces what the chosen category earns over a generic rule. The user learns the distinction by deciding it on their own code: which proposals to keep as named invariants, which to keep as conventions, which to demote or reject.
 
 ## Related substrate
 

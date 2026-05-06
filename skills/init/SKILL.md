@@ -33,7 +33,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 3. **Translate every proposed artifact via `${CLAUDE_PLUGIN_ROOT}/references/substrate-vocabulary.md`.** Each draft carries the substrate type's user-facing definition inline so the user learns what the category means while reviewing whether the proposal fits. Bare draft files without the translation defeat init's pedagogical purpose.
 
-4. **Bound the proposal count.** Cap at ≤5 drafts per substrate type and ≤20 drafts total in v0.1. Init is for the first substrate, not the complete substrate; users should reach `audit-substrate` for deeper inventory after init's drafts are accepted.
+4. **Bound the proposal count.** Cap at ≤5 drafts per of the **4 v0.1 type buckets enumerated in Step 2** (proto-invariants / proto-gotchas / proto-matrices / proto-conventions-and-linters), and ≤20 drafts total. The substrate-vocabulary table at `${CLAUDE_PLUGIN_ROOT}/references/substrate-vocabulary.md` defines 6 substrate types total; v0.1 init scans 4 of them — `Spec` is out of scope (specs are repo-shaped and the proto-spec signal is too noisy for bounded scanning), and standalone `Semantic linter` proposals fold under proto-conventions when init detects existing `scripts/check_*.sh` files. The 4-bucket × 5-cap = 20 total provides ranking pressure (init must prioritize the highest-signal proposals per bucket). Init is for the first substrate, not the complete substrate; users should reach `audit-substrate` for deeper inventory (including spec proposals) after init's drafts are accepted.
 
 5. **A `--brief` flag suppresses inline translations.** Senior engineers who already know the vocabulary can pass `--brief` to skip the translation paragraphs. Default is verbose (pedagogical); --brief is the opt-out, not the default.
 
@@ -172,7 +172,7 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 
 **Evidence:** `<path>:<line>` — `<excerpt>`
 
-**What Cohesive calls this:** <substrate-type>. <1-line user-facing summary from substrate-vocabulary.md>
+**What Cohesive calls this:** <substrate-type>. <the first sentence of the row's "User-facing translation" paragraph from `${CLAUDE_PLUGIN_ROOT}/references/substrate-vocabulary.md`>
 
 **Draft at:** `docs/substrate/init-draft/<category>/<slug>.md`
 
