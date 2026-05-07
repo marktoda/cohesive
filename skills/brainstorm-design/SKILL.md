@@ -124,14 +124,24 @@ Open with a single short turn rendering the **axes map** — a one-line structur
 
 > "These split along **<axis 1>** (one family) × **<axis 2>** (another). I'll walk through them in order of where your taste matters most."
 
-Then drill axes one at a time. Order: **user-impact-if-redirected** first (taste-driven, future-pressure-shaping, organizational/risk axes), **substrate-evidence-strength** as tiebreaker (strongest agent pick last, so prior decisions shape the leaf direction). Each axis turn must:
+Then drill axes one at a time. Order: **user-impact-if-redirected** first (taste-driven, future-pressure-shaping, organizational/risk axes), **substrate-evidence-strength** as tiebreaker (strongest agent pick last, so prior decisions shape the leaf direction). Each axis turn renders in this order:
 
-- **Name the axis and enumerate the option space first.** Render the credible option families for this axis with a one-line shape description each (e.g., "**A:** flat SDK-mirroring triple / **B:** bundled mcpAttachments / **C:** derived from AdapterSpec") *before* naming the agent's pick. Picking from an option space the user can't see is rule 2b naming-instead-of-showing — the user must be able to evaluate the pick against the alternatives, not reverse-engineer what A and C are from the counter-pressure paragraphs.
-- Surface the agent's pick + substrate evidence (path:line, gotcha citation, invariant name) in verdict-led voice ("I'd pick X because Y")
-- Name the strongest counter-pressure for the other side (the best argument, not a strawman)
-- Close with a forced-choice: ratify, push back with substantive counter-pressure, or move on
+1. **Name the axis** in a short header.
+2. **Enumerate the option space as a bulleted list — parallel structure, one option per line — before naming the pick.** Each option carries a short label, a one-clause shape description, and a one-clause tradeoff hint (the load-bearing thing that makes this option distinct from the others). Format:
 
-If the user pushes back on an axis, that axis opens into one additional turn where the agent surfaces deeper substrate evidence and re-decides. Don't loop further; if disagreement persists after that exchange, the user is the Decider and their pick stands. The agent records the divergence for Phase 4's cross-branch graft check.
+   > **Axis: \<axis name\>**
+   >
+   > - **A: \<short name\>** — \<shape in one clause\>. *Tradeoff:* \<what this option costs or makes hard\>.
+   > - **B: \<short name\>** — \<shape\>. *Tradeoff:* \<…\>
+   > - **C: \<short name\>** — \<shape\>. *Tradeoff:* \<…\>
+
+   The user must be able to scan the option space side-by-side and evaluate the pick against alternatives they can see — not reverse-engineer what A and C are from the counter-pressure paragraphs. Picking from an unseen option space is rule 2b naming-instead-of-showing inside a mid-dialog turn.
+
+3. **Render the pick + substrate evidence** in verdict-led voice — "I'd pick **X** because Y" with path:line / gotcha citation / invariant name as the substrate evidence.
+4. **Render counter-pressure** for the strongest alternative (the best argument for it, not a strawman) — and for any option you're rejecting outright (like a structurally blocked one), say so explicitly with the structural reason.
+5. **Close with a forced-choice prompt:** ratify, push back with substantive counter-pressure, or redirect.
+
+If the user pushes back on an axis, that axis opens into one additional turn where the agent surfaces deeper substrate evidence and re-decides — same render shape (option space + pick + counter-pressure + forced choice), just with the substrate-evidence section deepened. Don't loop further; if disagreement persists after that exchange, the user is the Decider and their pick stands. The agent records the divergence for Phase 4's cross-branch graft check.
 
 #### Leaf direction summary
 
