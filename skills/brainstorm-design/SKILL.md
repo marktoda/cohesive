@@ -80,6 +80,8 @@ The brainstorm uses these inputs to bias option-generation: any new option must 
 
 If any of the four input categories is unclear, ask **one** precise clarifying question. Suggested forms: "Which future pressure should this design optimize for most: <option A>, <option B>, or <option C>?" (when future pressure is the unclear input) or "Which of the prior reflection's concerns is the most load-bearing for this re-decide: <concern A> or <concern B>?" (when re-decide-cycle inputs are unclear).
 
+**Question precedence.** Step 0's change-surface clarification (Hard constraint #2) takes precedence over Phase 1's future-pressure / re-decide question. If the change surface is unclear, ask Step 0's question first; Phase 1's question only fires after the change surface is known and the discovery report is in hand.
+
 ### Phase 2: Identify axes and select mode
 
 Identify the **axes of disagreement** the substrate exposes — the orthogonal structural dimensions along which credible options would differ. Common axes:
