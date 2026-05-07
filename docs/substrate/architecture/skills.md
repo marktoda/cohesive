@@ -78,23 +78,25 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 
 ### discover-substrate
 
-**Purpose.** Read the codebase's existing substrate (specs, behavior matrices, named invariants, gotchas, semantic linters, CI checks, local commands) for a given change surface, and surface what's missing.
+**Purpose.** Read the codebase's existing substrate (specs, behavior matrices, named invariants, gotchas, semantic linters, CI checks, local commands) for a given change surface, and surface what's missing. **Primary invocation pattern: dispatched internally as a sub-step by a consumer skill (`brainstorm-design`, `audit-substrate`, `review-codebase`, `review-diff`).** Direct invocation (`/cohesive:discover-substrate`) remains supported but is the rare case — users typically want a brainstorm or review or audit, and discovery is plumbing for those.
 
 **Owns.**
 - Reading existing substrate, including external-repo conventions (`docs/adr/`, `docs/specs/`, `docs/design/`, etc.).
-- Producing the substrate discovery report that downstream skills consume.
+- Producing the substrate discovery report that consumer skills consume.
 - Surfacing gaps: implicit rules, branchy behavior without matrices, invariants without enforcement, scars trapped in comments.
+- Persisting the report so consumers can reuse it across skill invocations in the same session (the optional-override path documented in each consumer's Hard constraint #1).
 
 **Does not own.**
 - Verdicting whether the substrate is sufficient — that's `audit-substrate`.
 - Proposing changes to the substrate — that's `brainstorm-design` (forward) or `rewrite-specs` (after a direction is chosen).
 - General codebase exploration — that's Superpowers' research/exploration. Cohesive's discovery is *substrate-specific*. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md`.
+- Being a chain step the router dispatches separately. As of the 2026-05-06 discovery-as-internal-step rewrite, the cohesively router routes `design` / `review (codebase)` / `review (diff)` / `audit (substrate)` directly to the consumer skill; the consumer dispatches discover-substrate internally.
 
 **Inputs.** A change surface (subsystem name, file path, or "the whole codebase" for review uses). No prereq.
 
-**Outputs.** Substrate discovery report. No verdict.
+**Outputs.** Substrate discovery report (persisted to disk; path returned to the consumer). No verdict.
 
-**Why this shape.** Discovery is the prereq for every other chain skill. Making it a no-verdict utility lets multiple downstream skills consume the same report. A verdict here would force every consumer to dispatch on it; the consumers' own verdicts are what the chain actually acts on.
+**Why this shape.** Discovery is plumbing for the consumer skills that grow the substrate (brainstorm-design proposes new substrate; audit finds missing substrate; review checks existing substrate). When discovery was a chain step the router dispatched separately, users who asked for a brainstorm got a "shit ton of substrate info in chat" before reaching the brainstorm output — discovery's chat render was bigger than the consumer's. Internalizing discovery moves it from a user-visible chain step to a consumer-internal sub-step: users see the gate's outcome (the brainstorm, the audit, the review), not the plumbing. Direct invocation still works for the rare user who wants the raw inventory.
 
 ### brainstorm-design
 

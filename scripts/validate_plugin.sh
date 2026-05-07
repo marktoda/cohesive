@@ -205,16 +205,23 @@ done
 # 10. Canonical prereq-detection question in subskills with a substrate-discovery prereq.
 # Per docs/substrate/conventions/skill-shape.md §"Canonical prereq-detection question". Stable
 # opening: a blockquote line beginning `> "I see we're about to run <skill>.`
-# Path-prereq subskills (implement-cohesively, validate-rewrite) are excluded — their prereq is
-# a file path, not session state, so they use directive errors per skill-shape.md §"Path prereqs
-# use directive errors, not the canonical question". See check 10b below.
-discovery_prereq_subskills=(
-  brainstorm-design
-  rewrite-specs
-  review-codebase
-  review-diff
-  audit-substrate
-)
+#
+# As of the 2026-05-06 discovery-as-internal-step rewrite, brainstorm-design / audit-substrate /
+# review-codebase / review-diff dispatch discover-substrate internally (Step 0 / Phase 1.0) and
+# no longer carry the canonical discovery-state question — discovery is now plumbing internal to
+# each consumer skill rather than a user-visible prereq. Their canonical questions are now about
+# change-surface or scope (asked only when the user's request is unclear), not discovery state.
+# rewrite-specs is excluded because its prereq is a chosen-direction (a different question),
+# not discovery state.
+#
+# Path-prereq subskills (implement-cohesively, validate-rewrite) are also excluded — their prereq
+# is a file path, not session state, so they use directive errors per skill-shape.md §"Path
+# prereqs use directive errors, not the canonical question". See check 10b below.
+#
+# The array is intentionally empty at v0.1.5 — no skill carries the discovery-state canonical
+# question anymore. The check is preserved so a future skill that re-introduces the discovery-
+# state prereq pattern would land in this array.
+discovery_prereq_subskills=()
 errors_before=$errors
 for s in "${discovery_prereq_subskills[@]}"; do
   skill_md="skills/$s/SKILL.md"
@@ -223,7 +230,11 @@ for s in "${discovery_prereq_subskills[@]}"; do
     fail "skills/$s/SKILL.md missing canonical prereq-detection question (per docs/substrate/conventions/skill-shape.md §Canonical prereq-detection question)"
   fi
 done
-[ "$errors" -eq "$errors_before" ] && ok "all ${#discovery_prereq_subskills[@]} discovery-prereq subskills have the canonical prereq-detection question"
+if [ "${#discovery_prereq_subskills[@]}" -eq 0 ]; then
+  ok "discovery-prereq subskills array is empty (discovery is internal to consumer skills as of 2026-05-06)"
+elif [ "$errors" -eq "$errors_before" ]; then
+  ok "all ${#discovery_prereq_subskills[@]} discovery-prereq subskills have the canonical prereq-detection question"
+fi
 
 # 10b. Path-prereq subskills carry a directive-error template instead of the canonical question.
 # Per docs/substrate/conventions/skill-shape.md §"Path prereqs use directive errors, not the

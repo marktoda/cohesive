@@ -15,7 +15,7 @@ The user-facing model is three gates, not five subskills. Substrate plumbing is 
 
 | Gate | What the user gets | What runs underneath |
 |---|---|---|
-| **Decide** | A recommended direction with main risk + structural mitigation | `discover-substrate` (silent) + `brainstorm-design` |
+| **Decide** | A recommended direction with main risk + structural mitigation | `brainstorm-design` (which dispatches `discover-substrate` internally as Step 0) |
 | **Lock** | The direction pinned into specs + an architectural reflection on how the system feels after | `rewrite-specs` + `validate-rewrite` (repair loop internal) |
 | **Build** | Code that matches the locked design, with spec-coverage verified | `implement-cohesively` |
 
@@ -108,10 +108,10 @@ Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, the router-d
 
 | Route | Prereq state to pass | Chosen-direction / artifact state to pass |
 |---|---|---|
-| `design` | n/a (discover-substrate has no prereq) | n/a until step 3; then "approved direction: <option name + summary>"; ledger path passed to step 4 |
-| `review (codebase)` | "Discovery already complete; report at <path or 'inline above'>." | n/a |
-| `review (diff)` | "Discovery already complete (scoped to <changed-files>); report at <path or 'inline above'>." | n/a |
-| `audit (substrate)` | "Discovery already complete; report at <path or 'inline above'>." | n/a |
+| `design` | n/a (discover-substrate is dispatched internally by `brainstorm-design` per its Hard constraint #1) | n/a until step 3; then "approved direction: <option name + summary>"; ledger path passed to step 4 |
+| `review (codebase)` | n/a (discover-substrate is dispatched internally by `review-codebase` Phase 1) | n/a |
+| `review (diff)` | n/a (discover-substrate is dispatched internally by `review-diff` Step 2, scoped to changed files) | n/a |
+| `audit (substrate)` | n/a (discover-substrate is dispatched internally by `audit-substrate` Step 1) | n/a |
 | `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first); ledger path passed to step 2 once `rewrite-specs` has produced it |
 | `implement` | "Validate-rewrite returned **Approved**; review at <path>." | "Design delta ledger at <path>. Branch: design/<slug>." Validation review path and ledger path are both required. |
 | `init` | n/a (init has no prereq; refuses if substrate exists per its Hard constraint #1) | n/a — optional `--brief` flag is the only argument |
@@ -119,10 +119,10 @@ Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, the router-d
 
 Consumers:
 
-- **Prereq-state consumers** (subskills with a `discover-substrate` prereq): `brainstorm-design`, `rewrite-specs`, `review-codebase`, `review-diff`, `audit-substrate`. Each Hard Constraint #1 in those skill bodies states that when the router passes the prereq fragment, the canonical clarifying question is skipped.
+- **Internal-discovery consumers** (subskills that dispatch `cohesive:discover-substrate` themselves as Step 0 / Phase 1.0 of their Process): `brainstorm-design`, `audit-substrate`, `review-codebase`, `review-diff`. The router passes no discovery prereq; each consumer skill owns the dispatch internally. The `Optional override` clause in each consumer's Hard constraint #1 lets the router (or a prior session step) supply a pre-existing discovery report path to skip re-running discovery; absent that, the consumer dispatches discovery itself.
 - **Chosen-direction / ledger-path consumers**: `rewrite-specs` (chosen direction), `validate-rewrite` (ledger path only — no prereq state; this is the documented exception), `implement-cohesively` (validation review path + ledger path; both required), V1 artifact skills.
 
-Direct (non-router) invocation: the subskill asks its canonical question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions". The contract is router-side only.
+Direct (non-router) invocation: the subskill asks its canonical question (about change surface or scope, not about discovery state — discovery is always internal now) per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions". The contract is router-side only.
 
 ## Required behavior
 
