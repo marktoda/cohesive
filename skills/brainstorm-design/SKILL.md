@@ -127,15 +127,22 @@ Open with a single short turn rendering the **axes map** — a one-line structur
 Then drill axes one at a time. Order: **user-impact-if-redirected** first (taste-driven, future-pressure-shaping, organizational/risk axes), **substrate-evidence-strength** as tiebreaker (strongest agent pick last, so prior decisions shape the leaf direction). Each axis turn renders in this order:
 
 1. **Name the axis** in a short header.
-2. **Enumerate the option space as a bulleted list — parallel structure, one option per line — before naming the pick.** Each option carries a short label, a one-clause shape description, and a one-clause tradeoff hint (the load-bearing thing that makes this option distinct from the others). Format:
+2. **Render the option space as parallel labeled blocks — one option per block, blank line between blocks, with Pro and Con sub-bullets so benefits and costs are visible side-by-side.** Each block opens with a bold label + shape clause as its own paragraph; sub-bullets render Pro and Con. For options that are structurally blocked (not credibly viable), substitute `Status:` for Pro/Con and name the structural reason — forcing a fake Pro on a blocked option is theater. Format:
 
    > **Axis: \<axis name\>**
    >
-   > - **A: \<short name\>** — \<shape in one clause\>. *Tradeoff:* \<what this option costs or makes hard\>.
-   > - **B: \<short name\>** — \<shape\>. *Tradeoff:* \<…\>
-   > - **C: \<short name\>** — \<shape\>. *Tradeoff:* \<…\>
+   > **A: \<short name\>** — \<shape in one clause\>.
+   > - *Pro:* \<load-bearing benefit — what would make someone pick this\>
+   > - *Con:* \<load-bearing cost — the structural failure mode if you went this way\>
+   >
+   > **B: \<short name\>** — \<shape\>.
+   > - *Pro:* \<…\>
+   > - *Con:* \<…\>
+   >
+   > **C: \<short name\>** — \<shape\>.
+   > - *Status:* \<structurally blocked — name the reason\>
 
-   The user must be able to scan the option space side-by-side and evaluate the pick against alternatives they can see — not reverse-engineer what A and C are from the counter-pressure paragraphs. Picking from an unseen option space is rule 2b naming-instead-of-showing inside a mid-dialog turn.
+   Pro and Con must be load-bearing structural consequences (not nice-to-haves). If you can't name a real Pro for an option, it isn't credible enough to enumerate. Showing Pro upfront — alongside the costs — prevents biasing the user toward the chosen option through cost-only enumeration; rule 2b applies to mid-dialog turns just as to trailers. The blank lines between option blocks are load-bearing for visual scannability — markdown bulleted lists collapse vertically and lose the side-by-side structure the user needs to compare.
 
 3. **Render the pick + substrate evidence** in verdict-led voice — "I'd pick **X** because Y" with path:line / gotcha citation / invariant name as the substrate evidence.
 4. **Render counter-pressure** for the strongest alternative (the best argument for it, not a strawman) — and for any option you're rejecting outright (like a structurally blocked one), say so explicitly with the structural reason.

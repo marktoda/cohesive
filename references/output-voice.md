@@ -82,7 +82,7 @@ These produce wordiness without information:
 
 `brainstorm-design` conversational mode (per its Hard constraint #5) is the only multi-turn skill in v0.1. The five rules apply **per turn**: verdict-led picks, show-don't-name evidence, one forced-choice question per turn (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions" → §"Per turn, not per invocation"), forbidden phrasings still forbidden per turn, one next move per turn.
 
-The genuinely new constraint specific to multi-turn skills: **conversational-mode turns are not mini-trailers** — they do not carry the verdict-line / thesis / `### Next` shell. The full chat trailer renders once per skill invocation, after the dialog converges; mid-dialog turns are short verdict-led exchanges (1-2 sentences per axis pick + counter-pressure + forced choice; the leaf-direction summary turn is 3-5 lines).
+The genuinely new constraint specific to multi-turn skills: **conversational-mode turns are not mini-trailers** — they do not carry the verdict-line / thesis / `### Next` shell. The full chat trailer renders once per skill invocation, after the dialog converges. Mid-dialog turns render verdict-led picks against a visible option space: an axis turn renders ~15-20 lines for a typical 3-option axis (option space as parallel labeled blocks with Pro/Con sub-bullets per option, then pick + substrate evidence, then counter-pressure for the strongest alternative, then a forced-choice prompt). The leaf-direction summary turn is 3-5 lines.
 
 Generalize this section only when a second multi-turn skill needs the conventions.
 
