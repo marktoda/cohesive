@@ -10,7 +10,12 @@
 
 **3. Off-chain re-entry.** A diagnostic skill (`review-codebase`, `review-diff`, `audit-substrate`) produces findings that re-enter the chain at the appropriate skill. Re-entry is user-driven — the diagnostic recommends a next Cohesive skill in its output footer; the user invokes it. The Design Incoherent verdict from `validate-rewrite` is also treated as off-chain re-entry because it returns further back than the immediate predecessor (to `brainstorm-design`, not to `rewrite-specs`).
 
-**4. Internal repair loop.** A skill dispatches another Cohesive skill via the Skill tool *within its own Process*, consumes that skill's output, and re-dispatches a reviewer agent for the next pass. The loop is invisible to the user as a chain edge — the user sees pass-by-pass progress in chat but does not invoke the dispatched skill themselves. Currently there is one such loop: `validate-rewrite`'s Issues Found repair loop with `rewrite-specs` (see §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)" below).
+**4. Internal dispatch (with or without loop).** A skill dispatches another Cohesive skill via the Skill tool *within its own Process* and consumes that skill's output. Two sub-shapes share this transition:
+
+- **One-shot internal dispatch** — the consumer dispatches a sub-skill once, consumes the persisted output, and proceeds. The 2026-05-06 discovery-as-internal-step rewrite created four instances: `brainstorm-design` / `audit-substrate` / `review-codebase` / `review-diff` each dispatch `cohesive:discover-substrate` internally as a Step 0 / Phase 1.0 / Step 1 / Step 2 sub-step. See §"discover-substrate ↔ consumer skills (internal-dispatch transition)" below.
+- **Internal repair loop** — the consumer dispatches a sub-skill, dispatches a reviewer-agent Task subprocess, and *re-dispatches* the sub-skill on a verdict. Currently one such loop: `validate-rewrite`'s Issues Found repair loop with `rewrite-specs` (see §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)" below).
+
+Both sub-shapes share the same property: the dispatch is invisible to the user as a chain edge; the consumer's own output is what the user sees.
 
 **5. Session-start orientation.** The bootstrap skill `using-cohesive` advises Claude when Cohesive-shaped work is the right framing. It carries no artifact and no verdict; its sole effect is to route the user's substrate-shaped requests to `cohesively` rather than to Superpowers' research/exploration framing. The seam exists because Cohesive needs a session-start surface that competes natively with `superpowers:using-superpowers` for the harness's bootstrap loading slot — without it, first-time users land in the trigger competition documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md`. See §"using-cohesive → cohesively (session-start orientation)" below for the per-handoff contract.
 
@@ -75,17 +80,25 @@ Each handoff specifies: artifact crossing the seam, persistence shape, verdict g
 
 **Failure mode if the contract drifts.** Init produces drafts that overlap with what audit-substrate will later flag — wasted reviewer attention. Mitigation: init caps at 20 and is signal-grep based; audit operates against the kept substrate. The categories are distinct enough that overlap is rare.
 
-### discover-substrate → brainstorm-design
+### discover-substrate ↔ consumer skills (internal-dispatch transition)
 
-**Artifact crossing.** Substrate discovery report.
+As of the 2026-05-06 discovery-as-internal-step rewrite, `discover-substrate` is no longer a chain edge the router dispatches separately. Each consumer skill (`brainstorm-design`, `audit-substrate`, `review-codebase`, `review-diff`) dispatches `cohesive:discover-substrate` via the Skill tool internally as a sub-step of its own Process. This is structurally an **internal-dispatch transition** — same shape as the validate-rewrite ↔ rewrite-specs internal repair loop (transition shape #4 per §"The five transition shapes"), but with the consumer dispatching upstream rather than re-dispatching downstream.
 
-**Persistence.** Chat or persisted (caller's choice). When `cohesively` dispatches the `design` route, the report is passed via the dispatch prompt; when invoked directly, the report renders in chat.
+**Transition shape.** Internal dispatch within the consumer skill's Process. The consumer dispatches `cohesive:discover-substrate` via the Skill tool with a change surface (the user's brainstorm topic / audit scope / review scope / changed-files set), waits for the persisted report path, and consumes the report as input to its main work. The router does not see this dispatch — it only dispatches the consumer skill.
 
-**Verdict gate.** None. Discovery is a no-verdict utility.
+**Artifact crossing.** Substrate discovery report (persisted to disk by `discover-substrate`; path returned to the dispatching consumer).
 
-**What `brainstorm-design` must not re-derive.** The substrate inventory. The brainstorm reads the discovery report as input; re-discovering wastes a turn and produces an inventory that may diverge from the report.
+**Persistence.** Always persisted (so cross-skill reuse is possible per the optional-override path in each consumer's Hard constraint #1). The report lives at the path `discover-substrate` chooses per its artifact-resolution rules.
 
-**Failure mode if the contract drifts.** Brainstorm produces options grounded in a re-derived inventory; the inventory disagrees with the report; the user sees two substrate views and can't tell which is canonical. Detection: `spec-cohesion-reviewer` flags substrate-claim divergence during `validate-rewrite`.
+**Verdict gate.** None at the seam. Discovery is a no-verdict utility; the consumer's verdict is what gates anything downstream.
+
+**Optional override (cross-skill reuse).** If the dispatch prompt to a consumer skill includes "Discovery already complete; report at <path>", the consumer skips the internal `discover-substrate` dispatch and reads the named report directly. This handles three cases: (a) the user explicitly invoked `cohesive:discover-substrate` before the consumer; (b) another consumer skill ran discovery earlier in the same session and the report covers the same change surface; (c) legacy router-driven invocation patterns from before the 2026-05-06 internalization. The override is an optimization; the default is internal dispatch.
+
+**What the consumer must not re-derive.** The substrate inventory itself, when an override report path is supplied. Re-running discovery against an already-supplied report wastes the cross-skill reuse benefit and risks producing a divergent inventory.
+
+**Failure mode if the contract drifts.** (a) The consumer renders discovery's chat output as if it were a separate chain step (the user-reported pain the rewrite closed) — caught by reviewer attention on chat-trailer surfaces. (b) The consumer dispatches discover-substrate without a change surface — caught by discover-substrate's own input contract (it asks for a change surface if unclear). (c) The optional-override path is taken with a stale or scope-mismatched report — currently reviewer-judged; a future delta could add a freshness check or scope-match verification. (d) A new consumer skill is added but doesn't dispatch discovery internally — caught by the per-skill design layer in `architecture/skills.md` § the new skill's section, which would flag the omission against the new "Internally dispatches" Composition convention.
+
+**Cited from.** Each consumer skill's Hard constraint #1 + Process Step (0 / 1 / 1.0 / 2 depending on the skill) + `## Composition` "Internally dispatches" bullet. The router does not cite this transition because it does not participate.
 
 ### brainstorm-design → rewrite-specs
 

@@ -15,14 +15,18 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## When to invoke
 
-Always invoke this skill (or compose its output) before:
-- `brainstorm-design` — so options are grounded in what the system already says about itself
-- `rewrite-specs` — so the rewrite knows what it's overwriting
-- `review-codebase` — so the review knows where the normative docs live
-- `review-diff` — so the review can connect changed files to their substrate
-- `audit-substrate` — same scan, but emphasizes missing-memory findings
+**Primary invocation: dispatched internally by a consumer skill.** As of the 2026-05-06 discovery-as-internal-step rewrite, four consumer skills dispatch `cohesive:discover-substrate` themselves via the Skill tool as a sub-step of their own Process:
 
-Skip only when the user has *already* run discovery in this session and named the change surface. In that case, re-use the prior report.
+- `brainstorm-design` — Step 0 (per its Hard constraint #2)
+- `audit-substrate` — Step 1 (per its Hard constraint #1)
+- `review-codebase` — Phase 1.0 (per its Hard constraint #1)
+- `review-diff` — Step 2 (per its Hard constraint #1)
+
+In these cases, the user does not invoke this skill directly — it runs as plumbing inside the consumer's chat trailer. The consumer reads the persisted report from disk and produces the user-visible output. (Note: `rewrite-specs` is *not* an internal-discovery consumer — its prereq is a chosen direction, not a discovery report.)
+
+**Direct invocation (the rare case).** A user can invoke `/cohesive:discover-substrate` directly when they want a raw substrate inventory without a brainstorm / audit / review on top of it. Direct invocation produces the full inventory render in chat per the §"Output format" template below; this is the only path that surfaces discovery's chat output to the user.
+
+**Cross-skill reuse via the optional-override path.** When a discovery report from an earlier session step covers the same change surface, a consumer skill's "optional override" clause (Hard constraint #1, all four consumers) lets the dispatch prompt name the existing report path; the consumer skips re-running discovery and reads the named report directly.
 
 ## Inputs
 

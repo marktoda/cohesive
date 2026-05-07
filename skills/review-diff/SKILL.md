@@ -17,11 +17,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **Substrate discovery is a prereq; ask the user, don't guess.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, detecting prior discovery from session memory silently degrades. Open the turn with the canonical forced-choice question:
-
-   > "I see we're about to run review-diff. Has substrate discovery already happened for the changed files, or should I run `discover-substrate` first?"
-
-   When the `cohesively` router invokes this skill, it passes "discovery already complete; report at <path>" in the dispatch prompt and this skill skips the question.
+1. **Substrate discovery is internal to this skill.** Step 2 of the Process dispatches `cohesive:discover-substrate` via the Skill tool with the changed-files set as the change surface (scoped, not whole-repo per Hard constraint #4). discover-substrate runs as a sub-step, persists its report, and returns a path this skill consumes. The user does not see discovery output as a separate render. **Optional override:** if the dispatch prompt names a discovery report path that's already been produced (and the path was scoped to the same diff or a superset), this skill reuses that path instead of re-running discovery.
 
 2. **Reviewers receive paths, not summaries.** Pass the agents file paths; let them read.
 3. **Reviewers run in parallel.** Single message, multiple Task tool calls.
@@ -39,9 +35,9 @@ Try in order:
 - Else: `git diff HEAD` (working changes) and `git diff --cached` (staged)
 - If empty: refuse — "No diff to review. Specify a PR number or commit your changes first."
 
-### 2. Substrate discovery, scoped to changed files
+### 2. Dispatch substrate discovery internally, scoped to changed files
 
-Run `discover-substrate` with the changed file paths as the change surface (or reuse its output if the router already ran it).
+Per Hard constraint #1, dispatch `cohesive:discover-substrate` via the Skill tool with the changed file paths as the change surface (scoped, not whole-repo). Skip if the dispatch prompt names an existing scoped discovery report path. Consume the persisted report as input to Step 3's reviewer dispatch.
 
 ### 3. Dispatch two reviewers in parallel
 
@@ -140,7 +136,7 @@ The verdict line renders the user-facing label (translated via `${CLAUDE_PLUGIN_
 
 ## Composition
 
-- **Always preceded by:** `discover-substrate` (scoped to changed files, or reuse of its output)
+- **Internally dispatches:** `cohesive:discover-substrate` as Step 2 (scoped to changed files) per Hard constraint #1; optional override skips re-running discovery if a scoped report path is supplied in the dispatch prompt.
 - **Often followed by:** `rewrite-specs` (Needs substrate verdict), `cohesive:review-codebase` (Risky verdict), `brainstorm-design` (Block verdict), or `superpowers:writing-plans` (Pass / Pass with notes)
 - **Invocation contexts (four):** PR review (`gh pr diff <number>`); branch review (`git diff main...HEAD`); working-changes review (`git diff HEAD`); **post-implementation review against a Cohesive-locked design** — given a branch where code landed via a non-Cohesive path (the validate-rewrite Approved-trailer bypass option, a teammate writing code, or an external tool) and a `design/<slug>` rewrite the branch claims to implement, this skill is the verification entry point. Pass the design delta ledger path explicitly in the invocation so the substrate-alignment-reviewer reads the locked design as a primary input alongside discovery. Pattern documented in [`docs/substrate/architecture/handoffs.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md) §"Post-implementation review entry point".
 - **Compatible with:** Superpowers' `code-reviewer` for the implementation-quality lens after this skill's substrate lens. Run both for a high-stakes PR.

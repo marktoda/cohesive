@@ -23,17 +23,21 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 ## Hard constraints
 
 1. **Never produce code from this skill.** Not a snippet, not a function signature. Brainstorming ends at "here's the recommended direction."
-2. **Substrate discovery is a prereq; ask the user, don't guess.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, detecting prior discovery from session memory silently degrades. Open the turn with the canonical forced-choice question:
-
-   > "I see we're about to run brainstorm-design. Has substrate discovery already happened for this change surface, or should I run `discover-substrate` first?"
-
-   When the `cohesively` router invokes this skill, it passes "discovery already complete; report at <path>" in the dispatch prompt and this skill skips the question.
+2. **Substrate discovery is internal to this skill.** Step 0 of the Process dispatches `cohesive:discover-substrate` via the Skill tool with the change surface extracted from the user's brainstorm topic. The user never sees discovery output as a separate render — it's a sub-step that produces a persisted report this skill consumes. The router routes `design` to this skill *directly* (not chained discover-substrate → brainstorm-design); the discovery dispatch happens here, where it is plumbing for the brainstorm rather than user-visible output. **Optional override:** if the dispatch prompt names a discovery report path that's already been produced (e.g., another consumer skill ran discovery in the same session, or the user explicitly invoked `cohesive:discover-substrate` first), this skill reuses that path instead of re-running discovery.
 
 3. **Always propose at least two credible options for non-trivial changes.** Single-option "design" is just a proposal, not a decision.
 4. **Never recommend an option whose main risk is mitigated by "we'll be careful."** Mitigation is structure: a test, a linter, a boundary, a constraint.
 5. **Conversational mode is multi-turn; each turn asks at most one forced-choice question.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions" → §"Per turn, not per invocation". Each conversational turn presents a verdict-led pick on one decision and asks the user to ratify or redirect — never a vague "what do you want?" prompt. Forbidden phrasings from `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` apply per-turn.
 
 ## Process
+
+### Step 0: Dispatch substrate discovery (internal)
+
+Before grounding the brainstorm, dispatch `cohesive:discover-substrate` via the Skill tool with the change surface extracted from the user's request (the topic of the brainstorm). discover-substrate runs as a sub-step, persists its full report to disk, and returns a path. This skill consumes the path as input to Phase 1; the user does not see discover-substrate's chat output.
+
+**Skip condition:** if the dispatch prompt to this skill includes "Discovery already complete; report at <path>", do not re-dispatch — read the named report directly. This handles three cases: (a) the user explicitly invoked `cohesive:discover-substrate` before brainstorm-design and the report exists; (b) another consumer skill ran discovery earlier in the same session; (c) the router (in legacy invocation patterns) passed the prereq state explicitly.
+
+**Change-surface clarification:** if the user's brainstorm topic is unclear at the change-surface level (e.g., "design something for auth" without naming a subsystem), ask one precise clarifying question naming the candidate change surfaces from the repo's directory structure: "Which subsystem is the brainstorm about: <option A>, <option B>, <option C>?" This is the canonical clarifying question for brainstorm-design — distinct from the retired discovery-state question that lived here pre-2026-05-06.
 
 ### Phase 0: Resolve the artifact directory
 
@@ -48,7 +52,7 @@ Brainstorms are not always persisted — many design conversations end at the re
 
 ### Phase 1: Ground the brainstorm
 
-Use the discovery report (passed by the router or produced by Hard constraint #2's pre-check) as the starting material. If the discovery report carries `**Empty-substrate verdict: yes**`, broaden option-generation to fundamentals rather than grounding in nothing — this is a fresh-substrate codebase, not a mature one.
+Use the discovery report from Step 0 (the persisted report path returned by the internal `cohesive:discover-substrate` dispatch) as the starting material. If the discovery report carries `**Empty-substrate verdict: yes**`, broaden option-generation to fundamentals rather than grounding in nothing — this is a fresh-substrate codebase, not a mature one.
 
 Then, in chat, capture three things separately (plus a fourth optional category for re-decide cycles):
 
@@ -75,6 +79,8 @@ The dispatching `validate-rewrite` invocation passes this input as part of the S
 The brainstorm uses these inputs to bias option-generation: any new option must either resolve the harder-downstream concerns of the discarded direction or explicitly accept them with a different structural mitigation. Options that re-derive the discarded path without addressing its concerns are out of scope. The pressure-test battery in Phase 4 attacks the new options against the discarded reflection's concerns, not just against the substrate at large.
 
 If any of the four input categories is unclear, ask **one** precise clarifying question. Suggested forms: "Which future pressure should this design optimize for most: <option A>, <option B>, or <option C>?" (when future pressure is the unclear input) or "Which of the prior reflection's concerns is the most load-bearing for this re-decide: <concern A> or <concern B>?" (when re-decide-cycle inputs are unclear).
+
+**Question precedence.** Step 0's change-surface clarification (Hard constraint #2) takes precedence over Phase 1's future-pressure / re-decide question. If the change surface is unclear, ask Step 0's question first; Phase 1's question only fires after the change surface is known and the discovery report is in hand.
 
 ### Phase 2: Identify axes and select mode
 
@@ -354,6 +360,6 @@ If the user declines persistence (one-shot brainstorm, no rewrite intended), the
 
 ## Composition
 
-- **Always preceded by:** `discover-substrate` (or its output reused from earlier in session)
+- **Internally dispatches:** `cohesive:discover-substrate` as Step 0 per Hard constraint #2; optional override skips re-running discovery if a report path is supplied in the dispatch prompt.
 - **Modes:** autonomous (one-turn trailer) or conversational (multi-turn axis dialog) — selected by the auto-detect gate in Phase 2; user override available either direction at any phase boundary
 - **Often followed by:** `rewrite-specs` (if direction is approved and large enough to justify a spec rewrite). When `rewrite-specs` runs, the chain continues `validate-rewrite` → `implement-cohesively`. If the change is small and substrate is already in good shape, the user may go directly to `superpowers:writing-plans` without the rewrite chain.

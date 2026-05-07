@@ -17,11 +17,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **Substrate discovery is a prereq; ask the user, don't guess.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, detecting prior discovery from session memory silently degrades. Open the turn with the canonical forced-choice question:
-
-   > "I see we're about to run review-codebase. Has substrate discovery already happened for this scope, or should I run `discover-substrate` first?"
-
-   When the `cohesively` router invokes this skill, it passes "discovery already complete; report at <path>" in the dispatch prompt and this skill skips the question.
+1. **Substrate discovery is internal to this skill.** Phase 1's first sub-step dispatches `cohesive:discover-substrate` via the Skill tool with the review scope. discover-substrate runs as a sub-step, persists its report, and returns a path this skill consumes as the substrate inventory before reading normative docs. The user does not see discovery output as a separate render. **Optional override:** if the dispatch prompt names a discovery report path that's already been produced, this skill reuses that path instead of re-running discovery.
 
 2. **Reviewers receive paths, not summaries.** Pass the agents file paths; let them read. Pre-summarizing biases the review.
 3. **Reviewers run in parallel.** Use a single message with multiple Task tool calls. Sequential is wasted wall-clock time and burns more tokens because each agent re-loads context.
@@ -44,7 +40,9 @@ Announce the resolved path in chat before reading begins. Don't hardcode `docs/h
 
 ### Phase 1: Read normative substrate
 
-Use `discover-substrate` (or its output) to get the list. Read in priority order:
+**Phase 1.0: Dispatch substrate discovery internally.** Per Hard constraint #1, dispatch `cohesive:discover-substrate` via the Skill tool with the review scope (whole repo or named subsystem). Consume the persisted report. Skip if the dispatch prompt names an existing report path.
+
+**Phase 1.1: Read in priority order.** Use the discovery report's listing. Read:
 1. `CLAUDE.md`, `AGENTS.md`
 2. `ARCHITECTURE.md`, `architecture.md`
 3. `README.md`
@@ -225,7 +223,7 @@ Architecture reviews can burn a lot of tokens. Constraints:
 
 ## Composition
 
-- **Always preceded by:** `discover-substrate` (or reuse of its output)
+- **Internally dispatches:** `cohesive:discover-substrate` as Phase 1.0 per Hard constraint #1; optional override skips re-running discovery if a report path is supplied in the dispatch prompt.
 - **Often followed by:** `rewrite-specs` (if the review found spec drift requiring repair) or `superpowers:writing-plans` (if the review approved the change)
 - **Compatible with:** Superpowers' `code-reviewer` for the implementation-quality lens, after Cohesive's substrate lens. Run both for a high-stakes review.
 - **Adjacent skills:** `cohesive:review-diff` (PR/diff review) and `cohesive:audit-substrate` ("what's missing" rather than "what's wrong").

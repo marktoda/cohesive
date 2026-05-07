@@ -17,11 +17,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **Substrate discovery is a prereq; ask the user, don't guess.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, detecting prior discovery from session memory silently degrades. Open the turn with the canonical forced-choice question:
-
-   > "I see we're about to run audit-substrate. Has substrate discovery already happened for this scope, or should I run `discover-substrate` first?"
-
-   When the `cohesively` router invokes this skill, it passes "discovery already complete; report at <path>" in the dispatch prompt and this skill skips the question.
+1. **Substrate discovery is internal to this skill.** Step 0 of the Process dispatches `cohesive:discover-substrate` via the Skill tool with the audit scope (whole repo, or a named subsystem). discover-substrate runs as a sub-step, persists its report, and returns a path this skill consumes. The user does not see discovery output as a separate render. **Optional override:** if the dispatch prompt names a discovery report path that's already been produced, this skill reuses that path instead of re-running discovery.
 
 2. **No reviewer-agent dispatch.** A substrate audit is a single-pass scan. Don't burn 4× tokens for a missing-memory inventory.
 3. **Score "does the substrate exist," not "is the code good."** A missing-memory finding is about an absent artifact, not a code defect. Code defects belong in `cohesive:review-diff` or in normal review.
@@ -40,11 +36,13 @@ Before scanning, resolve where the audit report will be written. Apply the four-
 
 Announce the resolved path in chat before the scan begins.
 
-### 1. Re-use the substrate discovery report
+### 1. Dispatch substrate discovery internally and consume the report
 
-The user's answer to the prereq question (or the router's dispatch prompt) names the report path. Use it. If the user said to run `discover-substrate` first, do that and use its output.
+Per Hard constraint #1, dispatch `cohesive:discover-substrate` via the Skill tool with the audit scope (whole repo or a named subsystem extracted from the user's request). discover-substrate runs as a sub-step, persists its full report to disk, and returns the path. Read the path; consume the report as input to Step 2.
 
-When invoked from the `cohesively` router with the `audit (substrate)` route, the router passes "discovery already complete; report at <path>" explicitly per the dispatch prompt contract in `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md`.
+**Skip condition:** if the dispatch prompt to this skill includes "Discovery already complete; report at <path>", do not re-dispatch — read the named report directly. This handles three cases: (a) the user explicitly invoked `cohesive:discover-substrate` before audit-substrate; (b) another consumer skill ran discovery earlier in the same session; (c) the router (in legacy invocation patterns) passed the prereq state explicitly.
+
+**Scope clarification:** if the audit scope is unclear (e.g., "audit substrate" without naming whole-repo vs subsystem), ask one precise clarifying question naming the candidate scopes from the repo's directory structure: "Which scope should I audit: the whole repo, or a specific subsystem (<option A>, <option B>, ...)?"
 
 ### 2. Apply the cohesion rubric to the substrate, not the code
 
@@ -212,8 +210,8 @@ The "Top fixes" body block uses substrate-shape vocabulary in the *content* of e
 
 ## Composition
 
-- **Most often invoked by:** `cohesive:cohesively` route `audit (substrate)` (cell R007 in [`docs/substrate/matrices/router.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md)). The router passes "discovery already complete; report at <path>" so this skill skips its own discovery prompt.
-- **Always preceded by:** `cohesive:discover-substrate`
+- **Most often invoked by:** `cohesive:cohesively` route `audit (substrate)` (cell R007 in [`docs/substrate/matrices/router.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md)). The router passes no discovery prereq; this skill dispatches `cohesive:discover-substrate` internally as Step 1 per Hard constraint #1.
+- **Internally dispatches:** `cohesive:discover-substrate` as Step 1; optional override skips re-running discovery if a report path is supplied in the dispatch prompt.
 - **Often followed by:** `cohesive:rewrite-specs` (the highest-leverage entries become real artifacts) or no Cohesive follow-up (the audit is the deliverable).
 - **Adjacent skill:** `cohesive:review-codebase` — for "what's wrong with the architecture given the substrate that exists"; this skill is for "what substrate doesn't yet exist."
 
