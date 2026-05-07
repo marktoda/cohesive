@@ -1,6 +1,6 @@
 # Substrate layout
 
-The directory structure Cohesive's skills default to when creating or finding substrate artifacts. The structure encodes one principle: **canonical and historical artifacts have different lifecycles and live in different places.**
+The directory structure Cohesive's skills default to when creating or finding substrate artifacts. The structure encodes two principles: **canonical and historical artifacts have different lifecycles and live in different places**, and **within the historical bucket, durable decision records persist permanently while ephemeral run scaffolding is cleaned up at handoff**.
 
 ## The split
 
@@ -26,9 +26,15 @@ docs/
 
 `docs/history/` is **append-only**. Reviews, plans, and delta-ledgers are dated point-in-time artifacts; never edited after creation. Date in the filename.
 
+## Lifecycle: durable vs ephemeral
+
+Within `docs/history/`, artifacts split along a second axis. **Durable** decision records (brainstorms, delta-ledgers, reviews, transcripts) persist permanently in main; **ephemeral** run scaffolding (per-phase plans, discovery reports) lives on the implementation branch and is cleaned up at handoff per §"Cleanup at handoff" below. Per-category classification lives in [`docs/substrate/matrices/artifact-placement.md`](../matrices/artifact-placement.md) §"Lifecycle by artifact category".
+
+The lifecycle axis is orthogonal to the audience seam in [`audience-separation.md`](audience-separation.md): the audience seam governs render surfaces (chat vs persisted file); lifecycle governs persistence surfaces (main vs branch). See [`gotchas/plans-as-run-scaffolding.md`](../gotchas/plans-as-run-scaffolding.md) for the failure mode this prevents.
+
 ## Why the split
 
-Mixing canonical and historical content in one directory produces the pain Cohesive was designed to fix: you can never tell whether a doc is current or stale. The split makes it structural — `docs/substrate/X` is current *by location*. A reader doesn't have to read the file to know its lifecycle.
+Mixing canonical and historical content in one directory produces the pain Cohesive was designed to fix: you can never tell whether a doc is current or stale. The canonical/historical split makes it structural — `docs/substrate/X` is current *by location*. The durable/ephemeral sub-axis extends the same principle inside `docs/history/`: a reader on `main` who sees a plan path knows it's a permanent record, because the cleanup-at-handoff convention strips run scaffolding before merge.
 
 ## Naming
 
@@ -69,12 +75,21 @@ Cohesive skills creating new artifacts:
 1. **Detect existing convention.** If the repo uses `docs/specs/`, `docs/adr/`, `docs/invariants/`, etc., extend it — don't impose Cohesive's layout on a repo that has its own.
 2. **Otherwise default to the layout above.**
 3. **Never run parallel.** If `docs/specs/` exists for canonical content, don't create a sibling `docs/substrate/`. Pick one.
+4. **Write ephemeral artifacts to `docs/history/<category>/` like durable ones** — directory choice doesn't encode lifecycle; cleanup-at-handoff does. Per-category classification lives in [`artifact-placement.md`](../matrices/artifact-placement.md) §"Lifecycle by artifact category".
 
 Cohesive skills reading substrate (`discover-substrate`, `review-codebase`, `review-diff`, `audit-substrate`, `validate-rewrite`):
 
 - Read this layout if present
 - Read existing repo conventions otherwise
 - If both exist, treat the existing one as authoritative and flag the duplication for cleanup
+
+## Cleanup at handoff
+
+After Phase 3 (final substrate review) returns Pass / Pass with notes, `cohesive:implement-cohesively` Phase 3.5 runs `git rm` on the ephemeral paths for this slug and produces a single commit whose body lists the removed paths verbatim. The verbatim list is the breadcrumb a forensic reader on main follows back to pre-cleanup branch history via `git log --all -- <pattern>`. Cleanup gates on Implemented verdict only; on Phase Drift / Substrate Drift / Aborted, ephemeral artifacts remain on the branch for the next attempt or post-mortem.
+
+A "run" spans Phase 1 inception through Phase 3 verdict, independent of Claude session boundary. Plans persist on the branch across session disconnects; the run terminates when Phase 3 returns a verdict, not when the user closes a session. See [`skills/implement-cohesively/SKILL.md`](../../../skills/implement-cohesively/SKILL.md) §"Phase 3.5. Strip implementation scaffolding" for the operational steps and the cleanup commit format.
+
+**Forensic recovery edges.** When the branch is merged via merge-commit, the cleanup commit and the prior phase commits are both visible in main's history graph; `git log --all -- <pattern>` recovers the plans. When the branch is squash-merged, the per-phase add and the cleanup `rm` collapse into the squashed commit's net diff (zero — plans don't appear), which is the desired outcome (smaller PR); pre-squash branch history retains the plan content if the branch ref is preserved. When the branch is force-pushed or deleted before merge, plan content is unrecoverable — preserve the implementation branch ref until merge if forensic recovery matters.
 
 ## Artifact directory resolution
 
@@ -98,6 +113,7 @@ The full cell-by-cell expansion (per artifact category × per repo shape) lives 
 - "Design" doc that aspires to canonical state but lives in its own subdir — promote to `ARCHITECTURE.md` once approved; otherwise keep in `history/plans/` until it earns canonical status
 - One invariant file with multiple invariants in it — split into one file per named invariant; cross-reference via the substrate map
 - Creating subdirs before they have content — adds visual ceremony without teaching anything
+- Lifecycle mishandling — ephemeral artifacts surviving into main (Phase 3.5 didn't fire), gitignored ephemeral artifacts (causes citation rot at commit time), or new artifact categories shipped without a lifecycle row in `artifact-placement.md`. See [`gotchas/plans-as-run-scaffolding.md`](../gotchas/plans-as-run-scaffolding.md).
 
 ## Substrate map
 

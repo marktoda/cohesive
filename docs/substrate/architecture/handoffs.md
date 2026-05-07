@@ -200,13 +200,15 @@ When `validate-rewrite` returns **Approved** but the user reads the Architectura
 
 ### implement-cohesively → finishing-a-development-branch (Implemented)
 
-**Verdict gate.** **Implemented** — every phase's `delta-coverage-reviewer` returned Covered, the final `cohesive:review-diff` returned Pass or Pass with notes, and the branch is ready to merge.
+**Verdict gate.** **Implemented** — every phase's `delta-coverage-reviewer` returned Covered, the final `cohesive:review-diff` returned Pass or Pass with notes, and Phase 3.5 has produced the ephemeral-cleanup commit. The branch is ready to merge with main's tree carrying only durable decision records.
+
+**Artifact crossing.** The branch (with Phase 3.5 cleanup commit at HEAD) + the cleanup commit SHA, surfaced in the trailer's Branch state slot. Phase 3.5 strips ephemeral artifacts via `git rm` and produces a commit whose body lists removed paths verbatim; the verbatim list is the breadcrumb for forensic recovery via `git log --all -- <pattern>`. See `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` §"Phase 3.5. Strip implementation scaffolding".
 
 **Downstream skill.** `superpowers:finishing-a-development-branch` (recommended, not invoked — branch finishing is a user action per the Cohesive↔Superpowers seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`).
 
-**What the downstream must not re-derive.** The implementation's substrate alignment. The Implemented verdict is the substrate-side check; finishing-a-development-branch handles merge mechanics.
+**What the downstream must not re-derive.** The implementation's substrate alignment (the Implemented verdict is the substrate-side check). The downstream also must not undo the Phase 3.5 cleanup — ephemeral artifacts are intentionally absent from the post-cleanup tree.
 
-**Failure mode if the contract drifts.** `implement-cohesively` auto-invokes branch finishing instead of recommending it; user loses the explicit hand-off and the branch merges without their final approval. Detection: structure-reviewer flags auto-invocation as a Cohesive↔Superpowers seam violation.
+**Failure modes.** (a) Auto-invocation of branch finishing instead of recommending it — caught by structure-reviewer as a Cohesive↔Superpowers seam violation. (b) Phase 3.5 doesn't fire on Implemented (run scaffolding leaks into main) or fires on a non-Implemented verdict (artifacts load-bearing for the next attempt are stripped) — both caught by Hard constraint #6 in the skill body and by structure-reviewer attention on merged branches.
 
 ### implement-cohesively → implement-cohesively resume (Phase Drift)
 

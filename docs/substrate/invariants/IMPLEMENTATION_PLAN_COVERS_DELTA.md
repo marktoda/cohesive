@@ -1,18 +1,21 @@
 # IMPLEMENTATION_PLAN_COVERS_DELTA
 
-> Every entry in a design delta ledger maps to at least one phase in the implementation pass that lands code against that ledger. Phases without a plan persisted at `docs/history/plans/` cannot exist; plans without delta-entry citations cannot pass `delta-coverage-reviewer`. Coverage is structural, not aspirational.
+> Every entry in a design delta ledger maps to at least one phase in the implementation pass that lands code against that ledger. Phases produce per-phase plans persisted at `docs/history/plans/` during the run; plans without delta-entry citations cannot pass `delta-coverage-reviewer`. Phase commits cite both the plan path (resolves during the run; recoverable via `git log --all` after Phase 3.5 cleanup) and the delta-entry stable IDs (the citation that survives cleanup in main). Coverage is structural, not aspirational.
 
 ## Rule
 
 For every Cohesive implementation pass driven by `cohesive:implement-cohesively`:
 
 1. Every entry in the design delta ledger (every Files-rewritten entry, every Files-added entry, every Conceptual-change row, every Named-invariant entry, every Behavior-matrix entry, every Gotcha entry, every Tests-proposed entry — excluding entries explicitly marked Deferred) maps to ≥1 phase in the implementation pass.
-2. Every phase persists its plan at `docs/history/plans/<YYYY-MM-DD>-<slug>-phase-<N>.md`, authored by `superpowers:writing-plans` from the phase intent.
-3. Every phase's commit message cites the plan path and the stable IDs of the delta entries the phase covers.
+2. Every phase persists its plan at `docs/history/plans/<YYYY-MM-DD>-<slug>-phase-<N>.md` during the run, authored by `superpowers:writing-plans` from the phase intent. The plan is committed on the `design/<slug>` (or `implement/<slug>`) branch as part of the phase commit; `delta-coverage-reviewer`'s paths-only dispatch reads the tracked path during Phase 2c. The plan is **ephemeral** per [`docs/substrate/matrices/artifact-placement.md`](../matrices/artifact-placement.md) §"Lifecycle by artifact category" and is cleaned up at Phase 3.5 on Implemented verdict.
+3. Every phase's commit message cites both the plan path and the delta-entry stable IDs. After Phase 3.5 cleanup, the stable IDs remain greppable in main; the plan path is recoverable via `git log --all` from branch history.
 4. Every phase ends with a `delta-coverage-reviewer` cross-review whose verdict is Covered. Drift and Incomplete verdicts gate phase progression.
-5. The implementation pass ends with `cohesive:review-diff` against the branch as a final substrate check.
+5. The implementation pass ends with `cohesive:review-diff` against the branch as a final substrate check (Phase 3).
+6. On Phase 3 Pass / Pass with notes (Implemented verdict), Phase 3.5 strips ephemeral artifacts via a single cleanup commit whose body lists removed paths verbatim, before handoff to `superpowers:finishing-a-development-branch`. On Phase Drift / Substrate Drift / Aborted, Phase 3.5 does not fire — ephemeral artifacts remain on the branch for the next attempt or post-mortem.
 
-If any of points 1–5 fail, the implementation pass is non-compliant and substrate has drifted.
+If any of points 1–6 fail, the implementation pass is non-compliant and substrate has drifted.
+
+A "run" spans Phase 1 inception through Phase 3 verdict, independent of Claude session boundary. Plans persist on the branch across session disconnects; the run terminates on Phase 3 verdict, not on session disconnect. Re-entering on `design/<slug>` in a later session resumes the run; ephemeral artifacts the prior session committed are still load-bearing for `delta-coverage-reviewer` dispatch in subsequent phases.
 
 ## Scope
 
@@ -43,23 +46,18 @@ This is the third named invariant Cohesive ships, joining `${CLAUDE_PLUGIN_ROOT}
 
 Every place this invariant must hold:
 
-- **`cohesive:implement-cohesively` Phase 1.** Produces the coverage table; refuses to advance to Phase 2 if any delta entry is uncovered.
-- **`cohesive:implement-cohesively` Phase 2 per-phase loop.** Each iteration invokes `superpowers:writing-plans` (plan persistence), `superpowers:executing-plans` (code), `delta-coverage-reviewer` (cross-review verdict).
-- **`cohesive:implement-cohesively` Phase 3.** Final substrate check via `cohesive:review-diff`; any non-Pass verdict gates merge.
-- **`docs/history/plans/`.** Plans persisted here are the audit trail. A branch with implementation commits but no plans persisted is a violation.
-- **`design/<slug>` or `implement/<slug>` branch commit messages.** Each phase commit cites the plan path and the delta-entry stable IDs. A commit with implementation changes but no citation is a violation. Both branch shapes (default one-branch-end-to-end on `design/<slug>` and the split-merge alternative on `implement/<slug>`) are in scope.
+- **`cohesive:implement-cohesively` Phases 1, 2, 3, 3.5.** Phase 1 produces the coverage table and refuses to advance with uncovered delta entries. Phase 2 invokes `superpowers:writing-plans`, `superpowers:executing-plans`, and `delta-coverage-reviewer` per phase. Phase 3 runs `cohesive:review-diff`. Phase 3.5 strips ephemeral artifacts on Implemented verdict only, via a cleanup commit whose body lists removed paths verbatim.
+- **`docs/history/plans/`.** Plans persist on the branch from the phase commit that creates them through Phase 3.5 cleanup. A branch mid-implementation with phase commits but no plans on the tree is a violation. After cleanup, plans are absent from main's tree but recoverable via `git log --all` from branch history.
+- **Phase commit messages.** Each phase commit cites both the plan path and the delta-entry stable IDs. After Phase 3.5 cleanup, the stable IDs remain greppable in main; plan paths are pre-cleanup branch-history references. Both branch shapes (`design/<slug>` and `implement/<slug>`) are in scope.
 
 ## Enforcement
 
-How the invariant is structurally enforced:
+- **Skill-body acceptance criteria:** `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` Hard constraints #4, #5, and #6 require coverage, cross-review, and gated cleanup. The skill refuses to advance with uncovered delta entries; requires final substrate review; gates Phase 3.5 cleanup on Implemented verdict.
+- **Reviewer agent verdict:** `${CLAUDE_PLUGIN_ROOT}/agents/delta-coverage-reviewer.md` returns Covered/Drift/Incomplete during Phase 2c. Drift and Incomplete are non-advancing verdicts. The agent reads the plan path during cross-review — alive throughout Phase 2, before Phase 3.5 cleanup.
+- **Plan persistence:** `superpowers:writing-plans` writes plans to disk during Phase 2a; the phase commit tracks them on the branch. Plans cannot exist only in conversation.
+- **Phase 3.5 gating:** cleanup fires only on Implemented verdict; the cleanup commit body must list removed paths verbatim. Both rules are violations otherwise.
 
-- **Skill-body acceptance criteria:** `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` Hard constraints #4 and #5 require coverage and cross-review. The skill body refuses to advance with uncovered delta entries (Phase 1 acceptance) and requires final substrate review (Phase 3).
-- **Reviewer agent verdict:** `${CLAUDE_PLUGIN_ROOT}/agents/delta-coverage-reviewer.md` returns Covered/Drift/Incomplete; Drift and Incomplete are non-advancing verdicts. The agent's "What you check" §1 names coverage as the priority-one judgment.
-- **Plan persistence:** `superpowers:writing-plans` writes plans to disk. Plans cannot exist only in conversation. The artifact is the audit surface.
-- **Commit message citation:** `implement-cohesively`'s Phase 2d. Commit the phase names the plan path and delta IDs in the commit message body. Lint check (deferred V1): a CI grep that every commit on a `design/<slug>` or `implement/<slug>` branch authored by `implement-cohesively` cites at least one plan path and at least one delta entry stable ID.
-- **Final substrate review (Phase 3):** `cohesive:review-diff` runs after the last per-phase iteration of Phase 2 per `implement-cohesively` Hard constraint #5. Its verdict gates merge.
-
-A convention without enforcement is just a hope. The structural fences above (Phase 1 refuses to advance; reviewer returns non-advancing verdicts; plans persisted; final review runs) are the load-bearing enforcement. The deferred CI grep is the convention pin that promotes commit-message citation from "skill-body acceptance" to "CI-enforced."
+The deferred CI grep target is the delta-entry stable ID form (the citation that survives cleanup and remains greppable in main); promotion follows the existing convention-with-grep pattern.
 
 ## Known bypass risks
 
@@ -74,24 +72,23 @@ Naming bypasses is not weakness — it's substrate. Future contributors who enco
 
 When reviewing a change to `implement-cohesively`, the phase-derivation matrix, the `delta-coverage-reviewer` agent, or any branch produced by `implement-cohesively`:
 
-- [ ] Does the implementation pass produce a coverage table in Phase 1?
-- [ ] Are all delta-ledger entries (excluding explicit Deferred entries) covered by ≥1 phase?
-- [ ] Is every phase's plan persisted under `docs/history/plans/`?
-- [ ] Does every phase commit cite the plan path and the delta-entry stable IDs?
-- [ ] Did `delta-coverage-reviewer` return Covered for every phase before the next phase started?
-- [ ] Did `cohesive:review-diff` run at the end of the pass and return Pass / Pass with notes?
-- [ ] If the rule was bypassed (user chose direct `superpowers:writing-plans` from the validate-rewrite Approved decision matrix), was the literal acknowledgment line `Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply.` rendered in the conversation transcript before `superpowers:writing-plans` was invoked? (Commit-history landing of the acknowledgment is a future tightening, not a v0.1 expectation — see §Known bypass risks.)
+- [ ] Does Phase 1 produce a coverage table covering every non-Deferred delta-ledger entry?
+- [ ] Is every phase's plan committed during the run on the `design/<slug>` (or `implement/<slug>`) branch? (Plan present when `delta-coverage-reviewer` dispatched.)
+- [ ] Does every phase commit cite both the plan path and the delta-entry stable IDs?
+- [ ] Did `delta-coverage-reviewer` return Covered for every phase, and `cohesive:review-diff` (Phase 3) return Pass / Pass with notes?
+- [ ] On Implemented verdict, did Phase 3.5 produce a single cleanup commit with the removed paths listed verbatim in its body? On Phase Drift / Substrate Drift / Aborted, did Phase 3.5 *not* fire?
+- [ ] If the bypass was taken (user chose direct `superpowers:writing-plans`), was the literal acknowledgment line rendered in the conversation transcript? (See §Known bypass risks.)
 
 ## Related
 
 - `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` — the skill that implements this invariant
 - `${CLAUDE_PLUGIN_ROOT}/agents/delta-coverage-reviewer.md` — the per-phase reviewer agent
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/phase-derivation.md` — the matrix that derives phases from delta-ledger sections
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md` — the user-reported scar this invariant retires
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/skipping-per-phase-plan.md` — the failure mode that breaks coverage when `writing-plans` is skipped
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md` — the seam this invariant pins between Cohesive and Superpowers
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/artifact-placement.md` §"Lifecycle by artifact category" — the per-category lifecycle classification
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/plans-as-run-scaffolding.md` — the failure mode the cleanup-at-handoff pattern prevents
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md`, `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/skipping-per-phase-plan.md` — adjacent failure modes
 
 ## History
 
 - 2026-05-04 — Created. The structural pin behind `implement-cohesively`. Earned invariant status from day one because the rule has a concrete structural failure mode (silent substrate drift), an explicit enforcement path (Phase 1 coverage table; reviewer verdict; final substrate review), and a real cost on regression.
 - 2026-05-04 — Repair pass 1 (post first validate-rewrite verdict): Step/Phase numbering reconciled with `implement-cohesively` SKILL body (Phase 4 → Phase 3; the SKILL has three phases plus two Step bookends). §Scope and §Runtime paths extended to cover the alternative `implement/<slug>` child branch (the default `design/<slug>` was the only branch named in the original; the SKILL's "Branch shape" section had named both but the invariant did not). §Known bypass risks specifies the acknowledgment-line handshake for the validate-rewrite decision matrix's bypass row.
+- 2026-05-07 — Tightened the audit-citation distinction: durable citation is the **delta-entry stable ID** (survives Phase 3.5 cleanup); plan path is the **pre-cleanup branch-history pointer** (resolves during the run, recoverable via `git log --all` after cleanup). Added Rule #6 (Phase 3.5 cleanup, gated on Implemented verdict). §Runtime paths and §Enforcement extended to cover Phase 3.5; §Review checklist added items for cleanup-fires-on-Implemented and cleanup-does-not-fire-on-other-verdicts. Driven by the brainstorm at `docs/history/brainstorms/2026-05-07-run-scaffolding-cleanup.md` against pinky PR #175 evidence.

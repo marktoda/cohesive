@@ -1,14 +1,17 @@
 # Artifact Placement Behavior Matrix
 
 **Status:** Active
-**Last reviewed:** 2026-05-04
+**Last reviewed:** 2026-05-07
 **Owner:** Mark Toda
 
 ## Purpose
 
-Five Cohesive skills persist output: `review-codebase`, `audit-substrate`, `rewrite-specs`, `brainstorm-design` (when persistence is requested), `validate-rewrite`. Each writes to a different artifact category (review / audit / delta-ledger / brainstorm / validation) but resolves the output directory by the same four-rule procedure defined in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Artifact directory resolution".
+Cohesive skills persist output along two axes:
 
-This matrix expands the resolution cell-by-cell so the contract is testable. Without it, an external-repo run can silently litter `docs/history/` into a user repo that already has `docs/adr/` — exactly the "spec drift one half names but the other half doesn't honor" failure Cohesive exists to prevent.
+1. **Where the artifact lives** — resolved by the four-rule procedure in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Artifact directory resolution". §"Cells" below expands the resolution cell-by-cell across artifact category and repo shape.
+2. **Whether the artifact persists in main** — defined per-category in §"Lifecycle by artifact category" below. **Durable** artifacts persist permanently; **ephemeral** artifacts are cleaned up at handoff per `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` §"Phase 3.5. Strip implementation scaffolding".
+
+This matrix expands both axes cell-by-cell so the contract is testable. Without §"Cells", an external-repo run can silently litter `docs/history/` into a user repo that already has `docs/adr/` — the placement failure Cohesive exists to prevent. Without §"Lifecycle by artifact category", per-phase plans and discovery reports leak into main and produce the bloat documented in [`docs/substrate/gotchas/plans-as-run-scaffolding.md`](../gotchas/plans-as-run-scaffolding.md).
 
 ## Cells
 
@@ -44,9 +47,25 @@ Rows are repo shapes. Columns are artifact categories produced by the five persi
 
 The resolved path is announced in chat at the start of the run, before any read or dispatch. Hardcoding `docs/history/<subdir>/` is a violation of this matrix.
 
+## Lifecycle by artifact category
+
+Every artifact category Cohesive produces carries exactly one lifecycle. **Durable** artifacts persist permanently in main. **Ephemeral** artifacts are committed during the implementation pass on the `design/<slug>` branch and cleaned up at Phase 3.5 of `cohesive:implement-cohesively`, gated on Implemented verdict only.
+
+| Artifact category | Lifecycle | Cleanup target (ephemeral only) |
+|---|---|---|
+| Brainstorm, delta ledger, validation review, architecture review, substrate audit, final substrate review, transcript | **Durable** | n/a |
+| Per-phase plan | **Ephemeral** | `git rm docs/history/plans/<YYYY-MM-DD>-<slug>-phase-*.md` |
+| Discovery report | **Ephemeral** | `git rm docs/cohesive/discovery/<slug>.md` (when present) |
+
+Producing skill and consumer for each category are documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md`. New artifact categories register their lifecycle in this table *in the same pass* as the skill change; default to **Durable** when ambiguous.
+
 ## Related substrate
 
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Artifact directory resolution" — the four-rule procedure each skill cites.
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Lifecycle: durable vs ephemeral" + §"Cleanup at handoff" — the lifecycle convention this matrix expands per-category.
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md` — the invariant pinning ephemeral-artifact citation rules (stable IDs are durable; plan paths are pre-cleanup branch-history pointers).
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/plans-as-run-scaffolding.md` — the failure mode the lifecycle classification prevents.
+- `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` §"Phase 3.5. Strip implementation scaffolding" — the structural enforcement of ephemeral cleanup.
 - `${CLAUDE_PLUGIN_ROOT}/AGENTS.md` §"Default substrate locations" — names the layout for this repo's substrate (separate concern from artifact placement).
 - `${CLAUDE_PLUGIN_ROOT}/ARCHITECTURE.md` §"Conventions" — names `docs/cohesive/<x>/` as the external-repo default.
 
@@ -59,3 +78,4 @@ The resolved path is announced in chat at the start of the run, before any read 
 ## History
 
 - 2026-05-04 — Created during the v0.1 release-gate Phase 1+2 substrate repair pass. Promoted from finding #2 of `docs/history/reviews/2026-05-04-skill-quality-self-review.md` to a tracked behavior matrix; previously documented only in prose at `AGENTS.md:57` and `ARCHITECTURE.md:48`.
+- 2026-05-07 — Added §"Lifecycle by artifact category" introducing the durable/ephemeral split per the brainstorm at `docs/history/brainstorms/2026-05-07-run-scaffolding-cleanup.md`. The matrix now tracks both placement (where) and lifecycle (whether persists in main); `implement-cohesively` Phase 3.5 enforces ephemeral cleanup.
