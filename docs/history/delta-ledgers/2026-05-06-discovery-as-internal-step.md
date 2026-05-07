@@ -20,7 +20,7 @@ This rewrite is **Mixed** — primarily Design (the chain model itself changes; 
 - `skills/review-diff/SKILL.md` — Hard constraint #1 rewritten; Process Step 2 ("Substrate discovery, scoped to changed files") rewritten to dispatch internally with the scoped-to-diff override semantics.
 - `scripts/validate_plugin.sh` — Check 10 (`discovery_prereq_subskills`) array emptied. The check is preserved structurally so a future skill that re-introduces the discovery-state prereq pattern would land in the array; today the array is intentionally empty because no skill carries that pattern anymore. Comment updated to name the 2026-05-06 internalization rationale.
 
-- **Files:** 6 rewritten, 1 added (this ledger), 0 removed
+- **Files:** 8 rewritten, 1 added (this ledger), 0 removed
 - **Conceptual changes:** Discovery is no longer a user-visible chain step — it's a consumer-internal sub-step. The "discovery-state prereq" pattern is retired across the substrate; the canonical-question convention applies only to skills with genuinely user-decision prereqs (currently none with discovery state; rewrite-specs has a chosen-direction prereq which is a different question). The router's chain model simplifies: 4 routes go from 2-skill chains to single-skill dispatches.
 - **Named invariants:** none added / removed / changed.
 - **Behavior matrices:** `docs/substrate/matrices/router.md` §"Dispatch prompt contract (per route)" updated to reflect single-skill dispatch for the 4 affected routes; cell IDs preserved per immutability rule.
@@ -132,3 +132,30 @@ None added or retired. The user-reported failure mode is structurally closed by 
 - **The optional-override path's discovery-report-staleness question.** Each consumer's Hard constraint #1 names an "optional override" — if a discovery report path is passed in the dispatch prompt, skip re-running discovery. But discovery reports can become stale (a report produced an hour ago against a different change surface, or against the same surface but before the user ran a substantial branch operation). v0.1 trusts the dispatch prompt's claim; the consumer doesn't validate freshness. If staleness becomes a real failure mode, a future delta could add a freshness check (e.g., "is the report's persisted timestamp within 5 minutes of the current invocation?").
 - **Direct invocation of `/cohesive:discover-substrate` is now the rare case but its render isn't tightened.** discover-substrate's SKILL.md Output format still describes a full inventory render appropriate for direct invocation. Internal dispatchers won't render its output (the consumer reads the persisted file directly), so this isn't a contradiction — but a future contributor running `/cohesive:discover-substrate` directly will get the full inventory render, which is the correct behavior for that path.
 - **The composition-with-superpowers seam at the gate boundary.** With the Decide gate now a single-skill operation, the gate boundary (where the user sees output) is brainstorm-design's chat trailer. Implications for the Lock and Build gates are not affected by this rewrite (those gates were already single-or-near-single-skill operations), but a future composition refactor that touches gate boundaries should consider that "what runs underneath" the Decide gate is now structurally a single skill, not a chain.
+
+## Repair pass 2
+
+**Pass:** 2
+**Source review:** `docs/history/reviews/2026-05-06-discovery-as-internal-step-rewrite-validation.md` (pass 1, Issues Found)
+**Closes:** B1, B2, B3, B4, B5, I1, I2
+
+### Repairs applied
+
+- **B1 — audit-substrate `## Composition` rewritten.** "Most often invoked by" bullet now says the router passes no discovery prereq + names the internal Step 1 dispatch. "Always preceded by: cohesive:discover-substrate" replaced with "Internally dispatches: cohesive:discover-substrate as Step 1 per Hard constraint #1; optional override skips re-running discovery if a report path is supplied in the dispatch prompt."
+- **B2 — three other consumer skills' Composition sections updated.** brainstorm-design, review-codebase, review-diff each replace the `Always preceded by: discover-substrate` bullet with the parallel `Internally dispatches: cohesive:discover-substrate as <Step 0 / Phase 1.0 / Step 2> per Hard constraint #<N>; optional override...` form. Closes the load-bearing Composition contradiction across all four consumers.
+- **B3 — preamble file count updated.** "**Files:**" bullet now reads "8 rewritten, 1 added (this ledger), 0 removed" matching the §"Files rewritten" body enumeration.
+- **B4 — skills.md table + opening prose + bootstrap status updated.** Opening prose's chain notation rewritten to "`brainstorm-design` (Decide; dispatches `discover-substrate` internally as Step 0)". At-a-glance table row for `discover-substrate` Gate column changed from "Decide (silent)" to "_internal sub-step_" with Owns updated to name internal-dispatch as primary, direct-invocation as rare. Bootstrap status row promoted from `inherited` to `validated` (per the lens-13 imperative's promotion-on-forward-rewrite rule — this rewrite IS the forward rewrite).
+- **B5 — handoffs.md four discover-substrate handoff entries replaced with one internal-dispatch transition section.** Old §"discover-substrate → brainstorm-design" replaced with §"discover-substrate ↔ consumer skills (internal-dispatch transition)" covering all four consumers. Names the transition shape as "internal-dispatch" (a sub-shape of #4 in the existing §"The five transition shapes"); §"The five transition shapes" updated to clarify that shape #4 has two sub-shapes (one-shot internal dispatch vs internal repair loop), with both sharing the same invisible-to-user-as-chain-edge property.
+- **I1 — brainstorm-design Inputs in skills.md updated.** "User intent + substrate discovery report (passed by router or freshly invoked)" replaced with "User intent (the brainstorm topic, including the change surface). The substrate discovery report is produced by Step 0's internal `cohesive:discover-substrate` dispatch; an optional override path may be supplied to skip re-running discovery."
+- **I2 — validate_plugin.sh header comment updated.** "Canonical prereq-detection question in subskills with a discover-substrate prereq" replaced with "Canonical prereq-detection question (currently no skill carries a discovery-state prereq — discovery is dispatched internally by consumer skills as of 2026-05-06; check structure preserved against future regressions)."
+
+### Repair-pass file changes
+
+- `skills/audit-substrate/SKILL.md` — Composition section (B1).
+- `skills/brainstorm-design/SKILL.md` — Composition section (B2).
+- `skills/review-codebase/SKILL.md` — Composition section (B2).
+- `skills/review-diff/SKILL.md` — Composition section (B2).
+- `docs/history/delta-ledgers/2026-05-06-discovery-as-internal-step.md` — preamble file count (B3; this section).
+- `docs/substrate/architecture/skills.md` — opening prose + at-a-glance table row + bootstrap status row + brainstorm-design Inputs (B4 + I1).
+- `docs/substrate/architecture/handoffs.md` — discover-substrate handoff section + transition-shape clarification (B5).
+- `scripts/validate_plugin.sh` — header comment (I2).

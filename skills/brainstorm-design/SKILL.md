@@ -341,6 +341,6 @@ If the user declines persistence (one-shot brainstorm, no rewrite intended), the
 
 ## Composition
 
-- **Always preceded by:** `discover-substrate` (or its output reused from earlier in session)
+- **Internally dispatches:** `cohesive:discover-substrate` as Step 0 per Hard constraint #2; optional override skips re-running discovery if a report path is supplied in the dispatch prompt.
 - **Modes:** autonomous (one-turn trailer) or conversational (multi-turn axis dialog) — selected by the auto-detect gate in Phase 2; user override available either direction at any phase boundary
 - **Often followed by:** `rewrite-specs` (if direction is approved and large enough to justify a spec rewrite). When `rewrite-specs` runs, the chain continues `validate-rewrite` → `implement-cohesively`. If the change is small and substrate is already in good shape, the user may go directly to `superpowers:writing-plans` without the rewrite chain.

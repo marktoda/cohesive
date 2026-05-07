@@ -11,7 +11,9 @@
 #   - Substrate-vocabulary tokens in skill descriptions
 #   - Negative-trigger discipline (descriptions avoid generic-review phrases without
 #     cohesion-narrowing language)
-#   - Canonical prereq-detection question in subskills with a discover-substrate prereq
+#   - Canonical prereq-detection question (currently no skill carries a discovery-state prereq —
+#     discovery is dispatched internally by consumer skills as of 2026-05-06; check structure
+#     preserved against future regressions)
 #   - Fresh-eyes preamble bullet verbatim across reviewer agents
 #   - "### Next" footer in every persisting skill body (renamed from "Recommended next Cohesive skill" in audience-seam rewrite)
 #   - Component dirs at plugin root, not nested under .claude-plugin/

@@ -1,6 +1,6 @@
 # Skills
 
-> Cohesive ships eleven skills. The user-facing model is **three gates: Decide → Lock → Build**, with subskills running underneath. The agent-internal subskill order is `discover-substrate → brainstorm-design` (Decide), `rewrite-specs → validate-rewrite` (Lock, repair loop internal), `implement-cohesively` (Build). Three off-chain diagnostics (`review-codebase`, `review-diff`, `audit-substrate`) sit alongside the gates. One adoption skill (`init`) is the day-1 entry point for codebases with no existing substrate. One router (`cohesively`) selects the route; one session-start orientation skill (`using-cohesive`) sits upstream of the router. This doc is the per-skill design layer: what each skill is for, why the set has these skills and not others, and what each owns versus delegates. The SKILL.md body under `${CLAUDE_PLUGIN_ROOT}/skills/<name>/` is the implementation prompt; the section here is the substrate above it.
+> Cohesive ships eleven skills. The user-facing model is **three gates: Decide → Lock → Build**, with subskills running underneath. The agent-internal subskill chain is `brainstorm-design` (Decide; dispatches `discover-substrate` internally as Step 0), `rewrite-specs → validate-rewrite` (Lock, repair loop internal), `implement-cohesively` (Build). Three off-chain diagnostics (`review-codebase`, `review-diff`, `audit-substrate`) sit alongside the gates. One adoption skill (`init`) is the day-1 entry point for codebases with no existing substrate. One router (`cohesively`) selects the route; one session-start orientation skill (`using-cohesive`) sits upstream of the router. This doc is the per-skill design layer: what each skill is for, why the set has these skills and not others, and what each owns versus delegates. The SKILL.md body under `${CLAUDE_PLUGIN_ROOT}/skills/<name>/` is the implementation prompt; the section here is the substrate above it.
 
 ## Skill set at a glance
 
@@ -8,7 +8,7 @@ The user-facing surface for the flagship workflow is the gate vocabulary (Decide
 
 | Skill | Gate | Role | Owns | Output verdict |
 |---|---|---|---|---|
-| `discover-substrate` | Decide (silent) | Inventory existing substrate; flag missing memory | Substrate read; gap surfacing | _none (utility)_ |
+| `discover-substrate` | _internal sub-step_ | Inventory existing substrate; flag missing memory. Dispatched internally by `brainstorm-design` / `audit-substrate` / `review-codebase` / `review-diff` as Step 0 / Phase 1.0; direct invocation supported but rare | Substrate read; gap surfacing; persistence for cross-skill reuse | _none (utility)_ |
 | `brainstorm-design` | Decide | Convert intent into chosen direction | Pressure-testing options against substrate | _none (user approves)_ |
 | `rewrite-specs` | Lock | Hard-rewrite docs to end state | Spec rewrite + delta ledger | _none (validate-rewrite verdicts)_ |
 | `validate-rewrite` | Lock | Fresh-eyes review + architectural reflection at the lock→build handoff | Coherence, completeness, enforceability check; reflection synthesizing how the architecture feels after the lock | Approved / Issues Found / Design Incoherent |
@@ -62,7 +62,7 @@ Per-skill sections in this doc carry one of three statuses, named explicitly in 
 
 | Section | Status | Notes |
 |---|---|---|
-| `discover-substrate` | inherited | not yet validated against a forward rewrite |
+| `discover-substrate` | **validated** | validated by the 2026-05-06 discovery-as-internal-step rewrite (Purpose / Owns / Does not own / Outputs / Why-this-shape rewritten with the design layer as prior substrate) |
 | `brainstorm-design` | inherited | not yet validated against a forward rewrite |
 | `rewrite-specs` | **validated** | the architecture refactor itself touched its SKILL.md (Step 1a addition); spec-cohesion-reviewer lens 13 confirmed parity through repair-pass-3 |
 | `validate-rewrite` | **validated** | validated by the 2026-05-05 validate-rewrite-internal-loop refactor (Purpose / Owns / Inputs / Outputs / Why-this-shape rewritten with the design layer as prior substrate); spec-cohesion-reviewer lens 13 confirmed parity through repair pass 2 |
@@ -115,7 +115,7 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 - Implementation — that's `implement-cohesively`.
 - Producing code, even illustrative snippets. The skill output is design-shape only.
 
-**Inputs.** User intent + substrate discovery report (passed by router or freshly invoked).
+**Inputs.** User intent (the brainstorm topic, including the change surface). The substrate discovery report is produced by Step 0's internal `cohesive:discover-substrate` dispatch; an optional override path may be supplied to skip re-running discovery.
 
 **Outputs.** Approved direction (option name, summary paragraph, named main risk, structural mitigation). User-approved; no automated verdict. When conversational mode ran, the persisted file additionally carries a `## Decision dialog` section recording axes walked, sub-decision outcomes, and the cross-branch graft check result.
 

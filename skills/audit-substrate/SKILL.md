@@ -210,8 +210,8 @@ The "Top fixes" body block uses substrate-shape vocabulary in the *content* of e
 
 ## Composition
 
-- **Most often invoked by:** `cohesive:cohesively` route `audit (substrate)` (cell R007 in [`docs/substrate/matrices/router.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md)). The router passes "discovery already complete; report at <path>" so this skill skips its own discovery prompt.
-- **Always preceded by:** `cohesive:discover-substrate`
+- **Most often invoked by:** `cohesive:cohesively` route `audit (substrate)` (cell R007 in [`docs/substrate/matrices/router.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md)). The router passes no discovery prereq; this skill dispatches `cohesive:discover-substrate` internally as Step 1 per Hard constraint #1.
+- **Internally dispatches:** `cohesive:discover-substrate` as Step 1; optional override skips re-running discovery if a report path is supplied in the dispatch prompt.
 - **Often followed by:** `cohesive:rewrite-specs` (the highest-leverage entries become real artifacts) or no Cohesive follow-up (the audit is the deliverable).
 - **Adjacent skill:** `cohesive:review-codebase` — for "what's wrong with the architecture given the substrate that exists"; this skill is for "what substrate doesn't yet exist."
 

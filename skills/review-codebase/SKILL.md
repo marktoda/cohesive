@@ -223,7 +223,7 @@ Architecture reviews can burn a lot of tokens. Constraints:
 
 ## Composition
 
-- **Always preceded by:** `discover-substrate` (or reuse of its output)
+- **Internally dispatches:** `cohesive:discover-substrate` as Phase 1.0 per Hard constraint #1; optional override skips re-running discovery if a report path is supplied in the dispatch prompt.
 - **Often followed by:** `rewrite-specs` (if the review found spec drift requiring repair) or `superpowers:writing-plans` (if the review approved the change)
 - **Compatible with:** Superpowers' `code-reviewer` for the implementation-quality lens, after Cohesive's substrate lens. Run both for a high-stakes review.
 - **Adjacent skills:** `cohesive:review-diff` (PR/diff review) and `cohesive:audit-substrate` ("what's missing" rather than "what's wrong").
