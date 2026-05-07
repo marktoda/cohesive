@@ -126,7 +126,7 @@ Open with a single short turn rendering the **axes map** — a one-line structur
 
 Then drill axes one at a time. Order: **user-impact-if-redirected** first (taste-driven, future-pressure-shaping, organizational/risk axes), **substrate-evidence-strength** as tiebreaker (strongest agent pick last, so prior decisions shape the leaf direction). Each axis turn must:
 
-- Name the axis
+- **Name the axis and enumerate the option space first.** Render the credible option families for this axis with a one-line shape description each (e.g., "**A:** flat SDK-mirroring triple / **B:** bundled mcpAttachments / **C:** derived from AdapterSpec") *before* naming the agent's pick. Picking from an option space the user can't see is rule 2b naming-instead-of-showing — the user must be able to evaluate the pick against the alternatives, not reverse-engineer what A and C are from the counter-pressure paragraphs.
 - Surface the agent's pick + substrate evidence (path:line, gotcha citation, invariant name) in verdict-led voice ("I'd pick X because Y")
 - Name the strongest counter-pressure for the other side (the best argument, not a strawman)
 - Close with a forced-choice: ratify, push back with substantive counter-pressure, or move on
