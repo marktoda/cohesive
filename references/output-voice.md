@@ -53,6 +53,9 @@ Cohesive's substrate work is rigorous. Cohesive's chat output is not the place t
 | Say what you're about to do in one sentence | Narrate every tool call as you make it |
 | Recommend one next skill per verdict | "You could also try..." with three more |
 | Cap header depth at `###` | Stack `####` and `#####` to organize |
+| Render multi-sentence findings as cards (bold lead + labeled lines) | Pack paragraphs of substance into table cells |
+| Use short cross-refs in chat (`audience-separation §gate-token reuse`) | Render full `${CLAUDE_PLUGIN_ROOT}/docs/...md §"..."` paths inline |
+| Bold-lead bullets that run > 1 line | Wall-of-text bullets with no scan anchor |
 
 ## Forbidden phrasings
 
@@ -69,6 +72,7 @@ These produce wordiness without information:
 - "Next: rewrite-specs to close N findings" / "Recommended: brainstorm-design to revisit the direction" — handoffs without payload (violates rule 5a)
 - "Recommended next Cohesive skill" (as a section heading in chat) / "Cohesive workflow" / "Cohesive route" / "substrate-shaped work" (as user-facing labels) — methodology framing the chat does not carry (violates rule 2a — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`); the chat trailer renders `### Next` as the section heading, with the skill name appearing parenthetically in inline code
 - "Required substrate before implementation" / "Substrate artifact to add or update" / "Suggested substrate" / "substrate gaps" / "substrate sound" (as user-facing chat labels uncited from `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md`) — substrate-shape vocabulary leaking into chat (violates rule 2a — substrate concerns belong in persisted-file templates, not the chat trailer)
+- Inline-rendered full paths in chat — `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/<file>.md §"..."` is for persisted files and skill bodies. Chat uses short cross-refs per §"Readability" → §"Cross-reference form".
 
 ## Tone
 
@@ -77,6 +81,43 @@ These produce wordiness without information:
 - Confident about uncertainty. "I don't know whether X holds; the way to find out is Y" beats hand-waving.
 - No emojis. No exclamation points except in pull quotes from sources.
 - Short sentences over long ones. A clear one-clause sentence beats a clause-clause-clause sentence.
+
+## Readability
+
+Three operational tightening conventions for chat output. The five rules above govern macro-render-shape (what to render, how to structure); these govern within-block density (cell shape, citation form, scan anchors). They are not numbered alongside the five rules because the five rules are pinned by name in the validator and cited from other docs by number; these are quieter operational tightening, cited by section name.
+
+### Tables vs cards
+
+Render branchy content as a table when each cell fits on one line (≤ ~15 words). When cells carry multiple sentences — most show-shape findings tables, where Evidence + Change need paragraphs of substance — render as **cards** instead: one block per finding, bold lead (severity + short title), labeled lines for Evidence / Change / Doc.
+
+A finding card:
+
+> **High — Audience seam: `Decide` token collision**
+> *Evidence:* `brainstorm-design §Phase 2c:134` — `Open sub-decisions: [1] <name> [Decide]...`. Conflicts with `audience-separation §gate-token reuse:54` (gate vocabulary: `Decide / Lock / Build`).
+> *Change:* Rename sub-decision tags to `[Pick]` / `[Confirm]` / `[Default]`.
+> *Doc:* `brainstorm-design` Phase 2c/2d; `audience-separation` (gate-token-reuse note).
+
+Cards beat tables when cells carry paragraphs: vertical scannability, no horizontal scroll, parallelism preserved. Tables still win when cells are short keywords or single phrases (the §"Density budgets" router-announcement and verdict-vocabulary tables remain tables).
+
+### Cross-reference form
+
+Chat-rendered cross-references use a short form: `<filename without dir or .md> §<2-3 word section keyword>`. Examples:
+
+- `audience-separation §gate-token reuse` — not `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md §"Gate-token reuse is forbidden"`
+- `skill-shape §clarifying questions` — not the full path
+- `output-voice §multi-turn dialog` — not the full path
+
+Persisted files (delta ledgers, reviews, brainstorms) keep the canonical full path (the `${CLAUDE_PLUGIN_ROOT}/...` form) for grep, navigation, and validator pinning. Skill bodies and convention docs (this file included) keep the full path for the same reason. The short form is chat-only — for the reader's eye, not tooling.
+
+When a section name is genuinely ambiguous across skills (e.g., several have a `§"Output format"`), expand the file part minimally: `brainstorm-design §output format` rather than the full path. The disambiguator is the filename, not the directory.
+
+### Bold leads
+
+When a bullet's prose runs longer than one line, lead with a bold phrase that captures the load-bearing claim — let the reader skim in 5 seconds rather than read every word. Same for paragraphs in branchy sections (multi-finding lists, multi-axis enumerations, multi-recommendation `### Next` blocks).
+
+Format: `**<short label or claim>** — <explanation prose>.`
+
+A bullet that fits on one line doesn't need a bold lead — the bold becomes ceremony. A 5-line bullet without a bold lead is unreadable in skim mode; the same content with a bold lead enables a skim → scan → read reading mode where the reader picks depth.
 
 ## Multi-turn dialog skills
 
