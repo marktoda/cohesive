@@ -8,9 +8,10 @@ description: Use after validate-rewrite has returned Approved on a spec rewrite,
 ## What this skill produces
 
 - A **branch with implementation commits** that make every entry in the design delta ledger true in code, test, and CI.
-- A **per-phase implementation plan** (one `docs/history/plans/<YYYY-MM-DD>-<slug>-phase-N.md` per phase) authored by `superpowers:writing-plans` from a delta-derived phase intent.
+- A **per-phase implementation plan** (one `docs/history/plans/<YYYY-MM-DD>-<slug>-phase-N.md` per phase) authored by `superpowers:writing-plans` from a delta-derived phase intent — committed during the run as **ephemeral run scaffolding** per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/artifact-placement.md` §"Lifecycle by artifact category".
 - A **per-phase cross-review** dispatched against (delta entries, plan, diff) by the `delta-coverage-reviewer` agent.
 - A **final substrate review** of the branch against the rewritten specs via `cohesive:review-diff`.
+- On Implemented verdict only: a **single cleanup commit at Phase 3.5** that strips ephemeral artifacts (per-phase plans, discovery report if present) before handoff. The cleanup commit is the breadcrumb back from main to pre-cleanup branch history.
 - A handoff to `superpowers:finishing-a-development-branch` (or repair to the relevant earlier skill) based on the verdict.
 
 This is the second of Cohesive's flagship skills that owns code-producing work indirectly. The skill itself writes no code: it composes with `superpowers:writing-plans` (which authors plans) and `superpowers:executing-plans` (which writes code with TDD inside each phase). The Cohesive contribution is the **phase loop**: deriving phase shape from substrate, dispatching the cross-review agent against the delta ledger, and gating progression on coverage.
@@ -41,10 +42,11 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 3. **Per-phase cross-review is mandatory.** Every phase ends with a `delta-coverage-reviewer` dispatch (Task subprocess, paths-only inputs, fresh eyes). No phase advances without a Covered verdict. A Drift or Incomplete verdict gates the next phase until repaired.
 4. **Coverage of the delta is structural.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`, every entry in the design delta ledger maps to at least one phase. Phase 1 produces a coverage table and refuses to advance to Phase 2 if any delta entry is uncovered.
 5. **Final substrate review is mandatory.** After the last per-phase iteration of Phase 2 passes its cross-review, Phase 3 dispatches `cohesive:review-diff` against the branch. A non-Pass verdict gates merge.
+6. **Phase 3.5 ephemeral cleanup is gated on Implemented verdict.** On Phase 3 Pass / Pass with notes (Implemented), Phase 3.5 strips ephemeral artifacts (per-phase plans, discovery reports when present) via a single cleanup commit before handoff. On Phase Drift / Substrate Drift / Aborted, Phase 3.5 does not fire — ephemeral artifacts remain on the branch for the next attempt or post-mortem. Cleanup on a non-Implemented verdict is a violation; skipping cleanup on Implemented is a violation. The cleanup commit's body lists removed paths verbatim; a cleanup commit without that list is a violation. See §"Phase 3.5. Strip implementation scaffolding" for the operational steps and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md` Rule #6 for the structural pin.
 
 ## Process
 
-The skill body uses `Step 0` and `Step 4` for preflight and handoff bookends, and `Phase 1`, `Phase 2`, `Phase 3` for the three structural phases the named invariant `IMPLEMENTATION_PLAN_COVERS_DELTA` references. Citations to "Phase 1" / "Phase 2" / "Phase 3" elsewhere in the substrate (the invariant, anti-patterns, acceptance criteria) refer to the headings in this section by exactly those labels.
+The skill body uses `Step 0` and `Step 4` for preflight and handoff bookends, `Phase 1`, `Phase 2`, `Phase 3` for the three structural phases the named invariant `IMPLEMENTATION_PLAN_COVERS_DELTA` references, and `Phase 3.5` for the ephemeral-cleanup step inserted between Phase 3 and Step 4. Citations to "Phase 1" / "Phase 2" / "Phase 3" / "Phase 3.5" elsewhere in the substrate (the invariant, anti-patterns, acceptance criteria) refer to the headings in this section by exactly those labels.
 
 ### Step 0. Resolve inputs and confirm prereqs
 
@@ -117,9 +119,45 @@ Commit messages cite the plan path and the delta entries by stable ID. This is w
 
 After the last phase passes its cross-review, dispatch `cohesive:review-diff` against the branch. The review compares the branch diff to the rewritten specs and the substrate model. Verdict:
 
-- **Pass** or **Pass with notes** — the implementation is consistent with the substrate. Hand off to `superpowers:finishing-a-development-branch`.
-- **Needs substrate** — implementation introduced behavior not covered by the rewrite. Either rewrite the specs (`cohesive:rewrite-specs` to extend the rewrite) or revert the implementation in question.
-- **Risky** or **Block** — substrate drift or invariant violation. Repair before merge.
+- **Pass** or **Pass with notes** — the implementation is consistent with the substrate. Proceed to Phase 3.5 (cleanup), then Step 4 (handoff).
+- **Needs substrate** — implementation introduced behavior not covered by the rewrite. Either rewrite the specs (`cohesive:rewrite-specs` to extend the rewrite) or revert the implementation in question. Phase 3.5 does not fire.
+- **Risky** or **Block** — substrate drift or invariant violation. Repair before merge. Phase 3.5 does not fire.
+
+### Phase 3.5. Strip implementation scaffolding
+
+This phase fires **only on Phase 3 Pass / Pass with notes** (Implemented verdict). On any other verdict, skip directly to Step 4 — ephemeral artifacts remain on the branch for the next attempt or post-mortem.
+
+Ephemeral artifacts (per Hard constraint #6 and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/artifact-placement.md` §"Lifecycle by artifact category"):
+
+- `docs/history/plans/<YYYY-MM-DD>-<slug>-phase-*.md` — every per-phase plan from this implementation pass.
+- `docs/cohesive/discovery/<slug>.md` — the discovery report from the brainstorm sub-step, if present in the branch.
+- `docs/history/reviews/<YYYY-MM-DD>-<slug>-phase-*-coverage.md` — per-phase delta-coverage verdict files, if persisted (currently chat-only; included here for forward compatibility when the verdicts promote to file persistence).
+
+Do not strip durable artifacts: the brainstorm (`docs/history/brainstorms/`), the delta ledger (`docs/history/delta-ledgers/`), the validation review (`docs/history/reviews/<...>-rewrite-validation.md`), and the final substrate review (`docs/history/reviews/<...>-final-substrate-review.md`) all persist permanently per their durable classification.
+
+Steps:
+
+1. **Enumerate ephemeral paths.** Glob the three categories above against the slug. Skip any that are absent (a discovery report may not exist if the brainstorm dispatched discovery in a prior session and the path was reused).
+2. **Verify the paths are tracked.** `git ls-files <path>` for each. A path that is not tracked has either been stripped already (re-running cleanup is a no-op for that path) or was never committed (a violation upstream — surface to the user but proceed with the tracked paths).
+3. **Produce the cleanup commit.** Format:
+
+```bash
+git rm <enumerated paths>
+git commit -m "implement: clean up phase scaffolding for <slug>
+
+Removed:
+$(printf -- '- %s\n' <enumerated paths>)
+
+Branch history before this commit retains the plans for forensic recovery
+via 'git log --all -- docs/history/plans/<slug>-phase-*.md'.
+"
+```
+
+The commit message body lists removed paths verbatim — this is the breadcrumb a forensic reader on main follows back to pre-cleanup branch history. A cleanup commit without a verbatim removed-paths list is a violation per Hard constraint #6.
+
+4. **Capture the cleanup commit SHA.** Surface it in the trailer's Branch state slot (per §"Output format") so the user can reference the cleanup point for forensic recovery.
+
+After the cleanup commit lands, proceed to Step 4. The branch is ready for handoff to `superpowers:finishing-a-development-branch`; main's tree will carry only durable decision records after merge.
 
 ### Step 4. Hand off
 
@@ -141,7 +179,7 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
   - **Internal `Aborted`** (the user paused before Phase 3 ran) — omit both lines and the divergent-items list; the slot collapses to its header. The Branch state section below carries the partial state.
   - The Phase 3 review pointer (`Phase 3 review: <path>`) renders only when Phase 3 actually ran (Implemented / Phase Drift / Substrate Drift). Omit on Aborted.
 - **`## Phases`** — always renders; the table is non-empty by construction (Phase 1 derived ≥1 phase, otherwise the skill halted before reaching this trailer).
-- **`## Branch state`** — always renders.
+- **`## Branch state`** — always renders. On Implemented verdict, includes the cleanup commit SHA on a `Cleanup commit:` line so the user can reference the pre-cleanup boundary for forensic recovery via `git log --all -- docs/history/plans/<slug>-phase-*.md`. On Phase Drift / Substrate Drift / Aborted, the cleanup-commit line is omitted (Phase 3.5 did not fire).
 - **`### Next`** — renders one bullet, matching the internal verdict. The four `Internal <verdict>:` shapes below show the four possible renders; the chat trailer carries exactly one. This implements the per-verdict-branch recommendation rule in the chat-trailer template's §"How `### Next` carries payload" — the payload is the matching bullet, not the full set.
 
 ```md
@@ -169,7 +207,8 @@ Phase 3 review: `docs/history/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review
 
 - Branch: `design/<slug>`
 - Commits: <count>
-- Plans persisted: <count> at `docs/history/plans/`
+- Plans on the branch: <count> committed during the run at `docs/history/plans/`
+- Cleanup commit: `<SHA>` *(rendered only on Implemented verdict; SHA points at the Phase 3.5 commit that stripped ephemeral artifacts)*
 
 ### Next
 
@@ -196,6 +235,10 @@ The four `### Next` bullet shapes (one renders per invocation, matching the inte
 | Skipping the final substrate review (Phase 3) | The branch may pass per-phase reviews and still drift in aggregate | Hard constraint #5 — `cohesive:review-diff` is mandatory before handoff |
 | Auto-invoking `superpowers:finishing-a-development-branch` | Branch finishing is a user action per Cohesive↔Superpowers seam | Recommend; do not invoke |
 | Pre-summarizing the design for the cross-review agent | Bypasses fresh-eyes per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/fresh-eyes-review.md` | Pass paths only; never summarize the rewrite for the agent |
+| Skipping Phase 3.5 cleanup on Implemented verdict | Run scaffolding leaks into main; PRs bloat with ephemeral artifacts; the lifecycle convention's structural enforcement breaks (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/plans-as-run-scaffolding.md`) | Phase 3.5 fires unconditionally on Implemented verdict per Hard constraint #6 |
+| Firing Phase 3.5 cleanup on Phase Drift / Substrate Drift / Aborted | Strips artifacts that are load-bearing for the next attempt or post-mortem; the next implementation pass can't read the prior plans | Cleanup gates on Implemented per Hard constraint #6; skip directly to Step 4 on other verdicts |
+| Cleanup commit body without verbatim removed-paths list | Forensic readers on main lose the breadcrumb back to branch history; `git log --all` recovery becomes a guessing game | The Phase 3.5 commit message body lists every removed path verbatim per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Cleanup at handoff" |
+| Stripping durable artifacts (brainstorm / delta ledger / validation review / final substrate review) at Phase 3.5 | Permanent decision records become unrecoverable in main; the lifecycle classification is violated | Phase 3.5's enumerated paths are the three ephemeral categories from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/artifact-placement.md` §"Lifecycle by artifact category"; durable artifacts are out of scope |
 
 ## Branch shape
 
@@ -217,9 +260,11 @@ The implementation lands on the same `design/<slug>` branch the rewrite produced
 - Phase 1 surfaces the dispatch budget (phase count + `delta-coverage-reviewer` dispatch count + one final `review-diff`) and pauses for user confirmation when the phase count exceeds 8.
 - Each phase invokes `superpowers:writing-plans`, then `superpowers:executing-plans`, then `delta-coverage-reviewer` — in that order.
 - The cross-review agent receives only paths and a quoted ledger excerpt; never a pre-summarized design narrative.
-- Each phase commit cites the plan path and the delta-entry stable IDs.
+- Each phase commit cites both the **delta-entry stable IDs** (the durable citation that survives Phase 3.5 cleanup) and the **plan path** (the pre-cleanup branch-history pointer).
 - The Phase 2c escalation rule holds: after one repair cycle, the skill stops with verdict `Phase Drift`; no auto-loop past the first repair.
 - Phase 3 (`cohesive:review-diff`) runs after the last per-phase iteration of Phase 2.
+- Phase 3.5 fires on Implemented verdict only and produces a single cleanup commit whose message body lists removed ephemeral paths verbatim. On Phase Drift / Substrate Drift / Aborted, Phase 3.5 does not fire.
+- The trailer's `## Branch state` slot surfaces the cleanup commit SHA on Implemented verdict; on other verdicts, the cleanup-commit line is omitted.
 - The skill never invokes `superpowers:finishing-a-development-branch` — handoff is a user action.
 
 ## What this skill is *not*

@@ -200,13 +200,17 @@ When `validate-rewrite` returns **Approved** but the user reads the Architectura
 
 ### implement-cohesively → finishing-a-development-branch (Implemented)
 
-**Verdict gate.** **Implemented** — every phase's `delta-coverage-reviewer` returned Covered, the final `cohesive:review-diff` returned Pass or Pass with notes, and the branch is ready to merge.
+**Verdict gate.** **Implemented** — every phase's `delta-coverage-reviewer` returned Covered, the final `cohesive:review-diff` returned Pass or Pass with notes, and Phase 3.5 has produced the ephemeral-cleanup commit. The branch is ready to merge with main's tree carrying only durable decision records.
+
+**Phase 3.5 precedes this handoff.** On Implemented verdict, `implement-cohesively` Phase 3.5 strips ephemeral artifacts (per-phase plans, discovery report if present) via a single `git rm` + commit step before recommending `superpowers:finishing-a-development-branch`. The cleanup commit's body lists removed paths verbatim; this is the breadcrumb a forensic reader on main follows back to pre-cleanup branch history. See `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` §"Phase 3.5. Strip implementation scaffolding" and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Cleanup at handoff" for the operational steps and gating rules.
+
+**Artifact crossing.** The branch (with Phase 3.5 cleanup commit at HEAD) + the cleanup commit SHA (surfaced in the trailer's Branch state slot for forensic-recovery reference).
 
 **Downstream skill.** `superpowers:finishing-a-development-branch` (recommended, not invoked — branch finishing is a user action per the Cohesive↔Superpowers seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`).
 
-**What the downstream must not re-derive.** The implementation's substrate alignment. The Implemented verdict is the substrate-side check; finishing-a-development-branch handles merge mechanics.
+**What the downstream must not re-derive.** The implementation's substrate alignment. The Implemented verdict is the substrate-side check; finishing-a-development-branch handles merge mechanics. The downstream also must not undo the Phase 3.5 cleanup — the ephemeral artifacts are intentionally absent from the post-cleanup tree per the lifecycle convention.
 
-**Failure mode if the contract drifts.** `implement-cohesively` auto-invokes branch finishing instead of recommending it; user loses the explicit hand-off and the branch merges without their final approval. Detection: structure-reviewer flags auto-invocation as a Cohesive↔Superpowers seam violation.
+**Failure mode if the contract drifts.** (a) `implement-cohesively` auto-invokes branch finishing instead of recommending it; user loses the explicit hand-off. Detection: structure-reviewer flags auto-invocation as a Cohesive↔Superpowers seam violation. (b) Phase 3.5 doesn't fire on Implemented verdict (skipped or errored), and the handoff happens with ephemeral artifacts still in the tree; main inherits run scaffolding. Detection: `cohesive:review-codebase` structure-reviewer flags any merged `design/<slug>` branch lacking a Phase 3.5 cleanup commit; per-phase plan files in main's tree under `docs/history/plans/<slug>-phase-*.md` are the symptom. (c) Phase 3.5 fires on a non-Implemented verdict (e.g., Phase Drift), removing artifacts that are load-bearing for the next attempt — caught by Hard constraint #6 in `implement-cohesively`'s skill body.
 
 ### implement-cohesively → implement-cohesively resume (Phase Drift)
 
