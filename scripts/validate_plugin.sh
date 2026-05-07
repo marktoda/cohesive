@@ -442,23 +442,31 @@ fi
 
 # 13e. Implementation-path coverage in validate-rewrite Approved footer.
 # Per docs/substrate/gotchas/no-implementation-handoff.md and the validate-rewrite
-# Output format. The Approved verdict footer must document all four canonical
-# implementation paths (implement-now / land-specs-first / hand-off-to-Superpowers /
-# schedule-for-later) — without all four, the user loses a canonical choice and
-# Cohesive risks falling back to freeform code-writing. The render shape changed
-# in the decide-lock-build rewrite from a four-row table to a default-recommend
-# pattern (one default + alternatives behind a `(other options)` disclosure per
-# references/templates/chat-trailer.md §"Default-recommend rule"); the substantive
-# coverage requirement is preserved by greppable tokens that must appear in
-# either render shape.
+# Output format. The Approved verdict footer must document the default
+# implementation path plus the canonical conditional alternatives, so a reader
+# scanning the skill body can see the full set of moves the user might pick from
+# (even when only a subset render in any given Approved trailer per the
+# triggering conditions in skills/validate-rewrite/SKILL.md §"Conditional
+# alternatives"). The render shape evolved through several passes:
+#   - decide-lock-build rewrite: four-row table → default-recommend pattern
+#     (one default + alternatives behind a `(other options)` disclosure per
+#     references/templates/chat-trailer.md §"Default-recommend rule")
+#   - conditional-alternatives rewrite: dropped "Schedule for later" entirely
+#     (it was always-trivially-live, i.e. the user can always do nothing);
+#     renamed "Hand off to Superpowers without delta-coverage discipline" to
+#     "Implement with Superpowers directly" (user-facing language); made the
+#     remaining three alternatives (Land specs first / Implement with
+#     Superpowers directly / Re-decide) conditionally rendered.
+# The check enforces the post-rewrite vocabulary.
 errors_before=$errors
 if grep -qF '`cohesive:implement-cohesively`' skills/validate-rewrite/SKILL.md \
    && grep -qF 'Land specs first' skills/validate-rewrite/SKILL.md \
+   && grep -qF 'Implement with Superpowers directly' skills/validate-rewrite/SKILL.md \
    && grep -qF '`superpowers:writing-plans`' skills/validate-rewrite/SKILL.md \
-   && grep -qF 'Schedule for later' skills/validate-rewrite/SKILL.md; then
-  ok "validate-rewrite Approved footer covers all four canonical implementation paths"
+   && grep -qF 'Re-decide' skills/validate-rewrite/SKILL.md; then
+  ok "validate-rewrite Approved footer covers the default + canonical conditional alternatives (Land specs first / Implement with Superpowers directly / Re-decide)"
 else
-  fail "skills/validate-rewrite/SKILL.md missing one or more of the canonical implementation paths (per docs/substrate/gotchas/no-implementation-handoff.md). All four must be documented (in either the table or default-recommend shape): cohesive:implement-cohesively, Land specs first, superpowers:writing-plans, Schedule for later."
+  fail "skills/validate-rewrite/SKILL.md missing one or more of the canonical implementation paths. The default + three conditional alternatives must all be named in the skill body: cohesive:implement-cohesively (default), Land specs first, Implement with Superpowers directly, superpowers:writing-plans, Re-decide. See §\"Conditional alternatives\" and the gotcha at docs/substrate/gotchas/no-implementation-handoff.md."
 fi
 
 # 13f. implement-cohesively cites phase-derivation matrix + IMPLEMENTATION_PLAN_COVERS_DELTA.
@@ -478,10 +486,14 @@ fi
 # docs/substrate/gotchas/no-implementation-handoff.md "Tests / checks that preserve
 # this" bullet 4, and docs/substrate/architecture/handoffs.md §"Post-implementation
 # review entry point". The SKILL body must carry the literal string the Output
-# format renders to the transcript when the bypass option is picked, including the
-# post-implementation verification imperative added in the post-lock-escape rewrite.
+# format renders to the transcript when the user picks the "Implement with
+# Superpowers directly" alternative. The string was rewritten in the
+# conditional-alternatives pass to drop the `IMPLEMENTATION_PLAN_COVERS_DELTA`
+# invariant token from chat (per references/output-voice.md rule 2c —
+# substrate-shape vocabulary stays out of chat); the invariant doc remains the
+# substrate-side record.
 errors_before=$errors
-bypass_string='Implementation may drift from the rewrite; the IMPLEMENTATION_PLAN_COVERS_DELTA invariant does not apply. Run cohesive:review-diff against the branch when implementation lands — bypass means accepting drift risk, not skipping verification.'
+bypass_string="Implementing with plain Superpowers — Cohesive's per-phase verification of the rewrite doesn't apply. Run cohesive:review-diff after implementation to catch any drift."
 if grep -qF "$bypass_string" skills/validate-rewrite/SKILL.md; then
   ok "validate-rewrite carries the literal bypass-acknowledgment string (with post-impl verification imperative)"
 else

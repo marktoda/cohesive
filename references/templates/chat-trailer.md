@@ -40,25 +40,31 @@ The verdict line, the thesis (or skill-equivalent), and `### Next` always render
 
 ## Default-recommend rule
 
-When a `### Next` verdict branch has more than one plausible follow-up move, the chat trailer renders **one default** and puts the alternatives behind a `(other options)` disclosure. The default is the move the skill expects most users to take in the modal case for that verdict; the alternatives surface only when the user expands the disclosure or asks. Forcing the user to choose between four equally-weighted rows is ceremony — it pushes synthesis the skill should have done onto the user.
+When a `### Next` verdict branch has more than one plausible follow-up move, the chat trailer renders **one default** and puts the alternatives behind an `Other options` disclosure. The default is the move the skill expects most users to take in the modal case for that verdict; alternatives are **conditionally rendered** — each has an explicit triggering condition, and only alternatives whose condition fires for *this* invocation appear in the disclosure. If no alternatives fire, the disclosure is omitted entirely; the trailer is just the default. Forcing the user to scan a fixed menu of options that may not apply is ceremony — it pushes situational filtering the skill should have done onto the user.
 
 The disclosure shape:
 
 ```md
 ### Next
 
-<decision-shaped sentence naming the default>. *(`cohesive:<skill>`.)* **<Payload-kind>:** <payload>.
+<decision-shaped sentence naming the default>
+
+**<Default title>** — `cohesive:<skill>`
+<one short payload sentence: scope, branch, files, or other concrete inputs the next skill operates on>
 
 <details>
-<summary>(other options)</summary>
+<summary>Other options</summary>
 
-- <alternative 1 — decision-shape> *(`cohesive:<skill>`.)* — <when to pick>
-- <alternative 2 — decision-shape> *(`superpowers:<skill>`.)* — <when to pick>
-- ...
+**<Alternative 1 title>** — `cohesive:<skill>` or `superpowers:<skill>`
+<one short sentence: when to pick this alternative>
+
+**<Alternative 2 title>** — `<skill>`
+<one short sentence: when to pick this alternative>
+
 </details>
 ```
 
-Skills that render multi-option decision points follow this shape: lead with the default, hide the alternatives. Today the canonical case is `validate-rewrite`'s Approved trailer Implementation route, with four alternatives behind the disclosure (`superpowers:writing-plans` / land-specs-first / schedule-for-later / Re-decide). Flat enumerations where each item is independently actionable — `audit-substrate`'s Top fixes, `review-codebase`'s Top findings, `review-diff`'s Findings table — deliberately don't apply this rule because there is no "default" to recommend; the user reads all items because all items are evidence, not options.
+Skills that render multi-option decision points follow this shape: lead with the default, conditionally render alternatives. The canonical case is `validate-rewrite`'s Approved trailer Implementation route — three conditional alternatives (Land specs first / Implement with Superpowers directly / Re-decide), each with a triggering condition defined in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives". Flat enumerations where each item is independently actionable — `audit-substrate`'s Top fixes, `review-codebase`'s Top findings, `review-diff`'s Findings table — deliberately don't apply this rule because there is no "default" to recommend; the user reads all items because all items are evidence, not options.
 
 ## Vocabulary the chat trailer never uses
 
@@ -81,7 +87,7 @@ Each verdict-led skill specifies a body-block variant below. Per-skill SKILL.md 
 |---|---|---|---|
 | `review-codebase` | yes (5-vocabulary) | `**Thesis:**` | `## Top findings` — three show-shape findings, each: `### N. <title>` + `**Evidence:**` `<path>:<line>` + excerpt + `**Change:**` <specific edit> |
 | `review-diff` | yes (5-vocabulary) | `**Main concern:**` (one sentence) | `## Findings` — table with columns `Severity \| Area \| Evidence (file:line + excerpt) \| Change \| Doc to update`, ordered by leverage |
-| `validate-rewrite` | yes (3-vocabulary) | (omitted; review structure carries the thesis) | Approved verdict leads with `## Architectural reflection` (synthesis of how the architecture feels after the lock — what it makes easier downstream, what it makes harder, what depends on memory rather than structure); then only non-empty review sections per the render-only-non-empty rule (Executive judgment / Delta at a glance / Blocking issues / Important issues / Substrate gaps / Locality concerns / Future-fit concerns / Enforcement concerns / etc., per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`); the `### Next` footer renders the **Disposition** phrase + (Approved-only) **Implementation route** with the default-recommend rule applied — `cohesive:implement-cohesively` is the lead recommendation; alternatives sit behind a `(other options)` disclosure |
+| `validate-rewrite` | yes (3-vocabulary) | (omitted; review structure carries the thesis) | Approved verdict leads with `## Architectural reflection` (synthesis of how the architecture feels after the lock — what it makes easier downstream, what it makes harder, what depends on memory rather than structure); then only non-empty review sections per the render-only-non-empty rule (Executive judgment / Delta at a glance / Blocking issues / Important issues / Substrate gaps / Locality concerns / Future-fit concerns / Enforcement concerns / etc., per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`); the `### Next` footer renders the disposition phrase as a leading sentence (no `Disposition:` label) followed (Approved-only) by the **Implementation route** default plus conditional alternatives per the default-recommend rule — `cohesive:implement-cohesively` is the lead recommendation; alternatives sit behind an `Other options` disclosure and are conditionally rendered per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives" |
 | `audit-substrate` | yes (3-vocabulary) | `**Headline:**` (one or two sentences) | `## Top fixes` — three show-shape fixes, each: `### N. <artifact-to-add title>` + `**Evidence the gap exists:**` `<path>:<line>` + excerpt + `**What the artifact would say:**` <2-3 sentence sketch> + `**Where it lives:**` `<path>` |
 | `brainstorm-design` | no | (omitted) | `## Direction` — `**Direction:**` <chosen option name> + `**Main risk:**` <one sentence> + `**Structural mitigation:**` <test/type/constraint/linter — not "we'll be careful">. Optionally a `## Pressure test summary` table above when ≥3 options were considered |
 | `implement-cohesively` | yes (4-vocabulary) | `**Thesis:**` | `## Code matches locked design` slot — leads with `**Code matches locked design:** ✓` (Implemented verdict) or `**Drift detected:** ✗ <count> places` (Substrate Drift / Phase Drift verdicts), surfaced from the Phase 3 final `cohesive:review-diff` verdict — followed by `## Phases` table (`# \| Intent \| Delta entries \| Plan \| Cross-review`) + `## Branch state` (branch + commits + plans count). The Phase-3 final-review pointer renders inline beside the spec-coverage line as a path to the standalone persisted review file (`docs/history/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md`); long-form review detail lives in that file, not chat |

@@ -46,14 +46,14 @@ Ship `cohesive:implement-cohesively` as a v0.1 skill, not a V1-deferred one. The
 
 The router (`cohesively`) gains an `implement` route that dispatches `implement-cohesively` when the user says "implement the approved rewrite," "land docs with implementation," "implement-cohesively," or "drive implementation against the delta."
 
-The `validate-rewrite` Approved footer becomes an explicit decision matrix:
+The `validate-rewrite` Approved footer becomes an explicit decision matrix — the default plus zero or more conditionally-rendered alternatives, each gated by a triggering condition the agent judges from the rewrite's substrate shape (per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives"):
 
-- Implement now → `cohesive:implement-cohesively`
-- Land specs first; implement separately → merge the spec-rewrite branch, then later run `cohesive:implement-cohesively` against the merged delta ledger
-- Hand off to Superpowers without delta-coverage discipline → `superpowers:writing-plans` directly (less rigorous; user accepts that the implementation may drift from the rewrite)
-- Schedule for later → no immediate action
+- **Default** — Implement now → `cohesive:implement-cohesively`
+- **Conditional** — Land specs first → merge the spec-rewrite branch, then run `cohesive:implement-cohesively` against the merged delta ledger later (fires when the rewrite adds substantive new substrate worth independent human review before code lands)
+- **Conditional** — Implement with Superpowers directly → `superpowers:writing-plans` (fires when the rewrite is small enough that Cohesive's phased loop with per-phase reviews would be ceremony; the user accepts that implementation may drift)
+- **Conditional** — Re-decide → `cohesive:brainstorm-design` (fires when the Architectural reflection identifies a structural concern the brainstorm missed)
 
-The user picks; Cohesive does not improvise.
+The user picks from the rendered options; Cohesive does not improvise. When no conditional alternative fires, the trailer collapses to the default — the user can still invoke any other skill manually if they prefer.
 
 ## Related conventions
 

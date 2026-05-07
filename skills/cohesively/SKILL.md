@@ -63,7 +63,7 @@ Read the user's request and map to one of the routes below. Trigger phrases are 
 
 **Clarifying question (required if the validation review path is not in the user's request):** "Has validate-rewrite returned **Approved** for a spec rewrite, or should I run the design route first?"
 
-The user can decline the Build gate in favor of `superpowers:writing-plans` directly — this bypasses delta-coverage discipline (an option in the Lock gate's "(other options)" disclosure) and the user accepts that the implementation may drift from the rewrite.
+The user can decline the Build gate in favor of `superpowers:writing-plans` directly — this skips Cohesive's per-phase verification of the rewrite, with the user accepting that implementation may drift. Surfaced as the Lock gate's `Implement with Superpowers directly` alternative — conditionally rendered when the rewrite is small enough that the phased loop would be ceremony, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives".
 
 ### Route: review (codebase)
 

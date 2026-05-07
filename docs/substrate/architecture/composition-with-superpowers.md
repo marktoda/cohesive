@@ -45,7 +45,7 @@ The reason this seam is tighter than the worktree seam: plan-writing and TDD exe
 
 ### 3. Recommendation in skill output
 
-Subskills' "Recommended next Cohesive skill" footer can recommend a Superpowers skill when the appropriate next step is outside Cohesive's substrate scope. Example: `validate-rewrite`'s "Approved" branch renders a decision matrix where one option is "Hand off to Superpowers without delta-coverage discipline" via direct `superpowers:writing-plans` (the user accepts the implementation may drift from the rewrite). The default option, however, is `cohesive:implement-cohesively` — the substrate-shaped path that composes both plugins.
+Subskills' "Recommended next Cohesive skill" footer can recommend a Superpowers skill when the appropriate next step is outside Cohesive's substrate scope. Example: `validate-rewrite`'s "Approved" branch renders a decision matrix where one conditionally-rendered alternative is "Implement with Superpowers directly" via `superpowers:writing-plans` (the user accepts that implementation may drift from the rewrite; rendered when the rewrite is small enough that Cohesive's phased loop would be ceremony, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives"). The default option, however, is `cohesive:implement-cohesively` — the substrate-shaped path that composes both plugins.
 
 `superpowers:finishing-a-development-branch` is recommended (not invoked) after `implement-cohesively` Implemented verdict.
 
@@ -77,7 +77,7 @@ The README (§"Recommended companion") and this design doc state the phase bound
 
 ## Failure modes this composition does not prevent (and why)
 
-- **A user installs only Cohesive and asks for implementation.** `cohesive:implement-cohesively` stops with a hard error and recommends installing Superpowers. The `validate-rewrite` Approved decision matrix's "Hand off to Superpowers" option also requires Superpowers. The bypass option ("Land specs first; implement separately later") is available without Superpowers but defers the implementation question to a future session. The user-facing message is honest: Cohesive's substrate-shaped implementation needs Superpowers' per-phase plan and execution skills; without them, only the spec rewrite lands.
+- **A user installs only Cohesive and asks for implementation.** `cohesive:implement-cohesively` stops with a hard error and recommends installing Superpowers. The `validate-rewrite` Approved decision matrix's "Implement with Superpowers directly" alternative also requires Superpowers. The "Land specs first" alternative is available without Superpowers but defers the implementation question to a future session. The user-facing message is honest: Cohesive's substrate-shaped implementation needs Superpowers' per-phase plan and execution skills; without them, only the spec rewrite lands.
 - **A user installs only Superpowers and asks for substrate review.** Out of Cohesive's hands; same reasoning.
 
 ## Alternatives considered

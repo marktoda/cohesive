@@ -178,7 +178,7 @@ When `validate-rewrite` returns **Design Incoherent**, the rewrite cannot be rep
 
 ### validate-rewrite → brainstorm-design (Re-decide re-entry)
 
-When `validate-rewrite` returns **Approved** but the user reads the Architectural reflection and judges the locked design unsound (the reflection's Harder-downstream or Load-bearing-on-memory bullets reveal a structural problem the brainstorm missed), the user picks the **Re-decide** option from the Approved trailer's `(other options)` disclosure. This is distinct from Design Incoherent: the rewrite *did* lock coherently — the spec-cohesion-reviewer found no Blocker/High issues — but the user's architectural judgment after reading the reflection says the chosen direction has costs that weren't visible at brainstorm time. The reviewer can't catch this; only the user can, because it's a judgment on whether the design's tradeoffs fit the user's future priorities.
+When `validate-rewrite` returns **Approved** but the user reads the Architectural reflection and judges the locked design unsound (the reflection's Harder-downstream or Load-bearing-on-memory bullets reveal a structural problem the brainstorm missed), the user picks the **Re-decide** alternative from the Approved trailer's `Other options` disclosure (rendered when the reflection's bullets identify a specific structural concern, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives"). This is distinct from Design Incoherent: the rewrite *did* lock coherently — the spec-cohesion-reviewer found no Blocker/High issues — but the user's architectural judgment after reading the reflection says the chosen direction has costs that weren't visible at brainstorm time. The reviewer can't catch this; only the user can, because it's a judgment on whether the design's tradeoffs fit the user's future priorities.
 
 **Artifact crossing.** The discarded brainstorm's `## Direction` block (chosen direction summary) plus the Architectural reflection bullets from the discarded `validate-rewrite` Approved trailer (Harder-downstream + Load-bearing-on-memory). These cross the seam as `brainstorm-design`'s "What we already tried" optional input category (per `${CLAUDE_PLUGIN_ROOT}/skills/brainstorm-design/SKILL.md` §"Phase 1: Ground the brainstorm").
 
@@ -248,7 +248,7 @@ This is not a new skill — `review-diff` already exists and dispatches the subs
 
 **Trigger conditions** (any one fires the pattern):
 
-- The user picked the **Hand off to Superpowers without delta-coverage discipline** option in `cohesive:validate-rewrite`'s Approved trailer, code landed via `superpowers:writing-plans`, and the user wants to know if the implementation drifted from the rewrite.
+- The user picked the **Implement with Superpowers directly** alternative in `cohesive:validate-rewrite`'s Approved trailer (rendered when the rewrite is small enough that the phased loop would be ceremony, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives"), code landed via `superpowers:writing-plans`, and the user wants to know if the implementation drifted from the rewrite.
 - A teammate (or a non-Cohesive AI session) landed a branch claimed to implement a `design/<slug>` rewrite, and the user wants to verify before merge.
 - An external tool produced a branch matching a Cohesive-locked delta ledger and the user is the human-in-the-loop verifier.
 
@@ -260,8 +260,8 @@ This is not a new skill — `review-diff` already exists and dispatches the subs
 
 **Where this is recommended in chat.** Two surfaces name this pattern:
 
-1. The bypass-acknowledgment line in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Bypass acknowledgment" carries the imperative: "Run `cohesive:review-diff` against the branch when implementation lands — bypass means accepting drift risk, not skipping verification."
-2. The `(other options)` disclosure on `validate-rewrite`'s Approved trailer (the bypass alternative) carries the same imperative inline.
+1. The bypass-acknowledgment line in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Bypass acknowledgment" carries the imperative: "Run `cohesive:review-diff` after implementation to catch any drift."
+2. The Approved trailer's `Implement with Superpowers directly` alternative — conditionally rendered when its triggering condition fires — carries the same imperative in its why-line.
 
 **What `review-diff` must not re-derive.** The locked design. The reviewer reads the delta ledger as the design's executive summary; re-deriving design intent from the implementation is exactly what this pattern exists to catch (the implementation that drifts produces design "intent" that contradicts the ledger).
 

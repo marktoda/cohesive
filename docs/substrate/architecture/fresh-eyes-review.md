@@ -75,6 +75,14 @@ The fresh-eyes property was previously formalized as a named invariant (`FRESH_E
 
 **Conversation-style review (agent has access to dispatching skill's context).** Rejected: defeats the entire purpose. The reviewer's value is its independence.
 
+## Subprocess isolation also serves capacity isolation
+
+The Task-subprocess fence is the same mechanism whether a skill wants **fresh eyes** (independent verdict, no calling-skill bias) or **fresh capacity** (a clean context window with room for a long phase). Both reduce to: dispatch a subagent and pass the paths it needs.
+
+This means **wrap-up recommendations must never tell the user to restart their session for context-budget reasons.** "Open a fresh session and resume from Phase N" / "the fresh-session context budget gives Phase X room" / "start a new session, run X, then resume Y" — these all push friction onto the user that the harness already solves. If a flow's next step needs more context room than the current turn has, the right move is to (a) dispatch the next step as a subagent in the same turn, or (b) end the turn naming the next skill and let the user invoke it — that invocation itself runs in a fresh subprocess.
+
+The chat-output rule is in `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Forbidden phrasings"; this section is the architectural reason behind it. Any Cohesive skill producing a wrap-up trailer is bound by both surfaces.
+
 ## When to revisit
 
 - If a future Cohesive skill needs a non-reviewer agent (e.g., a long-running indexer agent that must inherit context for state-keeping). At that point, the property must clearly distinguish reviewer agents from non-reviewer agents and only apply to the former.
