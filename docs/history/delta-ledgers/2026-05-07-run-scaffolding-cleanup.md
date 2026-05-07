@@ -104,9 +104,31 @@ None. Enforcement is skill-body acceptance criteria (`implement-cohesively` Hard
 
 ## Remaining ambiguity
 
-- **Migration tooling for existing repos** — repos like pinky already have per-phase plans committed to main from prior implementation passes. The new convention applies prospectively; cleaning up *historical* plans is a separate decision the user makes per-repo. A bulk `git rm docs/history/plans/*-phase-*.md` PR is the manual path; whether Cohesive ships a one-shot migration skill is a future question.
-- **Phase 3.5 on squash-merge interaction** — when the user's branch-finishing path squashes the entire branch, the per-phase add-then-remove of plan files collapses to net-zero, which is the desired outcome (smaller PR, plans recoverable from pre-squash branch history). When the user uses merge-commit (preserving branch topology), the cleanup commit is at HEAD and the plan-creation commits are visible in the merge graph — also fine. No known edge case requires substrate change here, but worth flagging for forward-pass review.
-- **Per-phase delta-coverage verdict promotion path** — when verdicts promote from chat-only to file persistence (a future change), the lifecycle classification (ephemeral) and cleanup target path (`docs/history/reviews/<YYYY-MM-DD>-<slug>-phase-*-coverage.md`) are pre-named in `artifact-placement.md` §"Lifecycle by artifact category". The `implement-cohesively` Phase 3.5 step pre-includes the path glob. The promotion-pass rewrite will need to verify the glob still matches the chosen filename convention.
+- **Migration tooling for existing repos** — repos with plans already in main get a brainstorm acknowledgment but no substrate path. A bulk `git rm` PR is the manual path; whether Cohesive ships a one-shot migration skill is deferred. (Closes substrate gap from pass-1 review.)
+- **Per-phase delta-coverage verdict promotion path** — when verdicts promote from chat-only to file persistence, that PR adds the row to `artifact-placement.md` §"Lifecycle by artifact category" and updates `implement-cohesively` Phase 3.5's enumerated paths. The pre-classification was removed from this rewrite per pass-1 finding I2; promotion is a separate substrate change.
+
+## Repair pass 1 — pass-1 review I1, I2, simplification
+
+Source review: `docs/history/reviews/2026-05-07-run-scaffolding-cleanup-rewrite-validation.md` (Approved, two Mediums + two substrate gaps + author-driven simplification pass).
+
+Closed in this pass:
+
+- **Closes I1 (Run boundary unnamed).** `IMPLEMENTATION_PLAN_COVERS_DELTA.md` §"Rule" gains a closing paragraph defining run = Phase 1 inception → Phase 3 verdict, independent of Claude session boundary. Plans persist on the branch across session disconnects.
+- **Closes I2 (Speculative matrix row).** Removed the "Per-phase delta-coverage verdict (when persisted)" row from `artifact-placement.md` §"Lifecycle by artifact category" and the corresponding glob from `implement-cohesively/SKILL.md` Phase 3.5. The matrix is extended in the same pass that promotes verdicts to file persistence (pre-classifying speculative artifacts in normative spec violates `rewrite-specs` Hard constraint #5).
+- **Closes substrate gap (squash-merge / force-push forensic edge).** `substrate-layout.md` §"Cleanup at handoff" gains a §"Forensic recovery edges" paragraph naming the merge-commit / squash / force-push behaviors.
+- **Closes substrate gap (existing-repo migration).** Migration pointer added to `plans-as-run-scaffolding.md` §"Correct pattern".
+
+Author-driven simplifications (no review finding; user requested):
+
+- `artifact-placement.md` §"Lifecycle by artifact category" table collapsed from 5 columns × 10 rows to 3 columns × 3 rows; durable categories merged into one row. §"Lifecycle rules" subsection removed (one truly-novel rule folded into the table footer).
+- `substrate-layout.md` §"Lifecycle: durable vs ephemeral" compressed by ~50%; §"Why the split" two-paragraph form merged into one.
+- `IMPLEMENTATION_PLAN_COVERS_DELTA.md` §"Runtime paths" condensed from 6 bullets to 3; §"Enforcement" condensed; §"Review checklist" tightened to 6 items from 9; durable-vs-runtime citation named-concept treatment compressed (the distinction remains structural, the vocabulary is no longer multi-paragraph).
+- `implement-cohesively/SKILL.md` Phase 3.5 collapsed from 4 numbered sub-steps to 2 sentences + commit template; anti-pattern table consolidated 4 rows to 1.
+- `substrate-layout.md` §"Anti-patterns" 3 new entries collapsed to 1.
+- `plans-as-run-scaffolding.md` compressed from 75 lines to ~45 lines; §"Notes for future contributors" removed (the audience-seam orthogonality belongs in `audience-separation.md`; the verdict-promotion pre-classification was removed per I2).
+- Cross-references trimmed across all five rewritten files; each section names the single most-relevant link.
+
+Net change: ~-220 lines of substrate prose without changing structural enforcement. Hard constraint #6, Rule #6, Phase 3.5, the matrix lifecycle classification, and the gotcha all hold; the spec is shorter without weakening the contract.
 
 ## Ready for fresh-eyes review?
 

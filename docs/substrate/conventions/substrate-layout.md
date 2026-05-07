@@ -28,24 +28,13 @@ docs/
 
 ## Lifecycle: durable vs ephemeral
 
-Within `docs/history/`, artifacts split along a second axis: **durable decision records** persist permanently in main; **ephemeral run scaffolding** lives on the implementation branch during the run and is cleaned up at handoff. The split is structural — every artifact category has exactly one lifecycle, defined cell-by-cell in [`docs/substrate/matrices/artifact-placement.md`](../matrices/artifact-placement.md) §"Lifecycle by artifact category".
+Within `docs/history/`, artifacts split along a second axis. **Durable** decision records (brainstorms, delta-ledgers, reviews, transcripts) persist permanently in main; **ephemeral** run scaffolding (per-phase plans, discovery reports) lives on the implementation branch and is cleaned up at handoff per §"Cleanup at handoff" below. Per-category classification lives in [`docs/substrate/matrices/artifact-placement.md`](../matrices/artifact-placement.md) §"Lifecycle by artifact category".
 
-| Lifecycle | Categories | Persistence after merge |
-|---|---|---|
-| **Durable** | brainstorms, delta-ledgers, reviews (architecture, audit, validation, final substrate review), transcripts | Permanent in main |
-| **Ephemeral** | per-phase plans, discovery reports, per-phase reviewer verdicts (when persisted) | Stripped at handoff; recoverable from pre-cleanup branch history via `git log --all` |
-
-A durable artifact captures a load-bearing decision that explains *why* the system has its current shape — the chosen direction (brainstorm), the contract the implementation honors (delta ledger), the verdict on whether it succeeded (validation review, final substrate review). An ephemeral artifact is run scaffolding — load-bearing during the implementation pass for cross-review fresh-eyes dispatch and TDD execution, valueless after the final substrate review passes.
-
-The cleanup convention for ephemeral artifacts is named in §"Cleanup at handoff" below; it fires only on `cohesive:implement-cohesively` Phase 3 Pass (Implemented verdict). On Phase Drift / Substrate Drift / Aborted, ephemeral artifacts persist on the branch — they are load-bearing for the next attempt or the post-mortem.
-
-The lifecycle axis is orthogonal to the audience seam in [`docs/substrate/conventions/audience-separation.md`](audience-separation.md): the audience seam governs **render surfaces** (chat vs persisted file); the lifecycle axis governs **persistence surfaces** (main vs branch). A durable artifact is rendered in substrate-shape on its persisted file *and* persists in main; an ephemeral artifact is rendered in substrate-shape on its persisted file *and* is cleaned up before main. See [`docs/substrate/gotchas/plans-as-run-scaffolding.md`](../gotchas/plans-as-run-scaffolding.md) for the failure mode this convention prevents.
+The lifecycle axis is orthogonal to the audience seam in [`audience-separation.md`](audience-separation.md): the audience seam governs render surfaces (chat vs persisted file); lifecycle governs persistence surfaces (main vs branch). See [`gotchas/plans-as-run-scaffolding.md`](../gotchas/plans-as-run-scaffolding.md) for the failure mode this prevents.
 
 ## Why the split
 
-Mixing canonical and historical content in one directory produces the pain Cohesive was designed to fix: you can never tell whether a doc is current or stale. The canonical/historical split makes it structural — `docs/substrate/X` is current *by location*. A reader doesn't have to read the file to know its lifecycle.
-
-The durable/ephemeral split inside `docs/history/` extends the same principle: a reader on `main` who sees a `docs/history/plans/` directory should know by convention that any plan there is *durable history* (a permanent record), not run scaffolding from an unfinished pass. The cleanup-at-handoff structural enforcement guarantees that.
+Mixing canonical and historical content in one directory produces the pain Cohesive was designed to fix: you can never tell whether a doc is current or stale. The canonical/historical split makes it structural — `docs/substrate/X` is current *by location*. The durable/ephemeral sub-axis extends the same principle inside `docs/history/`: a reader on `main` who sees a plan path knows it's a permanent record, because the cleanup-at-handoff convention strips run scaffolding before merge.
 
 ## Naming
 
@@ -86,7 +75,7 @@ Cohesive skills creating new artifacts:
 1. **Detect existing convention.** If the repo uses `docs/specs/`, `docs/adr/`, `docs/invariants/`, etc., extend it — don't impose Cohesive's layout on a repo that has its own.
 2. **Otherwise default to the layout above.**
 3. **Never run parallel.** If `docs/specs/` exists for canonical content, don't create a sibling `docs/substrate/`. Pick one.
-4. **Honor the lifecycle classification.** When creating an ephemeral artifact, write it under `docs/history/<category>/` exactly as for a durable artifact — the file path is shared. The lifecycle distinction is enforced by the cleanup-at-handoff step, not by directory choice. A skill that introduces a new artifact category classifies its lifecycle in [`docs/substrate/matrices/artifact-placement.md`](../matrices/artifact-placement.md) §"Lifecycle by artifact category" *before* the skill ships.
+4. **Write ephemeral artifacts to `docs/history/<category>/` like durable ones** — directory choice doesn't encode lifecycle; cleanup-at-handoff does. Per-category classification lives in [`artifact-placement.md`](../matrices/artifact-placement.md) §"Lifecycle by artifact category".
 
 Cohesive skills reading substrate (`discover-substrate`, `review-codebase`, `review-diff`, `audit-substrate`, `validate-rewrite`):
 
@@ -96,27 +85,11 @@ Cohesive skills reading substrate (`discover-substrate`, `review-codebase`, `rev
 
 ## Cleanup at handoff
 
-Ephemeral artifacts are committed during the implementation pass on the `design/<slug>` branch — `superpowers:writing-plans` writes per-phase plans to `docs/history/plans/`, `cohesive:discover-substrate` writes discovery reports to `docs/cohesive/discovery/`, and per-phase commits cite plan paths per the `IMPLEMENTATION_PLAN_COVERS_DELTA` invariant. The fresh-eyes `delta-coverage-reviewer` agent reads plan paths during cross-review; the citation surface is alive throughout the run.
+After Phase 3 (final substrate review) returns Pass / Pass with notes, `cohesive:implement-cohesively` Phase 3.5 runs `git rm` on the ephemeral paths for this slug and produces a single commit whose body lists the removed paths verbatim. The verbatim list is the breadcrumb a forensic reader on main follows back to pre-cleanup branch history via `git log --all -- <pattern>`. Cleanup gates on Implemented verdict only; on Phase Drift / Substrate Drift / Aborted, ephemeral artifacts remain on the branch for the next attempt or post-mortem.
 
-After Phase 3 (final substrate review) returns Pass / Pass with notes, `cohesive:implement-cohesively` Phase 3.5 strips ephemeral artifacts:
+A "run" spans Phase 1 inception through Phase 3 verdict, independent of Claude session boundary. Plans persist on the branch across session disconnects; the run terminates when Phase 3 returns a verdict, not when the user closes a session. See [`skills/implement-cohesively/SKILL.md`](../../../skills/implement-cohesively/SKILL.md) §"Phase 3.5. Strip implementation scaffolding" for the operational steps and the cleanup commit format.
 
-```bash
-git rm docs/history/plans/<YYYY-MM-DD>-<slug>-phase-*.md
-git rm docs/cohesive/discovery/<slug>.md  # if present
-git commit -m "implement: clean up phase scaffolding for <slug>
-
-Removed:
-- docs/history/plans/<YYYY-MM-DD>-<slug>-phase-1.md
-- ...
-
-Branch history before this commit retains the plans for forensic recovery
-via 'git log --all -- docs/history/plans/<slug>-phase-*.md'.
-"
-```
-
-The cleanup commit is the **breadcrumb back from main to branch history**. A reader on main running `git log -- docs/history/plans/<slug>-phase-*.md` sees nothing in the current tree but finds the cleanup commit; the commit body lists the removed paths verbatim; `git log --all -- docs/history/plans/<slug>-phase-*.md` recovers the plans from pre-cleanup branch history.
-
-Cleanup is **gated, not unconditional**: it fires only on Implemented verdict. On Phase Drift / Substrate Drift / Aborted, ephemeral artifacts remain on the branch — see [`skills/implement-cohesively/SKILL.md`](../../../skills/implement-cohesively/SKILL.md) §"Phase 3.5. Strip implementation scaffolding" for the gating rules and the per-verdict behavior.
+**Forensic recovery edges.** When the branch is merged via merge-commit, the cleanup commit and the prior phase commits are both visible in main's history graph; `git log --all -- <pattern>` recovers the plans. When the branch is squash-merged, the per-phase add and the cleanup `rm` collapse into the squashed commit's net diff (zero — plans don't appear), which is the desired outcome (smaller PR); pre-squash branch history retains the plan content if the branch ref is preserved. When the branch is force-pushed or deleted before merge, plan content is unrecoverable — preserve the implementation branch ref until merge if forensic recovery matters.
 
 ## Artifact directory resolution
 
@@ -140,9 +113,7 @@ The full cell-by-cell expansion (per artifact category × per repo shape) lives 
 - "Design" doc that aspires to canonical state but lives in its own subdir — promote to `ARCHITECTURE.md` once approved; otherwise keep in `history/plans/` until it earns canonical status
 - One invariant file with multiple invariants in it — split into one file per named invariant; cross-reference via the substrate map
 - Creating subdirs before they have content — adds visual ceremony without teaching anything
-- Ephemeral artifacts (per-phase plans, discovery reports) surviving into main — Phase 3.5 cleanup didn't fire, or fired on the wrong verdict; the branch merged with run scaffolding still in the tree. See [`docs/substrate/gotchas/plans-as-run-scaffolding.md`](../gotchas/plans-as-run-scaffolding.md).
-- New artifact category shipped without lifecycle classification in `artifact-placement.md` §"Lifecycle by artifact category" — the cleanup pattern can't apply because the category isn't classified; bloat compounds silently across implementation passes.
-- Gitignoring ephemeral artifacts to suppress PR bloat — produces citation rot at commit time; the file is never tracked, so `git show <phase-commit>` cannot resolve cited plan paths and `IMPLEMENTATION_PLAN_COVERS_DELTA` review-checklist item #3 fails immediately. Use cleanup-at-handoff instead.
+- Lifecycle mishandling — ephemeral artifacts surviving into main (Phase 3.5 didn't fire), gitignored ephemeral artifacts (causes citation rot at commit time), or new artifact categories shipped without a lifecycle row in `artifact-placement.md`. See [`gotchas/plans-as-run-scaffolding.md`](../gotchas/plans-as-run-scaffolding.md).
 
 ## Substrate map
 

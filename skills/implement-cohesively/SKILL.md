@@ -125,39 +125,24 @@ After the last phase passes its cross-review, dispatch `cohesive:review-diff` ag
 
 ### Phase 3.5. Strip implementation scaffolding
 
-This phase fires **only on Phase 3 Pass / Pass with notes** (Implemented verdict). On any other verdict, skip directly to Step 4 — ephemeral artifacts remain on the branch for the next attempt or post-mortem.
+Fires **only on Phase 3 Pass / Pass with notes** (Implemented verdict). On any other verdict, skip directly to Step 4 — ephemeral artifacts remain on the branch for the next attempt or post-mortem.
 
-Ephemeral artifacts (per Hard constraint #6 and `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/artifact-placement.md` §"Lifecycle by artifact category"):
-
-- `docs/history/plans/<YYYY-MM-DD>-<slug>-phase-*.md` — every per-phase plan from this implementation pass.
-- `docs/cohesive/discovery/<slug>.md` — the discovery report from the brainstorm sub-step, if present in the branch.
-- `docs/history/reviews/<YYYY-MM-DD>-<slug>-phase-*-coverage.md` — per-phase delta-coverage verdict files, if persisted (currently chat-only; included here for forward compatibility when the verdicts promote to file persistence).
-
-Do not strip durable artifacts: the brainstorm (`docs/history/brainstorms/`), the delta ledger (`docs/history/delta-ledgers/`), the validation review (`docs/history/reviews/<...>-rewrite-validation.md`), and the final substrate review (`docs/history/reviews/<...>-final-substrate-review.md`) all persist permanently per their durable classification.
-
-Steps:
-
-1. **Enumerate ephemeral paths.** Glob the three categories above against the slug. Skip any that are absent (a discovery report may not exist if the brainstorm dispatched discovery in a prior session and the path was reused).
-2. **Verify the paths are tracked.** `git ls-files <path>` for each. A path that is not tracked has either been stripped already (re-running cleanup is a no-op for that path) or was never committed (a violation upstream — surface to the user but proceed with the tracked paths).
-3. **Produce the cleanup commit.** Format:
+`git rm` the ephemeral paths for this slug (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/artifact-placement.md` §"Lifecycle by artifact category" — currently `docs/history/plans/<YYYY-MM-DD>-<slug>-phase-*.md` and `docs/cohesive/discovery/<slug>.md` if present), and produce a single commit whose body lists the removed paths verbatim:
 
 ```bash
 git rm <enumerated paths>
 git commit -m "implement: clean up phase scaffolding for <slug>
 
 Removed:
-$(printf -- '- %s\n' <enumerated paths>)
+- <path 1>
+- <path 2>
+- ...
 
-Branch history before this commit retains the plans for forensic recovery
-via 'git log --all -- docs/history/plans/<slug>-phase-*.md'.
+Recoverable via 'git log --all -- <pattern>' from pre-cleanup branch history.
 "
 ```
 
-The commit message body lists removed paths verbatim — this is the breadcrumb a forensic reader on main follows back to pre-cleanup branch history. A cleanup commit without a verbatim removed-paths list is a violation per Hard constraint #6.
-
-4. **Capture the cleanup commit SHA.** Surface it in the trailer's Branch state slot (per §"Output format") so the user can reference the cleanup point for forensic recovery.
-
-After the cleanup commit lands, proceed to Step 4. The branch is ready for handoff to `superpowers:finishing-a-development-branch`; main's tree will carry only durable decision records after merge.
+The verbatim removed-paths body is the breadcrumb a forensic reader on main follows back to branch history. Capture the cleanup commit SHA for the trailer's Branch state slot. Then proceed to Step 4.
 
 ### Step 4. Hand off
 
@@ -235,10 +220,7 @@ The four `### Next` bullet shapes (one renders per invocation, matching the inte
 | Skipping the final substrate review (Phase 3) | The branch may pass per-phase reviews and still drift in aggregate | Hard constraint #5 — `cohesive:review-diff` is mandatory before handoff |
 | Auto-invoking `superpowers:finishing-a-development-branch` | Branch finishing is a user action per Cohesive↔Superpowers seam | Recommend; do not invoke |
 | Pre-summarizing the design for the cross-review agent | Bypasses fresh-eyes per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/fresh-eyes-review.md` | Pass paths only; never summarize the rewrite for the agent |
-| Skipping Phase 3.5 cleanup on Implemented verdict | Run scaffolding leaks into main; PRs bloat with ephemeral artifacts; the lifecycle convention's structural enforcement breaks (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/plans-as-run-scaffolding.md`) | Phase 3.5 fires unconditionally on Implemented verdict per Hard constraint #6 |
-| Firing Phase 3.5 cleanup on Phase Drift / Substrate Drift / Aborted | Strips artifacts that are load-bearing for the next attempt or post-mortem; the next implementation pass can't read the prior plans | Cleanup gates on Implemented per Hard constraint #6; skip directly to Step 4 on other verdicts |
-| Cleanup commit body without verbatim removed-paths list | Forensic readers on main lose the breadcrumb back to branch history; `git log --all` recovery becomes a guessing game | The Phase 3.5 commit message body lists every removed path verbatim per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Cleanup at handoff" |
-| Stripping durable artifacts (brainstorm / delta ledger / validation review / final substrate review) at Phase 3.5 | Permanent decision records become unrecoverable in main; the lifecycle classification is violated | Phase 3.5's enumerated paths are the three ephemeral categories from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/artifact-placement.md` §"Lifecycle by artifact category"; durable artifacts are out of scope |
+| Phase 3.5 mishandling | Cleanup fires on a non-Implemented verdict (strips artifacts load-bearing for the next attempt), skips on Implemented (run scaffolding leaks into main), produces a commit without a verbatim removed-paths body (forensic breadcrumb is lost), or strips durable artifacts (decision records become unrecoverable) | Hard constraint #6 enumerates all four sub-conditions; the ephemeral path list comes from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/artifact-placement.md` §"Lifecycle by artifact category" |
 
 ## Branch shape
 

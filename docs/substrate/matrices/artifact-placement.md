@@ -49,27 +49,15 @@ The resolved path is announced in chat at the start of the run, before any read 
 
 ## Lifecycle by artifact category
 
-Every artifact category Cohesive produces or consumes carries exactly one lifecycle. **Durable** artifacts persist permanently in main; **ephemeral** artifacts are committed during the implementation pass on the `design/<slug>` branch and cleaned up at handoff per `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` §"Phase 3.5. Strip implementation scaffolding".
+Every artifact category Cohesive produces carries exactly one lifecycle. **Durable** artifacts persist permanently in main. **Ephemeral** artifacts are committed during the implementation pass on the `design/<slug>` branch and cleaned up at Phase 3.5 of `cohesive:implement-cohesively`, gated on Implemented verdict only.
 
-| Artifact category | Producing skill | Consumer | Lifecycle | Cleanup target |
-|---|---|---|---|---|
-| Brainstorm | `brainstorm-design` (when persisted) | `rewrite-specs` (input) | **Durable** | n/a — persists permanently in main |
-| Delta ledger | `rewrite-specs` | `validate-rewrite`, `implement-cohesively`, `delta-coverage-reviewer` agent | **Durable** | n/a — persists permanently in main |
-| Validation review | `validate-rewrite` | `implement-cohesively` Hard constraint #1 (Approved gate) | **Durable** | n/a — persists permanently in main |
-| Architecture review | `review-codebase` | reader; `### Next` recommendation | **Durable** | n/a — persists permanently in main |
-| Substrate audit | `audit-substrate` | reader; `### Next` recommendation | **Durable** | n/a — persists permanently in main |
-| Final substrate review | `cohesive:review-diff` (dispatched as `implement-cohesively` Phase 3) | `implement-cohesively` trailer pointer | **Durable** | n/a — persists permanently in main |
-| Transcript | manually captured | reader | **Durable** | n/a — persists permanently in main |
-| Per-phase plan | `superpowers:writing-plans` (dispatched per phase from `implement-cohesively` Phase 2a) | `delta-coverage-reviewer` agent (paths-only fresh-eyes) | **Ephemeral** | `git rm docs/history/plans/<YYYY-MM-DD>-<slug>-phase-*.md` at Phase 3.5 |
-| Discovery report | `cohesive:discover-substrate` (internal sub-step of `brainstorm-design` / `audit-substrate` / `review-codebase` / `review-diff`) | dispatching skill, same run | **Ephemeral** | `git rm docs/cohesive/discovery/<slug>.md` at Phase 3.5 (when present) |
-| Per-phase delta-coverage verdict | `delta-coverage-reviewer` agent (currently chat-only) | next-phase gate | **Ephemeral** (when promoted to file persistence) | `git rm docs/history/reviews/<YYYY-MM-DD>-<slug>-phase-*-coverage.md` at Phase 3.5 |
+| Artifact category | Lifecycle | Cleanup target (ephemeral only) |
+|---|---|---|
+| Brainstorm, delta ledger, validation review, architecture review, substrate audit, final substrate review, transcript | **Durable** | n/a |
+| Per-phase plan | **Ephemeral** | `git rm docs/history/plans/<YYYY-MM-DD>-<slug>-phase-*.md` |
+| Discovery report | **Ephemeral** | `git rm docs/cohesive/discovery/<slug>.md` (when present) |
 
-### Lifecycle rules
-
-- **Durable artifacts persist regardless of verdict.** A `validate-rewrite` Issues Found review is just as durable as an Approved review — the audit trail is what *was* judged, not just what succeeded. Issues Found reviews accumulate as `<slug>-rewrite-validation-pass-<N>.md` files; all passes persist.
-- **Ephemeral cleanup is gated on Implemented verdict.** Phase 3.5 fires only when Phase 3 returns Pass / Pass with notes. On Phase Drift / Substrate Drift / Aborted, ephemeral artifacts remain on the branch — they are load-bearing for the next attempt or the post-mortem. Cleanup on a non-Implemented verdict is a violation; see `IMPLEMENTATION_PLAN_COVERS_DELTA` review checklist item #3.
-- **The cleanup commit is the breadcrumb.** Its body lists removed paths verbatim so a future reader on main can `git log --all -- <path>` to recover the artifact from pre-cleanup branch history. A cleanup commit without a verbatim removed-paths list is a violation.
-- **New artifact categories register their lifecycle before shipping.** A skill that introduces a new artifact category adds a row to this section *in the same pass* as the skill change. Default to **Durable** when ambiguous — reclassifying ephemeral-to-durable later is one PR; reclassifying durable-to-ephemeral after passes have merged requires reviewer attention across every prior implementation pass.
+Producing skill and consumer for each category are documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md`. New artifact categories register their lifecycle in this table *in the same pass* as the skill change; default to **Durable** when ambiguous.
 
 ## Related substrate
 
