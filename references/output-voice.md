@@ -73,6 +73,7 @@ These produce wordiness without information:
 - "Recommended next Cohesive skill" (as a section heading in chat) / "Cohesive workflow" / "Cohesive route" / "substrate-shaped work" (as user-facing labels) — methodology framing the chat does not carry (violates rule 2a — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`); the chat trailer renders `### Next` as the section heading, with the skill name appearing parenthetically in inline code
 - "Required substrate before implementation" / "Substrate artifact to add or update" / "Suggested substrate" / "substrate gaps" / "substrate sound" (as user-facing chat labels uncited from `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md`) — substrate-shape vocabulary leaking into chat (violates rule 2a — substrate concerns belong in persisted-file templates, not the chat trailer)
 - Inline-rendered full paths in chat — `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/<file>.md §"..."` is for persisted files and skill bodies. Chat uses short cross-refs per §"Readability" → §"Cross-reference form".
+- "Open a fresh session and resume from X" / "start a new session" / "the fresh-session context budget gives X room" / "Recommended path — open a fresh session, run X, then resume Y" — recommending the user restart their session to get fresh context (eyes or budget). The harness's Task-subprocess isolation already provides fresh context at zero friction; any Cohesive skill that wants it dispatches a subagent. Wrap-up trailers name the next skill and let the user invoke it (or dispatch the next step as a subagent in the same turn) — they never tell the user to restart. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/fresh-eyes-review.md` §"Subprocess isolation also serves capacity isolation".
 
 ## Tone
 
@@ -118,6 +119,31 @@ When a bullet's prose runs longer than one line, lead with a bold phrase that ca
 Format: `**<short label or claim>** — <explanation prose>.`
 
 A bullet that fits on one line doesn't need a bold lead — the bold becomes ceremony. A 5-line bullet without a bold lead is unreadable in skim mode; the same content with a bold lead enables a skim → scan → read reading mode where the reader picks depth.
+
+### Forced-choice questions
+
+When a skill turn asks a forced-choice clarifying question (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions"), render the prompt through Claude Code's `AskUserQuestion` tool — the form picker — rather than as inline-prose options. The form's structure (header, 2–4 mutually exclusive options, optional preview, per-option description) matches the forced-choice shape these turns already require, and the rendered UI scans faster than options buried in narrative.
+
+**Use `AskUserQuestion` for:**
+
+- Router announcements that carry a clarifying question (e.g., `cohesively` `rewrite-only` route: "Has a direction been chosen, or should we run brainstorm-design first?").
+- Pick and Confirm sub-decisions in `brainstorm-design` axis-walk and leaf-direction turns — option space is small and named.
+- Verdict-driven next-step trailers offering a discrete handoff (e.g., `validate-rewrite` Approved: Continue to Build / Bypass to Superpowers / Re-decide).
+
+**Stay in prose for:**
+
+- Open-ended pressure-test turns ("what's the harder downstream cost?") — the response is judgment, not a pick.
+- Scope-clarification where free-form input is load-bearing ("what are you actually trying to do?").
+- Anything that should accept "yes, but…" rather than a closed pick.
+
+**Render rules:**
+
+- The recommended option (when one exists) goes first with `(Recommended)` appended to its label.
+- Labels are 1–5 words, mutually exclusive; per-option `description` carries the tradeoff in one short sentence.
+- `header` ≤ 12 chars, names the dimension being chosen on (e.g., "Direction", "Next gate"), not the workflow.
+- Use `preview` only when comparing concrete artifacts (named options with their substrate consequences, candidate rewrite snippets) — not for plain text.
+
+Forms and prose are complementary, not exclusive: a turn can render its argument in prose and close with a forced-choice form. The form is the closer, not the entire turn.
 
 ## Multi-turn dialog skills
 

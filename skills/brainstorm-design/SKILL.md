@@ -27,7 +27,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 3. **Always propose at least two credible options for non-trivial changes.** Single-option "design" is just a proposal, not a decision.
 4. **Never recommend an option whose main risk is mitigated by "we'll be careful."** Mitigation is structure: a test, a linter, a boundary, a constraint.
-5. **Conversational mode is multi-turn; each turn asks at most one forced-choice question.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions" → §"Per turn, not per invocation". Each conversational turn presents a verdict-led pick on one decision and asks the user to ratify or redirect — never a vague "what do you want?" prompt. Forbidden phrasings from `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` apply per-turn.
+5. **Conversational mode is multi-turn; each turn asks at most one forced-choice question.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions" → §"Per turn, not per invocation". Each conversational turn presents a verdict-led pick on one decision and asks the user to ratify or redirect — never a vague "what do you want?" prompt. Forbidden phrasings from `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` apply per-turn. Render the per-turn forced-choice prompt (axis pick, sub-decision Pick/Confirm) through `AskUserQuestion` per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Forced-choice questions".
 
 ## Process
 
