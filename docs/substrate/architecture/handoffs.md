@@ -132,9 +132,9 @@ As of the 2026-05-06 discovery-as-internal-step rewrite, `discover-substrate` is
 
 **Verdict gate.** **Approved** required. Issues Found and Design Incoherent verdicts go to different edges (see below).
 
-**What `implement-cohesively` must not re-derive.** The design intent. The phase loop derives phases from the delta ledger; re-reading the brainstorm output or re-asking what the design is converts implementation back into design.
+**What `implement-cohesively` must not re-derive.** The design intent. Step 1 composes the thin intent paragraph from the delta ledger; re-reading the brainstorm output or re-asking what the design is converts implementation back into design.
 
-**Failure mode if the contract drifts.** Implementation falls into freeform code; phases stop being delta-derived; `IMPLEMENTATION_PLAN_COVERS_DELTA` is violated; `delta-coverage-reviewer` returns Drift or Incomplete. The named invariant exists precisely because this is the most expensive failure of the implementation phase.
+**Failure mode if the contract drifts.** Implementation falls into freeform code; the thin intent paragraph drops delta entries or invariant references; `IMPLEMENTATION_PLAN_COVERS_DELTA` is violated; the end-of-run `delta-coverage-reviewer` returns Drift or Incomplete. The named invariant exists precisely because this is the most expensive failure of the implementation pass.
 
 ### validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)
 
@@ -200,57 +200,57 @@ When `validate-rewrite` returns **Approved** but the user reads the Architectura
 
 ### implement-cohesively → finishing-a-development-branch (Implemented)
 
-**Verdict gate.** **Implemented** — every phase's `delta-coverage-reviewer` returned Covered, the final `cohesive:review-diff` returned Pass or Pass with notes, and Phase 3.5 has produced the ephemeral-cleanup commit. The branch is ready to merge with main's tree carrying only durable decision records.
+**Verdict gate.** **Implemented** — both end-of-run reviewers returned Pass per AND-shape synthesis: `delta-coverage-reviewer` returned Covered AND `cohesive:review-diff` returned Pass / Pass with notes. Step 3.5 has produced the ephemeral-cleanup commit. The branch is ready to merge with main's tree carrying only durable decision records.
 
-**Artifact crossing.** The branch (with Phase 3.5 cleanup commit at HEAD) + the cleanup commit SHA, surfaced in the trailer's Branch state slot. Phase 3.5 strips ephemeral artifacts via `git rm` and produces a commit whose body lists removed paths verbatim; the verbatim list is the breadcrumb for forensic recovery via `git log --all -- <pattern>`. See `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` §"Phase 3.5. Strip implementation scaffolding".
+**Artifact crossing.** The branch (with Step 3.5 cleanup commit at HEAD) + the cleanup commit SHA, surfaced in the trailer's Branch state slot. Step 3.5 strips ephemeral artifacts via `git rm` and produces a commit whose body lists removed paths verbatim; the verbatim list is the breadcrumb for forensic recovery via `git log --all -- <pattern>`. See `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` §"Step 3.5. Post-implementation cleanup".
 
 **Downstream skill.** `superpowers:finishing-a-development-branch` (recommended, not invoked — branch finishing is a user action per the Cohesive↔Superpowers seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`).
 
-**What the downstream must not re-derive.** The implementation's substrate alignment (the Implemented verdict is the substrate-side check). The downstream also must not undo the Phase 3.5 cleanup — ephemeral artifacts are intentionally absent from the post-cleanup tree.
+**What the downstream must not re-derive.** The implementation's substrate alignment (the Implemented verdict is the substrate-side check). The downstream also must not undo the Step 3.5 cleanup — ephemeral artifacts are intentionally absent from the post-cleanup tree.
 
-**Failure modes.** (a) Auto-invocation of branch finishing instead of recommending it — caught by structure-reviewer as a Cohesive↔Superpowers seam violation. (b) Phase 3.5 doesn't fire on Implemented (run scaffolding leaks into main) or fires on a non-Implemented verdict (artifacts load-bearing for the next attempt are stripped) — both caught by Hard constraint #6 in the skill body and by structure-reviewer attention on merged branches.
+**Failure modes.** (a) Auto-invocation of branch finishing instead of recommending it — caught by structure-reviewer as a Cohesive↔Superpowers seam violation. (b) Step 3.5 doesn't fire on Implemented (run scaffolding leaks into main) or fires on a non-Implemented verdict (artifacts load-bearing for the next attempt are stripped) — both caught by Hard constraint #5 in the skill body and by structure-reviewer attention on merged branches.
 
-### implement-cohesively → implement-cohesively resume (Phase Drift)
+### implement-cohesively → implement-cohesively resume (Coverage Drift)
 
-**Verdict gate.** **Phase Drift** — a per-phase `delta-coverage-reviewer` returned Drift or Incomplete after one repair cycle (the Phase 2c escalation rule per `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md`).
+**Verdict gate.** **Coverage Drift** — `delta-coverage-reviewer` returned Drift or Incomplete while `cohesive:review-diff` returned Pass / Pass with notes. The implementation missed delta entries the coverage reviewer named.
 
-**Downstream skill.** `cohesive:implement-cohesively` (resume) — the user repairs the flagged phase by hand or via a focused `superpowers:writing-plans` repair plan, then re-invokes `implement-cohesively` which picks up at the failed phase.
+**Downstream skill.** `cohesive:implement-cohesively` (resume) — the user repairs the named coverage gaps by hand or via a focused `superpowers:writing-plans` repair plan, then re-invokes `implement-cohesively` which dispatches the dual reviewer pair again.
 
-**What the downstream must not re-derive.** The phase derivation table from Phase 1. Resuming does not re-derive phases; it picks up from the recorded coverage state.
+**What the downstream must not re-derive.** The thin intent paragraph composed in Step 1. Resuming uses the same paragraph against the repaired diff; re-composing risks drift in stable-ID enumeration.
 
-**Failure mode if the contract drifts.** Resumption re-derives phases from scratch and produces a different phase ordering, decoupling commit history from the per-phase plans. Detection: per-phase commit messages cite plan paths and stable IDs (`IMPLEMENTATION_PLAN_COVERS_DELTA`); a re-derivation that breaks that grep auditing is the symptom.
+**Failure mode if the contract drifts.** Resumption re-composes the intent paragraph and drops or adds delta entries silently, decoupling the resume from the original run's coverage table. Detection: implementation commit messages cite the plan path and stable IDs (`IMPLEMENTATION_PLAN_COVERS_DELTA`); a re-composition that breaks that grep auditing is the symptom.
 
 ### implement-cohesively → rewrite-specs (Substrate Drift)
 
-**Verdict gate.** **Substrate Drift** — the final `cohesive:review-diff` returned Needs substrate, Risky, or Block; the implementation introduced behavior not covered by the rewrite, or invariant violations that aren't repairable in code alone.
+**Verdict gate.** **Substrate Drift** — `cohesive:review-diff` returned Needs substrate, Risky, or Block (regardless of `delta-coverage-reviewer`'s verdict; per AND-shape synthesis at §"Verdict synthesis", Substrate Drift wins on dual-fail). The implementation introduced behavior not covered by the rewrite, or invariant violations that aren't repairable in code alone.
 
 **Downstream skill.** `cohesive:rewrite-specs` — extend the rewrite to cover the implementation that landed (and re-validate), or revert the divergent code (and re-implement).
 
 **What the downstream must not re-derive.** The original approved direction. The Substrate Drift verdict means the rewrite was incomplete, not that the chosen direction was wrong; the repair extends scope rather than reopening design.
 
-**Failure mode if the contract drifts.** User reverts the implementation without extending the rewrite, leaving the substrate gap that produced the drift unaddressed; the next implementation pass repeats the drift. Detection: validate-rewrite on the repaired rewrite shows the drifted entries are now covered by the ledger; `delta-coverage-reviewer` on the next implementation pass returns Covered.
+**Failure mode if the contract drifts.** User reverts the implementation without extending the rewrite, leaving the substrate gap that produced the drift unaddressed; the next implementation pass repeats the drift. Detection: validate-rewrite on the repaired rewrite shows the drifted entries are now covered by the ledger; `cohesive:review-diff` on the next implementation pass returns Pass.
 
 ### implement-cohesively → out of chain (Aborted)
 
-**Verdict gate.** **Aborted** — the user stopped the implementation pass before completion (e.g., scope reassessment, external blocker). No downstream Cohesive skill applies.
+**Verdict gate.** **Aborted** — the user stopped the implementation pass before Step 3 ran (e.g., declined the delta-size budget gate, scope reassessment, external blocker). The dual reviewer pair did not dispatch. No downstream Cohesive skill applies.
 
-**Downstream skill.** None. The branch state is whatever the last successful phase committed; the user decides whether to discard the worktree, leave it for later, or invoke `cohesive:rewrite-specs` to reduce scope before resuming.
+**Downstream skill.** None. The branch state is whatever the last implementation commit landed; the user decides whether to discard the worktree, leave it for later, or invoke `cohesive:rewrite-specs` to reduce scope before resuming.
 
 **What the downstream must not re-derive.** N/a — Aborted is a leave-the-state-as-is verdict.
 
-**Failure mode if the contract drifts.** The skill auto-recovers (resumes phases unsolicited) when the user explicitly stopped. Detection: implement-cohesively's Phase 2c escalation rule explicitly stops at Phase Drift; Aborted is a user action surfaced to the user, not an internal recovery state.
+**Failure mode if the contract drifts.** The skill auto-recovers (resumes implementation unsolicited) when the user explicitly stopped. Detection: implement-cohesively's Step 1 budget gate explicitly surfaces and pauses; Aborted is a user action surfaced to the user, not an internal recovery state.
 
 ## Post-implementation review entry point
 
-Some implementation paths land code outside `cohesive:implement-cohesively`'s phase loop — the Approved-trailer bypass option (`superpowers:writing-plans` directly), a teammate writing code against a Cohesive-locked design, or an external tool (an autonomous agent, a code-generation pipeline) producing a branch claimed to match the locked design. In all three cases, the question "does the code match the locked design?" still needs an answer; the entry point for that answer is **`cohesive:review-diff` against the branch with the delta-ledger path as scope**.
+Some implementation paths land code outside `cohesive:implement-cohesively`'s end-of-run dual reviewer dispatch — the Approved-trailer bypass option (`superpowers:writing-plans` directly), a teammate writing code against a Cohesive-locked design, or an external tool (an autonomous agent, a code-generation pipeline) producing a branch claimed to match the locked design. In all three cases, the question "does the code match the locked design?" still needs an answer; the entry point for that answer is **`cohesive:review-diff` against the branch with the delta-ledger path as scope**.
 
-This is not a new skill — `review-diff` already exists and dispatches the substrate-alignment-reviewer + structure-reviewer agents against a diff. What this section does is name the *pattern* connecting a Cohesive-locked design to a non-Cohesive implementation, so future readers know where the verification entry point is when the implementation didn't run through `implement-cohesively`'s Phase 3.
+This is not a new skill — `review-diff` already exists and dispatches the substrate-alignment-reviewer + structure-reviewer agents against a diff. What this section does is name the *pattern* connecting a Cohesive-locked design to a non-Cohesive implementation, so future readers know where the verification entry point is when the implementation didn't run through `implement-cohesively`'s Step 3.
 
 ### Pattern: post-implementation review against a locked design
 
 **Trigger conditions** (any one fires the pattern):
 
-- The user picked the **Implement with Superpowers directly** alternative in `cohesive:validate-rewrite`'s Approved trailer (rendered when the rewrite is small enough that the phased loop would be ceremony, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives"), code landed via `superpowers:writing-plans`, and the user wants to know if the implementation drifted from the rewrite.
+- The user picked the **Implement with Superpowers directly** alternative in `cohesive:validate-rewrite`'s Approved trailer (rendered when the rewrite is small enough that the implement-cohesively flow would be ceremony, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives"), code landed via `superpowers:writing-plans`, and the user wants to know if the implementation drifted from the rewrite.
 - A teammate (or a non-Cohesive AI session) landed a branch claimed to implement a `design/<slug>` rewrite, and the user wants to verify before merge.
 - An external tool produced a branch matching a Cohesive-locked delta ledger and the user is the human-in-the-loop verifier.
 
@@ -274,7 +274,7 @@ This pattern is **not** a chain edge. The chain edge `validate-rewrite → imple
 ## What this doc does not cover
 
 - **Router dispatches** (user input → first chain skill). See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md`.
-- **Cohesive↔Superpowers seams** (Cohesive skill → Superpowers skill, internal to a phase loop). See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`.
+- **Cohesive↔Superpowers seams** (Cohesive skill → Superpowers skill, internal to an implementation pass). See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`.
 - **Within-skill process steps.** A skill's internal steps live in the SKILL.md body, not here.
 - **Convention-shape.** What every SKILL.md must look like is in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md`.
 - **Substrate primitive contracts.** What an invariant or matrix file must contain is in the relevant template at `${CLAUDE_PLUGIN_ROOT}/references/templates/`.
@@ -295,7 +295,7 @@ The contract sections are normative. Drift between this doc and SKILL.md bodies 
 
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` — per-skill design layer; what each skill is for.
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` — user input → route mapping; dispatch-prompt-contract grid.
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md` — internal implementation-phase seams.
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md` — internal implementation-pass seams.
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md` — the failure mode the chain edge to `implement-cohesively` closes.
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md` — the failure mode router prereq-passing closes.
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md` — the named invariant pinning the chain edge to `implement-cohesively`.

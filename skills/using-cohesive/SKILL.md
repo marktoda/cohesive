@@ -21,7 +21,7 @@ Cohesive applies when the user's request names — explicitly or by clear implic
 2. **Cohesion review.** Reviewing a codebase, subsystem, PR, or branch for cohesion — spec/code alignment, invariant enforcement, locality, agent-readiness. Phrases: "review for cohesion", "review the architecture for cohesion", "is this codebase cohesion-healthy", "review my PR for substrate".
 3. **Substrate audit.** Auditing a repo for missing memory: implicit rules without invariants, branchy behavior without matrices, scars trapped in comments, stale docs. Phrases: "audit substrate", "what memory is missing", "what specs/invariants/gotchas should we have but don't".
 4. **Spec rewrite.** Rewriting specs, behavior matrices, named invariants, or gotchas to describe a chosen end state. Phrases: "rewrite the specs for X", "update the design docs to reflect Y", "make the docs match the chosen direction".
-5. **Implementation against an approved rewrite.** Driving code phase-by-phase against a design delta ledger, with per-phase cross-review. Phrases: "implement the approved rewrite", "land docs with implementation", "drive implementation against the delta", "ship the rewrite cohesively".
+5. **Implementation against an approved rewrite.** Driving code in a single implementation pass against a design delta ledger, with end-of-run dual reviewer dispatch. Phrases: "implement the approved rewrite", "land docs with implementation", "drive implementation against the delta", "ship the rewrite cohesively".
 
 If the user signals one of these triggers, the orientation message names `cohesive:cohesively` as the entry point. Anything ambiguous or borderline stays out of scope — when in doubt, do not orient.
 

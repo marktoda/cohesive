@@ -469,16 +469,17 @@ else
   fail "skills/validate-rewrite/SKILL.md missing one or more of the canonical implementation paths. The default + three conditional alternatives must all be named in the skill body: cohesive:implement-cohesively (default), Land specs first, Implement with Superpowers directly, superpowers:writing-plans, Re-decide. See §\"Conditional alternatives\" and the gotcha at docs/substrate/gotchas/no-implementation-handoff.md."
 fi
 
-# 13f. implement-cohesively cites phase-derivation matrix + IMPLEMENTATION_PLAN_COVERS_DELTA.
+# 13f. implement-cohesively cites IMPLEMENTATION_PLAN_COVERS_DELTA + large-delta-mega-plan.
 # Per docs/substrate/gotchas/no-implementation-handoff.md "Tests / checks that preserve this"
-# bullet 3. The skill body's Process / Hard constraints must reference both substrate
-# artifacts so a reader of the SKILL alone can trace to the matrix and the invariant.
+# bullet 3. The skill body's Process / Hard constraints must reference the named invariant
+# (single-pass coverage rule) and the abandonment-cliff gotcha (Step 1 budget gate)
+# so a reader of the SKILL alone can trace to the structural pins.
 errors_before=$errors
-if grep -qF 'docs/substrate/matrices/phase-derivation.md' skills/implement-cohesively/SKILL.md \
-   && grep -qF 'docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md' skills/implement-cohesively/SKILL.md; then
-  ok "implement-cohesively cites phase-derivation matrix and IMPLEMENTATION_PLAN_COVERS_DELTA invariant"
+if grep -qF 'docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md' skills/implement-cohesively/SKILL.md \
+   && grep -qF 'docs/substrate/gotchas/large-delta-mega-plan.md' skills/implement-cohesively/SKILL.md; then
+  ok "implement-cohesively cites IMPLEMENTATION_PLAN_COVERS_DELTA invariant and large-delta-mega-plan gotcha"
 else
-  fail "skills/implement-cohesively/SKILL.md must cite docs/substrate/matrices/phase-derivation.md AND docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md (per docs/substrate/gotchas/no-implementation-handoff.md). One or both citations are missing."
+  fail "skills/implement-cohesively/SKILL.md must cite docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md AND docs/substrate/gotchas/large-delta-mega-plan.md (per docs/substrate/gotchas/no-implementation-handoff.md). One or both citations are missing."
 fi
 
 # 13g. Literal bypass-acknowledgment string in validate-rewrite.
@@ -493,7 +494,7 @@ fi
 # substrate-shape vocabulary stays out of chat); the invariant doc remains the
 # substrate-side record.
 errors_before=$errors
-bypass_string="Implementing with plain Superpowers — Cohesive's per-phase verification of the rewrite doesn't apply. Run cohesive:review-diff after implementation to catch any drift."
+bypass_string="Implementing with plain Superpowers — Cohesive's verification of the rewrite doesn't apply. Run cohesive:review-diff after implementation to catch any drift."
 if grep -qF "$bypass_string" skills/validate-rewrite/SKILL.md; then
   ok "validate-rewrite carries the literal bypass-acknowledgment string (with post-impl verification imperative)"
 else
@@ -590,6 +591,30 @@ if [ -n "$chain_violations" ]; then
   fail "Chain-rendering anti-pattern in skills/cohesively/SKILL.md (Check 13l): subskill IDs joined by → arrows render dispatch machinery in user-facing chat output. Lines: $(echo "$chain_violations" | tr '\n' ';'). Retire to one-sentence outcome announcements per skills/cohesively/SKILL.md §\"Output\" canonical announcement template."
 else
   ok "Chain-rendering anti-pattern absent from cohesively/SKILL.md (Check 13l)"
+fi
+
+# 13m. Forbidden phase-shaped literals in skills/, agents/, references/, and
+# docs/substrate/{conventions,architecture,matrices}/.
+# Per docs/history/delta-ledgers/2026-05-08-implement-cohesively-single-pass.md
+# §"Repair pass 2" and §"Repair pass 3" / §"End-of-run review notes". The
+# implement-cohesively single-pass redesign deleted phase-derivation as a
+# concept; literal phrases like "phase by phase" or "phase-by-phase" in
+# user-facing render templates contradict the named invariant
+# IMPLEMENTATION_PLAN_COVERS_DELTA. The check is convention-with-grep
+# (parallel to Check 13g's bypass_string). Pass-3 surfaced that the original
+# narrowing missed docs/substrate/conventions/ (scope.md:29 stale phase-shape
+# sentence escaped the pass-1 sweep); the end-of-run review-diff F2 finding
+# requested widening to cover the conventions/ tree. docs/substrate/gotchas/
+# and docs/substrate/invariants/ History sections retain phase-shaped
+# redesign provenance intentionally and remain out of scope.
+errors_before=$errors
+phase_violations=$(grep -rinE 'phase[ -]by[ -]phase' skills/ agents/ references/ docs/substrate/conventions/ docs/substrate/architecture/ docs/substrate/matrices/ 2>/dev/null || true)
+if [ -n "$phase_violations" ]; then
+  echo "$phase_violations" | while IFS= read -r line; do
+    fail "Forbidden phase-shaped literal (Check 13m): $line. The single-pass redesign retired the per-phase concept; replace with 'in a single pass' or 'per-pass'. See docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md."
+  done
+else
+  ok "no 'phase by phase' / 'phase-by-phase' literals in skills/, agents/, references/ (Check 13m)"
 fi
 
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.

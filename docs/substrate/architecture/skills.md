@@ -12,7 +12,7 @@ The user-facing surface for the flagship workflow is the gate vocabulary (Decide
 | `brainstorm-design` | Decide | Convert intent into chosen direction | Pressure-testing options against substrate | _none (user approves)_ |
 | `rewrite-specs` | Lock | Hard-rewrite docs to end state | Spec rewrite + delta ledger | _none (validate-rewrite verdicts)_ |
 | `validate-rewrite` | Lock | Fresh-eyes review + architectural reflection at the lock→build handoff | Coherence, completeness, enforceability check; reflection synthesizing how the architecture feels after the lock | Approved / Issues Found / Design Incoherent |
-| `implement-cohesively` | Build | Land code that makes the rewrite true; verify spec-coverage | Phase derivation; per-phase cross-review; spec-coverage verdict | Implemented / Phase Drift / Substrate Drift / Aborted |
+| `implement-cohesively` | Build | Land code that makes the rewrite true; verify spec-coverage | Single-pass writing-plans + executing-plans + end-of-run dual reviewer dispatch (delta-coverage-reviewer + review-diff) | Implemented / Coverage Drift / Substrate Drift / Aborted |
 | `review-codebase` | _diagnostic_ | Architecture-altitude cohesion review | Multi-reviewer dispatch + synthesis | Healthy / Mostly healthy / Cohesive but under-enforced / Spec drift risk / Architecture risk |
 | `review-diff` | _diagnostic_ | Cohesion review of a PR or working changes | Two-reviewer dispatch on bounded surface | Pass / Pass with notes / Needs substrate / Risky / Block |
 | `audit-substrate` | _diagnostic_ | Find missing memory | Single-pass scan; no reviewer dispatch | Substrate sound / Substrate gaps / Substrate sparse |
@@ -24,7 +24,7 @@ The user-facing surface for the flagship workflow is the gate vocabulary (Decide
 
 Three properties define a Cohesive skill.
 
-1. **Substrate-shape, not implementation-shape.** Skills work against specs, behavior matrices, named invariants, gotchas, and design docs. The only skill that produces code is `implement-cohesively`, which composes `superpowers:executing-plans` per phase rather than writing code directly.
+1. **Substrate-shape, not implementation-shape.** Skills work against specs, behavior matrices, named invariants, gotchas, and design docs. The only skill that produces code is `implement-cohesively`, which composes `superpowers:executing-plans` once per implementation pass rather than writing code directly.
 2. **Verdict-led where applicable.** Reviewing skills lead chat output with `**Verdict:**` from a controlled vocabulary. Workflow skills hand off via verdicts that gate downstream skills. Verdicts are how the chain knows what state it's in.
 3. **Fresh-eyes-when-reviewing.** Skills that dispatch reviewers do so via Task subprocess with no inherited conversation context. The structural fence is the harness's subprocess isolation — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/fresh-eyes-review.md`.
 
@@ -42,7 +42,7 @@ The skill set is the answer to several deliberate cuts. Each entry below explain
 
 **Why `cohesively` is a router, not a workflow.** A meta-skill that internally calls every step would hide phase transitions. Cohesive treats user-driven phase transitions as a feature: the user sees what's running, decides whether to continue, and can re-enter at any point. The router announces a route and dispatches; the chain runs as a sequence of legible turns.
 
-**Why `implement-cohesively` exists rather than handing off to `superpowers:writing-plans` directly.** The failure mode in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md`: without a substrate-shaped phase loop, freeform code follows by default and bypasses the substrate the rewrite established. Cohesive owns the phase derivation (delta ledger → per-phase intent) and the per-phase cross-review (delta-coverage-reviewer); Superpowers owns plan-writing and TDD execution inside each phase. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`.
+**Why `implement-cohesively` exists rather than handing off to `superpowers:writing-plans` directly.** The failure mode in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md`: without substrate-shaped framing around implementation, freeform code follows by default and bypasses the substrate the rewrite established. Cohesive owns the thin intent paragraph (delta ledger → writing-plans input), the delta-size budget gate, and the end-of-run dual reviewer dispatch with AND-shape verdict synthesis; Superpowers owns plan-writing and TDD execution. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md`.
 
 **Why `review-codebase` and `review-diff` are two skills, not one with a `--scope` flag.** Different reviewer panels (4 reviewers vs 2), different rubrics (architecture-review-rubric vs cohesion-rubric), different output shapes (persisted report vs chat-only verdict). The shared concept is "fresh-eyes review against substrate"; the executions diverge enough that one skill body would be a configuration-laden mess.
 
@@ -66,7 +66,7 @@ Per-skill sections in this doc carry one of three statuses, named explicitly in 
 | `brainstorm-design` | inherited | not yet validated against a forward rewrite |
 | `rewrite-specs` | **validated** | the architecture refactor itself touched its SKILL.md (Step 1a addition); spec-cohesion-reviewer lens 13 confirmed parity through repair-pass-3 |
 | `validate-rewrite` | **validated** | validated by the 2026-05-05 validate-rewrite-internal-loop refactor (Purpose / Owns / Inputs / Outputs / Why-this-shape rewritten with the design layer as prior substrate); spec-cohesion-reviewer lens 13 confirmed parity through repair pass 2 |
-| `implement-cohesively` | **validated** | validated by the 2026-05-05 review-diff repair pass; verdict vocabulary reconciled to four terminals (`Implemented / Phase Drift / Substrate Drift / Aborted`) |
+| `implement-cohesively` | **validated** | validated by the 2026-05-05 review-diff repair pass; verdict vocabulary reconciled to four terminals (`Implemented / Coverage Drift / Substrate Drift / Aborted`) per the 2026-05-08 single-pass redesign |
 | `review-codebase` | inherited | not yet validated against a forward rewrite |
 | `review-diff` | inherited | not yet validated against a forward rewrite |
 | `audit-substrate` | inherited | not yet validated against a forward rewrite |
@@ -169,24 +169,26 @@ Both `inherited` and `newly-authored` sections may surface lens 13 (design-imple
 
 ### implement-cohesively
 
-**Purpose.** Land code that makes the approved rewrite true, phase-by-phase against the design delta ledger, with per-phase cross-review for delta coverage.
+**Purpose.** Land code that makes the approved rewrite true in a single implementation pass against the design delta ledger, with end-of-run dual reviewer dispatch verifying both delta coverage and substrate alignment.
 
 **Owns.**
-- Deriving phases from the design delta ledger per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/phase-derivation.md`.
-- Per-phase composition: `superpowers:writing-plans` (plan) → `superpowers:executing-plans` (TDD execution) → `delta-coverage-reviewer` (cross-review).
-- Returning one of four terminal verdicts: **Implemented** (substrate and code agree; hand off to `superpowers:finishing-a-development-branch`), **Phase Drift** (a per-phase cross-review failed after one repair cycle; resume `implement-cohesively`), **Substrate Drift** (final `cohesive:review-diff` flagged drift; route to `cohesive:rewrite-specs` to extend or revert), **Aborted** (user stopped before completion; no downstream skill).
-- Running `cohesive:review-diff` against the branch as the final substrate check.
+- Composing the thin intent paragraph from the delta ledger (delta-entry stable IDs + named invariants the change touches + dual-reviewer acceptance) and dispatching `superpowers:writing-plans` once per pass.
+- Surfacing the delta-size budget gate above 15 entries before invoking `writing-plans` (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/large-delta-mega-plan.md`).
+- Dispatching `superpowers:executing-plans` once per pass against the persisted plan.
+- End-of-run parallel dispatch of `delta-coverage-reviewer` (whole-branch input contract) + `cohesive:review-diff`; AND-shape verdict synthesis.
+- Returning one of four terminal verdicts: **Implemented** (both reviewers Pass; hand off to `superpowers:finishing-a-development-branch`), **Coverage Drift** (delta-coverage-reviewer flagged missing entries; resume `implement-cohesively`), **Substrate Drift** (review-diff flagged substrate violation; route to `cohesive:rewrite-specs` to extend or revert), **Aborted** (user stopped before Step 3; no downstream skill).
+- Step 3.5 post-implementation cleanup gated on Implemented verdict.
 
 **Does not own.**
-- Writing code directly. Code is produced by `superpowers:executing-plans` inside the phase loop.
-- Per-phase plan authoring. That's `superpowers:writing-plans`.
+- Writing code directly. Code is produced by `superpowers:executing-plans`.
+- Plan authoring. That's `superpowers:writing-plans`.
 - Branch finishing. Recommended (not invoked) after Implemented verdict; user runs `superpowers:finishing-a-development-branch`.
 
 **Inputs.** Validate-rewrite Approved verdict + design delta ledger path + branch name.
 
-**Outputs.** Code committed phase-by-phase + per-phase plans persisted + final verdict. The named invariant `IMPLEMENTATION_PLAN_COVERS_DELTA` pins delta coverage across the phase loop.
+**Outputs.** Code committed in a single implementation pass + one per-pass plan persisted + final synthesized verdict. The named invariant `IMPLEMENTATION_PLAN_COVERS_DELTA` pins delta coverage across the implementation pass.
 
-**Why this shape.** The skill exists because the gap between "specs approved" and "code shipped" is where substrate is most easily abandoned (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md`). The phase loop with delta-coverage cross-review converts a freeform implementation into a structured one without Cohesive owning code-writing.
+**Why this shape.** The skill exists because the gap between "specs approved" and "code shipped" is where substrate is most easily abandoned (see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/no-implementation-handoff.md`). The single-pass implementation with end-of-run dual reviewer dispatch converts a freeform implementation into a structured one without Cohesive owning code-writing.
 
 ### review-codebase
 

@@ -2,7 +2,7 @@
 
 The prescriptive shape of every Cohesive **Task-tool reviewer-agent dispatch**. Read this when authoring a new reviewer-dispatching skill or a new reviewer agent. The load-bearing property — fresh-eyes review — and its rationale live in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/fresh-eyes-review.md`; this doc specifies the contract every Task-tool dispatch must follow.
 
-Cohesive has a second dispatch shape — **Skill-tool (skill→skill) dispatch** — used by `validate-rewrite`'s repair loop and `implement-cohesively`'s phase loop. Skill-tool dispatches are subroutine calls: same conversation context, prompt-as-handoff, no fresh-eyes property. This doc covers Task-tool dispatches only; the Skill-tool contract lives at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-tool-dispatch.md`. A new contributor authoring a composition seam should consult the right one — conflating the two is exactly the failure mode the separate documents exist to prevent.
+Cohesive has a second dispatch shape — **Skill-tool (skill→skill) dispatch** — used by `validate-rewrite`'s repair loop and `implement-cohesively`'s end-of-run dispatch of `cohesive:review-diff`. Skill-tool dispatches are subroutine calls: same conversation context, prompt-as-handoff, no fresh-eyes property. This doc covers Task-tool dispatches only; the Skill-tool contract lives at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-tool-dispatch.md`. A new contributor authoring a composition seam should consult the right one — conflating the two is exactly the failure mode the separate documents exist to prevent.
 
 ## The dispatch contract (what the calling skill must do)
 
@@ -68,7 +68,7 @@ The exact phrasing is the canonical preamble defined in `${CLAUDE_PLUGIN_ROOT}/d
 - **`skills/review-codebase/SKILL.md` Phase 3** — dispatches four reviewer agents in a single message via Task tool: `substrate-alignment-reviewer`, `structure-reviewer`, `library-native-reviewer`, `agent-readiness-reviewer`.
 - **`skills/review-diff/SKILL.md`** — dispatches two reviewers in a single message: `substrate-alignment-reviewer`, `structure-reviewer` (and the other two only for very large diffs).
 - **`skills/validate-rewrite/SKILL.md`** — dispatches `spec-cohesion-reviewer` once, with the design delta ledger and rewritten spec paths as inputs.
-- **`skills/implement-cohesively/SKILL.md` Phase 2c (per phase)** — dispatches `delta-coverage-reviewer` once per implementation phase, with the delta-ledger excerpt, plan path, and phase diff as inputs. Each dispatch is independent (per-phase fence); no cross-phase reviewer state.
+- **`skills/implement-cohesively/SKILL.md` Step 3 (end of run)** — dispatches `delta-coverage-reviewer` once per implementation pass in parallel with `cohesive:review-diff` (a Skill-tool dispatch, not an agent dispatch), with the delta-ledger path, plan path, and whole-branch diff as inputs to the agent. The two end-of-run dispatches are independent (separation-of-concerns fence); no cross-reviewer state. Verdict synthesis is AND-shape per `${CLAUDE_PLUGIN_ROOT}/skills/implement-cohesively/SKILL.md` §"Verdict synthesis".
 
 All sites honor the contract. The post-Phase-1 architecture review (2026-05-04) found that the agent-file preamble had drifted in wording across the agents — three variants among five files — and that the prior self-review's claim of full compliance was incorrect. That drift is what motivated the v0.1 substrate collapse: the verbatim-bullet rule was producing the appearance of an enforced contract without the substance.
 
@@ -79,4 +79,4 @@ The substrate collapse demoted the verbatim-bullet rule to convention; it did no
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/fresh-eyes-review.md` — the load-bearing property this contract enforces; rationale, alternatives, when to revisit.
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` — the canonical reviewer-agent shape, including the canonical preamble.
 - `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Dispatch discipline" — the canonical skill-side rules.
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-tool-dispatch.md` — the Skill-tool (skill→skill) dispatch contract; complementary to this doc and consulted instead when authoring an internal repair loop or phase loop.
+- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-tool-dispatch.md` — the Skill-tool (skill→skill) dispatch contract; complementary to this doc and consulted instead when authoring an internal repair loop or end-of-run skill dispatch.

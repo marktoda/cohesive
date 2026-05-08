@@ -14,7 +14,7 @@ Substrate-first judgment work: making senior-engineer architectural choices stru
 |---|---|
 | **Decide gate** (`brainstorm-design`) | Pressure-testing 2–4 design options against accumulated substrate; recommending a direction with main risk + structural mitigation |
 | **Lock gate** (`rewrite-specs` + `validate-rewrite`) | Hard-rewriting docs to a chosen end state; fresh-eyes review with internal repair loop; architectural reflection at lock→build handoff |
-| **Build gate** (`implement-cohesively`) | Phase derivation from delta ledger; per-phase cross-review against the locked design; spec-coverage verdict — code production composed via `superpowers:executing-plans` (the only code-producing surface in the entire stack) |
+| **Build gate** (`implement-cohesively`) | Thin intent paragraph derived from delta ledger; delta-size budget gate; end-of-run dual reviewer dispatch (`delta-coverage-reviewer` + `cohesive:review-diff`) against the locked design with AND-shape verdict synthesis; spec-coverage verdict — code production composed via `superpowers:executing-plans` (the only code-producing surface in the entire stack) |
 | **Diagnostics** (`review-codebase`, `review-diff`, `audit-substrate`) | Whole-architecture cohesion review; PR/branch substrate review; missing-memory inventory |
 | **Adoption** (`init`) | First-time substrate from a zero-substrate codebase, with side-by-side translations that teach the vocabulary |
 | **Router & orientation** (`cohesively`, `using-cohesive`) | Route selection; session-start framing |
@@ -26,9 +26,9 @@ The substrate primitives Cohesive operates on: specs, behavior matrices, named i
 
 ### Implementation discipline
 
-Superpowers' territory. The Cohesive↔Superpowers seam is documented at [`docs/substrate/architecture/composition-with-superpowers.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md); the principle is that Cohesive owns substrate and phase shape, Superpowers owns plan writing and TDD execution inside each phase.
+Superpowers' territory. The Cohesive↔Superpowers seam is documented at [`docs/substrate/architecture/composition-with-superpowers.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md); the principle is that Cohesive owns substrate-shaped framing (intent paragraph + delta-size budget gate + end-of-run dual reviewer dispatch), Superpowers owns plan writing and TDD execution.
 
-- **Plan writing** — `superpowers:writing-plans` owns this. `implement-cohesively` invokes it once per phase.
+- **Plan writing** — `superpowers:writing-plans` owns this. `implement-cohesively` invokes it once per implementation pass at Step 1.
 - **TDD execution** — `superpowers:executing-plans` owns this. The only code-producing surface in the entire stack.
 - **Branch finishing / merge mechanics** — `superpowers:finishing-a-development-branch` owns this. `implement-cohesively` recommends it on Implemented verdict; never auto-invokes.
 - **Code review for implementation quality** — `superpowers:code-reviewer` owns this. Cohesive's `review-codebase` and `review-diff` review for *substrate cohesion* (does the code agree with the docs?), not for code quality, naming, formatting, or micro-design.
