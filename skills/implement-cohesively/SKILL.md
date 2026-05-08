@@ -109,10 +109,9 @@ The two reviewer outputs combine AND-shape into a single internal verdict:
 | Drift / Incomplete | Pass / Pass with notes | **Coverage Drift** |
 | Covered | Needs substrate / Risky / Block | **Substrate Drift** |
 | Drift / Incomplete | Needs substrate / Risky / Block | **Substrate Drift** (wins on dual-fail; the rewrite was misformulated, which makes coverage gaps downstream) |
+| (not dispatched) | (not dispatched) | **Aborted** (Step 3 did not run — the user paused before reviewers dispatched, e.g., declined the budget gate or stopped during Step 2) |
 
-The internal verdict translates to the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"implement-cohesively". Render the chat trailer per §"Output format" below; persist the synthesis (which reviewer flagged what) in the trailer's `## End-of-run review` body block.
-
-A separate **Aborted** internal verdict applies when the user paused before Step 3 ran (e.g., declined the budget gate, or stopped during Step 2). Aborted does not run reviewers and does not fire Step 3.5.
+The internal verdict translates to the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"implement-cohesively". Render the chat trailer per §"Output format" below; persist the synthesis (which reviewer flagged what) in the trailer's `## End-of-run review` body block. Aborted does not run reviewers and does not fire Step 3.5.
 
 ### Step 3.5. Post-implementation cleanup
 

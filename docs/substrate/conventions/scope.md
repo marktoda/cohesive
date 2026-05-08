@@ -26,7 +26,7 @@ The substrate primitives Cohesive operates on: specs, behavior matrices, named i
 
 ### Implementation discipline
 
-Superpowers' territory. The Cohesive↔Superpowers seam is documented at [`docs/substrate/architecture/composition-with-superpowers.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md); the principle is that Cohesive owns substrate and phase shape, Superpowers owns plan writing and TDD execution inside each phase.
+Superpowers' territory. The Cohesive↔Superpowers seam is documented at [`docs/substrate/architecture/composition-with-superpowers.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md); the principle is that Cohesive owns substrate-shaped framing (intent paragraph + delta-size budget gate + end-of-run dual reviewer dispatch), Superpowers owns plan writing and TDD execution.
 
 - **Plan writing** — `superpowers:writing-plans` owns this. `implement-cohesively` invokes it once per implementation pass at Step 1.
 - **TDD execution** — `superpowers:executing-plans` owns this. The only code-producing surface in the entire stack.

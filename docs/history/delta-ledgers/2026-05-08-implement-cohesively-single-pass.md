@@ -254,6 +254,19 @@ Source review: `docs/history/reviews/2026-05-08-implement-cohesively-single-pass
 
 **Validation:** `scripts/validate_plugin.sh` passes after repair, including the new Check 13m which now actively prevents B1's regression class.
 
+## Repair pass 3 (close-inline)
+
+Source review: `docs/history/reviews/2026-05-08-implement-cohesively-single-pass-rewrite-validation-pass-3.md` (verdict: **Approved**; disposition: Close in same worktree → merge).
+
+The pass-3 reviewer returned Approved with one Medium and one Low closed inline before merge per the disposition rule:
+
+- **I1 (Medium)** — `docs/substrate/conventions/scope.md:29` stale phase-shape sentence. Repair pass 1 §B4 closed `scope.md:31` but missed line 29 in the same paragraph. Check 13m's grep scope (`skills/`, `agents/`, `references/`) does not cover `docs/substrate/conventions/`, so the literal-regression class B1 prevented did not catch this. Replaced line 29 with `"the principle is that Cohesive owns substrate-shaped framing (intent paragraph + delta-size budget gate + end-of-run dual reviewer dispatch), Superpowers owns plan writing and TDD execution."`
+- **I2 (Low)** — `skills/implement-cohesively/SKILL.md` §"Verdict synthesis" table was missing the `Aborted` row, even though Aborted is a real internal verdict documented in the prose paragraph below the table and in the `verdict-vocabulary.md` `implement-cohesively` section. Added a fifth row: `| (not dispatched) | (not dispatched) | **Aborted** (Step 3 did not run — the user paused before reviewers dispatched...) |`. The prose paragraph below collapsed into the table row's parenthetical.
+
+The vague-language items the pass-3 reviewer surfaced (`implement-cohesively/SKILL.md:74` deferral phrasing; `delta-coverage-reviewer.md:99` Medium/Low collapse) are Low and not closed inline; deferred to a future substrate touch.
+
+**Validation:** `scripts/validate_plugin.sh` passes after pass-3 close-inline.
+
 ## Ready for fresh-eyes review?
 
 **Yes** — the rewrite is internally consistent across every load-bearing surface; the named invariant is reformulated coherently with the day-one history entry inline-annotated for clarity; the chat-trailer template reflects the new body block; the verdict vocabulary is renamed; the bypass-acknowledgment string is canonical across SKILL.md, invariant, gotcha, and validator; the Implementation-route render literal in `validate-rewrite` reflects single-pass shape; `validate_plugin.sh` passes (now with Check 13m structurally preventing the regression class B1 represented); and no stale phase-shaped references remain outside History sections of the three substrate docs (`IMPLEMENTATION_PLAN_COVERS_DELTA.md`, `large-delta-mega-plan.md`, `plans-as-run-scaffolding.md`) that intentionally retain them as redesign provenance.
