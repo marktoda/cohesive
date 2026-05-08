@@ -16,7 +16,7 @@ A normal linter encodes generic engineering rules. A *semantic* linter encodes i
 
 - brainstorming a feature, refactor, or architecture change that touches behavior or invariants
 - rewriting design docs / specs to a chosen end state
-- driving implementation of an approved rewrite phase-by-phase against a design delta ledger
+- driving implementation of an approved rewrite in a single pass against a design delta ledger
 - reviewing a codebase, subsystem, or PR for cohesion
 - auditing a repo for missing memory — implicit rules, branchy code without matrices, invariants without enforcement
 - deciding whether to centralize, duplicate, split, or abstract
@@ -55,7 +55,7 @@ For a non-trivial feature or refactor:
 
 - **Decide** — recommended direction with main risk + structural mitigation. Many design conversations end here. *(Under the hood: `discover-substrate` + `brainstorm-design`.)*
 - **Lock** — chosen direction pinned into specs in a worktree, then fresh-eyes-validated. You get an architectural reflection on what's easier downstream, what's harder, what's load-bearing on memory rather than structure. *(Under: `rewrite-specs` + `validate-rewrite`, with an internal repair loop.)*
-- **Build** — locked design becomes code with spec-coverage verified. Phases derived from the design delta ledger; each phase is plan-then-TDD, then cross-reviewed against the delta. Final verdict: `Code matches locked design ✓` / `Drift detected ✗`. *(Under: `implement-cohesively`, composing `superpowers:writing-plans` + `executing-plans` per phase, plus `delta-coverage-reviewer` per phase.)*
+- **Build** — locked design becomes code with spec-coverage verified. A single-pass implementation against the delta ledger: thin intent paragraph → `superpowers:writing-plans` → `superpowers:executing-plans` → end-of-run parallel dispatch of `delta-coverage-reviewer` + `cohesive:review-diff`, synthesized AND-shape. Final verdict: `Code matches locked design ✓` / `Drift detected ✗`. *(Under: `implement-cohesively`, composing `superpowers:writing-plans` + `executing-plans` once per pass, plus the dual reviewer pair at end-of-run.)*
 
 You can stop at any gate.
 

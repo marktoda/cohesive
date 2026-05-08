@@ -24,7 +24,7 @@ The user-facing surface for the flagship workflow is the gate vocabulary (Decide
 
 Three properties define a Cohesive skill.
 
-1. **Substrate-shape, not implementation-shape.** Skills work against specs, behavior matrices, named invariants, gotchas, and design docs. The only skill that produces code is `implement-cohesively`, which composes `superpowers:executing-plans` per phase rather than writing code directly.
+1. **Substrate-shape, not implementation-shape.** Skills work against specs, behavior matrices, named invariants, gotchas, and design docs. The only skill that produces code is `implement-cohesively`, which composes `superpowers:executing-plans` once per implementation pass rather than writing code directly.
 2. **Verdict-led where applicable.** Reviewing skills lead chat output with `**Verdict:**` from a controlled vocabulary. Workflow skills hand off via verdicts that gate downstream skills. Verdicts are how the chain knows what state it's in.
 3. **Fresh-eyes-when-reviewing.** Skills that dispatch reviewers do so via Task subprocess with no inherited conversation context. The structural fence is the harness's subprocess isolation — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/fresh-eyes-review.md`.
 

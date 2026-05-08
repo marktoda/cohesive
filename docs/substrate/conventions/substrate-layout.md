@@ -28,7 +28,7 @@ docs/
 
 ## Lifecycle: durable vs ephemeral
 
-Within `docs/history/`, artifacts split along a second axis. **Durable** decision records (brainstorms, delta-ledgers, reviews, transcripts) persist permanently in main; **ephemeral** run scaffolding (per-phase plans, discovery reports) lives on the implementation branch and is cleaned up at handoff per §"Cleanup at handoff" below. Per-category classification lives in [`docs/substrate/matrices/artifact-placement.md`](../matrices/artifact-placement.md) §"Lifecycle by artifact category".
+Within `docs/history/`, artifacts split along a second axis. **Durable** decision records (brainstorms, delta-ledgers, reviews, transcripts) persist permanently in main; **ephemeral** run scaffolding (the per-pass implementation plan, discovery reports) lives on the implementation branch and is cleaned up at handoff per §"Cleanup at handoff" below. Per-category classification lives in [`docs/substrate/matrices/artifact-placement.md`](../matrices/artifact-placement.md) §"Lifecycle by artifact category".
 
 The lifecycle axis is orthogonal to the audience seam in [`audience-separation.md`](audience-separation.md): the audience seam governs render surfaces (chat vs persisted file); lifecycle governs persistence surfaces (main vs branch). See [`gotchas/plans-as-run-scaffolding.md`](../gotchas/plans-as-run-scaffolding.md) for the failure mode this prevents.
 

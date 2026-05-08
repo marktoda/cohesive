@@ -211,12 +211,39 @@ This rewrite is **Mixed**. Design-layer changes: skill purpose narrowing for `im
 ## Remaining ambiguity
 
 - **Branch-name convention vs harness behavior:** the substrate references `design/<slug>` branches (handoffs.md, IMPLEMENTATION_PLAN_COVERS_DELTA, etc.), but the harness's `EnterWorktree` tool produces `worktree-design+<slug>`. This rewrite landed on the latter; the substrate-side reconciliation is reviewer-judged and not in scope for this pass. Future tightening: either (a) update the substrate to acknowledge `worktree-design+<slug>` as the canonical form, or (b) add a `git branch -m` step to `rewrite-specs` that renames the harness-created branch to `design/<slug>`.
-- **Coverage Drift resume mechanics:** the skill body says "resume re-invokes implement-cohesively"; the exact mechanic of which delta entries get re-attempted vs which carry over from the prior pass is reviewer-judged (the user repairs by hand or via focused writing-plans). A future tightening could specify resume-state persistence; deferred.
+- **Coverage Drift resume mechanics (pass-1 I2 — substrate-noted):** `handoffs.md:219-220` says Coverage Drift resume "must not re-derive the thin intent paragraph" but `implement-cohesively/SKILL.md` Step 1 unconditionally enumerates non-Deferred entries — there is no resume branch in the SKILL body. The two surfaces don't disagree, but the discipline backing the handoff's must-not clause is reviewer-judged. Substrate-noted per the disposition rule §"Substrate-note as user override"; a future tightening could add a Step 1 sub-clause pinning the resume-state contract or persist resume state across invocations. Source review: `docs/history/reviews/2026-05-08-implement-cohesively-single-pass-rewrite-validation.md` finding I2.
 - **Verdict synthesis edge case:** what happens if `cohesive:review-diff` returns a verdict not enumerated in §"Verdict synthesis" (e.g., a future verdict added to review-diff's vocabulary)? Currently reviewer-judged; the `verdict-vocabulary.md` parity check in `validate_plugin.sh` is the structural fence.
+
+## Repair pass 1
+
+Source review: `docs/history/reviews/2026-05-08-implement-cohesively-single-pass-rewrite-validation.md` (verdict: Issues Found).
+
+**Closes:**
+
+- **B1** — Bypass-acknowledgment string contradiction. Decided canonical string by dropping "per-phase". Updated `validate-rewrite/SKILL.md:241,246` (replaced "phased loop with per-phase reviews" with "implement-cohesively flow with end-of-run dual reviewer dispatch"; replaced bypass acknowledgment string `"Cohesive's per-phase verification of the rewrite doesn't apply"` with `"Cohesive's verification of the rewrite doesn't apply"`); updated `validate_plugin.sh:497` `bypass_string` to match; `IMPLEMENTATION_PLAN_COVERS_DELTA.md:64` already had the canonical wording. Also updated `no-implementation-handoff.md:70` which carried a third stale variant of the bypass string. The three normative surfaces now agree on the literal string.
+
+- **B2** — Top-level surfaces sweep. `README.md:19` ("phase-by-phase against a design delta ledger" → "in a single pass against a design delta ledger"); `README.md:58` ("Phases derived from the design delta ledger; each phase is plan-then-TDD..." → "A single-pass implementation against the delta ledger: thin intent paragraph → writing-plans → executing-plans → end-of-run parallel dispatch..."); `ARCHITECTURE.md:11` ("composing superpowers:executing-plans per phase" → "composing superpowers:executing-plans once per implementation pass"); `ARCHITECTURE.md:76` ("phase-by-phase against the design delta ledger" → "single-pass against the design delta ledger with end-of-run dual reviewer dispatch").
+
+- **B3** — `skill-tool-dispatch.md` sweep. Added to rewrite list. Updated lines 3, 9, 23, 33, 59, 70, 74, 85, 108, 110, 117, 118, 134 to reflect the new shape: per-phase composition examples replaced with per-pass examples; line 117/118 are now Step 1 / Step 2 single-dispatch examples; Step 3 end-of-run dispatch of `cohesive:review-diff` added as a fourth concrete dispatch site. Plan-path example in line 117 reads `docs/history/plans/<YYYY-MM-DD>-<slug>.md` (singular) consistent with `IMPLEMENTATION_PLAN_COVERS_DELTA.md` Rule #2.
+
+- **B4** — Files claimed rewritten that retained stale phase vocabulary, swept:
+  - `fresh-eyes-review.md:16` ("the delta-coverage-reviewer dispatched per phase by implement-cohesively" → "the delta-coverage-reviewer dispatched at end-of-run by implement-cohesively")
+  - `dispatch-protocol.md:5` ("implement-cohesively's phase loop" → "implement-cohesively's end-of-run dispatch of cohesive:review-diff") and `:82` ("phase loop" → "end-of-run skill dispatch")
+  - `substrate-layout.md:31` ("per-phase plans, discovery reports" → "the per-pass implementation plan, discovery reports")
+  - `architecture/skills.md:27` ("composes superpowers:executing-plans per phase" → "composes superpowers:executing-plans once per implementation pass")
+  - Adjacent stale references found during the sweep also closed: `brainstorm-design/SKILL.md:357` ("per-phase composition" → "single-pass composition with end-of-run dual reviewer dispatch"); `scope.md:31` ("once per phase" → "once per implementation pass at Step 1"); `router.md:31` (R015 cell `"per phase"` → `"once per implementation pass plus end-of-run dual reviewer dispatch"`); `cohesion-review.md:121` ("phase-by-phase against the delta ledger" → "in a single pass against the delta ledger with end-of-run dual reviewer dispatch").
+
+- **I1** — `no-implementation-handoff.md:9` parenthetical ("delta ledger as inspectable work-shape; per-phase fence; final substrate review" → "delta ledger as inspectable work-shape; end-of-run dual reviewer fence; substrate-coverage verdict").
+
+- **I2** — Substrate-noted in §"Remaining ambiguity" above per the disposition rule §"Substrate-note as user override". The Coverage Drift resume mechanic remains reviewer-judged in v0.1.
+
+**Files added to rewrite list during repair:** `skills/validate-rewrite/SKILL.md` (B1), `docs/substrate/conventions/skill-tool-dispatch.md` (B3), `skills/brainstorm-design/SKILL.md` (B4 adjacent), `docs/substrate/matrices/router.md` (B4 adjacent), `references/templates/cohesion-review.md` (B4 adjacent).
+
+**Validation:** `scripts/validate_plugin.sh` passes after repair; the new `bypass_string` literal greps against the rewritten `validate-rewrite/SKILL.md`.
 
 ## Ready for fresh-eyes review?
 
-**Yes** — the rewrite is internally consistent, the named invariant is reformulated coherently, the chat-trailer template reflects the new body block, the verdict vocabulary is renamed across the substrate, the validate_plugin.sh check passes, and no stale phase-shaped references remain outside History sections (which intentionally retain them as redesign provenance).
+**Yes** — the rewrite is internally consistent across every load-bearing surface; the named invariant is reformulated coherently; the chat-trailer template reflects the new body block; the verdict vocabulary is renamed; the bypass-acknowledgment string is canonical across SKILL.md, invariant, gotcha, and validator; `validate_plugin.sh` passes; and no stale phase-shaped references remain outside History sections of the three substrate docs (`IMPLEMENTATION_PLAN_COVERS_DELTA.md`, `large-delta-mega-plan.md`, `plans-as-run-scaffolding.md`) that intentionally retain them as redesign provenance.
 
 ## How to read this ledger
 

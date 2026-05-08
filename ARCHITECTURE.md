@@ -8,7 +8,7 @@ This is the binding architectural map. Hook lines point at the design docs, inva
 
 Cohesive is a Claude Code plugin organized in three implementation tiers under `${CLAUDE_PLUGIN_ROOT}`. Implementation is what *plugin users get*; substrate is contributor-facing rules about *this repo itself*.
 
-- **`skills/`** — workflow orchestration. The session-start orientation skill (`using-cohesive`), the router (`cohesively`), the adoption skill (`init`), and eight workflow subskills make eleven skills total; this is the user-facing surface. Each skill is a process; skills do not run reviews directly. The `implement-cohesively` skill is the only one that produces code, and it does so by composing `superpowers:executing-plans` per phase rather than writing code directly. The per-skill design layer above the SKILL.md bodies lives at [`docs/substrate/architecture/skills.md`](docs/substrate/architecture/skills.md); chain-transition contracts at [`docs/substrate/architecture/handoffs.md`](docs/substrate/architecture/handoffs.md).
+- **`skills/`** — workflow orchestration. The session-start orientation skill (`using-cohesive`), the router (`cohesively`), the adoption skill (`init`), and eight workflow subskills make eleven skills total; this is the user-facing surface. Each skill is a process; skills do not run reviews directly. The `implement-cohesively` skill is the only one that produces code, and it does so by composing `superpowers:executing-plans` once per implementation pass rather than writing code directly. The per-skill design layer above the SKILL.md bodies lives at [`docs/substrate/architecture/skills.md`](docs/substrate/architecture/skills.md); chain-transition contracts at [`docs/substrate/architecture/handoffs.md`](docs/substrate/architecture/handoffs.md).
 - **`agents/`** — fresh-context reviewer agents. Dispatched via the Task tool with explicit input paths. They do not inherit conversation context; each review runs in a clean subprocess.
 - **`references/`** — runtime methodology cited by skills and agents during the workflow: the rubrics (`cohesion-rubric.md`, `architecture-review-rubric.md`), the design pressure-test battery, the locality-over-centralization principle, the substrate model, the chat-render voice guide (`output-voice.md`), and `templates/` — fillable forms skills consume to produce artifacts. All shipped to plugin users.
 
@@ -73,7 +73,7 @@ Workflow products (reviews, design delta ledgers, transcripts) and retired histo
 | Add or change a skill's verdict | [`VERDICT_BEFORE_EVIDENCE`](docs/substrate/invariants/VERDICT_BEFORE_EVIDENCE.md) and the relevant handoff in [`docs/substrate/architecture/handoffs.md`](docs/substrate/architecture/handoffs.md) |
 | Dispatch a reviewer agent | [`docs/substrate/architecture/fresh-eyes-review.md`](docs/substrate/architecture/fresh-eyes-review.md) (property) and [`docs/substrate/conventions/dispatch-protocol.md`](docs/substrate/conventions/dispatch-protocol.md) (template) |
 | Run Cohesive against this repo | `cohesive:review-codebase` — output lands in [`docs/history/reviews/`](docs/history/reviews/) |
-| Implement an approved spec rewrite | `cohesive:implement-cohesively` — phase-by-phase against the design delta ledger; requires Superpowers |
+| Implement an approved spec rewrite | `cohesive:implement-cohesively` — single-pass against the design delta ledger with end-of-run dual reviewer dispatch; requires Superpowers |
 
 ## Risks the design accepts
 

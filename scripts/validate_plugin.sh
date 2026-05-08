@@ -494,7 +494,7 @@ fi
 # substrate-shape vocabulary stays out of chat); the invariant doc remains the
 # substrate-side record.
 errors_before=$errors
-bypass_string="Implementing with plain Superpowers — Cohesive's per-phase verification of the rewrite doesn't apply. Run cohesive:review-diff after implementation to catch any drift."
+bypass_string="Implementing with plain Superpowers — Cohesive's verification of the rewrite doesn't apply. Run cohesive:review-diff after implementation to catch any drift."
 if grep -qF "$bypass_string" skills/validate-rewrite/SKILL.md; then
   ok "validate-rewrite carries the literal bypass-acknowledgment string (with post-impl verification imperative)"
 else

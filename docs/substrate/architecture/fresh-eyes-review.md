@@ -13,7 +13,7 @@ The fresh-eyes property defines four requirements for every review:
 3. **Bounded reading.** The agent reads only the paths passed to it (plus references its system prompt names). It does not glob the repo.
 4. **Structured output.** The agent returns findings in the canonical six-field shape (Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) so the dispatching skill can synthesize.
 
-The property applies to every reviewer agent dispatched from any Cohesive skill: the four reviewers in `review-codebase` Phase 3, the two reviewers in `review-diff`, the spec-cohesion-reviewer in `validate-rewrite`, and the delta-coverage-reviewer dispatched per phase by `implement-cohesively`.
+The property applies to every reviewer agent dispatched from any Cohesive skill: the four reviewers in `review-codebase` Phase 3, the two reviewers in `review-diff`, the spec-cohesion-reviewer in `validate-rewrite`, and the delta-coverage-reviewer dispatched at end-of-run by `implement-cohesively`.
 
 The prescriptive shape of the dispatch prompt and agent file lives in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/dispatch-protocol.md`. This doc explains why the property matters and what enforces it.
 
