@@ -469,16 +469,17 @@ else
   fail "skills/validate-rewrite/SKILL.md missing one or more of the canonical implementation paths. The default + three conditional alternatives must all be named in the skill body: cohesive:implement-cohesively (default), Land specs first, Implement with Superpowers directly, superpowers:writing-plans, Re-decide. See §\"Conditional alternatives\" and the gotcha at docs/substrate/gotchas/no-implementation-handoff.md."
 fi
 
-# 13f. implement-cohesively cites phase-derivation matrix + IMPLEMENTATION_PLAN_COVERS_DELTA.
+# 13f. implement-cohesively cites IMPLEMENTATION_PLAN_COVERS_DELTA + large-delta-mega-plan.
 # Per docs/substrate/gotchas/no-implementation-handoff.md "Tests / checks that preserve this"
-# bullet 3. The skill body's Process / Hard constraints must reference both substrate
-# artifacts so a reader of the SKILL alone can trace to the matrix and the invariant.
+# bullet 3. The skill body's Process / Hard constraints must reference the named invariant
+# (single-pass coverage rule) and the abandonment-cliff gotcha (Step 1 budget gate)
+# so a reader of the SKILL alone can trace to the structural pins.
 errors_before=$errors
-if grep -qF 'docs/substrate/matrices/phase-derivation.md' skills/implement-cohesively/SKILL.md \
-   && grep -qF 'docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md' skills/implement-cohesively/SKILL.md; then
-  ok "implement-cohesively cites phase-derivation matrix and IMPLEMENTATION_PLAN_COVERS_DELTA invariant"
+if grep -qF 'docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md' skills/implement-cohesively/SKILL.md \
+   && grep -qF 'docs/substrate/gotchas/large-delta-mega-plan.md' skills/implement-cohesively/SKILL.md; then
+  ok "implement-cohesively cites IMPLEMENTATION_PLAN_COVERS_DELTA invariant and large-delta-mega-plan gotcha"
 else
-  fail "skills/implement-cohesively/SKILL.md must cite docs/substrate/matrices/phase-derivation.md AND docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md (per docs/substrate/gotchas/no-implementation-handoff.md). One or both citations are missing."
+  fail "skills/implement-cohesively/SKILL.md must cite docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md AND docs/substrate/gotchas/large-delta-mega-plan.md (per docs/substrate/gotchas/no-implementation-handoff.md). One or both citations are missing."
 fi
 
 # 13g. Literal bypass-acknowledgment string in validate-rewrite.

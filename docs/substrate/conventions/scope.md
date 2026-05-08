@@ -14,7 +14,7 @@ Substrate-first judgment work: making senior-engineer architectural choices stru
 |---|---|
 | **Decide gate** (`brainstorm-design`) | Pressure-testing 2–4 design options against accumulated substrate; recommending a direction with main risk + structural mitigation |
 | **Lock gate** (`rewrite-specs` + `validate-rewrite`) | Hard-rewriting docs to a chosen end state; fresh-eyes review with internal repair loop; architectural reflection at lock→build handoff |
-| **Build gate** (`implement-cohesively`) | Phase derivation from delta ledger; per-phase cross-review against the locked design; spec-coverage verdict — code production composed via `superpowers:executing-plans` (the only code-producing surface in the entire stack) |
+| **Build gate** (`implement-cohesively`) | Thin intent paragraph derived from delta ledger; delta-size budget gate; end-of-run dual reviewer dispatch (`delta-coverage-reviewer` + `cohesive:review-diff`) against the locked design with AND-shape verdict synthesis; spec-coverage verdict — code production composed via `superpowers:executing-plans` (the only code-producing surface in the entire stack) |
 | **Diagnostics** (`review-codebase`, `review-diff`, `audit-substrate`) | Whole-architecture cohesion review; PR/branch substrate review; missing-memory inventory |
 | **Adoption** (`init`) | First-time substrate from a zero-substrate codebase, with side-by-side translations that teach the vocabulary |
 | **Router & orientation** (`cohesively`, `using-cohesive`) | Route selection; session-start framing |

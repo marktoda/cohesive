@@ -25,11 +25,11 @@ Render every bullet as a count-or-name list. When a category has no entries, ren
 - **Tests proposed:** <description> — or `none`
 - **Deferred (out of scope this pass):** <items> — or `none`
 
-The 8-category list above is also the substrate-shape input to `cohesive:implement-cohesively` Phase 1's coverage table — Phase 1 maps each delta-ledger entry to ≥1 implementation phase per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`. A future rename or addition of a category here updates Phase 1's coverage shape; treat the rename as a coupled change.
+The 8-category list above is also the substrate-shape input to `cohesive:implement-cohesively` Step 1's thin intent paragraph composition — Step 1 enumerates each non-Deferred delta-ledger entry by stable ID into the intent paragraph passed to `superpowers:writing-plans` per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`. A future rename or addition of a category here updates the intent-paragraph shape; treat the rename as a coupled change.
 
 ### Consumer rendering rules
 
-When a consumer (a validation review, a future implement-cohesively Phase 1 announcement, a future ledger-viewer CLI) renders the preamble, three rules govern what appears:
+When a consumer (a validation review, a future implement-cohesively Step 1 chat surface, a future ledger-viewer CLI) renders the preamble, three rules govern what appears:
 
 - **Preamble present and consistent with the body:** quote it verbatim into the consumer's `## Delta at a glance` section. No further annotation.
 - **Preamble missing:** render the literal string `Preamble missing — see Blocking issues` in the consumer's `## Delta at a glance` section. The consumer raises a Blocking Issue against this template's §"Delta at a glance" pointing to the missing preamble.

@@ -53,9 +53,9 @@ Authoring rule: when a skill's internal verdict vocabulary changes, update the c
 | Internal label | User-facing label |
 |---|---|
 | Implemented | **Implementation complete** — substrate and code agree; ready to merge |
-| Phase Drift | **A phase diverged from its plan** — repair the flagged phase, then re-run |
+| Coverage Drift | **Coverage gap — re-run to fill** — the implementation missed delta entries; repair the named gaps, then re-run |
 | Substrate Drift | **Implementation went beyond the design** — extend the docs to cover it, or revert the divergent code |
-| Aborted | **Implementation paused** — branch state is whatever the last successful phase committed |
+| Aborted | **Implementation paused** — branch state is whatever the last implementation commit landed |
 
 ## brainstorm-design
 

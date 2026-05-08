@@ -63,7 +63,7 @@ Read the user's request and map to one of the routes below. Trigger phrases are 
 
 **Clarifying question (required if the validation review path is not in the user's request):** "Has validate-rewrite returned **Approved** for a spec rewrite, or should I run the design route first?"
 
-The user can decline the Build gate in favor of `superpowers:writing-plans` directly — this skips Cohesive's per-phase verification of the rewrite, with the user accepting that implementation may drift. Surfaced as the Lock gate's `Implement with Superpowers directly` alternative — conditionally rendered when the rewrite is small enough that the phased loop would be ceremony, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives".
+The user can decline the Build gate in favor of `superpowers:writing-plans` directly — this skips Cohesive's end-of-run dual reviewer verification of the rewrite, with the user accepting that implementation may drift. Surfaced as the Lock gate's `Implement with Superpowers directly` alternative — conditionally rendered when the rewrite is small enough that the implement-cohesively flow would be ceremony, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives".
 
 ### Route: review (codebase)
 
@@ -143,17 +143,17 @@ Direct (non-router) invocation: the subskill asks its canonical question (about 
    | `init` | I'll scan your codebase for proto-substrate and produce drafts you can review. |
    | `artifact` | I'll draft the artifact you asked for. |
 
-2. **Process before implementation.** If behavior or architecture is changing, route through the Decide gate before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives code against the design delta ledger via the phase loop. Freeform code-writing from this skill body is forbidden.
+2. **Process before implementation.** If behavior or architecture is changing, route through the Decide gate before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives code against the design delta ledger via single-pass writing-plans + executing-plans + end-of-run dual reviewer dispatch. Freeform code-writing from this skill body is forbidden.
 
 3. **At most one clarifying question per turn.** The router's announcement turn asks at most one forced-choice question per route (forms above) before dispatching the subskill. Per [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Clarifying questions" → §"Per turn, not per invocation": subskills with multi-turn dialogs (e.g., `brainstorm-design` conversational mode) carry their own per-turn budget after dispatch. Question form is always a specific forced choice, never a vague "what do you want?" prompt. Render forced-choice questions through `AskUserQuestion` per [`references/output-voice.md`](${CLAUDE_PLUGIN_ROOT}/references/output-voice.md) §"Forced-choice questions".
 
-4. **Do not implement code from the router itself.** The router routes; subskills work. Implementation is delegated to the `implement` route, which dispatches `implement-cohesively`. That skill in turn composes `superpowers:writing-plans` and `superpowers:executing-plans` per phase — it does not write code itself either. Cohesive's only code-producing surface is `superpowers:executing-plans` invoked from inside `implement-cohesively`'s phase loop.
+4. **Do not implement code from the router itself.** The router routes; subskills work. Implementation is delegated to the `implement` route, which dispatches `implement-cohesively`. That skill in turn composes `superpowers:writing-plans` and `superpowers:executing-plans` once per implementation pass — it does not write code itself either. Cohesive's only code-producing surface is `superpowers:executing-plans` invoked from inside `implement-cohesively`.
 
 5. **Honor the dispatch prompt contract.** When invoking a subskill, include the relevant fragment from the table above. Subskills depend on this; omitting it produces a duplicate clarifying question on top of an already-routed turn.
 
 6. **Compose with Superpowers when present.** Specifically:
    - Worktrees: `superpowers:using-git-worktrees` (used by `rewrite-specs`)
-   - Implementation discipline: `superpowers:writing-plans` and `superpowers:executing-plans` (used per-phase by `implement-cohesively`); `superpowers:test-driven-development` is consumed indirectly via `executing-plans`
+   - Implementation discipline: `superpowers:writing-plans` and `superpowers:executing-plans` (used per-pass by `implement-cohesively`); `superpowers:test-driven-development` is consumed indirectly via `executing-plans`
    - Branch finishing: `superpowers:finishing-a-development-branch` (recommended after `implement-cohesively` Implemented verdict; user-invoked, never auto-invoked from the router)
 
 7. **Track progress with TodoWrite when chaining 3+ subskills.** The user should see the gates as they execute (Decide / Lock / Build), not the underlying subskill IDs.

@@ -4,7 +4,7 @@
 
 ## What
 
-Cohesive's review skills (`review-codebase`, `review-diff`, `validate-rewrite`, `implement-cohesively`'s per-phase cross-review) dispatch reviewer agents via the Task tool. Each agent runs in an isolated subprocess. The agent reads only paths the dispatching skill passes plus the references its system prompt names; it has no access to the conversation that produced those paths.
+Cohesive's review skills (`review-codebase`, `review-diff`, `validate-rewrite`, `implement-cohesively`'s end-of-run dual reviewer dispatch) dispatch reviewer agents via the Task tool. Each agent runs in an isolated subprocess. The agent reads only paths the dispatching skill passes plus the references its system prompt names; it has no access to the conversation that produced those paths.
 
 The fresh-eyes property defines four requirements for every review:
 

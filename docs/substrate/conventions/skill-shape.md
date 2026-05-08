@@ -247,7 +247,7 @@ These deviations are documented; new deviations require explicit discussion and 
 
 ## Code-producing skills
 
-A general convention reads "Cohesive skills do not produce code." That convention is true for every Cohesive skill *body*. The exception is `implement-cohesively`, which orchestrates a phase loop where `superpowers:executing-plans` produces code inside each phase. The skill body itself never writes code; it dispatches `superpowers:executing-plans` (which writes code with TDD discipline) per phase.
+A general convention reads "Cohesive skills do not produce code." That convention is true for every Cohesive skill *body*. The exception is `implement-cohesively`, which orchestrates a single implementation pass where `superpowers:executing-plans` produces code. The skill body itself never writes code; it dispatches `superpowers:executing-plans` (which writes code with TDD discipline) once per pass.
 
 The distinction matters for skill authors: a future Cohesive skill that wants to write code directly (without going through `superpowers:executing-plans`) crosses a seam the v0.1 design rejected. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/composition-with-superpowers.md` §"What Cohesive deliberately does not do." If a future skill genuinely needs to write substrate-shaped code (e.g., a behavior-matrix-to-test-stub generator), the seam needs explicit revisiting in the composition design doc.
 

@@ -79,10 +79,10 @@ bash scripts/validate_plugin.sh
 Install [Superpowers](https://github.com/obra/superpowers) alongside Cohesive. The two plugins compose at known seams:
 
 - `rewrite-specs` invokes `superpowers:using-git-worktrees` for worktree setup. *Loose composition: a 5-line fallback exists if Superpowers is absent.*
-- `implement-cohesively` invokes `superpowers:writing-plans` and `superpowers:executing-plans` per phase. *Tight composition: Superpowers is required; there is no fallback.* Plan-writing and TDD execution are not 5-line operations and reinventing them inside Cohesive is exactly the duplication the seam exists to prevent.
+- `implement-cohesively` invokes `superpowers:writing-plans` and `superpowers:executing-plans` once per implementation pass. *Tight composition: Superpowers is required; there is no fallback.* Plan-writing and TDD execution are not 5-line operations and reinventing them inside Cohesive is exactly the duplication the seam exists to prevent.
 - After `implement-cohesively` returns Implemented, hand off to `superpowers:finishing-a-development-branch`.
 
-**Cohesive shapes substrate and implementation phases; Superpowers shapes per-phase plans and code.** Cohesive's substrate-only workflows (review, audit, design, rewrite, validate) work without Superpowers.
+**Cohesive shapes substrate and the implementation pass; Superpowers shapes per-pass plans and code.** Cohesive's substrate-only workflows (review, audit, design, rewrite, validate) work without Superpowers.
 
 ## Layout
 
