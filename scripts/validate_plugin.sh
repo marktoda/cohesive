@@ -593,6 +593,26 @@ else
   ok "Chain-rendering anti-pattern absent from cohesively/SKILL.md (Check 13l)"
 fi
 
+# 13m. Forbidden phase-shaped literals in skills/, agents/, references/.
+# Per docs/history/delta-ledgers/2026-05-08-implement-cohesively-single-pass.md
+# §"Repair pass 2" and the pass-2 review's B1 / Substrate gaps note. The
+# implement-cohesively single-pass redesign deleted phase-derivation as a
+# concept; literal phrases like "phase by phase" or "phase-by-phase" in
+# user-facing render templates contradict the named invariant
+# IMPLEMENTATION_PLAN_COVERS_DELTA. The check is convention-with-grep
+# (parallel to Check 13g's bypass_string), narrowed to skills/, agents/,
+# references/ so historical narrative inside docs/substrate/gotchas/ and
+# docs/substrate/invariants/ History sections is not in scope.
+errors_before=$errors
+phase_violations=$(grep -rinE 'phase[ -]by[ -]phase' skills/ agents/ references/ 2>/dev/null || true)
+if [ -n "$phase_violations" ]; then
+  echo "$phase_violations" | while IFS= read -r line; do
+    fail "Forbidden phase-shaped literal (Check 13m): $line. The single-pass redesign retired the per-phase concept; replace with 'in a single pass' or 'per-pass'. See docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md."
+  done
+else
+  ok "no 'phase by phase' / 'phase-by-phase' literals in skills/, agents/, references/ (Check 13m)"
+fi
+
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
 # Per docs/substrate/invariants/PLUGIN_ROOT_PATHS.md. Excludes lines inside fenced code
 # blocks and lines marked as anti-pattern examples (so the rule's own anti-pattern

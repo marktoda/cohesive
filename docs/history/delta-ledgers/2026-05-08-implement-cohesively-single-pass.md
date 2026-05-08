@@ -241,9 +241,22 @@ Source review: `docs/history/reviews/2026-05-08-implement-cohesively-single-pass
 
 **Validation:** `scripts/validate_plugin.sh` passes after repair; the new `bypass_string` literal greps against the rewritten `validate-rewrite/SKILL.md`.
 
+## Repair pass 2
+
+Source review: `docs/history/reviews/2026-05-08-implement-cohesively-single-pass-rewrite-validation-pass-2.md` (verdict: Issues Found).
+
+**Closes:**
+
+- **B1** — `validate-rewrite/SKILL.md:220` Implementation-route card literal swept clean. The chat-rendered hand-off into Build now reads `"Builds the locked design in a single pass against the delta ledger at <...> on design/<slug>, with end-of-run dual reviewer dispatch."` instead of the prior `"phase by phase"` literal. Plus a new **Check 13m** in `scripts/validate_plugin.sh` greps `skills/`, `agents/`, `references/` for the forbidden literals `phase by phase` and `phase-by-phase`; zero matches required. The grep is narrowed to those three trees so historical narrative inside `docs/substrate/gotchas/` and `docs/substrate/invariants/` History sections is not in scope. Convention-with-grep promotion parallel to Check 13g's `bypass_string` pattern.
+- **I1** — `IMPLEMENTATION_PLAN_COVERS_DELTA.md:96` (2026-05-04 history entry) inline-annotated rather than rewritten, per the append-only history convention. The day-one entry now reads `"…explicit enforcement path (per-phase coverage + per-phase reviewer + final substrate review — per-phase at the time; reformulated to single-pass dual-reviewer dispatch on 2026-05-08; see entry below)…"`. The 2026-05-08 entry below it is unchanged.
+
+**I2 stays substrate-noted in §"Remaining ambiguity"** per the prior pass's disposition.
+
+**Validation:** `scripts/validate_plugin.sh` passes after repair, including the new Check 13m which now actively prevents B1's regression class.
+
 ## Ready for fresh-eyes review?
 
-**Yes** — the rewrite is internally consistent across every load-bearing surface; the named invariant is reformulated coherently; the chat-trailer template reflects the new body block; the verdict vocabulary is renamed; the bypass-acknowledgment string is canonical across SKILL.md, invariant, gotcha, and validator; `validate_plugin.sh` passes; and no stale phase-shaped references remain outside History sections of the three substrate docs (`IMPLEMENTATION_PLAN_COVERS_DELTA.md`, `large-delta-mega-plan.md`, `plans-as-run-scaffolding.md`) that intentionally retain them as redesign provenance.
+**Yes** — the rewrite is internally consistent across every load-bearing surface; the named invariant is reformulated coherently with the day-one history entry inline-annotated for clarity; the chat-trailer template reflects the new body block; the verdict vocabulary is renamed; the bypass-acknowledgment string is canonical across SKILL.md, invariant, gotcha, and validator; the Implementation-route render literal in `validate-rewrite` reflects single-pass shape; `validate_plugin.sh` passes (now with Check 13m structurally preventing the regression class B1 represented); and no stale phase-shaped references remain outside History sections of the three substrate docs (`IMPLEMENTATION_PLAN_COVERS_DELTA.md`, `large-delta-mega-plan.md`, `plans-as-run-scaffolding.md`) that intentionally retain them as redesign provenance.
 
 ## How to read this ledger
 

@@ -217,7 +217,7 @@ The persisted file keeps every section header as scaffolding for future review p
 <disposition phrase per the rubric's `Canonical Disposition phrase` column, rendered as a leading sentence with a trailing period — e.g., "Merge as-is — no findings.", "Close inline (≤2 lines per finding) → merge.", "Close in same worktree → merge.">
 
 **Implement now** — `cohesive:implement-cohesively`
-Builds the locked design phase by phase against the delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md` on `design/<slug>`.
+Builds the locked design in a single pass against the delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md` on `design/<slug>`, with end-of-run dual reviewer dispatch.
 
 <details>
 <summary>Other options</summary>
