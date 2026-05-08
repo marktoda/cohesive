@@ -593,18 +593,22 @@ else
   ok "Chain-rendering anti-pattern absent from cohesively/SKILL.md (Check 13l)"
 fi
 
-# 13m. Forbidden phase-shaped literals in skills/, agents/, references/.
+# 13m. Forbidden phase-shaped literals in skills/, agents/, references/, and
+# docs/substrate/{conventions,architecture,matrices}/.
 # Per docs/history/delta-ledgers/2026-05-08-implement-cohesively-single-pass.md
-# §"Repair pass 2" and the pass-2 review's B1 / Substrate gaps note. The
+# §"Repair pass 2" and §"Repair pass 3" / §"End-of-run review notes". The
 # implement-cohesively single-pass redesign deleted phase-derivation as a
 # concept; literal phrases like "phase by phase" or "phase-by-phase" in
 # user-facing render templates contradict the named invariant
 # IMPLEMENTATION_PLAN_COVERS_DELTA. The check is convention-with-grep
-# (parallel to Check 13g's bypass_string), narrowed to skills/, agents/,
-# references/ so historical narrative inside docs/substrate/gotchas/ and
-# docs/substrate/invariants/ History sections is not in scope.
+# (parallel to Check 13g's bypass_string). Pass-3 surfaced that the original
+# narrowing missed docs/substrate/conventions/ (scope.md:29 stale phase-shape
+# sentence escaped the pass-1 sweep); the end-of-run review-diff F2 finding
+# requested widening to cover the conventions/ tree. docs/substrate/gotchas/
+# and docs/substrate/invariants/ History sections retain phase-shaped
+# redesign provenance intentionally and remain out of scope.
 errors_before=$errors
-phase_violations=$(grep -rinE 'phase[ -]by[ -]phase' skills/ agents/ references/ 2>/dev/null || true)
+phase_violations=$(grep -rinE 'phase[ -]by[ -]phase' skills/ agents/ references/ docs/substrate/conventions/ docs/substrate/architecture/ docs/substrate/matrices/ 2>/dev/null || true)
 if [ -n "$phase_violations" ]; then
   echo "$phase_violations" | while IFS= read -r line; do
     fail "Forbidden phase-shaped literal (Check 13m): $line. The single-pass redesign retired the per-phase concept; replace with 'in a single pass' or 'per-pass'. See docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md."
