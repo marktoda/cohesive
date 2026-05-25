@@ -113,6 +113,7 @@ For each rewrite:
 - Replace those claims with the new design's claims, in present tense
 - Remove obsolete concepts entirely (don't leave them as "previously called X")
 - If a section becomes non-normative speculation, label the whole section "## Future direction (non-normative)" — don't sprinkle "may" or "should consider" through normative paragraphs
+- When the prose enumerates substrate (named invariants, gotchas, matrices, specs), reference the canonical list categorically rather than by count per `${CLAUDE_PLUGIN_ROOT}/references/substrate-references.md`. Constraint counts that express a design property ("four-concept core," "seven primitives") stay; inventory counts that tally items enumerated elsewhere ("the 9 invariants," "ships 8 gotchas") get replaced with a categorical reference plus a link to the canonical home.
 
 For each new doc, use the appropriate template:
 - Behavior matrix: `${CLAUDE_PLUGIN_ROOT}/references/templates/behavior-matrix.md`

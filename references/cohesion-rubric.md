@@ -22,8 +22,8 @@ A cohesive system has these properties:
 
 Are the docs internally consistent? Do they describe the same system?
 
-- **Healthy:** Docs agree with each other, are dated or versioned where needed, describe current reality.
-- **Drifting:** Multiple docs describe the same thing differently; some refer to old concepts.
+- **Healthy:** Docs agree with each other, are dated or versioned where needed, describe current reality. When prose refers to substrate enumerated elsewhere (the named invariants, gotchas, matrices, specs), the reference is *categorical* — it points at the canonical list rather than restating its cardinality. See [`substrate-references.md`](substrate-references.md).
+- **Drifting:** Multiple docs describe the same thing differently; some refer to old concepts. **Inventory-count drift** — prose carries phrasings like "the 9 named invariants" or "ships 8 gotchas" whose count diverges from the canonical list — is a common signal in this state. The fix is in [`substrate-references.md`](substrate-references.md) §"Constraint counts vs inventory counts"; reviewers flag inventory counts but preserve constraint counts (counts that express a design property — "four-concept core," "seven primitives" — stay).
 - **At risk:** Foundational docs (architecture.md, README) are stale; trusting them produces wrong code.
 
 ### 2. Code/spec alignment
