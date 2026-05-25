@@ -87,7 +87,7 @@ Install [Superpowers](https://github.com/obra/superpowers) alongside Cohesive. T
 ## Layout
 
 ```
-skills/        Workflow orchestration — the user-facing surface (11 skills)
+skills/        Workflow orchestration — the user-facing surface
 agents/        Fresh-context reviewer agents (dispatched in clean subprocesses)
 references/    Runtime methodology shipped to plugin users — rubrics, templates, voice
 docs/          Contributor-facing substrate + history (rules about THIS repo)
