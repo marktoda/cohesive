@@ -30,13 +30,13 @@ The user-facing model is three gates, paralleling Superpowers' `brainstorm → p
 
 - **Decide** — recommended direction with main risk + structural mitigation. Many design conversations end here.
 - **Lock** — chosen direction pinned into specs in a worktree, then fresh-eyes-validated.
-- **Build** — locked design becomes code with spec-coverage verified. Single-pass implementation against the spec diff (git diff at the rewrite-tip SHA), with end-of-run dual reviewer dispatch.
+- **Build** — locked design becomes code with spec-coverage verified. Single-pass implementation against the spec diff (git diff at the rewrite-tip SHA), with end-of-run reviewer dispatch — dual reviewer in standard mode, cross-mirror sweep in extend mode.
 
 Stop at any gate.
 
 ## Composition over reinvention
 
-Cohesive composes with [Superpowers](https://github.com/obra/superpowers) rather than reinventing implementation discipline. Cohesive owns substrate-shaped framing (thin intent paragraph, delta-size budget gate, end-of-run dual reviewer dispatch with AND-shape verdict synthesis). Superpowers owns per-pass plan writing and TDD execution. The seam between the two is documented and intentional.
+Cohesive composes with [Superpowers](https://github.com/obra/superpowers) rather than reinventing implementation discipline. Cohesive owns substrate-shaped framing (thin intent paragraph, diff-size budget gate, end-of-run reviewer dispatch — mode-specific synthesis per `implement-cohesively`). Superpowers owns per-pass plan writing and TDD execution. The seam between the two is documented and intentional.
 
 ## Fresh-eyes review
 
