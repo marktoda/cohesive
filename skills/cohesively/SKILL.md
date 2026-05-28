@@ -19,7 +19,7 @@ The user-facing model is three gates, not five subskills. Substrate plumbing is 
 | **Lock** | The direction pinned into specs + an architectural reflection on how the system feels after | `rewrite-specs` + `validate-rewrite` (repair loop internal) |
 | **Build** | Code that matches the locked design, with spec-coverage verified | `implement-cohesively` |
 
-The gate vocabulary is the load-bearing chat-surface vocabulary per [`docs/substrate/conventions/audience-separation.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md). Subskill IDs stay the dispatch keys; the user sees gates.
+The gate vocabulary is the load-bearing chat-surface vocabulary. Subskill IDs stay the dispatch keys; the user sees gates.
 
 ## The three diagnostics (standalone)
 
@@ -87,7 +87,8 @@ The user can decline the Build gate in favor of `superpowers:writing-plans` dire
 
 **When:** First-time adoption on a codebase with no Cohesive substrate. "Initialize cohesive", "set up substrate", "bootstrap cohesive", "we're new to cohesive", "first time using cohesive on this codebase", "init".
 
-**Stops at:** A draft substrate directory at `docs/substrate/init-draft/` containing proposed artifacts with side-by-side translations explaining each Cohesive type in plain terms. The user reviews each draft, edits or deletes, and `git mv`s kept drafts to canonical locations.
+**Stops at:** A draft substrate directory at `docs/cohesive/init-draft/` containing proposed artifacts with side-by-side translations explaining each Cohesive type in plain terms. The user reviews each draft, edits or deletes, and `git mv`s kept drafts to canonical locations.
+
 
 The init route is one-shot — `init`'s Hard constraint #1 refuses if substrate already exists. For codebases with existing substrate, the right route is `audit (substrate)`.
 
@@ -104,7 +105,7 @@ ${CLAUDE_PLUGIN_ROOT}/references/templates/<template>.md. I can fill it out with
 
 ## Dispatch prompt contract
 
-Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, the router-driven case requires explicit prereq-state passing — without it, subskills ask the canonical clarifying question on top of an already-routed turn. The table below is the per-route content the dispatch prompt must include. The matrix-side mirror (with the `validate-rewrite` exception) lives at `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/router.md` §"Dispatch prompt contract"; update both in the same pass. `scripts/validate_plugin.sh` Check 13i greps both surfaces and asserts route-name set equality (the route names — column 1 of each grid — must match across the two surfaces). Prereq-state-string parity across the two surfaces is a HANDOFF_VOCABULARY_PARITY-class check tracked as a deferred Check 13j candidate; for now, that parity is reviewer-judged.
+The router-driven case requires explicit prereq-state passing — without it, subskills ask the canonical clarifying question on top of an already-routed turn. The table below is the per-route content the dispatch prompt must include.
 
 | Route | Prereq state to pass | Chosen-direction / artifact state to pass |
 |---|---|---|
@@ -122,7 +123,7 @@ Consumers:
 - **Internal-discovery consumers** (subskills that dispatch `cohesive:discover-substrate` themselves as Step 0 / Phase 1.0 of their Process): `brainstorm-design`, `audit-substrate`, `review-codebase`, `review-diff`. The router passes no discovery prereq; each consumer skill owns the dispatch internally. The `Optional override` clause in each consumer's Hard constraint #1 lets the router (or a prior session step) supply a pre-existing discovery report path to skip re-running discovery; absent that, the consumer dispatches discovery itself.
 - **Chosen-direction / ledger-path consumers**: `rewrite-specs` (chosen direction), `validate-rewrite` (ledger path only — no prereq state; this is the documented exception), `implement-cohesively` (validation review path + ledger path; both required), V1 artifact skills.
 
-Direct (non-router) invocation: the subskill asks its canonical question (about change surface or scope, not about discovery state — discovery is always internal now) per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions". The contract is router-side only.
+Direct (non-router) invocation: the subskill asks its canonical question (about change surface or scope, not about discovery state — discovery is always internal now). The contract is router-side only.
 
 ## Required behavior
 
@@ -130,7 +131,7 @@ Direct (non-router) invocation: the subskill asks its canonical question (about 
 
    > "<one-sentence outcome the user gets>."
 
-   The outcome leads with what the user receives, per the audience seam in [`docs/substrate/conventions/audience-separation.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md). The form is also documented in [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Router conventions". The **internal route name** (one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `init`, `artifact`) is the dispatch key the router uses to pick its chain — it is agent-internal and does not appear in the announcement string. The chain (which subskills run underneath) is internal too; users see gates and outcomes, not subskill IDs. Per-route outcome sentences:
+   The outcome leads with what the user receives. The **internal route name** (one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `init`, `artifact`) is the dispatch key the router uses to pick its chain — it is agent-internal and does not appear in the announcement string. The chain (which subskills run underneath) is internal too; users see gates and outcomes, not subskill IDs. Per-route outcome sentences:
 
    | Internal route | Announcement outcome sentence |
    |---|---|
@@ -145,7 +146,7 @@ Direct (non-router) invocation: the subskill asks its canonical question (about 
 
 2. **Process before implementation.** If behavior or architecture is changing, route through the Decide gate before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives code against the design delta ledger via single-pass writing-plans + executing-plans + end-of-run dual reviewer dispatch. Freeform code-writing from this skill body is forbidden.
 
-3. **At most one clarifying question per turn.** The router's announcement turn asks at most one forced-choice question per route (forms above) before dispatching the subskill. Per [`docs/substrate/conventions/skill-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md) §"Clarifying questions" → §"Per turn, not per invocation": subskills with multi-turn dialogs (e.g., `brainstorm-design` conversational mode) carry their own per-turn budget after dispatch. Question form is always a specific forced choice, never a vague "what do you want?" prompt. Render forced-choice questions through `AskUserQuestion` per [`references/output-voice.md`](${CLAUDE_PLUGIN_ROOT}/references/output-voice.md) §"Forced-choice questions".
+3. **At most one clarifying question per turn.** The router's announcement turn asks at most one forced-choice question per route (forms above) before dispatching the subskill. Subskills with multi-turn dialogs (e.g., `brainstorm-design` conversational mode) carry their own per-turn budget after dispatch. Question form is always a specific forced choice, never a vague "what do you want?" prompt. Render forced-choice questions through `AskUserQuestion` per [`references/output-voice.md`](${CLAUDE_PLUGIN_ROOT}/references/output-voice.md) §"Forced-choice questions".
 
 4. **Do not implement code from the router itself.** The router routes; subskills work. Implementation is delegated to the `implement` route, which dispatches `implement-cohesively`. That skill in turn composes `superpowers:writing-plans` and `superpowers:executing-plans` once per implementation pass — it does not write code itself either. Cohesive's only code-producing surface is `superpowers:executing-plans` invoked from inside `implement-cohesively`.
 
@@ -170,7 +171,7 @@ When the request is ambiguous, prefer this resolution order:
 
 ## Output
 
-The router produces a single-sentence announcement before the first subskill is invoked. Per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets," the router's render budget is 1 sentence — it has no `#` title and is exempt from the voice-citation grep that applies to longer-rendered skills. The announcement leads with what the user gets — not the methodology framing, not the subskill chain — per the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+The router produces a single-sentence announcement before the first subskill is invoked. Per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Density budgets," the router's render budget is 1 sentence — it has no `#` title and is exempt from the voice-citation grep that applies to longer-rendered skills. The announcement leads with what the user gets — not the methodology framing, not the subskill chain.
 
 The canonical announcement template:
 
@@ -206,6 +207,8 @@ Then the router invokes the first subskill. Each subskill produces its own outpu
 - Dispatching subskills without the announcement. Users need to know which gate they're in.
 - Dispatching subskills without the prereq/direction context the dispatch contract requires. Subskills will then ask their canonical question on top of an already-routed turn.
 - Using "substrate" as a user-facing chat-surface term in announcements or trailers. Substrate is agent-internal vocabulary; the user-facing surface is the gate vocabulary.
+
+
 
 ## What this skill is *not*
 

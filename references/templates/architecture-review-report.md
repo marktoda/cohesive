@@ -4,7 +4,7 @@
 **Scope:** <whole repo / subsystem name>
 **Reviewer:** `cohesive:review-codebase`
 
-> The persisted body opens with the TL;DR section per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Output format conventions" rule 3 — verdict + 2-3 sentence thesis + top 3 findings (each in show-shape: title + Evidence + Change) + recommended next skill (with payload). The TL;DR is what `cohesive:review-codebase` quotes verbatim into chat as the substantive trailer; the rest of the persisted body carries the full audit content including the cohesion scorecard, the per-reviewer raw findings, and the cross-iteration `## History` section. Bookkeeping content (finding-ID continuity across passes, disposition matrices, verdict trajectory) lives in §"History" of this persisted file, not in the chat TL;DR — see `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2c.
+> The persisted body opens with the TL;DR section — verdict + 2-3 sentence thesis + top 3 findings (each in show-shape: title + Evidence + Change) + recommended next skill (with payload). The TL;DR is what `cohesive:review-codebase` quotes verbatim into chat as the substantive trailer; the rest of the persisted body carries the full audit content including the cohesion scorecard, the per-reviewer raw findings, and the cross-iteration `## History` section. Bookkeeping content (finding-ID continuity across passes, disposition matrices, verdict trajectory) lives in §"History" of this persisted file, not in the chat TL;DR — see `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2c.
 
 ## TL;DR
 
@@ -34,7 +34,7 @@
 
 ### Recommended next Cohesive skill
 
-`cohesive:<skill-name>` — <one-clause reason>. **<Payload-kind>:** <files / scope / design question per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Recommended-next-skill footer">.
+`cohesive:<skill-name>` — <one-clause reason>. **<Payload-kind>:** <files / scope / design question>.
 
 ## Executive thesis
 
@@ -168,8 +168,8 @@ Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boun
 
 One bullet per prior review of this scope, oldest first. The current review references the entire chain, not just the immediate predecessor — a reader of pass-4 needs to see how findings closed across passes 1→2→3 without leaving this section.
 
-- Pass 1 review: `docs/history/reviews/<earlier-date>-<slug>-architecture-review.md` — verdict: <value>; finding count: <N total; B blockers / H highs / M mediums / L lows>
-- Pass 2 review: `docs/history/reviews/<later-date>-<slug>-architecture-review.md` — verdict: <value>; finding count: <breakdown>
+- Pass 1 review: `docs/cohesive/reviews/<earlier-date>-<slug>-architecture-review.md` — verdict: <value>; finding count: <N total; B blockers / H highs / M mediums / L lows>
+- Pass 2 review: `docs/cohesive/reviews/<later-date>-<slug>-architecture-review.md` — verdict: <value>; finding count: <breakdown>
 - ...
 
 ### Disposition of prior findings

@@ -8,23 +8,23 @@ description: Use after brainstorm-design has produced an approved direction and 
 ## What this skill produces
 
 - A **set of rewritten docs** that describe the system's chosen end state in present-tense, normative language
-- A **design delta ledger** at `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md`) recording every change
+- A **design delta ledger** at `docs/cohesive/delta-ledgers/YYYY-MM-DD-<slug>.md` recording every change
 - A handoff to `validate-rewrite` for fresh-eyes review
 
 This is one of Cohesive's flagship skills. Spec rewriting is the cheapest place to discover that a design is wrong, and the rewrite-then-review loop is what makes that discovery happen *before* code.
 
 ## Voice
 
-Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output.
 
 ## Hard constraints
 
-1. **An approved direction is required.** Don't try to detect prior brainstorm output from session memory — per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/soft-prereqs.md`, that detection silently degrades. The skill takes a chosen direction explicitly from its dispatcher; if none was passed, ask.
+1. **An approved direction is required.** Don't try to detect prior brainstorm output from session memory — that detection silently degrades. The skill takes a chosen direction explicitly from its dispatcher; if none was passed, ask.
 
    **Explicit dispatch (skip the question).** Whenever this skill is invoked from another Cohesive skill via the Skill tool, the dispatch prompt names the chosen direction. Three dispatch shapes apply:
 
    - **Router dispatch from `cohesively`** — the router passes the brainstorm-approved direction per `${CLAUDE_PLUGIN_ROOT}/skills/cohesively/SKILL.md` §"Dispatch prompt contract".
-   - **Repair-loop dispatch from `validate-rewrite`** — the dispatch prompt names a per-pass validation review path under `docs/history/reviews/` and instructs repair-mode operation. The "approved direction" is the *repair scope* per the loop contract in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)"; treat each ranked repair in the cited review as the rewrite's input. Process Step 1b governs repair-mode mechanics.
+   - **Repair-loop dispatch from `validate-rewrite`** — the dispatch prompt names a per-pass validation review path under `docs/cohesive/reviews/` and instructs repair-mode operation. The "approved direction" is the *repair scope*; treat each ranked repair in the cited review as the rewrite's input. Process Step 1b governs repair-mode mechanics.
    - **Direct user invocation with inline direction** — the user names a direction in the invocation prompt ("rewrite specs for X; the chosen direction is Y").
 
    **If no direction is passed,** open the turn with the canonical forced-choice question:
@@ -60,9 +60,9 @@ Announce in chat: "Working in worktree `.worktrees/cohesive-${slug}` on branch `
 
 ### 0. Resolve the artifact directory
 
-Before rewriting any docs, resolve where the design delta ledger will be written. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Artifact directory resolution" with artifact category `delta-ledgers/`:
+Before rewriting any docs, resolve where the design delta ledger will be written. Apply the four-rule resolution with artifact category `delta-ledgers/`:
 
-1. If `docs/history/delta-ledgers/` exists, write there.
+1. If `docs/cohesive/delta-ledgers/` exists, write there.
 2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `delta-ledgers/` subdir alongside it.
 3. Else default to `docs/cohesive/delta-ledgers/`.
 4. If `docs/` does not exist, still default to `docs/cohesive/delta-ledgers/`.
@@ -81,10 +81,10 @@ Inputs:
 Before identifying the doc surface, classify whether the rewrite is:
 
 - **Pure implementation** — touches `${CLAUDE_PLUGIN_ROOT}/skills/<name>/SKILL.md` bodies and other implementation surfaces only. No skill purpose/ownership/seam/verdict changes. Skip the design layer; the rewrite proceeds against SKILL.md and the surrounding implementation surface.
-- **Design** — touches skill purpose, ownership, seams, verdicts, or the chain itself. Update `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` (per-skill section) and/or `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` (handoff contracts) **first** in this rewrite. SKILL.md changes follow.
+- **Design** — touches skill purpose, ownership, seams, verdicts, or the chain itself. Update the design-layer surfaces (skill purpose docs, handoff contracts) **first** in this rewrite. SKILL.md changes follow.
 - **Mixed** — both. List the design-layer changes *first* in the delta ledger, then the implementation changes. Both land in the same delta ledger but the design layer is the substrate; the SKILL.md is the implementation of that substrate.
 
-Default to **Mixed** when ambiguous. The cost of over-classifying is one additional doc edit; the cost of under-classifying is a substrate-implementation collapse. The `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"When to edit SKILL.md alone, and when to edit the design layer first" rule names the criteria.
+Default to **Mixed** when ambiguous. The cost of over-classifying is one additional doc edit; the cost of under-classifying is a substrate-implementation collapse.
 
 The classification appears in the delta ledger's `## Delta at a glance` preamble explicitly:
 
@@ -122,7 +122,7 @@ For each new doc, use the appropriate template:
 - Substrate map: `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-map.md`
 - Claimed system shape (Phase 1 of `cohesive:review-codebase`): `${CLAUDE_PLUGIN_ROOT}/references/templates/claimed-system-shape.md`
 
-Place new canonical artifacts (invariants, matrices, gotchas) under `docs/substrate/<category>/` per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md`. If the repo has its own convention (`docs/design/`, `docs/specs/`, `docs/adr/`, etc.), extend that — don't impose a parallel layout.
+Place new canonical artifacts (invariants, matrices, gotchas) under the repo's existing doc convention (`docs/design/`, `docs/specs/`, `docs/adr/`, etc.). Extend what's there — don't impose a parallel layout.
 
 ### 4. Update the substrate map
 
@@ -130,7 +130,7 @@ If a substrate map exists at the repo level, update it to reflect the rewrites: 
 
 ### 5. Produce the design delta ledger
 
-Write `docs/history/delta-ledgers/YYYY-MM-DD-<slug>.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md`. Delta ledgers are dated, append-only history. The ledger is what the fresh-eyes reviewer reads to understand the rewrite as a delta.
+Write `docs/cohesive/delta-ledgers/YYYY-MM-DD-<slug>.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md`. Delta ledgers are dated, append-only history. The ledger is what the fresh-eyes reviewer reads to understand the rewrite as a delta.
 
 The ledger's `## Delta at a glance` preamble is required and load-bearing. `validate-rewrite` quotes it verbatim into the validation review (after the Executive judgment, before the Blocking issues), so the reader of the validation review sees what's in the rewrite at decision time without invoking another skill first. Fill the preamble in last, after the body sections are stable, so it accurately summarizes them. `spec-cohesion-reviewer` cross-checks the preamble against the body and raises a Blocking Issue on divergence; `scripts/validate_plugin.sh` greps for preamble presence on every delta-ledger file dated on or after the cutoff (see §"Acceptance criteria").
 
@@ -143,11 +143,11 @@ git add -A
 git commit -m "design: rewrite specs for <topic>
 
 Approved direction: <option name>
-See: docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md
+See: docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md
 "
 ```
 
-For a **repair-pass** rewrite (Step 1b — invoked from `validate-rewrite`'s repair loop or by the user against a disposition that routed back here), the commit message cites the pass number and the closed finding IDs so `git log --grep "pass-"` over the `design/<slug>` branch yields the per-handoff auditing surface the loop contract in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` §"validate-rewrite ↔ rewrite-specs (Issues Found internal repair loop)" promises:
+For a **repair-pass** rewrite (Step 1b — invoked from `validate-rewrite`'s repair loop or by the user against a disposition that routed back here), the commit message cites the pass number and the closed finding IDs so `git log --grep "pass-"` over the `design/<slug>` branch yields the per-handoff auditing surface the repair loop promises:
 
 ```bash
 git add -A
@@ -155,8 +155,8 @@ git commit -m "design: repair pass-<N> — closes <finding IDs>
 
 Pass: <N>
 Closes: <comma-separated finding IDs, e.g., B1, I2, I3>
-Source review: docs/history/reviews/<YYYY-MM-DD>-<slug>-rewrite-validation[-pass-<N-1>].md
-See: docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md
+Source review: docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-rewrite-validation[-pass-<N-1>].md
+See: docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md
 "
 ```
 
@@ -164,7 +164,7 @@ The commit message is the auditing surface for repair sequences; the ledger's `#
 
 ### 7. Hand off to review
 
-Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md`. Ready for fresh-eyes review via `cohesive:validate-rewrite`. After Approved verdict, the implementation route — `cohesive:implement-cohesively` — drives code against the delta ledger; the validate-rewrite Approved footer renders the full decision matrix."
+Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger at `docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md`. Ready for fresh-eyes review via `cohesive:validate-rewrite`. After Approved verdict, the implementation route — `cohesive:implement-cohesively` — drives code against the delta ledger; the validate-rewrite Approved footer renders the full decision matrix."
 
 `validate-rewrite` always dispatches the `spec-cohesion-reviewer` agent in a Task subprocess with no inherited conversation context — the structural fresh-eyes fence is the harness's subprocess isolation, not which conversation the user invokes the review from. Whether `validate-rewrite` is invoked directly from this turn (e.g. by the `cohesively` router chaining the `design` route) or from a fresh session, the dispatched agent reads only paths it's passed.
 
@@ -198,13 +198,13 @@ The skill's chat output (separate from the file changes) is short:
 - Semantic linter specs (proposed, not implemented): <count>
 
 ### Design delta ledger
-`docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md`
+`docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md`
 
 ### Remaining ambiguity
 - <thing the rewrite couldn't fully resolve>
 
 ### Next
-Fresh-eyes review of the rewritten specs against the design and approved direction. *(`cohesive:validate-rewrite`.)* **Scope:** the design delta ledger at `docs/history/delta-ledgers/<YYYY-MM-DD>-<slug>.md` and the rewritten specs on branch `design/<slug>`.
+Fresh-eyes review of the rewritten specs against the design and approved direction. *(`cohesive:validate-rewrite`.)* **Scope:** the design delta ledger at `docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md` and the rewritten specs on branch `design/<slug>`.
 ```
 
 ## Anti-patterns (Red Flags)

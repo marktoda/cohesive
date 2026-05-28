@@ -6,7 +6,7 @@ The chat trailer renders user-facing verdict labels; the substrate (cohesion rub
 
 Each Cohesive verdict-led skill returns an internal verdict label (the row in its skill's verdict vocabulary). The chat-trailer template renders the user-facing label from the table below. Internal labels stay agent-facing — they are what `cohesion-rubric.md`'s severity-floor mapping, `handoffs.md`'s verdict gates, and `spec-cohesion-reviewer`'s lens-14 checks operate on. User-facing labels are decision-shaped: a fresh reader who has not learned Cohesive's vocabulary can act on them.
 
-Authoring rule: when a skill's internal verdict vocabulary changes, update the corresponding row here in the same pass. `validate_plugin.sh` Check 13k (deferred per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`) will eventually grep that every internal label named in `cohesion-rubric.md` and `handoffs.md` has a row here.
+Authoring rule: when a skill's internal verdict vocabulary changes, update the corresponding row here in the same pass.
 
 ## review-codebase
 
@@ -63,15 +63,13 @@ Authoring rule: when a skill's internal verdict vocabulary changes, update the c
 
 ## Why translate at the chat trailer, not earlier
 
-Translation lives in the chat-trailer render template — not in `cohesion-rubric.md`, not in `handoffs.md` edge entries, not in agent verdict choice. Three reasons:
+Translation lives in the chat-trailer render template — not in `cohesion-rubric.md`, not in agent verdict choice. Three reasons:
 
 1. **Internal labels gate dispatch.** `cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)" and §"Disposition rule for validation-review findings" use `Approved` / `Issues Found` / `Design Incoherent` as keys. Translating those at the rubric level would either (a) require updating the dispatching skills' branch logic, or (b) silently break the dispatch contract.
 2. **Reviewer agents return internal labels.** Each reviewer agent's "How to structure your output" carries the agent's verdict vocabulary in the canonical six-field finding shape. Translating at the agent would propagate user-facing-vocabulary into the persisted review files, which are agent-facing audit-trail content.
-3. **One translation point is reviewable.** A grep for forbidden internal-vocabulary tokens in `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` (Check 13k, deferred) tests one file, not many. The seam between agent-facing and user-facing rendering lives in one place.
+3. **One translation point is reviewable.** A grep for forbidden internal-vocabulary tokens in `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` tests one file, not many. The seam between agent-facing and user-facing rendering lives in one place.
 
 ## Related substrate
 
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` — the centralized chat shell that consumes this table
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md` — the convention this translation implements
 - `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` — agent-facing rubric using internal verdict labels
-- `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md` — chain transition contracts using internal verdict labels

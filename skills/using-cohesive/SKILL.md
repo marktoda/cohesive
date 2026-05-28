@@ -11,7 +11,7 @@ Establishes when Cohesive's substrate-first methodology is the right framing for
 
 Substrate-first work is what Cohesive optimizes for; implementation-discipline work is what Superpowers optimizes for. This skill picks between them at session start (or whenever its frontmatter trigger matches a user request mid-session). When Cohesive applies, the skill renders a 1–2 sentence orientation naming `cohesive:cohesively` as the next step. When the request is implementation-discipline-shaped, the skill stays silent — Superpowers' bootstrap (`superpowers:using-superpowers`) handles that framing on its own.
 
-The seam this skill closes is the trigger competition documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` §"Correct pattern" item 3. Without `using-cohesive`, first-time users who type "what's wrong with this codebase?" land in description-match-level competition between Cohesive's `discover-substrate`/`audit-substrate` and Superpowers' research/exploration skills; with it, the substrate-first framing has a session-start surface.
+The seam this skill closes is the trigger competition between Cohesive and Superpowers entry points. Without `using-cohesive`, first-time users who type "what's wrong with this codebase?" land in description-match-level competition between Cohesive's `discover-substrate`/`audit-substrate` and Superpowers' research/exploration skills; with it, the substrate-first framing has a session-start surface.
 
 ## When Cohesive applies
 
@@ -38,7 +38,7 @@ Cohesive does NOT apply when the request is implementation-discipline-shaped:
 
 In these cases, defer to Superpowers' skills (`superpowers:writing-plans`, `superpowers:executing-plans`, `superpowers:test-driven-development`, `superpowers:finishing-a-development-branch`, `superpowers:requesting-code-review`, `superpowers:systematic-debugging`, etc.) or to direct user invocation. Do not render an orientation message; the absence of orientation is the right signal.
 
-The seam between Cohesive and Superpowers is documented in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/discovery-vs-superpowers.md` §"Correct pattern". This skill is the structural mitigation named in item 3 of that pattern; the narrowing rule from item 1 (substrate-vocabulary tokens; no bare generic-review triggers) applies to this skill's own frontmatter description and is enforced by `scripts/validate_plugin.sh` Check 9a / 9b.
+This skill is the structural mitigation that closes the trigger-competition seam between Cohesive and Superpowers; the narrowing rule (substrate-vocabulary tokens; no bare generic-review triggers) applies to this skill's own frontmatter description and is enforced by `scripts/validate_plugin.sh` Check 9a / 9b.
 
 ## How to enter Cohesive
 
@@ -58,7 +58,7 @@ Then invoke `cohesive:cohesively` (or recommend the user do so, depending on har
 2. **Defer cleanly when Superpowers fits better.** When the request is implementation-discipline-shaped, do not orient toward Cohesive. Do not render an apologetic "Cohesive doesn't apply here" message — the absence of orientation is the right signal. Superpowers' bootstrap handles the implementation-discipline framing.
 3. **Never invoke a chain skill or diagnostic directly.** The only Cohesive skill this skill ever names as a next step is `cohesive:cohesively`. Naming a chain skill (e.g., `cohesive:discover-substrate`) bypasses route selection and reproduces the failure mode this skill exists to close.
 4. **Never re-orient over an already-running route.** If `cohesively` has already announced a route in this session, or a Cohesive subskill is currently executing, do not render an orientation message — the user is already inside Cohesive and re-orientation would be ceremony.
-5. **The frontmatter description is load-bearing.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/skills.md` §"### using-cohesive" Owns bullet 1, this skill carries the substrate-narrowed trigger phrases that distinguish Cohesive's framing from Superpowers'. The narrowing mechanism is enforced by `scripts/validate_plugin.sh` Check 9a (substrate-vocabulary tokens) and Check 9b (no bare generic-review triggers); see those checks for the concrete token list and forbidden phrase list. Drift in the description re-opens the seam this skill exists to close.
+5. **The frontmatter description is load-bearing.** This skill carries the substrate-narrowed trigger phrases that distinguish Cohesive's framing from Superpowers'. The narrowing mechanism is enforced by `scripts/validate_plugin.sh` Check 9a (substrate-vocabulary tokens) and Check 9b (no bare generic-review triggers); see those checks for the concrete token list and forbidden phrase list. Drift in the description re-opens the seam this skill exists to close.
 
 ## Output
 

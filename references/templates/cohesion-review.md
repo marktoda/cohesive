@@ -44,7 +44,7 @@ This section is a **render slot** in the validation review document, not the can
 
 ## Blocking issues
 
-Findings with severity `High` or `Blocker` (severity vocabulary: see `references/cohesion-rubric.md` §"Severity vocabulary for findings"; the verdict-floor mapping in the same file requires `High` or `Blocker` findings to land in this section under an `Issues Found` verdict). The section heading uses the historic word "Blocking" as a category label; the severity-vocabulary terms (`Blocker` for produced-defect findings, `High` for predictable-defect findings) live in the **Severity** field of each finding below. Each finding uses the canonical six-field shape from `docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions" — the same shape every Cohesive reviewer agent produces — so the synthesizing skill (`validate-rewrite`, `cohesive:review-codebase`, `cohesive:review-diff`) can merge findings uniformly.
+Findings with severity `High` or `Blocker` (severity vocabulary: see `references/cohesion-rubric.md` §"Severity vocabulary for findings"; the verdict-floor mapping in the same file requires `High` or `Blocker` findings to land in this section under an `Issues Found` verdict). The section heading uses the historic word "Blocking" as a category label; the severity-vocabulary terms (`Blocker` for produced-defect findings, `High` for predictable-defect findings) live in the **Severity** field of each finding below. Each finding uses the canonical six-field shape — the same shape every Cohesive reviewer agent produces — so the synthesizing skill (`validate-rewrite`, `cohesive:review-codebase`, `cohesive:review-diff`) can merge findings uniformly.
 
 ### B1. <short title>
 - **Severity:** Blocker / High / Medium / Low

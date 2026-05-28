@@ -18,7 +18,7 @@ The output is the input to either `rewrite-specs` (if a direction is approved) o
 
 ## Voice
 
-Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output.
 
 ## Hard constraints
 
@@ -27,7 +27,7 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 3. **Always propose at least two credible options for non-trivial changes.** Single-option "design" is just a proposal, not a decision.
 4. **Never recommend an option whose main risk is mitigated by "we'll be careful."** Mitigation is structure: a test, a linter, a boundary, a constraint.
-5. **Conversational mode is multi-turn; each turn asks at most one forced-choice question.** Per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Clarifying questions" → §"Per turn, not per invocation". Each conversational turn presents a verdict-led pick on one decision and asks the user to ratify or redirect — never a vague "what do you want?" prompt. Forbidden phrasings from `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` apply per-turn. Render the per-turn forced-choice prompt (axis pick, sub-decision Pick/Confirm) through `AskUserQuestion` per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Forced-choice questions".
+5. **Conversational mode is multi-turn; each turn asks at most one forced-choice question.** Each conversational turn presents a verdict-led pick on one decision and asks the user to ratify or redirect — never a vague "what do you want?" prompt. Forbidden phrasings from `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` apply per-turn. Render the per-turn forced-choice prompt (axis pick, sub-decision Pick/Confirm) through `AskUserQuestion` per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` §"Forced-choice questions".
 
 ## Process
 
@@ -41,9 +41,9 @@ Before grounding the brainstorm, dispatch `cohesive:discover-substrate` via the 
 
 ### Phase 0: Resolve the artifact directory
 
-If the brainstorm is going to be persisted (the user has asked for it, or the router's `design` route is chaining toward `rewrite-specs`), resolve where it will be written before grounding begins. Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Artifact directory resolution" with artifact category `brainstorms/`:
+If the brainstorm is going to be persisted (the user has asked for it, or the router's `design` route is chaining toward `rewrite-specs`), resolve where it will be written before grounding begins:
 
-1. If `docs/history/brainstorms/` exists, write there.
+1. If `docs/cohesive/brainstorms/` exists, write there.
 2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `brainstorms/` subdir alongside it.
 3. Else default to `docs/cohesive/brainstorms/`.
 4. If `docs/` does not exist, still default to `docs/cohesive/brainstorms/`.
@@ -164,7 +164,7 @@ After all axes converge, render a one-turn summary:
 
 #### Sub-decision routing
 
-Each open sub-decision inside the chosen direction is tagged in chat. Tags are **Pick / Confirm / Default** — *not* Decide/Lock/Build, which are the gate-vocabulary tokens reserved for the methodology's three-gate user-facing model (per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md` §"Gate-token reuse"):
+Each open sub-decision inside the chosen direction is tagged in chat. Tags are **Pick / Confirm / Default** — *not* Decide/Lock/Build, which are the gate-vocabulary tokens reserved for the methodology's three-gate user-facing model:
 
 - **Pick** — multiple substrate-coherent paths exist; the call shapes future-pressure outcomes; or there's an organizational/risk-tolerance dimension. The user picks; the agent surfaces options and tradeoffs but does not pick.
 - **Confirm** — substrate evidence points clearly to one answer with low organizational impact. The agent recommends; the user ratifies or pushes back.
@@ -203,11 +203,11 @@ Recommend exactly one option, or a named hybrid. The recommendation surfaces:
 - A list of **substrate that must exist before implementation** (specs, matrices, invariants, tests, linters) — in the persisted brainstorm file, agent-facing; not in the chat trailer
 - Whether the recommendation is ready for `rewrite-specs` or needs another brainstorm round
 
-The agent-facing substrate list is what `rewrite-specs` reads as input — it's load-bearing for the next chain step. It belongs in the persisted brainstorm file (substrate-shape vocabulary the agent uses to do the rewrite). The chat trailer renders the user-facing `## Direction` block — Direction + Main risk + Structural mitigation — which is what the user reads to decide whether to approve. The two surfaces carry the same recommendation in different shapes per the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+The agent-facing substrate list is what `rewrite-specs` reads as input — it's load-bearing for the next chain step. It belongs in the persisted brainstorm file (substrate-shape vocabulary the agent uses to do the rewrite). The chat trailer renders the user-facing `## Direction` block — Direction + Main risk + Structural mitigation — which is what the user reads to decide whether to approve. The two surfaces carry the same recommendation in different shapes.
 
 ## Output format
 
-The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` — without the verdict slot (brainstorm is not verdict-led; per the §"Variants" `brainstorm-design` row, the body block carries `## Direction` instead). When the brainstorm persists, the persisted file at `docs/history/brainstorms/YYYY-MM-DD-<slug>.md` carries the full substrate-shape body — agent-facing.
+The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` — without the verdict slot (brainstorm is not verdict-led; per the §"Variants" `brainstorm-design` row, the body block carries `## Direction` instead). When the brainstorm persists, the persisted file at `docs/cohesive/brainstorms/YYYY-MM-DD-<slug>.md` carries the full substrate-shape body — agent-facing.
 
 **Mode-aware rendering.** The trailer renders in one turn at Phase 5 — same shape in both modes (Direction + Main risk + Structural mitigation, optionally preceded by a Pressure test summary table when ≥3 options were considered). In autonomous mode it follows Phase 4's option pressure-testing directly. In conversational mode it follows Phase 3b's dialog (axes → leaf summary → sub-decisions) and Phase 4's leaf battery (cross-branch graft check + remaining categories); the Phase 3b dialog turns are short verdict-led exchanges (one axis pick + counter-pressure + forced choice), not mini-trailers.
 
@@ -288,14 +288,14 @@ For each option (or just the recommended one if the others are clearly out):
 <decision-shaped sentence>. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerated>. Slug: `<derived-from-topic>`.
 ```
 
-The persisted file's `## Recommendation` block carries the substrate-shape "Required substrate before implementation" list — agent-facing, consumed by `rewrite-specs` as input. The chat trailer renders only the `## Direction` decision-shape block; the substrate list does not appear in chat per the audience seam.
+The persisted file's `## Recommendation` block carries the substrate-shape "Required substrate before implementation" list — agent-facing, consumed by `rewrite-specs` as input. The chat trailer renders only the `## Direction` decision-shape block; the substrate list does not appear in chat.
 
 ## Persistence
 
 When the user accepts a recommendation (or after Phase 4 if the chain proceeds to `rewrite-specs`), persist the brainstorm output to:
 
 ```
-docs/history/brainstorms/YYYY-MM-DD-<slug>.md
+docs/cohesive/brainstorms/YYYY-MM-DD-<slug>.md
 ```
 
 The persisted file is agent-facing and uses the substrate-shape body in §"Output format". `rewrite-specs` consumes it as input, closing the soft-prereqs hand-off gap that previously made `brainstorm-design → rewrite-specs` rely on human memory.
@@ -333,7 +333,7 @@ If the user declines persistence (one-shot brainstorm, no rewrite intended), the
 - The recommendation states a main risk *and* a structural mitigation.
 - The recommendation lists required substrate by category.
 - Exactly one next-skill recommendation.
-- When the recommendation is accepted, the brainstorm output is persisted to `docs/history/brainstorms/YYYY-MM-DD-<slug>.md`.
+- When the recommendation is accepted, the brainstorm output is persisted to `docs/cohesive/brainstorms/YYYY-MM-DD-<slug>.md`.
 - Mode is selected explicitly per Phase 2's auto-detect gate (≥2 axes / ≥2 substrate kinds → conversational). User overrides ("walk me through it" / "give me the autonomous version") are honored at any phase boundary.
 - In conversational mode: the **axes map is the first user-visible chat turn** (auditable from the persisted file's `## Decision dialog` §"Axes walked"); each turn asks at most one forced-choice question; sub-decisions carry explicit Pick / Confirm / Default tags; the cross-branch graft check opens Phase 4 before the trailer renders.
 - In conversational mode: the persisted file carries a `## Decision dialog` section recording axes walked, sub-decision outcomes, and the cross-branch graft check result.
@@ -348,7 +348,7 @@ If the user declines persistence (one-shot brainstorm, no rewrite intended), the
 - Skipping pressure-test questions because "they don't apply" without saying *why* they don't apply.
 - Conversational mode drifting into "what do you want?" / "tell me more" / open-ended hedging — voice stays verdict-led per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md`. The user's role is forced-choice ratification or substantive redirect, not authoring.
 - Tagging sub-decisions as Confirm by default to look thorough. Default posture is aggressive Default; a sub-decision is material only if different choices land on different specs / invariants / tests / linters / matrices.
-- Reusing gate-vocabulary tokens (Decide / Lock / Build) as sub-decision tags. Sub-decision tags are Pick / Confirm / Default per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md` §"Gate-token reuse".
+- Reusing gate-vocabulary tokens (Decide / Lock / Build) as sub-decision tags. Sub-decision tags are Pick / Confirm / Default.
 - Skipping Phase 4's cross-branch graft check in conversational mode because the dialog "felt right." Q15/Q19/Q20 against the leaf is what catches premature commitment at the top-level axis.
 - Treating axis-pick disagreement as something to silently resolve. If a user redirected on an axis, that divergence is recorded for Phase 4's graft check and persisted in `## Decision dialog`.
 

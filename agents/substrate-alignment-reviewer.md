@@ -84,9 +84,9 @@ For `--scope diff`: read only the diff and substrate it touches.
 
 ## How to structure your output
 
-Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the render template below — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the render template below — instructions placed inside render templates leak verbatim into user-facing output.
 
-Return findings ranked by leverage × severity. Each finding uses the canonical six-field shape from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md` §"Output format conventions":
+Return findings ranked by leverage × severity. Each finding uses the canonical six-field shape:
 
 ```md
 ### <Finding title>
@@ -107,7 +107,7 @@ Return findings ranked by leverage × severity. Each finding uses the canonical 
 Spec / behavior matrix / invariant / gotcha / semantic linter / test / type boundary
 ```
 
-This is the same canonical shape every other reviewer agent uses — tracked in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/matrices/reviewer-output-shape.md`.
+This is the same canonical shape every other reviewer agent uses.
 
 Optionally group findings under these headings (omit any heading with no observed findings; do not fill empty sections):
 

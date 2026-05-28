@@ -25,7 +25,7 @@ Render every bullet as a count-or-name list. When a category has no entries, ren
 - **Tests proposed:** <description> — or `none`
 - **Deferred (out of scope this pass):** <items> — or `none`
 
-The 8-category list above is also the substrate-shape input to `cohesive:implement-cohesively` Step 1's thin intent paragraph composition — Step 1 enumerates each non-Deferred delta-ledger entry by stable ID into the intent paragraph passed to `superpowers:writing-plans` per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/invariants/IMPLEMENTATION_PLAN_COVERS_DELTA.md`. A future rename or addition of a category here updates the intent-paragraph shape; treat the rename as a coupled change.
+The 8-category list above is also the substrate-shape input to `cohesive:implement-cohesively` Step 1's thin intent paragraph composition — Step 1 enumerates each non-Deferred delta-ledger entry by stable ID into the intent paragraph passed to `superpowers:writing-plans`. A future rename or addition of a category here updates the intent-paragraph shape; treat the rename as a coupled change.
 
 ### Consumer rendering rules
 
@@ -105,7 +105,7 @@ A deferred finding that does not land here is a substrate violation: the next re
 Entries:
 
 - <ambiguity title>: <why it was left open>
-- pass-N I<n> — <crux>: <deferral rationale>; <`docs/history/reviews/...` path>
+- pass-N I<n> — <crux>: <deferral rationale>; <`docs/cohesive/reviews/...` path>
 
 If both kinds are absent, write `none` rather than omitting the section.
 

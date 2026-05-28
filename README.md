@@ -4,7 +4,7 @@
 
 Cohesive is a Claude Code plugin for building codebases meant to last. When code is cheap, confidence is scarce — Cohesive helps Claude make changes that aren't merely locally plausible, but globally coherent with the system's specs, behavior matrices, named invariants, semantic linters, gotchas, locality boundaries, and future product direction.
 
-**Status:** v0.1 MVP. Architecture map: [`ARCHITECTURE.md`](ARCHITECTURE.md).
+**Status:** v0.1 MVP.
 
 ## The core idea
 
@@ -90,11 +90,10 @@ Install [Superpowers](https://github.com/obra/superpowers) alongside Cohesive. T
 skills/        Workflow orchestration — the user-facing surface
 agents/        Fresh-context reviewer agents (dispatched in clean subprocesses)
 references/    Runtime methodology shipped to plugin users — rubrics, templates, voice
-docs/          Contributor-facing substrate + history (rules about THIS repo)
 scripts/       Plugin validation and substrate inventory
 ```
 
-Detail in [`ARCHITECTURE.md`](ARCHITECTURE.md); contributor rules in [`docs/substrate/`](docs/substrate/).
+Contributor notes in [`CLAUDE.md`](CLAUDE.md).
 
 ## Philosophy
 

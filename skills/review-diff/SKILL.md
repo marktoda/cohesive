@@ -13,7 +13,7 @@ For full architecture review use [`cohesive:review-codebase`](${CLAUDE_PLUGIN_RO
 
 ## Voice
 
-Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output.
 
 ## Hard constraints
 
@@ -48,11 +48,11 @@ Lighter than codebase scope:
 
 Skip `library-native-reviewer` and `agent-readiness-reviewer` for diff scope unless the diff is large (>500 lines changed) or restructures architecture.
 
-The dispatch prompt includes the same fresh-eyes prose as in codebase mode: "The reviewer reads only paths passed to it, not the conversation." See [`reviewer-agent-shape.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/reviewer-agent-shape.md) §"The fresh-eyes preamble" for the canonical form.
+The dispatch prompt includes the same fresh-eyes prose as in codebase mode: "The reviewer reads only paths passed to it, not the conversation."
 
 ### 4. Render the chat trailer
 
-Use the centralized chat-trailer template at `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md`. The shell (Verdict / Main concern / body block / `### Next`) is shared with every other verdict-led skill; this skill specifies only the body block per the §"Variants" `review-diff` row. The chat render is the decision-rendering of the diff per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c) and the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+Use the centralized chat-trailer template at `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md`. The shell (Verdict / Main concern / body block / `### Next`) is shared with every other verdict-led skill; this skill specifies only the body block per the §"Variants" `review-diff` row. The chat render is the decision-rendering of the diff per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c).
 
 **Verdict translation.** The internal verdict (`Pass` / `Pass with notes` / `Needs substrate` / `Risky` / `Block`) renders in the chat trailer as the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"review-diff".
 
@@ -91,7 +91,7 @@ Use the centralized chat-trailer template at `${CLAUDE_PLUGIN_ROOT}/references/t
 
 ### 5. Don't persist by default
 
-Diff reviews are usually conversation-scoped. User can `--persist` if needed; the persisted form lands at `docs/history/reviews/YYYY-MM-DD-<slug>-diff-review.md`.
+Diff reviews are usually conversation-scoped. User can `--persist` if needed; the persisted form lands at `docs/cohesive/reviews/YYYY-MM-DD-<slug>-diff-review.md`.
 
 ## Output format
 
@@ -106,7 +106,7 @@ The verdict line renders the user-facing label (translated via `${CLAUDE_PLUGIN_
 - **Every Findings row shows, not names.** File:line + quoted excerpt + the specific change is the minimum row shape per rule 2b.
 - **`### Next` carries payload.** The clause names the files / scope / design question, not just the skill name and a count. The decision-shaped sentence leads; the skill citation is parenthetical.
 - **No bookkeeping in chat.** Cross-iteration finding-ID continuity, disposition matrices, verdict-ratchet language don't appear here. Diff review is per-invocation.
-- **No substrate vocabulary in chat.** "Required substrate", "Recommended next Cohesive skill", "Cohesive workflow" are persisted-file vocabulary; the chat trailer renders decision-shape per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`. The Findings table's `Doc to update` column is the user-facing analog of the prior "Suggested substrate" column — naming the file the change touches in the user's repo, not Cohesive's internal vocabulary.
+- **No substrate vocabulary in chat.** "Required substrate", "Recommended next Cohesive skill", "Cohesive workflow" are persisted-file vocabulary; the chat trailer renders decision-shape. The Findings table's `Doc to update` column is the user-facing analog of the prior "Suggested substrate" column — naming the file the change touches in the user's repo, not Cohesive's internal vocabulary.
 - **Every finding has a substrate target.** If a finding has no doc to point at, ask whether it's preference rather than a real cohesion issue.
 - **Concrete file:line references.** Vague findings get rejected.
 
@@ -130,15 +130,15 @@ The verdict line renders the user-facing label (translated via `${CLAUDE_PLUGIN_
 - Dispatching reviewers sequentially instead of in parallel.
 - Producing a finding list with no verdict.
 - Findings without substrate artifacts.
-- Findings table row carries only Severity + Area + a bare title — no file:line, no excerpt, no Change column. Violates rule 2b — see [`docs/substrate/gotchas/naming-instead-of-showing.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md).
+- Findings table row carries only Severity + Area + a bare title — no file:line, no excerpt, no Change column. Violates rule 2b.
 - Chat trailer's `### Next` names a skill plus a count or a clause without the file list / scope / design question. Violates rule 5a.
-- Chat trailer renders substrate-vocabulary tokens ("Required substrate", "Recommended next Cohesive skill", "Cohesive workflow") instead of decision-shape. Violates the audience seam — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+- Chat trailer renders substrate-vocabulary tokens ("Required substrate", "Recommended next Cohesive skill", "Cohesive workflow") instead of decision-shape. Violates the audience seam.
 
 ## Composition
 
 - **Internally dispatches:** `cohesive:discover-substrate` as Step 2 (scoped to changed files) per Hard constraint #1; optional override skips re-running discovery if a scoped report path is supplied in the dispatch prompt.
 - **Often followed by:** `rewrite-specs` (Needs substrate verdict), `cohesive:review-codebase` (Risky verdict), `brainstorm-design` (Block verdict), or `superpowers:writing-plans` (Pass / Pass with notes)
-- **Invocation contexts (four):** PR review (`gh pr diff <number>`); branch review (`git diff main...HEAD`); working-changes review (`git diff HEAD`); **post-implementation review against a Cohesive-locked design** — given a branch where code landed via a non-Cohesive path (the validate-rewrite Approved-trailer bypass option, a teammate writing code, or an external tool) and a `design/<slug>` rewrite the branch claims to implement, this skill is the verification entry point. Pass the design delta ledger path explicitly in the invocation so the substrate-alignment-reviewer reads the locked design as a primary input alongside discovery. Pattern documented in [`docs/substrate/architecture/handoffs.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/architecture/handoffs.md) §"Post-implementation review entry point".
+- **Invocation contexts (four):** PR review (`gh pr diff <number>`); branch review (`git diff main...HEAD`); working-changes review (`git diff HEAD`); **post-implementation review against a Cohesive-locked design** — given a branch where code landed via a non-Cohesive path (the validate-rewrite Approved-trailer bypass option, a teammate writing code, or an external tool) and a `design/<slug>` rewrite the branch claims to implement, this skill is the verification entry point. Pass the design delta ledger path explicitly in the invocation so the substrate-alignment-reviewer reads the locked design as a primary input alongside discovery.
 - **Compatible with:** Superpowers' `code-reviewer` for the implementation-quality lens after this skill's substrate lens. Run both for a high-stakes PR.
 - **Adjacent skills:** `cohesive:review-codebase` (full architecture) and `cohesive:audit-substrate` (missing memory inventory)
 

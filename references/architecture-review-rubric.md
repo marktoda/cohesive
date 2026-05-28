@@ -1,6 +1,6 @@
 # Architecture review rubric
 
-The rubric `review-codebase` follows. It implements the four-phase architecture review whose original specification is preserved at `docs/history/initial-design.md` §15 and whose v0.1 agent set was agreed in `docs/history/plans/2026-05-04-mvp-implementation.md`. Current architecture: see `/ARCHITECTURE.md`.
+The rubric `review-codebase` follows. It implements the four-phase architecture review.
 
 ## What this rubric optimizes for
 
@@ -17,7 +17,7 @@ In priority order, read what exists:
 2. `architecture.md`
 3. `README.md`
 4. `docs/design/**`, `docs/specs/**`, `docs/adr/**`
-5. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md`)
+5. Repo-native substrate locations (invariants, gotchas, matrices, testing docs)
 
 Use `discover-substrate` (or its `scan_substrate.py` script) to enumerate. Don't glob.
 
@@ -103,7 +103,7 @@ The final report is **not** a flat list of findings. Start with a thesis.
 
 **A good thesis:** one paragraph that names the codebase's overall shape, the highest-leverage risk, and whether the system is in a position to scale development without founder memory. Concrete; specific to this codebase; not generic.
 
-Example (from spec §15.3):
+Example:
 
 > Cornbot is broadly moving toward the right architecture: connector-local adapters, shared decision kernels, and explicit workflow state. The main risk is that several company-defining invariants are still enforced by convention rather than structure. The code is locally competent, but the substrate is not yet strong enough for the company to scale development without founder memory.
 

@@ -7,17 +7,17 @@ description: Use when starting Cohesive on a codebase that has no Cohesive subst
 
 ## What this skill produces
 
-A **draft substrate directory** at `docs/substrate/init-draft/` containing proposed artifacts (named invariants, behavior matrices, gotchas, plus skeletal CLAUDE.md and ARCHITECTURE.md if neither exists). Each draft artifact carries a side-by-side translation: file:line evidence + Cohesive's name for the substrate type + a 1-paragraph user-facing definition + the proposed artifact itself. The user reviews each draft, deletes drafts that don't apply, edits drafts that do, and `git mv`s the kept ones to canonical locations.
+A **draft substrate directory** at `docs/cohesive/init-draft/` containing proposed artifacts (named invariants, behavior matrices, gotchas, plus skeletal CLAUDE.md and ARCHITECTURE.md if neither exists). Each draft artifact carries a side-by-side translation: file:line evidence + Cohesive's name for the substrate type + a 1-paragraph user-facing definition + the proposed artifact itself. The user reviews each draft, deletes drafts that don't apply, edits drafts that do, and `git mv`s the kept ones to canonical locations.
 
 This skill is the **Rosetta Stone** for non-Cohesive-native engineers: it teaches the substrate vocabulary by translating the user's own code into it. The pedagogical move lives in the *draft files the user opens*, not in the chat trailer — chat shows an index of drafts produced + 3 example type labels with one-line summaries, while each draft file carries the full translation paragraph from `${CLAUDE_PLUGIN_ROOT}/references/substrate-vocabulary.md`. The surface seam is deliberate: chat respects the density budget, the file the user reviews carries the substantive translation. After init runs once, the codebase has substrate AND the user has working knowledge of what the categories mean.
 
 ## Voice
 
-Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output.
 
 ## Hard constraints
 
-1. **Refuse when *substrate* already exists.** Substrate-shaped paths block init; agent-handoff paths (CLAUDE.md / AGENTS.md) do not. Init refuses if any of `docs/substrate/`, `docs/adr/`, `docs/design/`, or `docs/decisions/` exists with content — halt with a directive error per `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/skill-shape.md` §"Path prereqs use directive errors, not the canonical question":
+1. **Refuse when *substrate* already exists.** Substrate-shaped paths block init; agent-handoff paths (CLAUDE.md / AGENTS.md) do not. Init refuses if any of `docs/cohesive/`, `docs/adr/`, `docs/design/`, or `docs/decisions/` exists with content — halt with a directive error:
 
    ```
    This codebase already has Cohesive-shaped substrate (found: <path>). Init is for codebases starting from zero.
@@ -45,16 +45,16 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 **Refuse if substrate exists; warn-and-continue on agent-handoff files.**
 
-Check for substrate-shaped paths (any of `docs/substrate/`, `docs/adr/`, `docs/design/`, `docs/decisions/` containing files). If any are present, halt with the directive error from Hard constraint #1. Init does not run incrementally on existing substrate.
+Check for substrate-shaped paths (any of `docs/cohesive/`, `docs/adr/`, `docs/design/`, `docs/decisions/` containing files). If any are present, halt with the directive error from Hard constraint #1. Init does not run incrementally on existing substrate.
 
 Separately, check for agent-handoff or spec paths (`CLAUDE.md` / `AGENTS.md` / `docs/specs/`). If any are present, do not refuse — proceed to step 1, but capture their existence so the chat trailer renders a warning line ("Detected existing CLAUDE.md / AGENTS.md / docs/specs/; init will not overwrite or propose overlapping drafts.") and step 4's skeletal generation skips them. Step 2's signal scan also avoids proposing drafts that would overlap with existing `docs/specs/` content (per Hard constraint #1's "do not propose drafts that overlap with what's already there").
 
 ### 1. Resolve the draft directory
 
-Apply the four-rule resolution from `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md` §"Artifact directory resolution" with artifact category `init-draft/`:
+Apply the four-rule resolution with artifact category `init-draft/`:
 
-1. If `docs/` exists, write to `docs/substrate/init-draft/`.
-2. Else default to `docs/substrate/init-draft/` (creating `docs/`).
+1. If `docs/` exists, write to `docs/cohesive/init-draft/`.
+2. Else default to `docs/cohesive/init-draft/` (creating `docs/`).
 
 Announce the resolved path in chat before scanning.
 
@@ -73,7 +73,7 @@ Bound proposals per Hard constraint #4: ≤5 per substrate type, ≤20 total. Ra
 
 ### 3. Render the draft directory
 
-For each ranked proposal, write a draft file at `docs/substrate/init-draft/<category>/<slug>.md` using this shape (verbose default; `--brief` skips the §"What this is" block):
+For each ranked proposal, write a draft file at `docs/cohesive/init-draft/<category>/<slug>.md` using this shape (verbose default; `--brief` skips the §"What this is" block):
 
 ```md
 # Draft: <substrate-type> — <slug>
@@ -98,7 +98,7 @@ For each ranked proposal, write a draft file at `docs/substrate/init-draft/<cate
 
 ## Where this lives if you keep it
 
-`<canonical path — e.g., docs/substrate/invariants/<INVARIANT_NAME>.md>`
+`<canonical path the user picks for this artifact>`
 
 ## Decision
 
@@ -134,7 +134,7 @@ Init does not invoke another skill. The user reviews drafts, edits or deletes ea
 
 ## Output format
 
-The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` and persists the draft directory to `docs/substrate/init-draft/`. The chat render is the decision-rendering of the scan per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c) and the audience seam in `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/audience-separation.md`.
+The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` and persists the draft directory to `docs/cohesive/init-draft/`. The chat render is the decision-rendering of the scan per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c).
 
 **No verdict.** Like `discover-substrate`, init is a utility skill that produces a draft, not a judgment. The chat trailer renders no `**Verdict:**` slot per the §"Variants" `init` row of the centralized template.
 
@@ -145,7 +145,7 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 ```md
 # Cohesive Init — <repo-name>
 
-**Headline:** Found <N> proto-substrate signals across <M> categories. Drafts at `docs/substrate/init-draft/`.
+**Headline:** Found <N> proto-substrate signals across <M> categories. Drafts at `docs/cohesive/init-draft/`.
 
 ## Drafts produced
 
@@ -174,7 +174,7 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 
 **What Cohesive calls this:** <substrate-type>. <the first sentence of the row's "User-facing translation" paragraph from `${CLAUDE_PLUGIN_ROOT}/references/substrate-vocabulary.md`>
 
-**Draft at:** `docs/substrate/init-draft/<category>/<slug>.md`
+**Draft at:** `docs/cohesive/init-draft/<category>/<slug>.md`
 
 ### 2. <substrate-type> — <slug>
 ...
@@ -184,12 +184,12 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 
 ## What to do next
 
-1. Open `docs/substrate/init-draft/` and review each draft. Each carries an evidence excerpt, a definition of what Cohesive thinks the type is, and a proposed artifact.
+1. Open `docs/cohesive/init-draft/` and review each draft. Each carries an evidence excerpt, a definition of what Cohesive thinks the type is, and a proposed artifact.
 2. For each draft: edit + `git mv` to the canonical path (keep), or delete (reject).
 3. After kept drafts are committed, run `cohesive:audit-substrate` for the deeper second-pass inventory — init is bounded; audit is exhaustive.
 
 ### Persisted record
-`docs/substrate/init-draft/` (draft directory; not a single file)
+`docs/cohesive/init-draft/` (draft directory; not a single file)
 
 ### Next
 

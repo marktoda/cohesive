@@ -27,7 +27,7 @@ The load-bearing distinction. Not every count is drift bait — some counts are 
 
 | Drift-bait | Replacement |
 |---|---|
-| `Cohesive ships v0.1 with four named invariants:` | `Cohesive ships v0.1 with the following named invariants (full list in [`docs/substrate/invariants/`](../docs/substrate/invariants/)):` |
+| `Cohesive ships v0.1 with four named invariants:` | `Cohesive ships v0.1 with the following named invariants (categorical reference to the canonical list):` |
 | `the 9 Tool-boundary invariants` | `all Tool-boundary invariants ([list](path/to/invariants/))` |
 | `the 8 gotchas` | `the documented gotchas ([listing](path/to/gotchas/))` |
 | `9 shipped workflows` | `the shipped workflows ([table](path/to/workflows.md))` |

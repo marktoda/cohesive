@@ -11,7 +11,7 @@ A structured **substrate discovery report** that names the docs, tests, invarian
 
 ## Voice
 
-Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output (the failure mode `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/style-guide-rot.md` documents).
+Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat output. The voice guide is the load-bearing source for verdict-leads, header-depth cap, density budgets, and forbidden phrasings; the imperative above is what triggers the model to load it via a Read tool call. Do not reproduce the imperative or any citation to the voice guide inside the Output format render template — instructions placed inside render templates leak verbatim into user-facing output.
 
 ## When to invoke
 
@@ -54,7 +54,7 @@ In this order, if present:
 1. `CLAUDE.md` and `AGENTS.md` (highest priority — these often contain rules the codebase depends on)
 2. `architecture.md` and `README.md`
 3. `docs/design/**`, `docs/specs/**`, `docs/adr/**`
-4. `docs/substrate/invariants/**`, `docs/substrate/gotchas/**`, `docs/substrate/matrices/**`, `docs/testing/**` (or repo-native equivalents — see `${CLAUDE_PLUGIN_ROOT}/docs/substrate/conventions/substrate-layout.md`)
+4. `docs/testing/**` (or repo-native equivalents)
 
 If the user named a subsystem, prefer docs whose path or title contains the subsystem name. Read normative docs *before* reading implementation files — they tell you what the system is supposed to do, which is more important than what it currently does.
 
@@ -69,7 +69,7 @@ These are the tests that *guarantee* behavior. Lower-level unit tests are useful
 
 ### 4. Search for existing matrices, invariants, gotchas, linters
 
-Even if the codebase doesn't have dedicated `docs/substrate/invariants/` (or `docs/invariants/`) directories, the equivalents may exist informally:
+Even if the codebase doesn't have dedicated invariants directories, the equivalents may exist informally:
 - comments containing words like "INVARIANT", "MUST", "NEVER", "WARNING", "DO NOT"
 - custom check scripts under `scripts/`, `bin/`, `tools/`
 - pre-commit hooks
@@ -174,7 +174,7 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 - **<concrete-gap-name>** — `<path>:<line>` — <quoted excerpt of the implicit rule, the unmatricized branch, the comment-as-rule, or the stale doc>. The substrate that would close this: <named invariant / behavior matrix / gotcha / spec / linter — concrete enough that a reader could begin drafting it>.
 - ...
 
-(Each Missing memory item is a concrete defect with file:line evidence and the artifact-shape that would close it. Cross-iteration references like "review finding 6 family" or "the X deferred items" are bookkeeping shorthand; if a prior review identified a gap that still holds, restate the gap concretely with current evidence — do not reference its ID. See `${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md`.)
+(Each Missing memory item is a concrete defect with file:line evidence and the artifact-shape that would close it. Cross-iteration references like "review finding 6 family" or "the X deferred items" are bookkeeping shorthand; if a prior review identified a gap that still holds, restate the gap concretely with current evidence — do not reference its ID.)
 
 ### Next
 - <decision-shaped sentence — what the user gets next>. *(`cohesive:<skill-name>`.)* **<Payload-kind>:** <payload — substitute the appropriate kind from `references/templates/chat-trailer.md` §"How `### Next` carries payload": `**Files to edit:**` for `cohesive:rewrite-specs`, `**Design question:**` for `cohesive:brainstorm-design`, `**Scope:**` for `cohesive:review-codebase` / `cohesive:review-diff` / `cohesive:audit-substrate` / `superpowers:writing-plans`>.
@@ -202,5 +202,5 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 - Producing a report with "Existing" full and "Missing memory" empty. That means you searched for what's there and not for what isn't. Re-read step 6.
 - Recommending more than one next skill. Pick one. The router can route again later.
 - Mentioning the implementation files before the spec/test files. Substrate discovery reads normative docs first.
-- Missing memory items rendered as bare phrases without file:line evidence ("invariant for token TTL is missing") or as cross-iteration finding-ID references ("review finding 6 family"). Violates rule 2b — see [`docs/substrate/gotchas/naming-instead-of-showing.md`](${CLAUDE_PLUGIN_ROOT}/docs/substrate/gotchas/naming-instead-of-showing.md).
+- Missing memory items rendered as bare phrases without file:line evidence ("invariant for token TTL is missing") or as cross-iteration finding-ID references ("review finding 6 family"). Violates rule 2b.
 - `### Next` names a skill plus a reason without naming the change surface, design question, or scope. Violates rule 5a.
