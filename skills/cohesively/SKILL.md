@@ -109,19 +109,19 @@ The router-driven case requires explicit prereq-state passing — without it, su
 
 | Route | Prereq state to pass | Chosen-direction / artifact state to pass |
 |---|---|---|
-| `design` | n/a (discover-substrate is dispatched internally by `brainstorm-design` per its Hard constraint #1) | n/a until step 3; then "approved direction: <option name + summary>"; ledger path passed to step 4 |
+| `design` | n/a (discover-substrate is dispatched internally by `brainstorm-design` per its Hard constraint #1) | n/a until step 3; then "approved direction: <option name + summary>"; branch name passed to step 4 once `rewrite-specs` has produced it |
 | `review (codebase)` | n/a (discover-substrate is dispatched internally by `review-codebase` Phase 1) | n/a |
 | `review (diff)` | n/a (discover-substrate is dispatched internally by `review-diff` Step 2, scoped to changed files) | n/a |
 | `audit (substrate)` | n/a (discover-substrate is dispatched internally by `audit-substrate` Step 1) | n/a |
-| `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first); ledger path passed to step 2 once `rewrite-specs` has produced it |
-| `implement` | "Validate-rewrite returned **Approved**; review at <path>." | "Design delta ledger at <path>. Branch: design/<slug>." Validation review path and ledger path are both required. |
+| `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first); branch name passed to step 2 once `rewrite-specs` has produced it |
+| `implement` | "Validate-rewrite returned **Approved**; review at <path>." | "Branch: design/<slug>." The validation review file carries the **Rewrite-tip:** SHA (captured at Approved time); implement-cohesively parses it from there. Validation review path and branch name are both required. |
 | `init` | n/a (init has no prereq; refuses if substrate exists per its Hard constraint #1) | n/a — optional `--brief` flag is the only argument |
 | `artifact` | n/a | "Artifact requested: <invariant / matrix / gotcha>" |
 
 Consumers:
 
 - **Internal-discovery consumers** (subskills that dispatch `cohesive:discover-substrate` themselves as Step 0 / Phase 1.0 of their Process): `brainstorm-design`, `audit-substrate`, `review-codebase`, `review-diff`. The router passes no discovery prereq; each consumer skill owns the dispatch internally. The `Optional override` clause in each consumer's Hard constraint #1 lets the router (or a prior session step) supply a pre-existing discovery report path to skip re-running discovery; absent that, the consumer dispatches discovery itself.
-- **Chosen-direction / ledger-path consumers**: `rewrite-specs` (chosen direction), `validate-rewrite` (ledger path only — no prereq state; this is the documented exception), `implement-cohesively` (validation review path + ledger path; both required), V1 artifact skills.
+- **Chosen-direction / branch-name consumers**: `rewrite-specs` (chosen direction), `validate-rewrite` (branch name only — no prereq state; this is the documented exception), `implement-cohesively` (validation review path + branch name; both required), V1 artifact skills.
 
 Direct (non-router) invocation: the subskill asks its canonical question (about change surface or scope, not about discovery state — discovery is always internal now). The contract is router-side only.
 
@@ -144,7 +144,7 @@ Direct (non-router) invocation: the subskill asks its canonical question (about 
    | `init` | I'll scan your codebase for proto-substrate and produce drafts you can review. |
    | `artifact` | I'll draft the artifact you asked for. |
 
-2. **Process before implementation.** If behavior or architecture is changing, route through the Decide gate before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives code against the design delta ledger via single-pass writing-plans + executing-plans + end-of-run dual reviewer dispatch. Freeform code-writing from this skill body is forbidden.
+2. **Process before implementation.** If behavior or architecture is changing, route through the Decide gate before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives code against the spec diff (anchored at the rewrite-tip SHA persisted in the Approved validation review) via single-pass writing-plans + executing-plans + end-of-run dual reviewer dispatch. Freeform code-writing from this skill body is forbidden.
 
 3. **At most one clarifying question per turn.** The router's announcement turn asks at most one forced-choice question per route (forms above) before dispatching the subskill. Subskills with multi-turn dialogs (e.g., `brainstorm-design` conversational mode) carry their own per-turn budget after dispatch. Question form is always a specific forced choice, never a vague "what do you want?" prompt. Render forced-choice questions through `AskUserQuestion` per [`references/output-voice.md`](${CLAUDE_PLUGIN_ROOT}/references/output-voice.md) §"Forced-choice questions".
 

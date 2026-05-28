@@ -16,7 +16,7 @@ A normal linter encodes generic engineering rules. A *semantic* linter encodes i
 
 - brainstorming a feature, refactor, or architecture change that touches behavior or invariants
 - rewriting design docs / specs to a chosen end state
-- driving implementation of an approved rewrite in a single pass against a design delta ledger
+- driving implementation of an approved rewrite in a single pass against the spec diff
 - reviewing a codebase, subsystem, or PR for cohesion
 - auditing a repo for missing memory — implicit rules, branchy code without matrices, invariants without enforcement
 - deciding whether to centralize, duplicate, split, or abstract
@@ -37,7 +37,7 @@ The user-facing model is **three gates: Decide → Lock → Build**, paralleling
 /cohesive:brainstorm-design      # Options + 25-question pressure-test
 /cohesive:rewrite-specs          # Hard-rewrite docs to chosen end state (in worktree)
 /cohesive:validate-rewrite       # Fresh-eyes review of the rewrite
-/cohesive:implement-cohesively   # Drive implementation against the design delta ledger
+/cohesive:implement-cohesively   # Drive implementation against the spec diff
 
 # Off-chain diagnostics
 /cohesive:review-codebase        # Full architecture cohesion review
@@ -55,7 +55,7 @@ For a non-trivial feature or refactor:
 
 - **Decide** — recommended direction with main risk + structural mitigation. Many design conversations end here. *(Under the hood: `discover-substrate` + `brainstorm-design`.)*
 - **Lock** — chosen direction pinned into specs in a worktree, then fresh-eyes-validated. You get an architectural reflection on what's easier downstream, what's harder, what's load-bearing on memory rather than structure. *(Under: `rewrite-specs` + `validate-rewrite`, with an internal repair loop.)*
-- **Build** — locked design becomes code with spec-coverage verified. A single-pass implementation against the delta ledger: thin intent paragraph → `superpowers:writing-plans` → `superpowers:executing-plans` → end-of-run parallel dispatch of `delta-coverage-reviewer` + `cohesive:review-diff`, synthesized AND-shape. Final verdict: `Code matches locked design ✓` / `Drift detected ✗`. *(Under: `implement-cohesively`, composing `superpowers:writing-plans` + `executing-plans` once per pass, plus the dual reviewer pair at end-of-run.)*
+- **Build** — locked design becomes code with spec-coverage verified. A single-pass implementation against the spec diff: `git diff $(merge-base main rewrite-tip)..rewrite-tip` → `superpowers:writing-plans` → `superpowers:executing-plans` → end-of-run parallel dispatch of `delta-coverage-reviewer` (spec-diff vs implementation-diff) + `cohesive:review-diff` (substrate alignment), synthesized AND-shape. Final verdict: `Code matches locked design ✓` / `Drift detected ✗`. *(Under: `implement-cohesively`, composing `superpowers:writing-plans` + `executing-plans` once per pass, plus the dual reviewer pair at end-of-run.)*
 
 You can stop at any gate.
 

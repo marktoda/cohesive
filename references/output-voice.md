@@ -12,7 +12,7 @@ Cohesive's substrate work is rigorous. Cohesive's chat output is not the place t
 
 1. **Verdict before evidence.** Every chat-rendered output that has a verdict opens with the verdict line. Pinned as the named invariant `VERDICT_BEFORE_EVIDENCE`.
 
-2. **The chat render is substance, not bookkeeping.** Persisted artifacts (architecture reviews, brainstorms, delta ledgers, audit reports) carry the full body, the audit trail, and the substrate-shape vocabulary the agent uses to do its work. Chat shows the verdict (in user-facing form), the thesis, the top findings, and the next step — and *shows* them, not just names them. The persisted file is canonical; the chat render is its decision-shaped trailer.
+2. **The chat render is substance, not bookkeeping.** Persisted artifacts (architecture reviews, brainstorms, audit reports) carry the full body, the audit trail, and the substrate-shape vocabulary the agent uses to do its work. Chat shows the verdict (in user-facing form), the thesis, the top findings, and the next step — and *shows* them, not just names them. The persisted file is canonical; the chat render is its decision-shaped trailer.
 
    This rule has three sub-rules, each independently testable.
 
@@ -106,7 +106,7 @@ Chat-rendered cross-references use a short form: `<filename without dir or .md> 
 
 - `output-voice §multi-turn dialog` — not the full path
 
-Persisted files (delta ledgers, reviews, brainstorms) keep the canonical full path (the `${CLAUDE_PLUGIN_ROOT}/...` form) for grep, navigation, and validator pinning. Skill bodies and convention docs (this file included) keep the full path for the same reason. The short form is chat-only — for the reader's eye, not tooling.
+Persisted files (reviews, brainstorms) keep the canonical full path (the `${CLAUDE_PLUGIN_ROOT}/...` form) for grep, navigation, and validator pinning. Skill bodies and convention docs (this file included) keep the full path for the same reason. The short form is chat-only — for the reader's eye, not tooling.
 
 When a section name is genuinely ambiguous across skills (e.g., several have a `§"Output format"`), expand the file part minimally: `brainstorm-design §output format` rather than the full path. The disambiguator is the filename, not the directory.
 
@@ -162,7 +162,7 @@ These are guidelines, not enforced limits. A density invariant would require a c
 | `brainstorm-design` recommendation | Pressure-test summary table (when ≥3 options) + 1-paragraph Recommendation (Direction + Main risk + Structural mitigation) per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` §"Variants" |
 | `review-diff` verdict | User-facing verdict + table (3 show-shape rows: file:line + excerpt + Change column + Doc-to-update column) + one-paragraph main concern |
 | `review-codebase` chat render | User-facing verdict + thesis + 3 show-shape findings + payload-bearing `### Next`; full body in the persisted file |
-| `validate-rewrite` verdict | User-facing verdict + Delta-at-a-glance quote + show-shape findings (six-field shape: Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) + disposition + (Approved-only) implementation matrix; ½–¾ page |
+| `validate-rewrite` verdict | User-facing verdict + Delta-at-a-glance summary (auto-generated from the spec diff) + show-shape findings (six-field shape: Severity / Category / Why it matters / Evidence / Recommended fix / Substrate artifact) + disposition + (Approved-only) implementation matrix; ½–¾ page |
 | `audit-substrate` chat render | User-facing verdict + headline + 3 show-shape top-fixes with title + Evidence + Sketch + Path + payload-bearing `### Next`; full body in the persisted file |
 | `implement-cohesively` chat render | User-facing verdict + thesis + Phases table + Delta coverage line + Final substrate review pointer + Branch state + payload-bearing `### Next` per verdict |
 | Reviewer agent (any) | ≤500 lines hard cap (existing reviewer rule) |

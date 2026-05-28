@@ -18,6 +18,7 @@
 #   - Bypass-acknowledgment string in validate-rewrite
 #   - Chain-rendering anti-pattern absent from router
 #   - Forbidden phase-shaped literals absent from runtime surfaces
+#   - No retired delta-ledger references in production surface
 #   - PLUGIN_ROOT_PATHS (no hardcoded absolute paths)
 #   - Referenced files exist (warn-level)
 #   - Scripts are executable (warn-level)
@@ -426,6 +427,23 @@ if [ -n "$phase_violations" ]; then
   done
 else
   ok "no 'phase by phase' / 'phase-by-phase' literals in skills/, agents/, references/"
+fi
+
+# 13n. No remaining references to the retired design-delta-ledger artifact in
+# skills/, agents/, or references/. The delta ledger was retired in favor of the
+# git diff being the authoritative record of what the rewrite changed; any
+# remaining reference in the production surface is a regression.
+ledger_violations=$(
+  grep -rinE 'delta[ -]ledger|design-delta-ledger|delta_ledger|IMPLEMENTATION_PLAN_COVERS_DELTA' \
+    skills/ agents/ references/ 2>/dev/null \
+    || true
+)
+if [ -n "$ledger_violations" ]; then
+  echo "$ledger_violations" | while IFS= read -r line; do
+    fail "Retired delta-ledger reference: $line. The delta-ledger artifact was retired; the git diff at the rewrite-tip SHA is the authoritative record. Update to spec-diff / rewrite-tip / IMPLEMENTATION_COVERS_SPEC_DIFF vocabulary."
+  done
+else
+  ok "no retired delta-ledger references in skills/, agents/, references/"
 fi
 
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
