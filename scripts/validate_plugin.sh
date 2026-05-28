@@ -20,6 +20,7 @@
 #   - Forbidden phase-shaped literals absent from runtime surfaces
 #   - No retired delta-ledger references in production surface
 #   - Change-type gate present in cohesively router
+#   - Pass-budget default 2 + closed-findings forwarding (L3 convergence rule)
 #   - PLUGIN_ROOT_PATHS (no hardcoded absolute paths)
 #   - Referenced files exist (warn-level)
 #   - Scripts are executable (warn-level)
@@ -458,6 +459,30 @@ if grep -qF 'Change-type gate' skills/cohesively/SKILL.md \
   ok "Change-type gate present in cohesively router (extend route + gate question)"
 else
   fail "skills/cohesively/SKILL.md missing the L2 change-type gate. Required: §\"Change-type gate\" header, the question text 'Are you extending an existing concept, or introducing a new one?', and the \`extend\` route in the dispatch contract table."
+fi
+
+# 13p. Pass-budget convergence rule (L3). validate-rewrite's repair loop is capped
+# at MAX_REPAIR_PASSES default 2. Regressing to 5 (or higher than 3) defeats the
+# convergence rule. Body text must mention the default 2 — either via the explicit
+# `MAX_REPAIR_PASSES = 2` form or the `default 2` phrasing in Hard constraints / Step 4.
+errors_before=$errors
+if grep -qE '`?MAX_REPAIR_PASSES`?[[:space:]]*=[[:space:]]*2\b' skills/validate-rewrite/SKILL.md \
+   || grep -qF 'default 2' skills/validate-rewrite/SKILL.md; then
+  ok "Pass-budget default 2 present in validate-rewrite (L3 convergence rule)"
+else
+  fail "skills/validate-rewrite/SKILL.md missing the L3 pass-budget default of 2. Required: text indicating MAX_REPAIR_PASSES default is 2 (either '\`MAX_REPAIR_PASSES = 2\`' or 'default 2' phrasing in Hard constraint #4 / Step 4)."
+fi
+
+# 13q. Closed-findings forwarding contract (L3). Pass-N reviewers (N ≥ 2) receive
+# prior-pass closed findings as anti-amnesia context. The dispatch-prompt section
+# header is canonical; the spec-cohesion-reviewer agent's input contract must
+# acknowledge the list.
+errors_before=$errors
+if grep -qF 'Closed findings from prior passes' skills/validate-rewrite/SKILL.md \
+   && grep -qF 'Closed findings from prior passes' agents/spec-cohesion-reviewer.md; then
+  ok "L3 closed-findings forwarding contract present (validate-rewrite dispatch prompt + spec-cohesion-reviewer input contract)"
+else
+  fail "L3 closed-findings forwarding contract missing. Required: '## Closed findings from prior passes' section in skills/validate-rewrite/SKILL.md (dispatch-prompt shape) AND a corresponding bullet in agents/spec-cohesion-reviewer.md (Inputs section)."
 fi
 
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.

@@ -20,7 +20,8 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 1. **Always dispatch the `spec-cohesion-reviewer` agent via Task tool.** The skill itself never renders the verdict from in-conversation reading — it dispatches and surfaces the agent's report. The Task subprocess provides the structural fresh-eyes fence; this skill's job is the dispatch and the synthesis. This applies **per pass** of the repair loop, not just on the first pass.
 2. **Inputs must be paths, not summaries.** Pass the agent file paths to read; don't pre-summarize the design for it. The dispatch prompt's content is the entire context the agent has, so any summary the dispatching skill writes into it bypasses fresh-eyes — the harness fence prevents conversation inheritance, but it can't prevent prompt contamination. This applies per pass: the pass-N reviewer is dispatched with paths only, never with the pass-(N-1) review as context.
 3. **The review can block implementation.** Verdicts gate implementation per the verdict→severity-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)": `Issues Found` (highest severity High or Blocker) drives the internal repair loop (Hard constraint #4), and `Design Incoherent` exits the loop and routes to `brainstorm-design`. `Approved` (highest severity Medium, Low, or none) terminates the loop and unlocks the implementation route; the trailer leads with one default move (`cohesive:implement-cohesively`) and surfaces alternatives behind a `(other options)` disclosure per the chat-trailer template's §"Default-recommend rule". The disposition rule in the rubric specifies what (if anything) to close before merge.
-4. **The Issues Found repair loop runs internally.** When the reviewer returns `Issues Found`, the skill dispatches `cohesive:rewrite-specs` in repair mode via the Skill tool, then re-dispatches `spec-cohesion-reviewer` for the next pass — up to `MAX_REPAIR_PASSES` (default 5). The user does not invoke `rewrite-specs` themselves except after a max-passes stall or a Design Incoherent exit. The loop terminates on Approved, Design Incoherent, or max-passes; do not loop past the ceiling, and do not auto-pivot to `brainstorm-design` on max-passes (that is a user decision).
+4. **The Issues Found repair loop runs internally with a tight default budget.** When the reviewer returns `Issues Found`, the skill dispatches `cohesive:rewrite-specs` in repair mode via the Skill tool, then re-dispatches `spec-cohesion-reviewer` for the next pass — up to `MAX_REPAIR_PASSES` (default 2; configurable via `--max-passes=N`). The default-2 ceiling encodes the convergence rule: if pass 2 doesn't return Approved, the design is more likely at fault than the spec text, and the stall banner routes the user back to `brainstorm-design`. The user does not invoke `rewrite-specs` themselves except after a max-passes stall or a Design Incoherent exit. The loop terminates on Approved, Design Incoherent, or max-passes; do not loop past the ceiling, and do not auto-pivot to `brainstorm-design` on max-passes (that is a user decision).
+5. **Pass-N reviewers (N ≥ 2) receive prior-pass closed findings as anti-amnesia context.** When dispatching the pass-N reviewer, the skill builds an accumulated closed-findings list from all prior passes' `Closes:` commit-message trailers and prior review files (see Step 4 substep 2.5), and includes it in the dispatch prompt as a `## Closed findings from prior passes` section. The reviewer MUST NOT re-raise a closed finding as a new finding unless (a) it cites the prior pass's ID and (b) it explains in "Why it matters" why the prior closure was wrong. Fresh-eyes is about objectivity, not amnesia — the prior pass's closures are visible to the reviewer specifically so the loop doesn't re-do work the prior pass already closed.
 
 ## Process
 
@@ -117,11 +118,37 @@ Then branch on verdict:
 
 ### 4. Repair loop (Issues Found only)
 
-The repair loop runs internally per Hard constraint #4. Default ceiling: `MAX_REPAIR_PASSES = 5` (override via `--max-passes=N`). The loop body:
+The repair loop runs internally per Hard constraint #4. Default ceiling: `MAX_REPAIR_PASSES = 2` (override via `--max-passes=N`). The loop body:
 
 1. **Render pass progress in chat.** One sentence: `Pass <N>/<MAX>: Issues Found — <count> findings (Blocker: <b>, High: <h>, Medium: <m>). Dispatching repair…`. This is the only progress line per pass; the user can interrupt at any point and the worktree state is whatever the last completed pass committed.
 2. **Dispatch `cohesive:rewrite-specs` in repair mode** via the Skill tool. The dispatch prompt names the just-persisted pass-N review path as the repair source and instructs repair-mode operation per `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` §"Process Step 1b. Repair-pass mode". The dispatch prompt **must** state, explicitly: (a) the repair scope is the enumerated repairs in the cited review, not a fresh design pass; (b) the chosen direction must not be re-derived — if the dispatched skill concludes the design itself is unsound, that is a Design Incoherent signal that the next pass's reviewer should surface, not a verdict the dispatched `rewrite-specs` renders directly; (c) repair commits land on the same `design/<slug>` branch and follow the repair-mode commit template in `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` §"Step 6. Commit the rewrite". Wait for `rewrite-specs` to return — it will land repair commits on the `design/<slug>` branch.
-3. **Increment the pass counter and re-dispatch `spec-cohesion-reviewer`** per Step 2. The dispatch is a fresh Task subprocess with paths-only input — never pass the prior pass's review or the loop's conversation context to the new reviewer (Hard constraints #1 and #2 apply per pass).
+
+2.5. **Build the accumulated closed-findings list.** After the repair commits land, parse their commit-message bodies for the `Closes: <IDs>` trailer (the `rewrite-specs` repair-mode convention; see `${CLAUDE_PLUGIN_ROOT}/skills/rewrite-specs/SKILL.md` §"Step 6"). For each cited finding ID, look up the title from the corresponding prior pass's review file (`docs/cohesive/reviews/<...>-rewrite-validation[-pass-N].md`). Accumulate the list across all prior passes — the pass-2 list carries pass-1's closures; the pass-3 list carries pass-1's + pass-2's; etc. This list becomes the `## Closed findings from prior passes` section in the next dispatch prompt (substep 3). On pass 1 the list is empty and the section is omitted entirely.
+
+3. **Increment the pass counter and re-dispatch `spec-cohesion-reviewer`** per Step 2, with the accumulated closed-findings list from substep 2.5 included in the dispatch prompt. The dispatch prompt shape on pass 2+ adds this section between "Substrate discovery" and "Read all of the above":
+
+   ```
+   ## Closed findings from prior passes — do not re-raise unless the prior closure is wrong
+
+   The following findings were raised in earlier passes and closed by repair commits.
+   Do NOT re-raise these as new findings. If you believe a prior closure was incorrect
+   (the repair did not actually address the underlying issue, or it introduced a new
+   problem), you may raise a NEW finding citing the prior ID and explaining in the
+   "Why it matters" field why the prior closure was wrong. Re-raising without that
+   justification is a contract violation.
+
+   ### From pass 1 (<review path>):
+   - **B1.** <title> — closed by repair-pass-1 commit <SHA>
+   - **I2.** <title> — closed by repair-pass-1 commit <SHA>
+   ...
+
+   ### From pass 2 (<review path>):  *(only on pass-3+ dispatches)*
+   - **B1.** <title> — closed by repair-pass-2 commit <SHA>
+   ...
+   ```
+
+   The dispatch is a fresh Task subprocess with paths-only input — never pass the prior pass's review *as a narrative* or the loop's conversation context to the new reviewer (Hard constraints #1 and #2 apply per pass). The closed-findings list is structured data (IDs + titles + commit SHAs), not a narrative; it preserves the fresh-eyes property by being file-based input the reviewer reads as data, the same shape as the spec-diff path.
+
 4. **Persist the new pass's review** per Step 3 and re-branch on verdict:
    - Approved → exit loop; proceed to Step 5.
    - Design Incoherent → exit loop; proceed to Step 5.
@@ -273,10 +300,11 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 
 ## Acceptance criteria
 
-- Each pass's dispatched agent receives only file paths, not pre-digested summaries.
-- The pass-N agent's input does not include the pass-(N-1) review, the brainstorm output, or the loop's conversation history.
+- Each pass's dispatched agent receives only file paths and structured data (IDs + titles + commit SHAs), not pre-digested narrative summaries.
+- The pass-N agent's input does not include the pass-(N-1) review *as a narrative*, the brainstorm output, or the loop's conversation history. The accumulated closed-findings list (IDs + titles + commit SHAs) is the one exception per Hard constraint #5 — structured data, not narrative.
+- The pass-N reviewer dispatch (N ≥ 2) includes a `## Closed findings from prior passes` section in the dispatch prompt; on pass 1 the section is omitted.
 - The verdict vocabulary is {Approved, Issues Found, Design Incoherent}. The max-passes stall is a *loop-exit shape* that surfaces the latest pass's Issues Found verdict to the user with a stall banner; Issues Found does not surface to the user except via that banner (the loop normally drives it internally to convergence).
-- The Issues Found repair loop terminates within `MAX_REPAIR_PASSES` iterations (default 5; configurable via `--max-passes=N`) regardless of repair convergence.
+- The Issues Found repair loop terminates within `MAX_REPAIR_PASSES` iterations (default 2; configurable via `--max-passes=N`) regardless of repair convergence.
 - The loop never auto-pivots from Issues Found to `brainstorm-design`; that decision is the user's, surfaced after a max-passes stall or a Design Incoherent verdict.
 - Every issue in each pass's report names the **substrate artifact** to repair (spec, matrix, invariant, gotcha, linter, test, type boundary).
 - Vague language ("should," "may," "TBD") in normative sections is enumerated with file:line references.
@@ -284,7 +312,7 @@ The dispatched `spec-cohesion-reviewer` agent simulates the future reader. It ru
 ## Red flags
 
 - Calling the agent with a long contextual preamble that summarizes the design. That bypasses fresh-eyes by smuggling the calling skill's mental model into the agent's prompt — the harness fence can't prevent prompt contamination, only conversation inheritance.
-- Passing the prior pass's review (or the loop's conversation context) to the next pass's reviewer. Each pass is fresh eyes; contaminating across passes defeats the property the loop relies on.
+- Passing the prior pass's review *as a narrative* (the full review document or paraphrased findings) to the next pass's reviewer. The pass-N reviewer receives a *structured* closed-findings list (IDs + titles + commit SHAs) per Hard constraint #5; that is data, not narrative. A narrative-shaped preamble contaminates fresh-eyes; a data-shaped list does not, because the reviewer reads it the same way they read the spec-diff path — as input data, not as guidance.
 - Rendering the verdict from in-conversation reading instead of dispatching the agent. The skill always dispatches; that's the structural fence.
 - Auto-looping past `MAX_REPAIR_PASSES` because "the next pass might converge." The ceiling exists because non-convergent designs are usually structural; surface and let the user decide.
 - Auto-pivoting to `brainstorm-design` on max-passes stall instead of recommending it. The user owns the decision to revisit the chosen direction.
