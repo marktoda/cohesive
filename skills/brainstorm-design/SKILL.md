@@ -74,7 +74,7 @@ The dispatching `validate-rewrite` invocation passes this input as part of the S
 - **Discarded direction:** <option name + 1-2 sentence summary from the discarded brainstorm's `## Direction` block>
 - **Reflection's harder-downstream concerns:** <bullets from the discarded validate-rewrite Approved trailer's Architectural reflection §"Harder downstream">
 - **Reflection's load-bearing-on-memory concerns:** <bullets from the discarded validate-rewrite Approved trailer's Architectural reflection §"Load-bearing on memory">
-- **Re-decide pass count:** N (incrementing across the cycle; cap at 2-3 per the convention in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Re-decide acknowledgment")
+- **Re-decide pass count:** N (incrementing across the cycle; cap at 2-3 per the `**Re-decide acknowledgment**` convention in `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Output format")
 
 The brainstorm uses these inputs to bias option-generation: any new option must either resolve the harder-downstream concerns of the discarded direction or explicitly accept them with a different structural mitigation. Options that re-derive the discarded path without addressing its concerns are out of scope. The pressure-test battery in Phase 4 attacks the new options against the discarded reflection's concerns, not just against the substrate at large.
 

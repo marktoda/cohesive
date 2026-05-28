@@ -72,6 +72,15 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 **Verdict:** Approved / Issues Found / Design Incoherent
 
+## Architectural reflection
+*(Required on Approved verdict; omit on Issues Found / Design Incoherent.)*
+
+How it feels now: <one paragraph — concrete to this design; not "looks good">
+
+- **Easier downstream:** <what future change becomes cheaper or more predictable because of this lock>
+- **Harder downstream:** <what becomes more expensive; what new context a future change in this area requires>
+- **Load-bearing on memory:** <rules that depend on reviewer attention rather than tests/types/linters/CI; omit when fully enforced>
+
 ## Executive judgment
 <one paragraph>
 
@@ -84,6 +93,8 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 (Each finding uses the canonical six-field shape.)
 ```
+
+The Architectural reflection is what the dispatching `validate-rewrite` skill renders at the top of the Approved chat trailer (per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Architectural reflection"). On Approved verdicts you MUST produce it — the skill can't synthesize it without your locality / future-fit / enforcement findings as input. On non-Approved verdicts you omit it; the disposition handles the next step.
 
 Use the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md`. Your verdict must be one of, gated on the verdict→severity-floor mapping in `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)":
 

@@ -82,7 +82,15 @@ The skill body uses `Step 0` and `Step 4` for preflight and handoff bookends, `S
 
 The first action of Step 0 is **mode detection**: standard or extend.
 
-- **Mode detection rule.** If the inputs include a validation review path, mode is standard. Else if the inputs include a change-surface description, mode is extend. If neither (or both), halt with a directive error asking the user to specify (per Hard constraint #1).
+- **Mode detection rule.** If the inputs include a validation review path AND no change-surface description, mode is standard. Else if the inputs include a change-surface description AND no validation review path, mode is extend. Otherwise halt with a directive error:
+
+  ```
+  Cannot detect mode for slug `<slug>`. Either both inputs supplied or neither.
+  Standard mode requires a validation review path (post-validate-rewrite-Approved).
+  Extend mode requires a change-surface description (post-rewrite-specs-extension).
+  Supply exactly one. If you intend standard mode, drop the change-surface input;
+  if extend mode, drop the validation review path.
+  ```
 
 The rest of Step 0 then branches on mode:
 
@@ -291,7 +299,7 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 The four `### Next` bullet shapes (one renders per invocation, matching the internal verdict):
 
 - **Internal `Implemented`:** Substrate and code agree; ready to ship. *(`superpowers:finishing-a-development-branch`.)* **Scope:** the `design/<slug>` branch.
-- **Internal `Coverage Drift`:** Repair the named coverage gaps, then re-invoke. *(`cohesive:implement-cohesively` resume.)* **Scope:** the spec-diff hunks the coverage reviewer flagged as Drift / Incomplete.
+- **Internal `Coverage Drift`:** Repair the named coverage gaps, then re-invoke. *(`cohesive:implement-cohesively` resume.)* **Scope:** the spec-diff hunks the coverage reviewer flagged as Drift / Incomplete. **Resume semantics:** re-invocation reads the same `Rewrite-tip:` SHA from the validation review file (or the same `rewrite-specs` extension commit, in extend mode) — Step 1's spec-diff capture is idempotent across resumes. The user closes the named gaps by landing new implementation commits on the branch; Step 3's end-of-run dispatch re-runs against the updated implementation diff (now wider). No new "resume" input is required — the skill detects partial implementation by computing `git diff <rewrite-tip>..HEAD` and treating the result as the implementation diff regardless of how many resume cycles produced it.
 - **Internal `Substrate Drift`:** Extend the design to cover what the implementation introduced, or revert the divergent code. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerate the docs the substrate review flagged as needing extension>. Slug: `<derived-from-original-slug>-extension`. *(Extend mode: this verdict means the change was misclassified as extension and went beyond extension shape. Re-route through `cohesive:cohesively` and pick "Introducing a new concept" at the change-type gate, OR revert the divergent code and keep the change as a pure extension.)*
 - **Internal `Aborted`:** Implementation paused at user request. *(No follow-up skill required.)* The branch state is whatever the last implementation commit landed.
 
@@ -308,7 +316,6 @@ The four `### Next` bullet shapes (one renders per invocation, matching the inte
 | Recomputing the spec diff at invocation time instead of using the rewrite-tip SHA | Diff drifts as implementation commits land; Coverage Drift retries become impossible | Step 1 anchors the spec diff to the SHA captured in the validation review file, not to HEAD |
 | Auto-invoking `superpowers:finishing-a-development-branch` | Branch finishing is a user action per Cohesive↔Superpowers seam | Recommend; do not invoke |
 | Pre-summarizing the design for the dispatched reviewers | Bypasses fresh-eyes | Pass paths only; never summarize the rewrite for the agent |
-| Step 3.5 mishandling | Cleanup fires on a non-Implemented verdict (strips artifacts load-bearing for the next attempt), skips on Implemented (run scaffolding leaks into main), produces a commit without a verbatim removed-paths body (forensic breadcrumb is lost), or strips durable artifacts (decision records become unrecoverable) | Hard constraint #5 enumerates all four sub-conditions |
 
 ## Branch shape
 
@@ -336,7 +343,7 @@ The implementation lands on the same `design/<slug>` branch the rewrite produced
 - Step 1 captures the spec diff at the rewrite-tip SHA into `.cohesive/tmp/<slug>-spec-diff.patch`; surfaces the changed-line count when above 1000 and pauses for user confirmation; below threshold the gate is invisible (both modes).
 - Step 1's thin intent paragraph references the spec-diff patch path; the format is exactly the three lines specified per mode (standard: Make / Constraints / Acceptance; extend: Make / Sibling sites / Acceptance).
 - Step 2 invokes `superpowers:executing-plans` against the persisted plan path; implementation commits cite the plan path (both modes).
-- *Standard mode Step 3:* dispatches `delta-coverage-reviewer` and `cohesive:review-diff` in parallel; both reviewers receive only paths (spec-diff patch, branch name, rewrite-tip SHA); never a pre-summarized design narrative.
+- *Standard mode Step 3:* dispatches `delta-coverage-reviewer` and `cohesive:review-diff` in parallel; both reviewers receive only paths (spec-diff patch, per-pass plan path, branch name, rewrite-tip SHA); never a pre-summarized design narrative.
 - *Extend mode Step 3:* dispatches `cross-mirror-reviewer` solo; the reviewer receives only paths (spec-diff patch, plan path, branch name, rewrite-tip SHA, discovery report path, change-surface description); never a pre-summarized design narrative.
 - *Standard mode:* Step 3 synthesizes the verdict AND-shape per §"Verdict synthesis"; only `Covered + (Pass | Pass with notes)` synthesizes to Implemented.
 - *Extend mode:* Step 3's verdict is the cross-mirror-reviewer's verdict directly (Covered → Implemented, Sites Missing → Coverage Drift, Bigger than extension → Substrate Drift).
