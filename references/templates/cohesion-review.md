@@ -2,7 +2,7 @@
 
 **Reviewer:** spec-cohesion-reviewer (fresh-eyes context)
 **Date:** YYYY-MM-DD
-**Subject:** <which rewritten specs were reviewed; reference the design delta ledger>
+**Subject:** <which rewritten specs were reviewed; cite the rewrite branch and the rewrite-tip SHA>
 
 **Status:** Approved / Issues Found / Design Incoherent
 
@@ -40,7 +40,15 @@ One paragraph. Could a future contributor — human or agent — read these rewr
 
 ## Delta at a glance
 
-This section is a **render slot** in the validation review document, not the canonical contract for the preamble. Quote the ledger's `## Delta at a glance` section verbatim here. The **canonical contract** — category list, authoring rules, and consumer rendering rules (missing-preamble handling and divergence-from-body handling) — lives at `references/templates/design-delta-ledger.md` §"Delta at a glance"; that section names itself as canonical-contract using the same bolded term, so the contract/slot relationship is symmetric whichever document a reader opens first.
+This section is a **render slot** in the validation review document. The dispatching `validate-rewrite` skill computes the spec diff (`git diff $(merge-base main HEAD)..HEAD`) and renders an auto-generated 5-bullet summary here:
+
+- `N files rewritten / M files added / K files removed`
+- `Named invariants touched:` <comma-separated names from `### …`-style headings in the diff> — or `none`
+- `Behavior matrix rows changed:` <count + matrix names> — or `none`
+- `Gotchas added or retired:` <names> — or `none`
+- `Classification:` <Pure implementation | Design | Mixed> (read from the rewrite commit's `Classification:` trailer)
+
+This is render-time orientation; no parallel persisted artifact backs it. The reviewer reads the diff itself as the authoritative source — this summary just helps the reader of the validation review scan what's in the rewrite at decision time.
 
 ## Blocking issues
 
@@ -116,9 +124,9 @@ Look for "should," "probably," "we will," "TODO," "TBD" in normative sections of
 
 This `### Next` block is the `validate-rewrite` variant per `references/templates/chat-trailer.md` §"Variants" — the **Disposition** phrase + (Approved-only) **Implementation route** with the default-recommend rule applied per the centralized chat-trailer template's §"Default-recommend rule". The `###` heading depth matches the centralized chat-trailer template's footer convention per `references/templates/chat-trailer.md` §"The shell". The disposition phrase is determined by the rule in `references/cohesion-rubric.md` §"Disposition rule for validation-review findings"; it is single-phrase by design.
 
-**Disposition:** <the literal string in the `Canonical Disposition phrase` column of the rubric table at `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", for the row whose `(Verdict, Highest severity present)` pair matches this review. The rubric is the single source of truth for the phrase string; this template cites rather than restates. Substrate-noting is a user override of the Approved + Low default per the rubric §"Substrate-note as user override", **not a separate Disposition phrase the agent renders**; the agent renders the rule's default and the user's override (if any) is a post-render move that lands in the ledger §"Remaining ambiguity".>
+**Disposition:** <the literal string in the `Canonical Disposition phrase` column of the rubric table at `references/cohesion-rubric.md` §"Disposition rule for validation-review findings", for the row whose `(Verdict, Highest severity present)` pair matches this review. The rubric is the single source of truth for the phrase string; this template cites rather than restates. Substrate-noting is a user override of the Approved + Low default per the rubric §"Substrate-note as user override", **not a separate Disposition phrase the agent renders**; the agent renders the rule's default and the user's override (if any) is a post-render move that lands in the validation review file's `## Deferred findings (substrate-note overrides)` section.>
 
-**Implementation route:** [render iff verdict is `Approved`; otherwise omit]. The verdict-floor mapping in `references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)" guarantees `Approved` is merge-ready. The route is rendered with the default-recommend rule per the chat-trailer template's §"Default-recommend rule": one default move (`cohesive:implement-cohesively` — drive code in a single pass against the delta ledger with end-of-run dual reviewer dispatch) leads, with the alternatives behind a `(other options)` disclosure. The full alternatives list is in `skills/validate-rewrite/SKILL.md` §"Output format". Omit the entire route slot for `Issues Found` and `Design Incoherent`.
+**Implementation route:** [render iff verdict is `Approved`; otherwise omit]. The verdict-floor mapping in `references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)" guarantees `Approved` is merge-ready. The route is rendered with the default-recommend rule per the chat-trailer template's §"Default-recommend rule": one default move (`cohesive:implement-cohesively` — drive code in a single pass against the spec diff anchored at the rewrite-tip SHA, with end-of-run dual reviewer dispatch) leads, with the alternatives behind a `(other options)` disclosure. The full alternatives list is in `skills/validate-rewrite/SKILL.md` §"Output format". Omit the entire route slot for `Issues Found` and `Design Incoherent`.
 
 ## What looked right
 

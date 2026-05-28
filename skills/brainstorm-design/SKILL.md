@@ -354,7 +354,7 @@ If the user declines persistence (one-shot brainstorm, no rewrite intended), the
 
 ## What this skill is *not*
 
-- Not an implementation planner. After `validate-rewrite` Approved, `cohesive:implement-cohesively` drives implementation against the delta ledger (single-pass composition with `superpowers:writing-plans` and `superpowers:executing-plans` plus end-of-run dual reviewer dispatch); for non-substrate-shaped implementation, `superpowers:writing-plans` is also available directly.
+- Not an implementation planner. After `validate-rewrite` Approved, `cohesive:implement-cohesively` drives implementation against the spec diff (single-pass composition with `superpowers:writing-plans` and `superpowers:executing-plans` plus end-of-run dual reviewer dispatch); for non-substrate-shaped implementation, `superpowers:writing-plans` is also available directly.
 - Not an architecture review. That's `cohesive:review-codebase`.
 - Not a substrate audit. That's `cohesive:audit-substrate`.
 

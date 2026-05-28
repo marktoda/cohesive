@@ -30,7 +30,7 @@ The user-facing model is three gates, paralleling Superpowers' `brainstorm → p
 
 - **Decide** — recommended direction with main risk + structural mitigation. Many design conversations end here.
 - **Lock** — chosen direction pinned into specs in a worktree, then fresh-eyes-validated.
-- **Build** — locked design becomes code with spec-coverage verified. Single-pass implementation against a delta ledger, with end-of-run dual reviewer dispatch.
+- **Build** — locked design becomes code with spec-coverage verified. Single-pass implementation against the spec diff (git diff at the rewrite-tip SHA), with end-of-run dual reviewer dispatch.
 
 Stop at any gate.
 
@@ -46,7 +46,7 @@ Reviewer agents run in isolated subprocesses with no conversation-context inheri
 
 We tried it. We're not doing it anymore.
 
-The Cohesive workflow stores its substrate (named invariants, behavior matrices, gotchas, delta ledgers, design docs) as markdown files. The Cohesive *product itself* is also markdown — SKILL.md, agent definitions, references. When you try to dogfood the workflow on the codebase that ships the workflow, the two markdown trees become indistinguishable in conversation. Every time someone asked "is this a contributor-facing rule or a runtime-facing rule?", the answer required holding both trees in mind. Confusion compounded faster than substrate accrued.
+The Cohesive workflow stores its substrate (named invariants, behavior matrices, gotchas, design docs) as markdown files. The Cohesive *product itself* is also markdown — SKILL.md, agent definitions, references. When you try to dogfood the workflow on the codebase that ships the workflow, the two markdown trees become indistinguishable in conversation. Every time someone asked "is this a contributor-facing rule or a runtime-facing rule?", the answer required holding both trees in mind. Confusion compounded faster than substrate accrued.
 
 So: don't recreate `docs/substrate/`, `docs/history/`, or any Cohesive-shaped substrate tree inside *this* repo. If you want substrate-style memory about the plugin itself, encode it as:
 

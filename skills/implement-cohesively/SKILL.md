@@ -1,19 +1,20 @@
 ---
 name: implement-cohesively
-description: Use after validate-rewrite has returned Approved on a spec rewrite, when the user wants to land code that makes the rewrite true. Drives a single-pass implementation where Cohesive owns the substrate-shaped intent (thin paragraph derived from the delta ledger) and the end-of-run dual reviewer dispatch (delta-coverage-reviewer + cohesive:review-diff in parallel, AND-shape verdict synthesis); Superpowers owns plan writing and TDD execution. Triggers on "implement the approved rewrite", "land docs with implementation", "implement-cohesively", "drive implementation against the delta", "ship the rewrite". Always preceded by validate-rewrite Approved; always pairs with superpowers:writing-plans and superpowers:executing-plans.
+description: Use after validate-rewrite has returned Approved on a spec rewrite, when the user wants to land code that makes the rewrite true. Drives a single-pass implementation where Cohesive owns the substrate-shaped intent (thin paragraph anchored to the spec diff at the rewrite-tip SHA) and the end-of-run dual reviewer dispatch (delta-coverage-reviewer + cohesive:review-diff in parallel, AND-shape verdict synthesis); Superpowers owns plan writing and TDD execution. Triggers on "implement the approved rewrite", "land docs with implementation", "implement-cohesively", "drive implementation against the rewrite", "ship the rewrite". Always preceded by validate-rewrite Approved; always pairs with superpowers:writing-plans and superpowers:executing-plans.
 ---
 
 # Implement cohesively
 
 ## What this skill produces
 
-- A **branch with implementation commits** that make every non-Deferred entry in the design delta ledger true in code, test, and CI.
-- A **single per-pass implementation plan** at `docs/cohesive/plans/<YYYY-MM-DD>-<slug>.md`, authored by `superpowers:writing-plans` from a thin intent paragraph the skill composes from the delta ledger — committed during the run as **ephemeral run scaffolding**.
-- An **end-of-run dual reviewer dispatch**: `delta-coverage-reviewer` (whole-branch input contract; verifies every delta entry maps to a diff hunk) and `cohesive:review-diff` (substrate alignment against the rewritten specs) run in parallel. Verdict is synthesized AND-shape.
-- On Implemented verdict only: a **single cleanup commit at Step 3.5** that strips ephemeral artifacts (per-pass plan, discovery report if present) before handoff. The cleanup commit is the breadcrumb back from main to pre-cleanup branch history.
+- A **branch with implementation commits** that make every promise in the spec diff (computed as `git diff $(merge-base main <rewrite-tip>)..<rewrite-tip>`) true in code, test, and CI.
+- A **spec-diff snapshot** at `.cohesive/tmp/<slug>-spec-diff.patch`, captured at Step 1 before any implementation commits land. This is the substrate-shaped source of work.
+- A **single per-pass implementation plan** at `docs/cohesive/plans/<YYYY-MM-DD>-<slug>.md`, authored by `superpowers:writing-plans` from a thin intent paragraph the skill composes — committed during the run as **ephemeral run scaffolding**.
+- An **end-of-run dual reviewer dispatch**: `delta-coverage-reviewer` (compares spec-diff vs implementation-diff; verifies every promise is delivered) and `cohesive:review-diff` (substrate alignment against the rewritten specs) run in parallel. Verdict is synthesized AND-shape.
+- On Implemented verdict only: a **single cleanup commit at Step 3.5** that strips ephemeral artifacts (per-pass plan, spec-diff snapshot, discovery report if present) before handoff. The cleanup commit is the breadcrumb back from main to pre-cleanup branch history.
 - A handoff to `superpowers:finishing-a-development-branch` (or repair to the relevant earlier skill) based on the verdict.
 
-This is the second of Cohesive's flagship skills that owns code-producing work indirectly. The skill itself writes no code: it composes with `superpowers:writing-plans` (which authors the plan) and `superpowers:executing-plans` (which writes code with TDD). The Cohesive contribution is the **substrate-shaped framing**: composing the intent from the delta ledger, surfacing the delta-size budget gate before invocation, and dispatching the end-of-run dual reviewer pair with AND-shape verdict synthesis.
+This is the second of Cohesive's flagship skills that owns code-producing work indirectly. The skill itself writes no code: it composes with `superpowers:writing-plans` (which authors the plan) and `superpowers:executing-plans` (which writes code with TDD). The Cohesive contribution is the **substrate-shaped framing**: anchoring the implementation intent to the spec diff at the rewrite-tip SHA, surfacing the diff-size budget gate before invocation, and dispatching the end-of-run dual reviewer pair with AND-shape verdict synthesis.
 
 ## Voice
 
@@ -21,81 +22,100 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **An Approved validate-rewrite verdict is required, declared as paths.** This skill's prereq is a file path, not session state — the canonical clarifying question does not apply. Required inputs (validation review path + design delta ledger path + branch name) are declared in §"Step 0. Resolve inputs and confirm prereqs"; the dispatching context (the `cohesively` router, a prior `validate-rewrite` Approved render the user is acting on, or direct user invocation) supplies them explicitly.
+1. **An Approved validate-rewrite verdict is required, declared as paths.** This skill's prereq is a file path, not session state — the canonical clarifying question does not apply. Required inputs (validation review path + branch name) are declared in §"Step 0. Resolve inputs and confirm prereqs"; the dispatching context (the `cohesively` router, a prior `validate-rewrite` Approved render the user is acting on, or direct user invocation) supplies them explicitly. The validation review file carries the `**Rewrite-tip:**` SHA captured at Approved time; Step 0 parses it.
 
    **If any required input is missing,** stop with a directive error. The directive names the missing input and the upstream skill that produces it:
 
    ```
    Missing validation review for slug `<slug>`. Run cohesive:validate-rewrite first;
-   expected output at docs/cohesive/reviews/<date>-<slug>-rewrite-validation.md.
+   expected output at docs/cohesive/reviews/<date>-<slug>-rewrite-validation.md
+   with a **Rewrite-tip:** SHA header line on Approved verdict.
    ```
 
    ```
-   Missing design delta ledger for slug `<slug>`. Run cohesive:rewrite-specs first;
-   expected output at docs/cohesive/delta-ledgers/<date>-<slug>.md.
+   Missing rewrite branch for slug `<slug>`. Run cohesive:rewrite-specs and
+   cohesive:validate-rewrite first; expected branch `design/<slug>` with
+   rewrite commits and an Approved validation review.
    ```
 
    Do not ask the canonical forced-choice question and do not invent paths. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)", `Approved` is the only verdict that unlocks this route — verify the supplied review's verdict line is `**Verdict:** Approved` before proceeding; on any other verdict, refuse with a pointer to the appropriate upstream skill.
 
 2. **Compose with Superpowers; do not reinvent its execution discipline.** This skill invokes `superpowers:writing-plans` once to author the per-pass plan and `superpowers:executing-plans` once to execute it. The skill never authors a TDD-shaped plan directly and never writes code itself. If Superpowers is not installed, the skill stops with a hard error and recommends installation — the inline 5-line worktree fallback in `rewrite-specs` does not apply here, because plan-writing and TDD execution are not 5-line operations.
-3. **Single per-pass plan covers the delta.** Every non-Deferred entry in the design delta ledger is covered by the single plan authored from the thin intent paragraph. Step 1 enumerates every non-Deferred entry by stable ID into the intent paragraph; an omitted entry is a substrate violation the end-of-run reviewer will flag.
-4. **End-of-run dual reviewer dispatch is mandatory.** The implementation pass ends with parallel dispatch of `delta-coverage-reviewer` (Task subprocess, paths-only inputs, fresh eyes, whole-branch input contract) and `cohesive:review-diff` (Cohesive skill, substrate alignment scope). Both reviewers must complete before verdict synthesis. Skipping either is a violation. The verdict is synthesized AND-shape per §"Verdict synthesis" below.
-5. **Step 3.5 cleanup is gated on Implemented verdict.** On Implemented (both reviewers Pass), Step 3.5 strips ephemeral artifacts (per-pass plan, discovery report when present) via a single cleanup commit before handoff. On Coverage Drift / Substrate Drift / Aborted, Step 3.5 does not fire — ephemeral artifacts remain on the branch for the next attempt or post-mortem. The cleanup commit's body lists removed paths verbatim; a cleanup commit without that list is a violation. See §"Step 3.5. Post-implementation cleanup" for operational steps.
-6. **Delta-size budget gate fires above threshold.** Step 1 surfaces the non-Deferred delta-entry count before invoking `superpowers:writing-plans`. When the count exceeds **15** (default; tunable in a follow-up substrate change), the skill pauses for user confirmation. The gate is the structural mitigation for mega-plan abandonment risk. Below threshold the gate is invisible; above threshold, skipping the surfacing or invoking `writing-plans` without confirmation is a violation.
+3. **Single per-pass plan covers the spec diff.** Every promise in the spec diff (computed as `git diff $(merge-base main <rewrite-tip>)..<rewrite-tip>`) is covered by the single plan authored from the thin intent paragraph. Step 1 hands the spec diff to `writing-plans` as the work to do; an uncovered promise is a substrate violation the end-of-run reviewer will flag.
+4. **End-of-run dual reviewer dispatch is mandatory.** The implementation pass ends with parallel dispatch of `delta-coverage-reviewer` (Task subprocess, paths-only inputs, fresh eyes, spec-diff-vs-implementation-diff input contract) and `cohesive:review-diff` (Cohesive skill, substrate alignment scope). Both reviewers must complete before verdict synthesis. Skipping either is a violation. The verdict is synthesized AND-shape per §"Verdict synthesis" below.
+5. **Step 3.5 cleanup is gated on Implemented verdict.** On Implemented (both reviewers Pass), Step 3.5 strips ephemeral artifacts (per-pass plan, spec-diff snapshot, discovery report when present) via a single cleanup commit before handoff. On Coverage Drift / Substrate Drift / Aborted, Step 3.5 does not fire — ephemeral artifacts remain on the branch for the next attempt or post-mortem. The cleanup commit's body lists removed paths verbatim; a cleanup commit without that list is a violation. See §"Step 3.5. Post-implementation cleanup" for operational steps.
+6. **Diff-size budget gate fires above threshold.** Step 1 surfaces the spec-diff changed-line count before invoking `superpowers:writing-plans`. When the count exceeds **1000** (default; tunable in a follow-up substrate change), the skill pauses for user confirmation. The gate is the structural mitigation for mega-plan abandonment risk. Below threshold the gate is invisible; above threshold, skipping the surfacing or invoking `writing-plans` without confirmation is a violation.
 
 ## Process
 
-The skill body uses `Step 0` and `Step 4` for preflight and handoff bookends, `Step 1` / `Step 2` / `Step 3` for the three structural steps the named invariant `IMPLEMENTATION_PLAN_COVERS_DELTA` references, and `Step 3.5` for the ephemeral-cleanup step inserted between Step 3 and Step 4. Citations to "Step 1" / "Step 2" / "Step 3" / "Step 3.5" elsewhere in the substrate (the invariant, anti-patterns, acceptance criteria) refer to the headings in this section by exactly those labels.
+The skill body uses `Step 0` and `Step 4` for preflight and handoff bookends, `Step 1` / `Step 2` / `Step 3` for the three structural steps the named invariant `IMPLEMENTATION_COVERS_SPEC_DIFF` references, and `Step 3.5` for the ephemeral-cleanup step inserted between Step 3 and Step 4. Citations to "Step 1" / "Step 2" / "Step 3" / "Step 3.5" elsewhere in the substrate (the invariant, anti-patterns, acceptance criteria) refer to the headings in this section by exactly those labels.
 
 ### Step 0. Resolve inputs and confirm prereqs
 
 Required inputs:
 
-- **Design delta ledger path** — usually `docs/cohesive/delta-ledgers/YYYY-MM-DD-<slug>.md`. The skill reads this as the substrate-shaped source of work.
-- **Validate-rewrite Approved verdict path** — usually `docs/cohesive/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md`. The skill verifies the verdict is `Approved`.
+- **Validate-rewrite Approved verdict path** — usually `docs/cohesive/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md`. The skill verifies the verdict is `Approved` and parses the `**Rewrite-tip:**` SHA from the header.
 - **Branch name** — typically `design/<slug>` from the rewrite worktree. Implementation lands on this branch (or a child branch — see §"Branch shape" below).
 - **Substrate discovery report path** (optional) — passed to the end-of-run reviewers for context.
 
-If any required input is missing, halt with the directive error per Hard constraint #1; do not ask the canonical forced-choice question and do not invent paths. The directive-error templates and the upstream-skill names live in Hard constraint #1 above; this step does not duplicate them.
+**Verify the rewrite-tip SHA exists in branch history.** After parsing the SHA from the validation review file, run `git cat-file -e <SHA>` to confirm it exists on the branch. On missing (e.g., the branch was rebased after Approved), halt with a directive error:
 
-### Step 1. Compose the intent paragraph and dispatch writing-plans
+```
+Rewrite tip SHA `<X>` not found on branch `design/<slug>`.
+The branch was likely rebased or rewritten after validate-rewrite Approved.
+Re-run cohesive:validate-rewrite to capture a fresh rewrite-tip SHA.
+```
 
-Read the delta ledger and enumerate every non-Deferred entry by stable ID (Files-rewritten paths, Conceptual-change row IDs, Named-invariant names, Behavior-matrix paths, Gotcha names, Tests-proposed descriptions). Surface the **delta-size budget gate** before composing the intent:
+If any other required input is missing, halt with the directive error per Hard constraint #1; do not ask the canonical forced-choice question and do not invent paths.
 
-- If the non-Deferred entry count is at or below **15**, proceed silently to intent composition.
-- If above 15, render the budget surfacing in chat and pause for user confirmation:
+### Step 1. Capture the spec diff and dispatch writing-plans
+
+Capture the spec diff to a tmp file using the rewrite-tip SHA parsed at Step 0:
+
+```bash
+REWRITE_TIP=<SHA from validation review file>
+mkdir -p .cohesive/tmp
+git diff $(git merge-base main $REWRITE_TIP)..$REWRITE_TIP > .cohesive/tmp/<slug>-spec-diff.patch
+```
+
+The spec diff is anchored to a stable SHA, not to "HEAD at invocation time" — this makes Coverage Drift retries and interrupted runs handle cleanly (same SHA → same spec diff, even after partial implementation commits land).
+
+Surface the **diff-size budget gate** before composing the intent. Count changed lines via `wc -l < .cohesive/tmp/<slug>-spec-diff.patch`:
+
+- If the changed-line count is at or below **1000**, proceed silently to intent composition.
+- If above 1000, render the budget surfacing in chat and pause for user confirmation:
 
    ```
-   This delta has <N> entries. Single-pass implementation produces one large plan;
+   This spec diff has <N> changed lines. Single-pass implementation produces one large plan;
    executing-plans runs may abandon on context overflow. Confirm to proceed, or run
-   cohesive:rewrite-specs to split the delta into smaller rewrites first.
+   cohesive:rewrite-specs to split the rewrite into smaller pieces first.
    ```
 
-  On confirm: proceed. On abort: exit with `Aborted` verdict and recommend scope reduction via `cohesive:rewrite-specs`. The threshold is a v0.1 default; tighten or relax in a follow-up substrate change as real-world delta sizes inform the budget.
+  On confirm: proceed. On abort: exit with `Aborted` verdict and recommend scope reduction via `cohesive:rewrite-specs`. The 1000-line threshold is a v0.1 default; tighten or relax in a follow-up substrate change as real-world rewrite sizes inform the budget.
 
 After the gate clears, compose the **thin intent paragraph** and pass it to `superpowers:writing-plans` via the Skill tool. The format is exactly three lines:
 
 ```
-Make these delta entries true: <comma-separated stable-ID list of every non-Deferred entry>.
-Constraints: <named invariants the change touches; cite by INVARIANT_NAME>.
-Acceptance: cohesive:implement-cohesively dispatches delta-coverage-reviewer (verifies every delta entry maps to a diff hunk) and cohesive:review-diff (verifies substrate alignment with the rewritten specs) at end-of-run; both must Pass.
+Make this spec diff true in code: .cohesive/tmp/<slug>-spec-diff.patch.
+Constraints: <named invariants the docs cite; reference by INVARIANT_NAME>.
+Acceptance: cohesive:implement-cohesively dispatches delta-coverage-reviewer (verifies every spec-diff promise is delivered) and cohesive:review-diff (verifies substrate alignment with the rewritten specs) at end-of-run; both must Pass.
 ```
 
-The intent paragraph is the substrate-shape→TDD-shape seam. `writing-plans` produces the TDD-shape plan; the intent paragraph names what the plan must accomplish in substrate terms. Capture the plan path that `writing-plans` returns (`docs/cohesive/plans/<YYYY-MM-DD>-<slug>.md`); it is an input to the end-of-run reviewer dispatch.
+The intent paragraph is the substrate-shape→TDD-shape seam. `writing-plans` reads the spec diff and produces the TDD-shape plan; the intent paragraph names what the plan must accomplish in substrate terms. Capture the plan path that `writing-plans` returns (`docs/cohesive/plans/<YYYY-MM-DD>-<slug>.md`); it is an input to the end-of-run reviewer dispatch.
 
 ### Step 2. Execute the plan
 
 Invoke `superpowers:executing-plans` via the Skill tool with the persisted plan path. Superpowers owns TDD discipline inside this step: failing test first, minimal implementation, refactor. The skill does not interleave; it waits for the implementation commits to land on the branch.
 
-Implementation commits cite both the plan path and the delta-entry stable IDs they implement. The commit-message convention `executing-plans` produces should include both citations; if it does not, the skill body's Hard constraint #3 plus the named invariant `IMPLEMENTATION_PLAN_COVERS_DELTA` Rule #3 govern the citation requirement.
+Implementation commits cite the plan path they implement. The commit-message convention `executing-plans` produces should include that citation; if it does not, the skill body's Hard constraint #3 plus the named invariant `IMPLEMENTATION_COVERS_SPEC_DIFF` govern the citation requirement.
 
 ### Step 3. End-of-run dual reviewer dispatch
 
 After the last implementation commit lands, dispatch two reviewers **in parallel**:
 
-- **`delta-coverage-reviewer`** (Task subprocess) with `subagent_type: delta-coverage-reviewer`. The dispatch prompt names exactly three artifact paths: the design delta ledger path, the per-pass plan path, and the whole-branch diff (`git diff <base>..<branch>` or equivalent). The reviewer returns one of three verdicts: **Covered** / **Drift** / **Incomplete**. Persist the reviewer's output at `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-coverage-review.md`.
+- **`delta-coverage-reviewer`** (Task subprocess) with `subagent_type: delta-coverage-reviewer`. The dispatch prompt names: the spec-diff patch path (`.cohesive/tmp/<slug>-spec-diff.patch` captured at Step 1), the per-pass plan path, the branch name, and the rewrite-tip SHA (so the reviewer can compute the implementation diff = `git diff <rewrite-tip>..<branch-tip>`). The reviewer compares spec-diff vs implementation-diff and returns one of three verdicts: **Covered** / **Drift** / **Incomplete**. Persist the reviewer's output at `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-coverage-review.md`.
 
-- **`cohesive:review-diff`** (Skill tool dispatch) scoped to the branch with the design delta ledger path passed as additional context. The skill dispatches its own reviewer agents (substrate-alignment + structure) per its Process. The verdict is one of: **Pass** / **Pass with notes** / **Needs substrate** / **Risky** / **Block**. The persisted review lives at `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md`.
+- **`cohesive:review-diff`** (Skill tool dispatch) scoped to the branch with the validation review path (carrying the rewrite-tip SHA) passed as additional context. The skill dispatches its own reviewer agents (substrate-alignment + structure) per its Process. The verdict is one of: **Pass** / **Pass with notes** / **Needs substrate** / **Risky** / **Block**. The persisted review lives at `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md`.
 
 Both dispatches happen in the same turn (the harness's parallel-tool-call pattern). Wait for both to complete before synthesizing the verdict.
 
@@ -117,7 +137,7 @@ The internal verdict translates to the user-facing label per `${CLAUDE_PLUGIN_RO
 
 Fires **only on Implemented verdict**. On any other verdict, skip directly to Step 4 — ephemeral artifacts remain on the branch for the next attempt or post-mortem.
 
-`git rm` the ephemeral paths for this slug (currently `docs/cohesive/plans/<YYYY-MM-DD>-<slug>.md` and `docs/cohesive/discovery/<slug>.md` if present), and produce a single commit whose body lists the removed paths verbatim:
+`git rm` (or `rm` for untracked files) the ephemeral paths for this slug — currently `docs/cohesive/plans/<YYYY-MM-DD>-<slug>.md`, `.cohesive/tmp/<slug>-spec-diff.patch`, and `docs/cohesive/discovery/<slug>.md` if present — and produce a single commit whose body lists the removed paths verbatim:
 
 ```bash
 git rm <enumerated paths>
@@ -186,7 +206,7 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 The four `### Next` bullet shapes (one renders per invocation, matching the internal verdict):
 
 - **Internal `Implemented`:** Substrate and code agree; ready to ship. *(`superpowers:finishing-a-development-branch`.)* **Scope:** the `design/<slug>` branch.
-- **Internal `Coverage Drift`:** Repair the named coverage gaps, then re-invoke. *(`cohesive:implement-cohesively` resume.)* **Scope:** the delta entries the coverage reviewer flagged as Drift / Incomplete.
+- **Internal `Coverage Drift`:** Repair the named coverage gaps, then re-invoke. *(`cohesive:implement-cohesively` resume.)* **Scope:** the spec-diff hunks the coverage reviewer flagged as Drift / Incomplete.
 - **Internal `Substrate Drift`:** Extend the design to cover what the implementation introduced, or revert the divergent code. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerate the docs the substrate review flagged as needing extension>. Slug: `<derived-from-original-slug>-extension`.
 - **Internal `Aborted`:** Implementation paused at user request. *(No follow-up skill required.)* The branch state is whatever the last implementation commit landed.
 
@@ -194,13 +214,13 @@ The four `### Next` bullet shapes (one renders per invocation, matching the inte
 
 | Anti-pattern | Why it's wrong | Fix |
 |---|---|---|
-| Skipping `superpowers:writing-plans` to "save tokens" | Collapses the substrate-shape→TDD-shape seam; the end-of-run coverage reviewer cannot distinguish "plan didn't cover delta entry" from "implementation didn't execute plan" | Always invoke `writing-plans`; the per-pass plan is the inspectable bridge artifact |
-| Authoring TDD-shaped tasks directly from delta entries | Reinvents `superpowers:writing-plans`; defeats the composition seam | Pass the thin intent paragraph to `writing-plans`; let it produce TDD shape |
+| Skipping `superpowers:writing-plans` to "save tokens" | Collapses the substrate-shape→TDD-shape seam; the end-of-run coverage reviewer cannot distinguish "plan didn't cover spec-diff promise" from "implementation didn't execute plan" | Always invoke `writing-plans`; the per-pass plan is the inspectable bridge artifact |
+| Authoring TDD-shaped tasks directly from the spec diff | Reinvents `superpowers:writing-plans`; defeats the composition seam | Pass the thin intent paragraph (which references the spec-diff patch path) to `writing-plans`; let it produce TDD shape |
 | Producing code from this skill body | The skill orchestrates; it never writes code itself | All code-writing happens inside `superpowers:executing-plans` |
-| Skipping or sequencing the dual reviewer dispatch | The dual reviewer pair is the substrate-side enforcement of `IMPLEMENTATION_PLAN_COVERS_DELTA`; running only one or running them sequentially defeats the parallel-fresh-eyes design | Dispatch both reviewers in parallel per Hard constraint #4; wait for both before synthesizing |
+| Skipping or sequencing the dual reviewer dispatch | The dual reviewer pair is the substrate-side enforcement of `IMPLEMENTATION_COVERS_SPEC_DIFF`; running only one or running them sequentially defeats the parallel-fresh-eyes design | Dispatch both reviewers in parallel per Hard constraint #4; wait for both before synthesizing |
 | Substituting `cohesive:review-diff`'s coverage check for the dedicated `delta-coverage-reviewer` | Folds two distinct concerns (substrate alignment vs delta coverage) into one prompt; one lens crowds out the other under token pressure | Keep the reviewers separate; the AND-shape synthesis at §"Verdict synthesis" combines them |
-| Ignoring the delta-size budget gate above threshold | The gate is the structural mitigation for mega-plan abandonment; bypassing it makes abandonment silent | Surface the count and pause for confirmation per Step 1; honor abort as `Aborted` verdict |
-| Letting the intent paragraph drop a non-Deferred delta entry | Coverage gap = silent substrate drift the end-of-run reviewer will catch but at the cost of a re-run | Step 1 enumerates every non-Deferred entry by stable ID before composing the intent |
+| Ignoring the diff-size budget gate above threshold | The gate is the structural mitigation for mega-plan abandonment; bypassing it makes abandonment silent | Surface the changed-line count and pause for confirmation per Step 1; honor abort as `Aborted` verdict |
+| Recomputing the spec diff at invocation time instead of using the rewrite-tip SHA | Diff drifts as implementation commits land; Coverage Drift retries become impossible | Step 1 anchors the spec diff to the SHA captured in the validation review file, not to HEAD |
 | Auto-invoking `superpowers:finishing-a-development-branch` | Branch finishing is a user action per Cohesive↔Superpowers seam | Recommend; do not invoke |
 | Pre-summarizing the design for the dispatched reviewers | Bypasses fresh-eyes | Pass paths only; never summarize the rewrite for the agent |
 | Step 3.5 mishandling | Cleanup fires on a non-Implemented verdict (strips artifacts load-bearing for the next attempt), skips on Implemented (run scaffolding leaks into main), produces a commit without a verbatim removed-paths body (forensic breadcrumb is lost), or strips durable artifacts (decision records become unrecoverable) | Hard constraint #5 enumerates all four sub-conditions |
@@ -222,10 +242,11 @@ The implementation lands on the same `design/<slug>` branch the rewrite produced
 ## Acceptance criteria
 
 - An Approved validate-rewrite verdict path is in the inputs.
-- Step 1 surfaces the delta-entry count when above 15 and pauses for user confirmation; below threshold the gate is invisible.
-- Step 1's thin intent paragraph enumerates every non-Deferred delta-ledger entry by stable ID; the format is exactly the three lines specified (Make / Constraints / Acceptance).
-- Step 2 invokes `superpowers:executing-plans` against the persisted plan path; implementation commits cite both the plan path and the delta-entry stable IDs.
-- Step 3 dispatches `delta-coverage-reviewer` and `cohesive:review-diff` in parallel; both reviewers receive only paths and a quoted ledger excerpt; never a pre-summarized design narrative.
+- Step 0 parses the `**Rewrite-tip:**` SHA from the validation review file and verifies it exists in branch history via `git cat-file -e`.
+- Step 1 captures the spec diff at the rewrite-tip SHA into `.cohesive/tmp/<slug>-spec-diff.patch`; surfaces the changed-line count when above 1000 and pauses for user confirmation; below threshold the gate is invisible.
+- Step 1's thin intent paragraph references the spec-diff patch path; the format is exactly the three lines specified (Make / Constraints / Acceptance).
+- Step 2 invokes `superpowers:executing-plans` against the persisted plan path; implementation commits cite the plan path.
+- Step 3 dispatches `delta-coverage-reviewer` and `cohesive:review-diff` in parallel; both reviewers receive only paths (spec-diff patch, branch name, rewrite-tip SHA); never a pre-summarized design narrative.
 - Step 3 synthesizes the verdict AND-shape per §"Verdict synthesis"; only `Covered + (Pass | Pass with notes)` synthesizes to Implemented.
 - Step 3.5 fires on Implemented verdict only and produces a single cleanup commit whose message body lists removed ephemeral paths verbatim. On Coverage Drift / Substrate Drift / Aborted, Step 3.5 does not fire.
 - The trailer's `## Branch state` slot surfaces the cleanup commit SHA on Implemented verdict; on other verdicts, the cleanup-commit line is omitted.

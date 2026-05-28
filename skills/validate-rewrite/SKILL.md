@@ -1,6 +1,6 @@
 ---
 name: validate-rewrite
-description: Use after rewrite-specs has produced a spec rewrite and a design delta ledger, before implementation. Runs a fresh-eyes review of rewritten docs/specs in a separate agent context that did not participate in the design discussion. Judges whether the new design is internally coherent, behaviorally complete, enforceable, and aligned with the system's stated future direction. Triggers on "validate the rewrite", "review the spec rewrite", "fresh-eyes review of the new design docs", "is the rewrite ready for implementation", "check the spec cohesion". Returns Approved / Issues Found / Design Incoherent.
+description: Use after rewrite-specs has produced rewrite commits on a `design/<slug>` branch, before implementation. Runs a fresh-eyes review of rewritten docs/specs (reading the git diff directly) in a separate agent context that did not participate in the design discussion. On Approved verdict, captures the rewrite-tip SHA in the persisted review file as the snapshot boundary for implement-cohesively. Judges whether the new design is internally coherent, behaviorally complete, enforceable, and aligned with the system's stated future direction. Triggers on "validate the rewrite", "review the spec rewrite", "fresh-eyes review of the new design docs", "is the rewrite ready for implementation", "check the spec cohesion". Returns Approved / Issues Found / Design Incoherent.
 ---
 
 # Validate rewrite
@@ -39,21 +39,29 @@ Announce the resolved path in chat before the dispatch. If `--no-write` is set, 
 
 Required inputs the calling user or skill must provide:
 
-- **Design delta ledger path** — usually `docs/cohesive/delta-ledgers/YYYY-MM-DD-<slug>.md`. **Required path prereq.**
-- **Rewritten spec paths** — derived from the delta ledger's "Files rewritten" / "Files added" sections. Not a separate input; the ledger is the source.
-- **Approved direction summary** — one or two sentences carried in the dispatch prompt (router or repair-loop) or in the user's invocation. Optional in repair-loop dispatches, where the source review's `## Delta at a glance` preamble carries the equivalent.
+- **Branch name** — typically `design/<slug>`. **Required prereq.** The skill computes the spec diff itself via `git diff $(git merge-base main HEAD)..HEAD` on this branch.
+- **Approved direction summary** — one or two sentences carried in the dispatch prompt (router or repair-loop) or in the user's invocation. Optional in repair-loop dispatches, where the source review's `## Delta at a glance` summary carries the equivalent.
 - **Substrate discovery report path** (optional) — if `discover-substrate` ran earlier, pass its output path so the reviewer can compare what existed before to what now exists.
 
-This skill's required prereq is a file path (the delta ledger), not session state — the canonical clarifying question does not apply. If the delta ledger path is missing, **stop with a directive error**:
+This skill's required prereq is a branch name, not session state — the canonical clarifying question does not apply. If the branch name is missing or the branch does not exist, **stop with a directive error**:
 
 ```
-Missing design delta ledger for slug `<slug>`. Run cohesive:rewrite-specs first;
-expected output at docs/cohesive/delta-ledgers/<date>-<slug>.md.
+Missing rewrite branch for slug `<slug>`. Run cohesive:rewrite-specs first;
+expected branch `design/<slug>` with rewrite commits on it.
 ```
 
 Do not invent paths and do not ask the canonical question.
 
 ### 2. Dispatch the spec-cohesion-reviewer agent
+
+Before dispatch, capture the spec diff to a tmp file the agent can read:
+
+```bash
+mkdir -p .cohesive/tmp
+git diff $(git merge-base main HEAD)..HEAD > .cohesive/tmp/<slug>-spec-diff.patch
+```
+
+The spec diff is the authoritative record of what changed; the reviewer reads it as a file (path passed in the dispatch prompt). Derive the **rewritten spec paths** by inspecting the diff's changed-file list.
 
 Use the Task tool with `subagent_type: spec-cohesion-reviewer`. Pass a prompt with this shape:
 
@@ -62,7 +70,9 @@ You are reviewing a spec rewrite. Your inputs are file paths only — do not ass
 
 **Approved direction:** <one or two sentences>
 
-**Design delta ledger:** <path>
+**Branch:** design/<slug>
+
+**Spec diff:** .cohesive/tmp/<slug>-spec-diff.patch
 
 **Rewritten specs to review:**
 - <path>
@@ -80,7 +90,7 @@ ${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md.
 
 Verdicts: Approved | Issues Found | Design Incoherent.
 
-Do not read any file not listed above unless the design delta ledger explicitly references it. Do not run code, tests, or git commands. Your job is judgment of the rewritten specs.
+Do not read any file not listed above unless the spec diff explicitly references it. Do not run code, tests, or git commands. Your job is judgment of the rewritten specs.
 ```
 
 Run the agent in the foreground — its result is what this skill returns.
@@ -89,7 +99,15 @@ Run the agent in the foreground — its result is what this skill returns.
 
 When the agent returns, persist its report at `docs/cohesive/reviews/YYYY-MM-DD-<slug>-rewrite-validation[-pass-N].md` (omit `-pass-N` for pass 1; subsequent passes carry `-pass-2`, `-pass-3`, etc.). Reviews are append-only history — commit each pass with a message of the form `review: persist pass-N review (<verdict>)`.
 
-If the user passed `--no-write`, render in chat only and skip persistence. The router's dispatch prompt for the `design` route step 4 and the `rewrite-only` route step 2 includes the ledger path; persistence is the default in both router-driven and direct-invocation cases.
+**On Approved verdict — capture the rewrite-tip SHA.** When the terminal verdict is Approved, capture `git rev-parse HEAD` at this moment and write it into the persisted review file as a header line near the top (immediately under the `**Status:**` line):
+
+```md
+**Rewrite-tip:** <full SHA of HEAD at Approved time>
+```
+
+This SHA is the load-bearing primitive for downstream consumers: `implement-cohesively` parses it from the review file and uses it as the boundary between "the rewrite" and "anything after." Persisting it in the review file (rather than only in chat) makes the boundary stable across re-invocations, interrupted runs, and Coverage Drift retries. On `Issues Found` and `Design Incoherent` verdicts, do NOT capture the SHA — the rewrite is not yet a stable boundary.
+
+If the user passed `--no-write`, render in chat only and skip persistence. Persistence is the default in both router-driven and direct-invocation cases.
 
 Then branch on verdict:
 
@@ -146,7 +164,7 @@ The skill's chat output (the agent's report, surfaced) follows the centralized c
 **Render-conditional rules for the body block.** The render template below is the agent's literal output template; it does not carry meta-instructions or comments inline (instructions inside render templates leak into user-facing output). The render conditions live here, in prose, instead:
 
 - **`## Architectural reflection`** — renders only when the verdict is `Approved` (the lock→build handoff). Omitted entirely on `Issues Found` and `Design Incoherent`. Format per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Architectural reflection".
-- **`## Executive judgment`** and **`## Delta at a glance`** — always render across all three verdicts. The Delta at a glance is verbatim-quoted from the ledger preamble per the consumer rendering rules in `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Delta at a glance".
+- **`## Executive judgment`** and **`## Delta at a glance`** — always render across all three verdicts. The Delta at a glance is an auto-generated 5-bullet summary derived from the spec diff per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Delta at a glance" — render-time orientation, not a quote from a parallel artifact.
 - **`## Blocking issues`**, **`## Important issues`**, **`## Substrate gaps`**, **`## Vague language to tighten`**, **`## Recommended repairs (ranked)`** — render only when the section has at least one entry, per the chat-trailer template's §"Render-only-non-empty rule". A clean Approved verdict typically collapses all of these out.
 - **`## Locality concerns`**, **`## Future-fit concerns`**, **`## Enforcement concerns`** — render only when non-empty AND the verdict is not `Approved`. On `Approved`, the Architectural reflection synthesizes these three into one decision-shaped block; rendering both surfaces would duplicate the same content in chat.
 - **`## Behavior knowable outside implementation?`** — renders only when the answer is "no" or "partially". A "yes" answer is the modal Approved case and adds no information.
@@ -173,7 +191,7 @@ The persisted file keeps every section header as scaffolding for future review p
 
 ## Delta at a glance
 
-<verbatim quote of the ledger's `## Delta at a glance` preamble>
+<auto-generated 5-bullet summary derived from the spec diff per `${CLAUDE_PLUGIN_ROOT}/references/templates/cohesion-review.md` §"Delta at a glance">
 
 ## Blocking issues
 
@@ -217,7 +235,7 @@ The persisted file keeps every section header as scaffolding for future review p
 <disposition phrase per the rubric's `Canonical Disposition phrase` column, rendered as a leading sentence with a trailing period — e.g., "Merge as-is — no findings.", "Close inline (≤2 lines per finding) → merge.", "Close in same worktree → merge.">
 
 **Implement now** — `cohesive:implement-cohesively`
-Builds the locked design in a single pass against the delta ledger at `docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md` on `design/<slug>`, with end-of-run dual reviewer dispatch.
+Builds the locked design in a single pass against the spec diff (anchored at the rewrite-tip SHA in this review file) on `design/<slug>`, with end-of-run dual reviewer dispatch.
 
 <details>
 <summary>Other options</summary>
@@ -233,17 +251,17 @@ Builds the locked design in a single pass against the delta ledger at `docs/cohe
 
 **Conditional alternatives.** The `Other options` disclosure is rendered iff at least one alternative below has its triggering condition met for this Approved verdict. Each alternative renders as a two-line card: a bold title with the skill citation on the title line, followed by one short sentence describing when to pick it. If no alternative's triggering condition fires, the disclosure is omitted entirely — the trailer is just the disposition phrase plus the **Implement now** card.
 
-The agent picks which alternatives fire by reading the persisted Approved review (the Architectural reflection bullets and the Delta at a glance) and the design delta ledger at `docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md`. Triggering conditions are intent-based, not mechanical thresholds — the agent judges whether each alternative is genuinely live for this rewrite.
+The agent picks which alternatives fire by reading the persisted Approved review (the Architectural reflection bullets, the Delta at a glance summary, and the Rewrite-tip SHA) and the spec diff at the rewrite-tip SHA. Triggering conditions are intent-based, not mechanical thresholds — the agent judges whether each alternative is genuinely live for this rewrite.
 
 | Alternative | Render | Triggering condition |
 |---|---|---|
 | Land specs first | `**Land specs first** — merge `design/<slug>`; implement later.`<br>`Pick when the docs PR has independent review value, or when implementation has dependencies that aren't ready.` | The rewrite adds substantive new substrate (specs, invariants, behavior matrices, gotchas) that benefits from independent human review before code lands. |
-| Implement with Superpowers directly | `**Implement with Superpowers directly** — `superpowers:writing-plans``<br>`Pick when the rewrite is small enough that Cohesive's implement-cohesively flow with end-of-run dual reviewer dispatch would be ceremony. Verify with `cohesive:review-diff` after.` | The rewrite is small or polishing-only — few delta entries, no new invariants, no new behavior matrix rows. The implement-cohesively flow's end-of-run verification would be ceremony given the rewrite's size. |
+| Implement with Superpowers directly | `**Implement with Superpowers directly** — `superpowers:writing-plans``<br>`Pick when the rewrite is small enough that Cohesive's implement-cohesively flow with end-of-run dual reviewer dispatch would be ceremony. Verify with `cohesive:review-diff` after.` | The rewrite is small or polishing-only — small spec diff, no new invariants, no new behavior matrix rows. The implement-cohesively flow's end-of-run verification would be ceremony given the rewrite's size. |
 | Re-decide | `**Re-decide** — `cohesive:brainstorm-design``<br>`Pick when the Architectural reflection's Harder-downstream or Load-bearing-on-memory bullets reveal a structural problem the brainstorm missed. Discard the worktree and capture the concern in brainstorm's "What we already tried" input.` | The Architectural reflection's Harder-downstream or Load-bearing-on-memory bullets identify a specific structural concern (not just an acceptable tradeoff). |
 
 If multiple alternatives fire, render each as its own card in disclosure order (Land specs first → Implement with Superpowers directly → Re-decide). The default **Implement now** card always renders for Approved.
 
-**Bypass acknowledgment.** When the user picks the **Implement with Superpowers directly** alternative (rendered when its triggering condition fires; invokes `superpowers:writing-plans` directly), the skill renders the literal acknowledgment line `Implementing with plain Superpowers — Cohesive's verification of the rewrite doesn't apply. Run cohesive:review-diff after implementation to catch any drift.` in chat *before* invoking `superpowers:writing-plans`. The acknowledgment lands in the conversation transcript, making the bypass legible and naming the post-implementation verification entry point. The acknowledgment line is user-facing per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2c — the `IMPLEMENTATION_PLAN_COVERS_DELTA` invariant name is substrate-shape vocabulary that lives in the persisted file and the invariant doc, not in chat. No file is written, no flag is required — the convention is the line itself, and skipping it is a substrate violation reviewed in `cohesive:review-codebase`.
+**Bypass acknowledgment.** When the user picks the **Implement with Superpowers directly** alternative (rendered when its triggering condition fires; invokes `superpowers:writing-plans` directly), the skill renders the literal acknowledgment line `Implementing with plain Superpowers — Cohesive's verification of the rewrite doesn't apply. Run cohesive:review-diff after implementation to catch any drift.` in chat *before* invoking `superpowers:writing-plans`. The acknowledgment lands in the conversation transcript, making the bypass legible and naming the post-implementation verification entry point. The acknowledgment line is user-facing per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2c — the `IMPLEMENTATION_COVERS_SPEC_DIFF` invariant name is substrate-shape vocabulary that lives in the persisted file and the invariant doc, not in chat. No file is written, no flag is required — the convention is the line itself, and skipping it is a substrate violation reviewed in `cohesive:review-codebase`.
 
 **Re-decide acknowledgment.** When the user picks the **Re-decide** option (returns to `cohesive:brainstorm-design`), the skill renders the literal acknowledgment line `Discarding the locked design and returning to Decide. Capture the reflection's harder-downstream / load-bearing-on-memory bullets in brainstorm-design's "What we already tried" input.` in chat *before* the user (or Claude on the user's behalf) invokes `cohesive:brainstorm-design`. The Re-decide path is user-driven (parallel to the Bypass acknowledgment shape above): this skill renders the line as part of the Approved trailer when the user picks Re-decide; the subsequent `brainstorm-design` invocation is a fresh skill call (router-driven via `cohesively` or direct user invocation), with the "What we already tried" payload assembled from three named persisted artifacts — the discarded brainstorm at `docs/cohesive/brainstorms/<date>-<slug>.md`, this Approved review's Architectural reflection bullets (Harder-downstream + Load-bearing-on-memory), and the cycle count derived from the `<slug>` lineage (the count of prior Re-decide acknowledgments in the branch's commit history). The acknowledgment names the substrate input that closes the loop on what was learned. The 2-3-cycle cap is the convention; if the re-decide chain reaches a fourth iteration, surface the pattern to the user and recommend cutting scope rather than continuing.
 

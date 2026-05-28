@@ -6,7 +6,7 @@ The rule, in one sentence: **when a doc refers to substrate enumerated elsewhere
 
 ## Why this exists
 
-Counts are a manual cross-reference. Every "the 7 invariants" written inline is a synchronization point between the prose and the directory listing it summarizes. The directory listing is authoritative; the prose is not. When the inventory changes — a gotcha added, a matrix renamed, an invariant graduated from convention — every count-bearing reference must be re-synced by hand. The count-bearing references are scattered across READMEs, architecture maps, design docs, delta ledgers, and skill bodies; nothing greps the cardinality back to its source. Drift is the default outcome, not the exception.
+Counts are a manual cross-reference. Every "the 7 invariants" written inline is a synchronization point between the prose and the directory listing it summarizes. The directory listing is authoritative; the prose is not. When the inventory changes — a gotcha added, a matrix renamed, an invariant graduated from convention — every count-bearing reference must be re-synced by hand. The count-bearing references are scattered across READMEs, architecture maps, design docs, and skill bodies; nothing greps the cardinality back to its source. Drift is the default outcome, not the exception.
 
 The pattern is structural, not incidental. Each substrate refinement pass introduces new count-drift, because authors writing summary prose reach for cardinality as the easiest way to gesture at "the list." The fix is to push the cardinality back to its canonical home and reference the home instead.
 
@@ -18,7 +18,6 @@ The load-bearing distinction. Not every count is drift bait — some counts are 
 |---|---|---|
 | **Constraint count** — the count IS the design constraint. The number expresses a property of the architecture, not a tally of items. | "four-concept core," "seven Tools," "five axioms," "three-tier separation" | **Keep.** The number expresses a design property — "only seven primitives" is a value claim, not an inventory fact. |
 | **Inventory count** — a tally of items enumerated elsewhere, where the count happens to be N today but is incidental to the design. | "9 named invariants," "8 gotchas," "the 6 behavior matrices," "ships 7 shipped workflows" | **Replace with categorical reference + canonical-list pointer.** Say "the named invariants" / "the shipped gotchas" / "the behavior matrices" and link to the directory or matrix that lists them. |
-| **Delta ledger preamble** — substrate touched in a rewrite. | "11 invariants (5+4+2)," "rewrites 8 specs" | **List names, not counts.** The form `Named invariants: <comma-separated names>` is self-counting and self-describing — the reader sees both what changed and how many. |
 | **Per-tier counts in a tiered model** — counts within a layered design. | "5 axiom + 4 shipped-default + 2 opt-in" | **Edge case.** If the count of a *tier* is bounded by design intent (axioms, by definition, are stable across years), keep that count visible. For mutable tiers, soften to a categorical reference ("the shipped defaults," "opt-in invariants") without a number. |
 
 ## Worked examples
@@ -40,21 +39,6 @@ The load-bearing distinction. Not every count is drift bait — some counts are 
 - "Three-tier separation." ← The three-ness is the architecture's value prop.
 - "Verdict-led skills lead with the verdict within the **first three non-blank lines**." ← The three is a specification of the invariant, not a tally.
 
-**Delta ledger preamble — list names:**
-
-```
-Substrate touched in this rewrite:
-- Named invariants: VERDICT_BEFORE_EVIDENCE, PLUGIN_ROOT_PATHS
-- Gotchas added: inventory-count-drift
-- Matrices touched: skill-section-presence
-```
-
-Not:
-
-```
-Substrate touched: 2 invariants, 1 new gotcha, 1 matrix update.
-```
-
 ## How the rule is loaded
 
 - **At authoring time.** `cohesive:rewrite-specs` cites this doc in §"Rewrite each affected doc to end-state" — when rewriting a normative doc, the rewriter checks each enumeration in the body against the inventory-vs-constraint distinction and replaces inventory counts with categorical references.
@@ -65,7 +49,7 @@ Substrate touched: 2 invariants, 1 new gotcha, 1 matrix update.
 
 - Not a rule for *all* counts. Constraint counts (architectural value props) stay. Only inventory counts (tallies of items enumerated elsewhere) drift.
 - Not a forbidden-phrasings list. The distinction is semantic, not syntactic — `"four invariants"` is forbidden when it tallies the directory listing, fine when it states a design constraint. Reviewers judge by intent, not regex.
-- Not a chat-render rule. Chat-render voice is governed by [`output-voice.md`](output-voice.md); this rule applies to persisted-file prose (READMEs, architecture maps, design docs, delta ledgers, skill bodies).
+- Not a chat-render rule. Chat-render voice is governed by [`output-voice.md`](output-voice.md); this rule applies to persisted-file prose (READMEs, architecture maps, design docs, skill bodies).
 
 ## Related substrate
 

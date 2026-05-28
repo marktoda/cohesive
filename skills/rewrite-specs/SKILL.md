@@ -1,6 +1,6 @@
 ---
 name: rewrite-specs
-description: Use after brainstorm-design has produced an approved direction and before any code is written. Hard-rewrites design docs, specs, behavior matrices, invariants, gotchas, and substrate maps to describe the chosen end state as if it were already true — not as "we will" or "we should consider." Produces a design delta ledger documenting every change. Triggers on "rewrite the specs for X", "update the design docs to reflect Y", "make the docs match the chosen direction", "produce a spec rewrite for the new architecture". Always work in a worktree; always pair with validate-rewrite afterwards.
+description: Use after brainstorm-design has produced an approved direction and before any code is written. Hard-rewrites design docs, specs, behavior matrices, invariants, gotchas, and substrate maps to describe the chosen end state as if it were already true — not as "we will" or "we should consider." Lands rewrite commits on a `design/<slug>` branch; the git diff is the authoritative record of what changed. Triggers on "rewrite the specs for X", "update the design docs to reflect Y", "make the docs match the chosen direction", "produce a spec rewrite for the new architecture". Always work in a worktree; always pair with validate-rewrite afterwards.
 ---
 
 # Rewrite specs
@@ -8,7 +8,7 @@ description: Use after brainstorm-design has produced an approved direction and 
 ## What this skill produces
 
 - A **set of rewritten docs** that describe the system's chosen end state in present-tense, normative language
-- A **design delta ledger** at `docs/cohesive/delta-ledgers/YYYY-MM-DD-<slug>.md` recording every change
+- A **rewrite commit** (or repair commit, on repair-pass mode) on a `design/<slug>` branch whose message body carries a `Classification:` trailer (`Pure implementation` / `Design` / `Mixed`). The git diff between `merge-base(main, HEAD)` and `HEAD` is the authoritative record of what the rewrite changed; no separate persisted artifact describes the change.
 - A handoff to `validate-rewrite` for fresh-eyes review
 
 This is one of Cohesive's flagship skills. Spec rewriting is the cheapest place to discover that a design is wrong, and the rewrite-then-review loop is what makes that discovery happen *before* code.
@@ -58,17 +58,6 @@ Announce in chat: "Working in worktree `.worktrees/cohesive-${slug}` on branch `
 
 ## Process
 
-### 0. Resolve the artifact directory
-
-Before rewriting any docs, resolve where the design delta ledger will be written. Apply the four-rule resolution with artifact category `delta-ledgers/`:
-
-1. If `docs/cohesive/delta-ledgers/` exists, write there.
-2. Else if the repo carries `docs/adr/`, `docs/specs/`, `docs/design/`, `docs/decisions/`, or `docs/architecture/`, write to a `delta-ledgers/` subdir alongside it.
-3. Else default to `docs/cohesive/delta-ledgers/`.
-4. If `docs/` does not exist, still default to `docs/cohesive/delta-ledgers/`.
-
-Announce the resolved path in chat before rewriting begins.
-
 ### 1. Read the approved direction and the substrate context
 
 Inputs:
@@ -82,19 +71,15 @@ Before identifying the doc surface, classify whether the rewrite is:
 
 - **Pure implementation** — touches `${CLAUDE_PLUGIN_ROOT}/skills/<name>/SKILL.md` bodies and other implementation surfaces only. No skill purpose/ownership/seam/verdict changes. Skip the design layer; the rewrite proceeds against SKILL.md and the surrounding implementation surface.
 - **Design** — touches skill purpose, ownership, seams, verdicts, or the chain itself. Update the design-layer surfaces (skill purpose docs, handoff contracts) **first** in this rewrite. SKILL.md changes follow.
-- **Mixed** — both. List the design-layer changes *first* in the delta ledger, then the implementation changes. Both land in the same delta ledger but the design layer is the substrate; the SKILL.md is the implementation of that substrate.
+- **Mixed** — both. Land the design-layer changes *first* in the commit sequence, then the implementation changes. The design layer is the substrate; the SKILL.md is the implementation of that substrate.
 
 Default to **Mixed** when ambiguous. The cost of over-classifying is one additional doc edit; the cost of under-classifying is a substrate-implementation collapse.
 
-The classification appears in the delta ledger's `## Delta at a glance` preamble explicitly:
-
-> "This rewrite is [Pure implementation / Design / Mixed]. Design-layer changes: [list]. Implementation changes: [list]."
-
-This classification is what `spec-cohesion-reviewer` reads (lens 1: substrate-first compliance) during `validate-rewrite` to verify the rewrite touched the right layer first.
+The classification persists in the rewrite commit message body as a `Classification:` trailer (see Step 6 below). `spec-cohesion-reviewer` reads the trailer during `validate-rewrite` and cross-checks it against the spec diff: a `Pure implementation` rewrite whose diff touches design-layer files (e.g., seam docs, named-invariant docs) raises an Important issue.
 
 ### 1b. Repair-pass mode (if the input is a validate-rewrite review)
 
-When the input is a `validate-rewrite` review with a `Repair → re-validate` or `Close in same worktree → merge` disposition, "the recommended direction" is the enumerated repair list, not a brainstorm option. Skip Step 2's full doc-surface scan — the surface is already fixed by the review's findings. Each ranked repair already names a specific artifact (file:line, named invariant, gotcha, matrix); rewrite those surfaces to address the finding. The design delta ledger §"Per-file changes" entries cite the originating review finding by ID (e.g., `Closes B1`, `Closes I2`), and the §"Delta at a glance" preamble names the source review path so the next `validate-rewrite` reader sees this as a repair pass rather than a fresh rewrite. Step 1a's classification still applies — a repair-pass rewrite is typically **Pure implementation** (textual fixes against named findings) but can be **Mixed** when the repair touches design-layer surfaces.
+When the input is a `validate-rewrite` review with a `Repair → re-validate` or `Close in same worktree → merge` disposition, "the recommended direction" is the enumerated repair list, not a brainstorm option. Skip Step 2's full doc-surface scan — the surface is already fixed by the review's findings. Each ranked repair already names a specific artifact (file:line, named invariant, gotcha, matrix); rewrite those surfaces to address the finding. The repair commit message body cites the originating review finding IDs (e.g., `Closes: B1, I2`) so the next `validate-rewrite` reader can grep the commit history to see what each repair pass closed. Step 1a's classification still applies — a repair-pass rewrite is typically **Pure implementation** (textual fixes against named findings) but can be **Mixed** when the repair touches design-layer surfaces.
 
 ### 2. Identify the doc surface to rewrite
 
@@ -128,12 +113,6 @@ Place new canonical artifacts (invariants, matrices, gotchas) under the repo's e
 
 If a substrate map exists at the repo level, update it to reflect the rewrites: new specs, new matrices, new invariants, removed concepts. If no substrate map exists yet, **don't create one as part of this rewrite** — that's a separate decision the user should make explicitly.
 
-### 5. Produce the design delta ledger
-
-Write `docs/cohesive/delta-ledgers/YYYY-MM-DD-<slug>.md` using the template at `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md`. Delta ledgers are dated, append-only history. The ledger is what the fresh-eyes reviewer reads to understand the rewrite as a delta.
-
-The ledger's `## Delta at a glance` preamble is required and load-bearing. `validate-rewrite` quotes it verbatim into the validation review (after the Executive judgment, before the Blocking issues), so the reader of the validation review sees what's in the rewrite at decision time without invoking another skill first. Fill the preamble in last, after the body sections are stable, so it accurately summarizes them. `spec-cohesion-reviewer` cross-checks the preamble against the body and raises a Blocking Issue on divergence; `scripts/validate_plugin.sh` greps for preamble presence on every delta-ledger file dated on or after the cutoff (see §"Acceptance criteria").
-
 ### 6. Commit the rewrite
 
 For a **forward** rewrite (initial pass against an approved direction):
@@ -143,9 +122,11 @@ git add -A
 git commit -m "design: rewrite specs for <topic>
 
 Approved direction: <option name>
-See: docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md
+Classification: <Pure implementation | Design | Mixed>
 "
 ```
+
+The `Classification:` trailer is required and is what `spec-cohesion-reviewer` reads during `validate-rewrite` to cross-check against the diff (see Step 1a above).
 
 For a **repair-pass** rewrite (Step 1b — invoked from `validate-rewrite`'s repair loop or by the user against a disposition that routed back here), the commit message cites the pass number and the closed finding IDs so `git log --grep "pass-"` over the `design/<slug>` branch yields the per-handoff auditing surface the repair loop promises:
 
@@ -156,15 +137,15 @@ git commit -m "design: repair pass-<N> — closes <finding IDs>
 Pass: <N>
 Closes: <comma-separated finding IDs, e.g., B1, I2, I3>
 Source review: docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-rewrite-validation[-pass-<N-1>].md
-See: docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md
+Classification: <Pure implementation | Design | Mixed>
 "
 ```
 
-The commit message is the auditing surface for repair sequences; the ledger's `## Repair pass <N>` section is the substrate-shape record. Both are required for repair commits; only the forward-rewrite template is required for forward commits.
+The commit message is the auditing surface for repair sequences. Both templates require the `Classification:` trailer.
 
 ### 7. Hand off to review
 
-Announce: "Spec rewrite complete on branch `design/<slug>`. Design delta ledger at `docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md`. Ready for fresh-eyes review via `cohesive:validate-rewrite`. After Approved verdict, the implementation route — `cohesive:implement-cohesively` — drives code against the delta ledger; the validate-rewrite Approved footer renders the full decision matrix."
+Announce: "Spec rewrite complete on branch `design/<slug>`. Ready for fresh-eyes review via `cohesive:validate-rewrite` (which reads the spec diff directly from git). After Approved verdict, the implementation route — `cohesive:implement-cohesively` — drives code against the spec diff anchored at the rewrite-tip SHA the validation review captures; the validate-rewrite Approved footer renders the full decision matrix."
 
 `validate-rewrite` always dispatches the `spec-cohesion-reviewer` agent in a Task subprocess with no inherited conversation context — the structural fresh-eyes fence is the harness's subprocess isolation, not which conversation the user invokes the review from. Whether `validate-rewrite` is invoked directly from this turn (e.g. by the `cohesively` router chaining the `design` route) or from a fresh session, the dispatched agent reads only paths it's passed.
 
@@ -177,6 +158,7 @@ The skill's chat output (separate from the file changes) is short:
 
 **Worktree:** `.worktrees/cohesive-<slug>` on `design/<slug>`
 **Approved direction:** <option name>
+**Classification:** <Pure implementation | Design | Mixed>
 
 ### Files rewritten
 - `path/to/file.md` — <one-line summary of change>
@@ -191,20 +173,17 @@ The skill's chat output (separate from the file changes) is short:
 - ...
 
 ### Substrate updated
-- Specs: <count>
-- Behavior matrices: <count, including which are new>
-- Named invariants: <count, names>
-- Gotchas: <count>
-- Semantic linter specs (proposed, not implemented): <count>
-
-### Design delta ledger
-`docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md`
+- Specs touched
+- Behavior matrices touched (including which are new)
+- Named invariants touched (with names)
+- Gotchas touched (with names)
+- Semantic linter specs touched (proposed, not implemented; with names)
 
 ### Remaining ambiguity
 - <thing the rewrite couldn't fully resolve>
 
 ### Next
-Fresh-eyes review of the rewritten specs against the design and approved direction. *(`cohesive:validate-rewrite`.)* **Scope:** the design delta ledger at `docs/cohesive/delta-ledgers/<YYYY-MM-DD>-<slug>.md` and the rewritten specs on branch `design/<slug>`.
+Fresh-eyes review of the rewritten specs against the design and approved direction. *(`cohesive:validate-rewrite`.)* **Scope:** the spec diff on branch `design/<slug>` (`git diff $(merge-base main HEAD)..HEAD`) — validate-rewrite reads the diff directly.
 ```
 
 ## Anti-patterns (Red Flags)
@@ -218,16 +197,14 @@ Fresh-eyes review of the rewritten specs against the design and approved directi
 | Making implementation the only place where behavior is knowable | Defeats the purpose of substrate-first work | Add the behavior to a spec or matrix |
 | Treating all future pressure as current scope | Spec bloat; future pressure becomes implicit promise | Keep future pressure in a clearly-marked non-normative section |
 | Rewriting docs in the main worktree | Loses the ability to review the rewrite as a coherent diff | Use a worktree |
-| Skipping the design delta ledger | Reviewer can't see the rewrite as a delta; review becomes "read everything again" | Always produce the ledger |
-| Skipping or stubbing the `## Delta at a glance` preamble | `validate-rewrite` has nothing to quote at decision time; the user is asked to choose an implementation path without seeing what the rewrite contains | Fill in the preamble after body sections stabilize; the validator greps for its presence on any ledger dated on or after the cutoff |
-| Filling in the preamble first, then drifting body sections away from it | Preamble and body diverge; reviewer raises a Blocking Issue and the rewrite goes back through repair | Fill the preamble last, or re-sync it before commit |
+| Omitting the `Classification:` trailer from the rewrite commit body | `spec-cohesion-reviewer` has no human-authored classification to cross-check against the diff; raises a Blocking Issue | Always include the `Classification:` trailer in the rewrite commit message per Step 6 |
+| Claiming a Pure-implementation classification when the diff touches design-layer surfaces | The classification trailer disagrees with what the diff shows; surfaces an Important issue in validate-rewrite | Use Mixed when in doubt; the cost of over-classifying is one extra doc edit |
 
 ## Acceptance criteria
 
 - All affected docs are in end-state language; no "we will" / "should consider" in normative sections.
 - Obsolete concepts are removed, not annotated.
-- A design delta ledger exists at the canonical path.
-- The ledger's `## Delta at a glance` preamble is filled in per the canonical category list and density target in `${CLAUDE_PLUGIN_ROOT}/references/templates/design-delta-ledger.md` §"Delta at a glance", and accurately summarizes the body.
+- The rewrite commit message body carries a `Classification:` trailer (`Pure implementation` / `Design` / `Mixed`).
 - Substrate map (if it exists) is updated.
 - The rewrite happens on a `design/<slug>` branch in a worktree.
 - A commit captures the rewrite atomically.
