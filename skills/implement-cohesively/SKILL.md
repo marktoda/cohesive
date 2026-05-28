@@ -1,20 +1,31 @@
 ---
 name: implement-cohesively
-description: Use after validate-rewrite has returned Approved on a spec rewrite, when the user wants to land code that makes the rewrite true. Drives a single-pass implementation where Cohesive owns the substrate-shaped intent (thin paragraph anchored to the spec diff at the rewrite-tip SHA) and the end-of-run dual reviewer dispatch (delta-coverage-reviewer + cohesive:review-diff in parallel, AND-shape verdict synthesis); Superpowers owns plan writing and TDD execution. Triggers on "implement the approved rewrite", "land docs with implementation", "implement-cohesively", "drive implementation against the rewrite", "ship the rewrite". Always preceded by validate-rewrite Approved; always pairs with superpowers:writing-plans and superpowers:executing-plans.
+description: Use after either validate-rewrite has returned Approved on a spec rewrite (standard mode) or rewrite-specs has landed an extension rewrite directly on a branch (extend mode), when the user wants to land code that makes the rewrite true. Drives a single-pass implementation where Cohesive owns the substrate-shaped intent (thin paragraph anchored to the spec diff) and the end-of-run reviewer dispatch — dual (delta-coverage-reviewer + cohesive:review-diff, AND-shape) in standard mode, or solo (cross-mirror-reviewer) in extend mode; Superpowers owns plan writing and TDD execution. Triggers on "implement the approved rewrite", "land docs with implementation", "implement-cohesively", "drive implementation against the rewrite", "ship the rewrite", "extend the existing concept". Always preceded by either validate-rewrite Approved (standard) or rewrite-specs extension commit (extend); always pairs with superpowers:writing-plans and superpowers:executing-plans.
 ---
 
 # Implement cohesively
 
 ## What this skill produces
 
-- A **branch with implementation commits** that make every promise in the spec diff (computed as `git diff $(merge-base main <rewrite-tip>)..<rewrite-tip>`) true in code, test, and CI.
+The skill operates in one of two modes, picked from the inputs:
+
+| Mode | Trigger | Required inputs | End-of-run reviewer dispatch |
+|---|---|---|---|
+| **standard** | Reached via `implement` route, post-validate-rewrite-Approved | Validation review path (with `**Rewrite-tip:**` SHA) + branch name | Dual: `delta-coverage-reviewer` + `cohesive:review-diff`, AND-shape synthesis |
+| **extend** | Reached via `extend` route, post-rewrite-specs-extension | Change-surface description + branch name | Solo: `cross-mirror-reviewer` |
+
+The two modes share most of the body — what differs is the input contract (Step 0), how the spec-diff boundary is established (Step 1), and the end-of-run reviewer dispatch (Step 3). The middle (writing-plans + executing-plans + Step 3.5 cleanup) is identical.
+
+Shared outputs across both modes:
+
+- A **branch with implementation commits** that make every promise in the spec diff true in code, test, and CI.
 - A **spec-diff snapshot** at `.cohesive/tmp/<slug>-spec-diff.patch`, captured at Step 1 before any implementation commits land. This is the substrate-shaped source of work.
 - A **single per-pass implementation plan** at `docs/cohesive/plans/<YYYY-MM-DD>-<slug>.md`, authored by `superpowers:writing-plans` from a thin intent paragraph the skill composes — committed during the run as **ephemeral run scaffolding**.
-- An **end-of-run dual reviewer dispatch**: `delta-coverage-reviewer` (compares spec-diff vs implementation-diff; verifies every promise is delivered) and `cohesive:review-diff` (substrate alignment against the rewritten specs) run in parallel. Verdict is synthesized AND-shape.
+- An **end-of-run reviewer dispatch** (dual in standard mode, solo in extend mode — see table above).
 - On Implemented verdict only: a **single cleanup commit at Step 3.5** that strips ephemeral artifacts (per-pass plan, spec-diff snapshot, discovery report if present) before handoff. The cleanup commit is the breadcrumb back from main to pre-cleanup branch history.
 - A handoff to `superpowers:finishing-a-development-branch` (or repair to the relevant earlier skill) based on the verdict.
 
-This is the second of Cohesive's flagship skills that owns code-producing work indirectly. The skill itself writes no code: it composes with `superpowers:writing-plans` (which authors the plan) and `superpowers:executing-plans` (which writes code with TDD). The Cohesive contribution is the **substrate-shaped framing**: anchoring the implementation intent to the spec diff at the rewrite-tip SHA, surfacing the diff-size budget gate before invocation, and dispatching the end-of-run dual reviewer pair with AND-shape verdict synthesis.
+This is the second of Cohesive's flagship skills that owns code-producing work indirectly. The skill itself writes no code: it composes with `superpowers:writing-plans` (which authors the plan) and `superpowers:executing-plans` (which writes code with TDD). The Cohesive contribution is the **substrate-shaped framing**: anchoring the implementation intent to the spec diff, surfacing the diff-size budget gate before invocation, and dispatching the appropriate end-of-run reviewer(s) per mode.
 
 ## Voice
 
@@ -22,9 +33,11 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **An Approved validate-rewrite verdict is required, declared as paths.** This skill's prereq is a file path, not session state — the canonical clarifying question does not apply. Required inputs (validation review path + branch name) are declared in §"Step 0. Resolve inputs and confirm prereqs"; the dispatching context (the `cohesively` router, a prior `validate-rewrite` Approved render the user is acting on, or direct user invocation) supplies them explicitly. The validation review file carries the `**Rewrite-tip:**` SHA captured at Approved time; Step 0 parses it.
+1. **Required inputs are mode-conditional, declared as paths.** This skill's prereqs are paths, not session state — the canonical clarifying question does not apply. Required inputs differ by mode (see §"What this skill produces"); the dispatching context (the `cohesively` router via the `implement` or `extend` route, a prior `validate-rewrite` Approved render the user is acting on, a prior `rewrite-specs` extension run, or direct user invocation) supplies them explicitly.
 
-   **If any required input is missing,** stop with a directive error. The directive names the missing input and the upstream skill that produces it:
+   **Standard mode** requires the validation review path (with `**Rewrite-tip:**` SHA) plus the branch name. **Extend mode** requires the change-surface description plus the branch name; Step 0 dispatches `discover-substrate` scoped to the change surface to find sibling sites.
+
+   **If any required input is missing,** stop with a directive error. The directive names the missing input and the upstream skill that produces it. Standard-mode directives:
 
    ```
    Missing validation review for slug `<slug>`. Run cohesive:validate-rewrite first;
@@ -38,13 +51,28 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
    rewrite commits and an Approved validation review.
    ```
 
-   Do not ask the canonical forced-choice question and do not invent paths. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)", `Approved` is the only verdict that unlocks this route — verify the supplied review's verdict line is `**Verdict:** Approved` before proceeding; on any other verdict, refuse with a pointer to the appropriate upstream skill.
+   Extend-mode directives:
+
+   ```
+   Missing change-surface description for extend mode. Provide one or two
+   sentences naming what to extend (e.g., "add HOME to SurfaceRole"), or
+   route through cohesive:cohesively which will ask the gate question and
+   collect this input.
+   ```
+
+   ```
+   Missing rewrite branch for extend mode. Run cohesive:rewrite-specs first
+   to land the extension commit on `design/<slug>`; expected branch with
+   at least one `design: rewrite specs for ...` commit ahead of main.
+   ```
+
+   Do not ask the canonical forced-choice question and do not invent paths. Per `${CLAUDE_PLUGIN_ROOT}/references/cohesion-rubric.md` §"Verdict → severity-floor mapping (validate-rewrite)", `Approved` is the only verdict that unlocks **standard** mode — verify the supplied review's verdict line is `**Verdict:** Approved` before proceeding; on any other verdict, refuse with a pointer to the appropriate upstream skill. Extend mode does not require a validate-rewrite verdict (the route deliberately skips that stage).
 
 2. **Compose with Superpowers; do not reinvent its execution discipline.** This skill invokes `superpowers:writing-plans` once to author the per-pass plan and `superpowers:executing-plans` once to execute it. The skill never authors a TDD-shaped plan directly and never writes code itself. If Superpowers is not installed, the skill stops with a hard error and recommends installation — the inline 5-line worktree fallback in `rewrite-specs` does not apply here, because plan-writing and TDD execution are not 5-line operations.
-3. **Single per-pass plan covers the spec diff.** Every promise in the spec diff (computed as `git diff $(merge-base main <rewrite-tip>)..<rewrite-tip>`) is covered by the single plan authored from the thin intent paragraph. Step 1 hands the spec diff to `writing-plans` as the work to do; an uncovered promise is a substrate violation the end-of-run reviewer will flag.
-4. **End-of-run dual reviewer dispatch is mandatory.** The implementation pass ends with parallel dispatch of `delta-coverage-reviewer` (Task subprocess, paths-only inputs, fresh eyes, spec-diff-vs-implementation-diff input contract) and `cohesive:review-diff` (Cohesive skill, substrate alignment scope). Both reviewers must complete before verdict synthesis. Skipping either is a violation. The verdict is synthesized AND-shape per §"Verdict synthesis" below.
-5. **Step 3.5 cleanup is gated on Implemented verdict.** On Implemented (both reviewers Pass), Step 3.5 strips ephemeral artifacts (per-pass plan, spec-diff snapshot, discovery report when present) via a single cleanup commit before handoff. On Coverage Drift / Substrate Drift / Aborted, Step 3.5 does not fire — ephemeral artifacts remain on the branch for the next attempt or post-mortem. The cleanup commit's body lists removed paths verbatim; a cleanup commit without that list is a violation. See §"Step 3.5. Post-implementation cleanup" for operational steps.
-6. **Diff-size budget gate fires above threshold.** Step 1 surfaces the spec-diff changed-line count before invoking `superpowers:writing-plans`. When the count exceeds **1000** (default; tunable in a follow-up substrate change), the skill pauses for user confirmation. The gate is the structural mitigation for mega-plan abandonment risk. Below threshold the gate is invisible; above threshold, skipping the surfacing or invoking `writing-plans` without confirmation is a violation.
+3. **Single per-pass plan covers the spec diff.** Every promise in the spec diff (standard mode: `git diff $(merge-base main <rewrite-tip>)..<rewrite-tip>` using the SHA from the validation review; extend mode: `git diff $(merge-base main HEAD)..<rewrite-tip-commit>` where `<rewrite-tip-commit>` is the most recent `design: rewrite specs` commit on the branch) is covered by the single plan authored from the thin intent paragraph. Step 1 hands the spec diff to `writing-plans` as the work to do; an uncovered promise is a substrate violation the end-of-run reviewer will flag.
+4. **End-of-run reviewer dispatch is mandatory and mode-conditional.** Standard mode dispatches `delta-coverage-reviewer` (Task subprocess, paths-only inputs, fresh eyes, spec-diff-vs-implementation-diff input contract) and `cohesive:review-diff` (Cohesive skill, substrate alignment scope) in parallel; verdict synthesized AND-shape. Extend mode dispatches `cross-mirror-reviewer` solo (Task subprocess, paths-only inputs, fresh eyes, sibling-site + extension-shape input contract); its verdict is the run's verdict directly. Skipping the dispatch in either mode is a violation. See §"Verdict synthesis" below.
+5. **Step 3.5 cleanup is gated on Implemented verdict.** On Implemented (standard: dual Pass; extend: Covered), Step 3.5 strips ephemeral artifacts (per-pass plan, spec-diff snapshot, discovery report when present) via a single cleanup commit before handoff. On Coverage Drift / Substrate Drift / Aborted, Step 3.5 does not fire — ephemeral artifacts remain on the branch for the next attempt or post-mortem. The cleanup commit's body lists removed paths verbatim; a cleanup commit without that list is a violation. See §"Step 3.5. Post-implementation cleanup" for operational steps.
+6. **Diff-size budget gate fires above threshold.** Step 1 surfaces the spec-diff changed-line count before invoking `superpowers:writing-plans`. When the count exceeds **1000** (default; tunable in a follow-up substrate change), the skill pauses for user confirmation. The gate is the structural mitigation for mega-plan abandonment risk. Below threshold the gate is invisible; above threshold, skipping the surfacing or invoking `writing-plans` without confirmation is a violation. Applies in both modes.
 
 ## Process
 
@@ -52,13 +80,19 @@ The skill body uses `Step 0` and `Step 4` for preflight and handoff bookends, `S
 
 ### Step 0. Resolve inputs and confirm prereqs
 
-Required inputs:
+The first action of Step 0 is **mode detection**: standard or extend.
+
+- **Mode detection rule.** If the inputs include a validation review path, mode is standard. Else if the inputs include a change-surface description, mode is extend. If neither (or both), halt with a directive error asking the user to specify (per Hard constraint #1).
+
+The rest of Step 0 then branches on mode:
+
+**Standard mode inputs:**
 
 - **Validate-rewrite Approved verdict path** — usually `docs/cohesive/reviews/YYYY-MM-DD-<slug>-rewrite-validation.md`. The skill verifies the verdict is `Approved` and parses the `**Rewrite-tip:**` SHA from the header.
 - **Branch name** — typically `design/<slug>` from the rewrite worktree. Implementation lands on this branch (or a child branch — see §"Branch shape" below).
 - **Substrate discovery report path** (optional) — passed to the end-of-run reviewers for context.
 
-**Verify the rewrite-tip SHA exists in branch history.** After parsing the SHA from the validation review file, run `git cat-file -e <SHA>` to confirm it exists on the branch. On missing (e.g., the branch was rebased after Approved), halt with a directive error:
+**Standard-mode verification:** Verify the rewrite-tip SHA exists in branch history via `git cat-file -e <SHA>`. On missing (e.g., the branch was rebased after Approved), halt with a directive error:
 
 ```
 Rewrite tip SHA `<X>` not found on branch `design/<slug>`.
@@ -66,11 +100,22 @@ The branch was likely rebased or rewritten after validate-rewrite Approved.
 Re-run cohesive:validate-rewrite to capture a fresh rewrite-tip SHA.
 ```
 
+**Extend mode inputs:**
+
+- **Change-surface description** — one or two sentences naming what to extend (e.g., "add HOME to SurfaceRole"). This is what the `extend` route's dispatch contract supplies.
+- **Branch name** — typically `design/<slug>` from the rewrite worktree (the extension rewrite already landed via `rewrite-specs`).
+
+**Extend-mode discovery dispatch:** Dispatch `cohesive:discover-substrate` via the Skill tool, scoped to the change surface, to enumerate sibling sites (everywhere the existing concept is referenced, pattern-matched, or enumerated). The dispatch prompt names the change surface and instructs discovery to focus on the locations a future implementer would need to update. Capture the discovery report path returned — it is an input to Step 1's intent paragraph and to the end-of-run reviewer dispatch.
+
+**Extend-mode verification:** Verify the branch has at least one `design: rewrite specs for ...` commit ahead of `main` via `git log main..HEAD --grep="^design: rewrite specs" -n 1 --format=%H` returning non-empty. Capture this SHA as the **rewrite-tip commit** for Step 1. On missing, halt with the extend-mode directive error per Hard constraint #1.
+
 If any other required input is missing, halt with the directive error per Hard constraint #1; do not ask the canonical forced-choice question and do not invent paths.
 
 ### Step 1. Capture the spec diff and dispatch writing-plans
 
-Capture the spec diff to a tmp file using the rewrite-tip SHA parsed at Step 0:
+Capture the spec diff to a tmp file. The capture command differs by mode:
+
+**Standard mode** uses the rewrite-tip SHA parsed at Step 0:
 
 ```bash
 REWRITE_TIP=<SHA from validation review file>
@@ -78,7 +123,15 @@ mkdir -p .cohesive/tmp
 git diff $(git merge-base main $REWRITE_TIP)..$REWRITE_TIP > .cohesive/tmp/<slug>-spec-diff.patch
 ```
 
-The spec diff is anchored to a stable SHA, not to "HEAD at invocation time" — this makes Coverage Drift retries and interrupted runs handle cleanly (same SHA → same spec diff, even after partial implementation commits land).
+**Extend mode** uses the rewrite-tip commit captured at Step 0 (the latest `design: rewrite specs` commit on the branch):
+
+```bash
+REWRITE_TIP=<SHA from Step 0's git log lookup>
+mkdir -p .cohesive/tmp
+git diff $(git merge-base main $REWRITE_TIP)..$REWRITE_TIP > .cohesive/tmp/<slug>-spec-diff.patch
+```
+
+In both modes the spec diff is anchored to a stable SHA, not to "HEAD at invocation time" — this makes Coverage Drift retries and interrupted runs handle cleanly (same SHA → same spec diff, even after partial implementation commits land).
 
 Surface the **diff-size budget gate** before composing the intent. Count changed lines via `wc -l < .cohesive/tmp/<slug>-spec-diff.patch`:
 
@@ -93,12 +146,22 @@ Surface the **diff-size budget gate** before composing the intent. Count changed
 
   On confirm: proceed. On abort: exit with `Aborted` verdict and recommend scope reduction via `cohesive:rewrite-specs`. The 1000-line threshold is a v0.1 default; tighten or relax in a follow-up substrate change as real-world rewrite sizes inform the budget.
 
-After the gate clears, compose the **thin intent paragraph** and pass it to `superpowers:writing-plans` via the Skill tool. The format is exactly three lines:
+After the gate clears, compose the **thin intent paragraph** and pass it to `superpowers:writing-plans` via the Skill tool. The format differs by mode:
+
+**Standard mode** — three lines:
 
 ```
 Make this spec diff true in code: .cohesive/tmp/<slug>-spec-diff.patch.
 Constraints: <named invariants the docs cite; reference by INVARIANT_NAME>.
 Acceptance: cohesive:implement-cohesively dispatches delta-coverage-reviewer (verifies every spec-diff promise is delivered) and cohesive:review-diff (verifies substrate alignment with the rewritten specs) at end-of-run; both must Pass.
+```
+
+**Extend mode** — three lines, with sibling sites surfaced from the discovery report:
+
+```
+Make this spec diff true in code: .cohesive/tmp/<slug>-spec-diff.patch.
+Sibling sites to update (from discovery): <bulleted list of file:line refs from the discovery report at <path>>.
+Acceptance: cohesive:implement-cohesively dispatches cross-mirror-reviewer at end-of-run; it returns Covered (all sibling sites updated + diff stays within extension shape), Sites Missing (close the gaps and re-run), or Bigger than extension (the change went beyond extension; re-route).
 ```
 
 The intent paragraph is the substrate-shape→TDD-shape seam. `writing-plans` reads the spec diff and produces the TDD-shape plan; the intent paragraph names what the plan must accomplish in substrate terms. Capture the plan path that `writing-plans` returns (`docs/cohesive/plans/<YYYY-MM-DD>-<slug>.md`); it is an input to the end-of-run reviewer dispatch.
@@ -109,9 +172,11 @@ Invoke `superpowers:executing-plans` via the Skill tool with the persisted plan 
 
 Implementation commits cite the plan path they implement. The commit-message convention `executing-plans` produces should include that citation; if it does not, the skill body's Hard constraint #3 plus the named invariant `IMPLEMENTATION_COVERS_SPEC_DIFF` govern the citation requirement.
 
-### Step 3. End-of-run dual reviewer dispatch
+### Step 3. End-of-run reviewer dispatch
 
-After the last implementation commit lands, dispatch two reviewers **in parallel**:
+After the last implementation commit lands, dispatch the appropriate reviewer(s) for the mode.
+
+**Standard mode — dual dispatch in parallel:**
 
 - **`delta-coverage-reviewer`** (Task subprocess) with `subagent_type: delta-coverage-reviewer`. The dispatch prompt names: the spec-diff patch path (`.cohesive/tmp/<slug>-spec-diff.patch` captured at Step 1), the per-pass plan path, the branch name, and the rewrite-tip SHA (so the reviewer can compute the implementation diff = `git diff <rewrite-tip>..<branch-tip>`). The reviewer compares spec-diff vs implementation-diff and returns one of three verdicts: **Covered** / **Drift** / **Incomplete**. Persist the reviewer's output at `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-coverage-review.md`.
 
@@ -119,9 +184,17 @@ After the last implementation commit lands, dispatch two reviewers **in parallel
 
 Both dispatches happen in the same turn (the harness's parallel-tool-call pattern). Wait for both to complete before synthesizing the verdict.
 
+**Extend mode — solo dispatch:**
+
+- **`cross-mirror-reviewer`** (Task subprocess) with `subagent_type: cross-mirror-reviewer`. The dispatch prompt names: the spec-diff patch path (captured at Step 1), the per-pass plan path, the branch name, the rewrite-tip SHA (for computing the implementation diff), the substrate discovery report path (the sibling-site list from Step 0), and the change-surface description. The reviewer compares each sibling site to the implementation diff and checks whether the diff stays within extension shape. It returns one of three verdicts: **Covered** / **Sites Missing** / **Bigger than extension**. Persist the reviewer's output at `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-cross-mirror-review.md`.
+
+The extend-mode dispatch is one Task call; the reviewer's verdict is the run's verdict directly (no AND-shape synthesis).
+
 ### Verdict synthesis
 
-The two reviewer outputs combine AND-shape into a single internal verdict:
+Internal verdict mapping differs by mode but the external vocabulary (`Implemented` / `Coverage Drift` / `Substrate Drift` / `Aborted`) is unified.
+
+**Standard-mode synthesis (AND-shape from the dual reviewers):**
 
 | `delta-coverage-reviewer` | `cohesive:review-diff` | Internal verdict |
 |---|---|---|
@@ -130,6 +203,15 @@ The two reviewer outputs combine AND-shape into a single internal verdict:
 | Covered | Needs substrate / Risky / Block | **Substrate Drift** |
 | Drift / Incomplete | Needs substrate / Risky / Block | **Substrate Drift** (wins on dual-fail; the rewrite was misformulated, which makes coverage gaps downstream) |
 | (not dispatched) | (not dispatched) | **Aborted** (Step 3 did not run — the user paused before reviewers dispatched, e.g., declined the budget gate or stopped during Step 2) |
+
+**Extend-mode synthesis (direct from cross-mirror-reviewer's verdict):**
+
+| `cross-mirror-reviewer` | Internal verdict |
+|---|---|
+| Covered | **Implemented** |
+| Sites Missing | **Coverage Drift** |
+| Bigger than extension | **Substrate Drift** (the diff went beyond extension shape; the change should be re-routed through the heavy path with `cohesive:rewrite-specs` + `cohesive:validate-rewrite`) |
+| (not dispatched) | **Aborted** (Step 3 did not run) |
 
 The internal verdict translates to the user-facing label per `${CLAUDE_PLUGIN_ROOT}/references/verdict-vocabulary.md` §"implement-cohesively". Render the chat trailer per §"Output format" below; persist the synthesis (which reviewer flagged what) in the trailer's `## End-of-run review` body block. Aborted does not run reviewers and does not fire Step 3.5.
 
@@ -188,8 +270,11 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 
 ## End-of-run review
 
-- Coverage: <Covered | Drift | Incomplete> — `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-coverage-review.md`
-- Substrate: <Pass | Pass with notes | Needs substrate | Risky | Block> — `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md`
+*(Standard mode renders both rows; extend mode renders only the cross-mirror row.)*
+
+- Coverage: <Covered | Drift | Incomplete> — `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-coverage-review.md` *(standard mode only)*
+- Substrate: <Pass | Pass with notes | Needs substrate | Risky | Block> — `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-final-substrate-review.md` *(standard mode only)*
+- Cross-mirror: <Covered | Sites Missing | Bigger than extension> — `docs/cohesive/reviews/<YYYY-MM-DD>-<slug>-cross-mirror-review.md` *(extend mode only)*
 
 ## Branch state
 
@@ -207,7 +292,7 @@ The four `### Next` bullet shapes (one renders per invocation, matching the inte
 
 - **Internal `Implemented`:** Substrate and code agree; ready to ship. *(`superpowers:finishing-a-development-branch`.)* **Scope:** the `design/<slug>` branch.
 - **Internal `Coverage Drift`:** Repair the named coverage gaps, then re-invoke. *(`cohesive:implement-cohesively` resume.)* **Scope:** the spec-diff hunks the coverage reviewer flagged as Drift / Incomplete.
-- **Internal `Substrate Drift`:** Extend the design to cover what the implementation introduced, or revert the divergent code. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerate the docs the substrate review flagged as needing extension>. Slug: `<derived-from-original-slug>-extension`.
+- **Internal `Substrate Drift`:** Extend the design to cover what the implementation introduced, or revert the divergent code. *(`cohesive:rewrite-specs`.)* **Files to edit:** <enumerate the docs the substrate review flagged as needing extension>. Slug: `<derived-from-original-slug>-extension`. *(Extend mode: this verdict means the change was misclassified as extension and went beyond extension shape. Re-route through `cohesive:cohesively` and pick "Introducing a new concept" at the change-type gate, OR revert the divergent code and keep the change as a pure extension.)*
 - **Internal `Aborted`:** Implementation paused at user request. *(No follow-up skill required.)* The branch state is whatever the last implementation commit landed.
 
 ## Anti-patterns (Red Flags)
@@ -231,24 +316,31 @@ The implementation lands on the same `design/<slug>` branch the rewrite produced
 
 ## Composition
 
-- **Always preceded by:** `validate-rewrite` (Approved verdict required).
+- **Preceded by (mode-conditional):**
+  - *Standard mode:* `validate-rewrite` (Approved verdict required).
+  - *Extend mode:* `rewrite-specs` (extension rewrite committed on `design/<slug>`); validate-rewrite is deliberately skipped per the `extend` route's design.
 - **Composes with:**
-  - `superpowers:writing-plans` — single per-pass plan authoring.
-  - `superpowers:executing-plans` — single per-pass TDD execution.
-  - `delta-coverage-reviewer` agent — end-of-run coverage verification (parallel dispatch).
-  - `cohesive:review-diff` — end-of-run substrate alignment (parallel dispatch).
+  - `superpowers:writing-plans` — single per-pass plan authoring (both modes).
+  - `superpowers:executing-plans` — single per-pass TDD execution (both modes).
+  - `delta-coverage-reviewer` agent — end-of-run coverage verification (standard mode only).
+  - `cohesive:review-diff` — end-of-run substrate alignment (standard mode only).
+  - `cross-mirror-reviewer` agent — end-of-run sibling-site + extension-shape verification (extend mode only).
+  - `cohesive:discover-substrate` — scoped sibling-site enumeration at Step 0 (extend mode only).
 - **Followed by:** `superpowers:finishing-a-development-branch` (Implemented verdict) or repair via `cohesive:rewrite-specs` (Substrate Drift) or repair via re-invocation (Coverage Drift).
 
 ## Acceptance criteria
 
-- An Approved validate-rewrite verdict path is in the inputs.
-- Step 0 parses the `**Rewrite-tip:**` SHA from the validation review file and verifies it exists in branch history via `git cat-file -e`.
-- Step 1 captures the spec diff at the rewrite-tip SHA into `.cohesive/tmp/<slug>-spec-diff.patch`; surfaces the changed-line count when above 1000 and pauses for user confirmation; below threshold the gate is invisible.
-- Step 1's thin intent paragraph references the spec-diff patch path; the format is exactly the three lines specified (Make / Constraints / Acceptance).
-- Step 2 invokes `superpowers:executing-plans` against the persisted plan path; implementation commits cite the plan path.
-- Step 3 dispatches `delta-coverage-reviewer` and `cohesive:review-diff` in parallel; both reviewers receive only paths (spec-diff patch, branch name, rewrite-tip SHA); never a pre-summarized design narrative.
-- Step 3 synthesizes the verdict AND-shape per §"Verdict synthesis"; only `Covered + (Pass | Pass with notes)` synthesizes to Implemented.
-- Step 3.5 fires on Implemented verdict only and produces a single cleanup commit whose message body lists removed ephemeral paths verbatim. On Coverage Drift / Substrate Drift / Aborted, Step 3.5 does not fire.
+- Step 0 detects mode (standard if validation review path supplied; extend if change-surface description supplied; halts otherwise).
+- *Standard mode:* an Approved validate-rewrite verdict path is in the inputs; Step 0 parses the `**Rewrite-tip:**` SHA from the validation review file and verifies it exists in branch history via `git cat-file -e`.
+- *Extend mode:* a change-surface description is in the inputs; Step 0 dispatches `cohesive:discover-substrate` scoped to the change surface; Step 0 captures the rewrite-tip commit SHA from `git log main..HEAD --grep="^design: rewrite specs"`.
+- Step 1 captures the spec diff at the rewrite-tip SHA into `.cohesive/tmp/<slug>-spec-diff.patch`; surfaces the changed-line count when above 1000 and pauses for user confirmation; below threshold the gate is invisible (both modes).
+- Step 1's thin intent paragraph references the spec-diff patch path; the format is exactly the three lines specified per mode (standard: Make / Constraints / Acceptance; extend: Make / Sibling sites / Acceptance).
+- Step 2 invokes `superpowers:executing-plans` against the persisted plan path; implementation commits cite the plan path (both modes).
+- *Standard mode Step 3:* dispatches `delta-coverage-reviewer` and `cohesive:review-diff` in parallel; both reviewers receive only paths (spec-diff patch, branch name, rewrite-tip SHA); never a pre-summarized design narrative.
+- *Extend mode Step 3:* dispatches `cross-mirror-reviewer` solo; the reviewer receives only paths (spec-diff patch, plan path, branch name, rewrite-tip SHA, discovery report path, change-surface description); never a pre-summarized design narrative.
+- *Standard mode:* Step 3 synthesizes the verdict AND-shape per §"Verdict synthesis"; only `Covered + (Pass | Pass with notes)` synthesizes to Implemented.
+- *Extend mode:* Step 3's verdict is the cross-mirror-reviewer's verdict directly (Covered → Implemented, Sites Missing → Coverage Drift, Bigger than extension → Substrate Drift).
+- Step 3.5 fires on Implemented verdict only (both modes) and produces a single cleanup commit whose message body lists removed ephemeral paths verbatim. On Coverage Drift / Substrate Drift / Aborted, Step 3.5 does not fire.
 - The trailer's `## Branch state` slot surfaces the cleanup commit SHA on Implemented verdict; on other verdicts, the cleanup-commit line is omitted.
 - The skill never invokes `superpowers:finishing-a-development-branch` — handoff is a user action.
 

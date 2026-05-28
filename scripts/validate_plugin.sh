@@ -19,6 +19,7 @@
 #   - Chain-rendering anti-pattern absent from router
 #   - Forbidden phase-shaped literals absent from runtime surfaces
 #   - No retired delta-ledger references in production surface
+#   - Change-type gate present in cohesively router
 #   - PLUGIN_ROOT_PATHS (no hardcoded absolute paths)
 #   - Referenced files exist (warn-level)
 #   - Scripts are executable (warn-level)
@@ -444,6 +445,19 @@ if [ -n "$ledger_violations" ]; then
   done
 else
   ok "no retired delta-ledger references in skills/, agents/, references/"
+fi
+
+# 13o. Change-type gate presence in cohesively router. The L2 design adds a gate
+# question for forward-looking routes (design / rewrite-only / extend) that picks
+# between extending an existing concept and introducing a new one. A missing gate
+# section means the router cannot route to the extend path.
+errors_before=$errors
+if grep -qF 'Change-type gate' skills/cohesively/SKILL.md \
+   && grep -qF 'Are you extending an existing concept, or introducing a new one?' skills/cohesively/SKILL.md \
+   && grep -qF '| `extend` |' skills/cohesively/SKILL.md; then
+  ok "Change-type gate present in cohesively router (extend route + gate question)"
+else
+  fail "skills/cohesively/SKILL.md missing the L2 change-type gate. Required: §\"Change-type gate\" header, the question text 'Are you extending an existing concept, or introducing a new one?', and the \`extend\` route in the dispatch contract table."
 fi
 
 # 14. PLUGIN_ROOT_PATHS: no hardcoded absolute paths in skills/, agents/, references/.
