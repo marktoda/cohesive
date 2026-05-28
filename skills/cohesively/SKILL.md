@@ -35,21 +35,53 @@ The gate vocabulary is the load-bearing chat-surface vocabulary. Subskill IDs st
 |---|---|
 | `cohesive:init` | First-time adoption on a codebase with no Cohesive substrate. Scans for proto-substrate (rules in comments, scars in test names, branchy code) and produces a draft substrate with side-by-side translations explaining each Cohesive type in plain terms. The user reviews and keeps what fits. Runs once; refuses if substrate already exists. |
 
+## Change-type gate (forward-looking routes)
+
+Before dispatching `design`, `rewrite-only`, or `extend`, the router asks one forced-choice question via `AskUserQuestion` — **the change-type gate**. The gate does not fire for `review (codebase)`, `review (diff)`, `audit (substrate)`, `init`, `implement`, or `artifact` (those don't introduce substrate or are past the decision point).
+
+The question is verdict-led: the agent reads signals in the user's request and pre-fills a `(Recommended)` option; the user can override.
+
+| Field | Value |
+|---|---|
+| Header | `Change type` |
+| Question | "Are you extending an existing concept, or introducing a new one?" |
+| Option 1 | **Extending an existing concept** — adds a leaf to an enum, a row to a behavior matrix, a sibling case to an existing pattern, or tightens an existing invariant. |
+| Option 2 | **Introducing a new concept** — new named-invariant family, new behavior matrix, new seam, new admission layer, concept merge/split. |
+
+**Pre-fill heuristic.** The agent recommends Option 1 when the request reads as adding to an existing thing — phrases like "add X to Y," "support a new value for E," "extend Y with Z," "add another <noun> like the others." It recommends Option 2 when the request reads as introducing a new thing — phrases like "introduce a new family of X," "add a new admission layer," "create a new matrix for Y," "refactor X into two concepts," "move the seam between A and B." When signals are mixed or absent, default to Option 2 (the safer default — heavier flow handles ambiguity through brainstorm-design's pressure-testing).
+
+**Routing from the gate answer:**
+
+- Option 1 → `extend` route → chain: `rewrite-specs` → `implement-cohesively` (extend mode)
+- Option 2 → `design` route (forward-looking and brainstorm-shaped) or `rewrite-only` route (a direction was already named by the user) — unchanged from pre-L2 behavior
+
+The gate is asked once per session per substrate-shaped request. If the user re-asks for the same change later, do not re-ask (the choice is sticky for the request shape).
+
 ## Routes
 
-Read the user's request and map to one of the routes below. Trigger phrases are primary; topic and verb tense are secondary.
+Read the user's request and map to one of the routes below. Trigger phrases are primary; topic and verb tense are secondary. For the three forward-looking routes (`design`, `rewrite-only`, `extend`), the §"Change-type gate" above runs first and picks between them.
 
 ### Route: design (Decide gate)
 
-**When:** Brainstorm or refactor a feature/subsystem. Forward-looking ("add", "refactor", "support", "build").
+**When:** Forward-looking change that the §"Change-type gate" classified as **introducing a new concept** (Option 2) — a brainstorm or refactor where there's a real design space to explore. Phrases like "introduce a new family of X," "add a new admission layer," "refactor X into two concepts," "move the seam between A and B."
 
 **Stops at:** A recommended direction with main risk + structural mitigation. The user approves before the Lock gate runs; design conversations often end here.
 
 **Clarifying question (optional, max one):** "Which future pressure should this design optimize for most: <option A>, <option B>, <option C>?"
 
+### Route: extend (light path)
+
+**When:** Forward-looking change that the §"Change-type gate" classified as **extending an existing concept** (Option 1) — adding a leaf to an enum, a row to a behavior matrix, a sibling case to an existing pattern, or tightening an existing invariant. The substrate already names the concept; the change adds one more member.
+
+**Stops at:** Code on the branch + a verdict from `cross-mirror-reviewer` (Covered / Sites Missing / Bigger than extension). The light path skips `brainstorm-design` (no design space) and `validate-rewrite` (no novel design to fresh-eyes); it runs `rewrite-specs` to land the doc change and then `implement-cohesively` in **extend mode** for the code change + cross-mirror sweep at end-of-run.
+
+**Clarifying question:** None at the router level — the gate already classified. The downstream skills (`rewrite-specs`, `implement-cohesively` extend mode) ask their canonical questions if their inputs are missing.
+
+**Backstop:** If `cross-mirror-reviewer` returns `Bigger than extension`, the user has mis-classified — the diff went beyond extension shape. The reviewer surfaces the verdict; the user decides to revert or accept retroactively (re-routing through `rewrite-specs` + `validate-rewrite` to get fresh-eyes on the now-larger rewrite).
+
 ### Route: rewrite-only (Lock gate)
 
-**When:** A direction has been chosen (from a prior brainstorm, a review, or named by the user) and the user wants the design pinned into specs. "Rewrite the specs for X", "lock in the design for Y", "update the design docs to reflect Z".
+**When:** Forward-looking change that the §"Change-type gate" classified as **introducing a new concept** (Option 2), AND a direction has been chosen (from a prior brainstorm, a review, or named by the user). The user wants the design pinned into specs. "Rewrite the specs for X", "lock in the design for Y", "update the design docs to reflect Z".
 
 **Stops at:** Approved verdict + an Architectural reflection — synthesizing how the architecture feels after the lock and what it makes harder downstream. The user approves before the Build gate runs.
 
@@ -110,6 +142,7 @@ The router-driven case requires explicit prereq-state passing — without it, su
 | Route | Prereq state to pass | Chosen-direction / artifact state to pass |
 |---|---|---|
 | `design` | n/a (discover-substrate is dispatched internally by `brainstorm-design` per its Hard constraint #1) | n/a until step 3; then "approved direction: <option name + summary>"; branch name passed to step 4 once `rewrite-specs` has produced it |
+| `extend` | n/a (discover-substrate is dispatched internally by `implement-cohesively` extend mode at Step 0, scoped to the change surface) | "Change surface: <one or two sentences naming what to extend, e.g., 'add HOME to SurfaceRole'>"; branch name passed to step 2 once `rewrite-specs` has produced it |
 | `review (codebase)` | n/a (discover-substrate is dispatched internally by `review-codebase` Phase 1) | n/a |
 | `review (diff)` | n/a (discover-substrate is dispatched internally by `review-diff` Step 2, scoped to changed files) | n/a |
 | `audit (substrate)` | n/a (discover-substrate is dispatched internally by `audit-substrate` Step 1) | n/a |
@@ -120,8 +153,8 @@ The router-driven case requires explicit prereq-state passing — without it, su
 
 Consumers:
 
-- **Internal-discovery consumers** (subskills that dispatch `cohesive:discover-substrate` themselves as Step 0 / Phase 1.0 of their Process): `brainstorm-design`, `audit-substrate`, `review-codebase`, `review-diff`. The router passes no discovery prereq; each consumer skill owns the dispatch internally. The `Optional override` clause in each consumer's Hard constraint #1 lets the router (or a prior session step) supply a pre-existing discovery report path to skip re-running discovery; absent that, the consumer dispatches discovery itself.
-- **Chosen-direction / branch-name consumers**: `rewrite-specs` (chosen direction), `validate-rewrite` (branch name only — no prereq state; this is the documented exception), `implement-cohesively` (validation review path + branch name; both required), V1 artifact skills.
+- **Internal-discovery consumers** (subskills that dispatch `cohesive:discover-substrate` themselves as Step 0 / Phase 1.0 of their Process): `brainstorm-design`, `audit-substrate`, `review-codebase`, `review-diff`, `implement-cohesively` (extend mode only, scoped to the change surface). The router passes no discovery prereq; each consumer skill owns the dispatch internally. The `Optional override` clause in each consumer's Hard constraint #1 lets the router (or a prior session step) supply a pre-existing discovery report path to skip re-running discovery; absent that, the consumer dispatches discovery itself.
+- **Chosen-direction / branch-name consumers**: `rewrite-specs` (chosen direction or change surface), `validate-rewrite` (branch name only — no prereq state; this is the documented exception), `implement-cohesively` standard mode (validation review path + branch name; both required), `implement-cohesively` extend mode (change surface + branch name; both required), V1 artifact skills.
 
 Direct (non-router) invocation: the subskill asks its canonical question (about change surface or scope, not about discovery state — discovery is always internal now). The contract is router-side only.
 
@@ -131,11 +164,12 @@ Direct (non-router) invocation: the subskill asks its canonical question (about 
 
    > "<one-sentence outcome the user gets>."
 
-   The outcome leads with what the user receives. The **internal route name** (one of: `design`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `init`, `artifact`) is the dispatch key the router uses to pick its chain — it is agent-internal and does not appear in the announcement string. The chain (which subskills run underneath) is internal too; users see gates and outcomes, not subskill IDs. Per-route outcome sentences:
+   The outcome leads with what the user receives. The **internal route name** (one of: `design`, `extend`, `review (codebase)`, `review (diff)`, `audit (substrate)`, `rewrite-only`, `implement`, `init`, `artifact`) is the dispatch key the router uses to pick its chain — it is agent-internal and does not appear in the announcement string. The chain (which subskills run underneath) is internal too; users see gates and outcomes, not subskill IDs. Per-route outcome sentences:
 
    | Internal route | Announcement outcome sentence |
    |---|---|
    | `design` | I'll explore design tradeoffs and recommend a direction. |
+   | `extend` | I'll extend the existing concept and verify all sibling sites are updated. |
    | `review (codebase)` | I'll review the architecture for cohesion. |
    | `review (diff)` | I'll review the change against the docs. |
    | `audit (substrate)` | I'll find what's missing from the docs and tests. |
@@ -165,7 +199,7 @@ When the request is ambiguous, prefer this resolution order:
 
 1. **Explicit user instruction** ("review the codebase" → review/codebase; "init" / "set up substrate" → init). Always wins.
 2. **Adoption signal.** "First time using cohesive", "we have no substrate", or running against a codebase where `discover-substrate` would return Empty-substrate verdict → init. The init route is one-shot at adoption time; do not route a returning user with existing substrate to init.
-3. **Verb tense and implementation cue.** Imperative implementation verbs against an existing approved rewrite ("implement", "land", "ship", "build it") → implement. Other forward-looking verbs ("add", "refactor", "build", "design") → design. Retrospective ("review", "audit", "what's wrong with") → review.
+3. **Verb tense and implementation cue.** Imperative implementation verbs against an existing approved rewrite ("implement", "land", "ship", "build it") → implement. Other forward-looking verbs ("add", "refactor", "build", "design") → ask the §"Change-type gate" question first; Option 1 → extend, Option 2 → design (or rewrite-only if a direction was already named). Retrospective ("review", "audit", "what's wrong with") → review.
 4. **Scope hints.** Whole-repo / subsystem / "the codebase" → review (codebase). Diff / PR / branch / changes → review (diff). Missing / gaps / what's-not-there → audit (substrate).
 5. **Default.** When truly stuck, default to `audit (substrate)` for retrospective requests and `design` for forward-looking ones — these are the two routes most likely to surface what's actually needed.
 
@@ -182,6 +216,7 @@ The canonical announcement template:
 Concrete examples:
 
 - design route: `I'll explore design tradeoffs and recommend a direction.`
+- extend route: `I'll extend the existing concept and verify all sibling sites are updated.`
 - review (codebase) route: `I'll review the architecture for cohesion.`
 - rewrite-only route: `I'll lock the chosen direction into specs and pressure-test the architecture.`
 - implement route: `I'll build the locked design and verify the code matches it.`
