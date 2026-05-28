@@ -95,7 +95,7 @@ Read the user's request and map to one of the routes below. Trigger phrases are 
 
 **Clarifying question (required if the validation review path is not in the user's request):** "Has validate-rewrite returned **Approved** for a spec rewrite, or should I run the design route first?"
 
-The user can decline the Build gate in favor of `superpowers:writing-plans` directly — this skips Cohesive's end-of-run dual reviewer verification of the rewrite, with the user accepting that implementation may drift. Surfaced as the Lock gate's `Implement with Superpowers directly` alternative — conditionally rendered when the rewrite is small enough that the implement-cohesively flow would be ceremony, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives".
+The user can decline the Build gate in favor of `superpowers:writing-plans` directly — this skips Cohesive's end-of-run reviewer verification of the rewrite, with the user accepting that implementation may drift. Surfaced as the Lock gate's `Implement with Superpowers directly` alternative — conditionally rendered when the rewrite is small enough that the implement-cohesively flow would be ceremony, per `${CLAUDE_PLUGIN_ROOT}/skills/validate-rewrite/SKILL.md` §"Conditional alternatives".
 
 ### Route: review (codebase)
 
@@ -178,7 +178,7 @@ Direct (non-router) invocation: the subskill asks its canonical question (about 
    | `init` | I'll scan your codebase for proto-substrate and produce drafts you can review. |
    | `artifact` | I'll draft the artifact you asked for. |
 
-2. **Process before implementation.** If behavior or architecture is changing, route through the Decide gate before any code. The `implement` route is the structural answer to "implement now" — it dispatches `implement-cohesively`, which drives code against the spec diff (anchored at the rewrite-tip SHA persisted in the Approved validation review) via single-pass writing-plans + executing-plans + end-of-run dual reviewer dispatch. Freeform code-writing from this skill body is forbidden.
+2. **Process before implementation.** If behavior or architecture is changing, route through either the Decide gate (for shape-changes) or the §"Change-type gate" extend path (for additions) before any code. The `implement` route is the structural answer to "implement now" for the standard path — it dispatches `implement-cohesively` standard mode, which drives code against the spec diff (anchored at the rewrite-tip SHA persisted in the Approved validation review) via single-pass writing-plans + executing-plans + end-of-run dual reviewer dispatch. The `extend` route is the structural answer for additive changes — it dispatches `implement-cohesively` extend mode, which drives code via writing-plans + executing-plans + end-of-run cross-mirror reviewer. Freeform code-writing from this skill body is forbidden.
 
 3. **At most one clarifying question per turn.** The router's announcement turn asks at most one forced-choice question per route (forms above) before dispatching the subskill. Subskills with multi-turn dialogs (e.g., `brainstorm-design` conversational mode) carry their own per-turn budget after dispatch. Question form is always a specific forced choice, never a vague "what do you want?" prompt. Render forced-choice questions through `AskUserQuestion` per [`references/output-voice.md`](${CLAUDE_PLUGIN_ROOT}/references/output-voice.md) §"Forced-choice questions".
 
