@@ -17,17 +17,17 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 ## Hard constraints
 
-1. **Refuse when *substrate* already exists.** Substrate-shaped paths block init; agent-handoff paths (CLAUDE.md / AGENTS.md) do not. Init refuses if any of `docs/cohesive/`, `docs/adr/`, `docs/design/`, or `docs/decisions/` exists with content — halt with a directive error:
+1. **Refuse when *substrate* already exists.** Substrate-shaped paths block init; agent-handoff paths (CLAUDE.md / AGENTS.md), generic spec directories (docs/specs/), and external-convention directories (docs/decisions/) do not. Init refuses if any of `docs/cohesive/`, `docs/adr/`, or `docs/design/` exists with content — halt with a directive error:
 
    ```
-   This codebase already has Cohesive-shaped substrate (found: <path>). Init is for codebases starting from zero.
+   This codebase already has substrate-shaped paths (found: <path>). Init is for codebases starting from zero.
    For codebases with existing substrate, use cohesive:audit-substrate to find what's missing,
    or cohesive:review-codebase for full architecture review.
    ```
 
-   `CLAUDE.md` and `AGENTS.md` are agent-handoff files present in most mature codebases — they signal "an agent has worked here," not "Cohesive substrate exists." `docs/specs/` similarly is a generic spec directory that may exist independent of Cohesive adoption (e.g., a codebase that already maintained behavioral specs before adopting Cohesive). All three are detect-and-warn, not refuse: init proceeds, surfaces a warning line in the chat trailer ("Detected existing CLAUDE.md / AGENTS.md / docs/specs/; init will not overwrite or propose overlapping drafts."), and step 4's skeletal-CLAUDE.md generation continues to skip when one exists. Step 2's signal scan does not propose drafts that overlap with existing `docs/specs/` content.
+   `CLAUDE.md` / `AGENTS.md` are agent-handoff files signaling "an agent has worked here," not Cohesive substrate. `docs/specs/` is a generic spec directory that may exist independent of Cohesive. `docs/decisions/` is a common ADR-lite convention; if it exists, the user has external decision records init shouldn't trample but doesn't directly conflict with. All four are detect-and-warn, not refuse: init proceeds, surfaces a warning line in the chat trailer ("Detected existing CLAUDE.md / AGENTS.md / docs/specs/ / docs/decisions/; init will not overwrite or propose overlapping drafts."), and step 4's skeletal-CLAUDE.md generation continues to skip when one exists. Step 2's signal scan does not propose drafts that overlap with existing `docs/specs/` content.
 
-   Do not invent a way to merge with existing substrate; do not propose drafts that overlap with what's already there. The first-time use-case is the entire scope of the refusal — but the refusal trigger is "Cohesive-shaped substrate exists" (the four substrate-shaped paths above), not "any spec or agent file exists."
+   Do not invent a way to merge with existing substrate; do not propose drafts that overlap with what's already there. The refusal trigger is "Cohesive-shaped substrate exists" (the three substrate-shaped paths above), not "any spec or agent file exists."
 
 2. **Never auto-commit.** Init produces a draft directory the user explicitly reviews and moves. The skill does not `git add` or `git commit`; it writes the draft files and stops. Auto-commit would let confidently-wrong proposals enter the canonical substrate without review.
 
@@ -43,11 +43,11 @@ Read ${CLAUDE_PLUGIN_ROOT}/references/output-voice.md before rendering chat outp
 
 **Parse `--brief`.** If the dispatch prompt or user invocation includes the literal token `--brief`, set `verbose=false`; default `verbose=true`. The flag controls whether per-draft files render the §"What this is" translation paragraph (verbose default per Hard constraint #5).
 
-**Refuse if substrate exists; warn-and-continue on agent-handoff files.**
+**Refuse if substrate exists; warn-and-continue on agent-handoff / spec / external-convention paths.**
 
-Check for substrate-shaped paths (any of `docs/cohesive/`, `docs/adr/`, `docs/design/`, `docs/decisions/` containing files). If any are present, halt with the directive error from Hard constraint #1. Init does not run incrementally on existing substrate.
+Check the three substrate-shaped paths (`docs/cohesive/`, `docs/adr/`, `docs/design/`). If any are present and contain files, halt with the directive error from Hard constraint #1. Init does not run incrementally on existing Cohesive-shaped substrate.
 
-Separately, check for agent-handoff or spec paths (`CLAUDE.md` / `AGENTS.md` / `docs/specs/`). If any are present, do not refuse — proceed to step 1, but capture their existence so the chat trailer renders a warning line ("Detected existing CLAUDE.md / AGENTS.md / docs/specs/; init will not overwrite or propose overlapping drafts.") and step 4's skeletal generation skips them. Step 2's signal scan also avoids proposing drafts that would overlap with existing `docs/specs/` content (per Hard constraint #1's "do not propose drafts that overlap with what's already there").
+Separately, check for agent-handoff / spec / external-convention paths (`CLAUDE.md` / `AGENTS.md` / `docs/specs/` / `docs/decisions/`). If any are present, warn-and-continue per Hard constraint #1: capture their existence so the chat trailer renders the warning line; step 4's skeletal generation skips them; step 2's signal scan does not propose overlapping drafts.
 
 ### 1. Resolve the draft directory
 
@@ -136,7 +136,7 @@ Init does not invoke another skill. The user reviews drafts, edits or deletes ea
 
 The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/references/templates/chat-trailer.md` and persists the draft directory to `docs/cohesive/init-draft/`. The chat render is the decision-rendering of the scan per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2a (with sub-rules 2b / 2c).
 
-**No verdict.** Like `discover-substrate`, init is a utility skill that produces a draft, not a judgment. The chat trailer renders no `**Verdict:**` slot per the §"Variants" `init` row of the centralized template.
+**No verdict.** Like `discover-substrate`, init is a utility skill that produces a draft, not a judgment. The chat trailer renders no `**Verdict:**` slot; `init` is not listed in the chat-trailer template's §"Variants" table (which only enumerates verdict-led skills), and its output is documented in this file directly.
 
 **Body block specification.** A `## Drafts produced` section with one line per substrate type counted, followed by a `## Top translations` section showing 3 example translations side-by-side (so the user sees the Rosetta Stone immediately in chat without opening files), followed by a `## What to do next` pointer.
 
@@ -158,9 +158,7 @@ The skill renders the centralized chat trailer per `${CLAUDE_PLUGIN_ROOT}/refere
 - Skeletal CLAUDE.md: yes / no / *(skipped — already exists)*
 - Skeletal ARCHITECTURE.md: yes / no / *(skipped — already exists)*
 
-<!-- Render conditional: when M < N, the "for the rest, run audit-substrate" parenthetical anchors the user's expectation that init is bounded. When M == N (rare; small codebase), drop the parenthetical. -->
-
-## Detected existing files  *(rendered iff CLAUDE.md / AGENTS.md / docs/specs/ exist)*
+## Detected existing files  *(rendered iff CLAUDE.md / AGENTS.md / docs/specs/ / docs/decisions/ exist)*
 
 - `CLAUDE.md` exists — init will not overwrite. Skeletal CLAUDE.md generation skipped.
 - `AGENTS.md` exists — init will not overwrite. Skeletal CLAUDE.md generation skipped (covers the AGENTS.md role for harness).

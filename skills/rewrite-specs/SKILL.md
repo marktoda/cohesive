@@ -75,7 +75,7 @@ Before identifying the doc surface, classify whether the rewrite is:
 
 Default to **Mixed** when ambiguous. The cost of over-classifying is one additional doc edit; the cost of under-classifying is a substrate-implementation collapse.
 
-The classification persists in the rewrite commit message body as a `Classification:` trailer (see Step 6 below). `spec-cohesion-reviewer` reads the trailer during `validate-rewrite` and cross-checks it against the spec diff: a `Pure implementation` rewrite whose diff touches design-layer files (e.g., seam docs, named-invariant docs) raises an Important issue.
+The classification persists in the rewrite commit message body as a `Classification:` trailer (see Step 5 below). `spec-cohesion-reviewer` reads the trailer during `validate-rewrite` and cross-checks it against the spec diff: a `Pure implementation` rewrite whose diff touches design-layer files (e.g., seam docs, named-invariant docs) raises an Important issue.
 
 ### 1b. Repair-pass mode (if the input is a validate-rewrite review)
 
@@ -113,7 +113,7 @@ Place new canonical artifacts (invariants, matrices, gotchas) under the repo's e
 
 If a substrate map exists at the repo level, update it to reflect the rewrites: new specs, new matrices, new invariants, removed concepts. If no substrate map exists yet, **don't create one as part of this rewrite** — that's a separate decision the user should make explicitly.
 
-### 6. Commit the rewrite
+### 5. Commit the rewrite
 
 For a **forward** rewrite (initial pass against an approved direction):
 
@@ -143,7 +143,7 @@ Classification: <Pure implementation | Design | Mixed>
 
 The commit message is the auditing surface for repair sequences. Both templates require the `Classification:` trailer.
 
-### 7. Hand off to review
+### 6. Hand off to review
 
 Announce: "Spec rewrite complete on branch `design/<slug>`. Ready for fresh-eyes review via `cohesive:validate-rewrite` (which reads the spec diff directly from git). After Approved verdict, the implementation route — `cohesive:implement-cohesively` — drives code against the spec diff anchored at the rewrite-tip SHA the validation review captures; the validate-rewrite Approved footer renders the full decision matrix."
 
@@ -197,7 +197,7 @@ Fresh-eyes review of the rewritten specs against the design and approved directi
 | Making implementation the only place where behavior is knowable | Defeats the purpose of substrate-first work | Add the behavior to a spec or matrix |
 | Treating all future pressure as current scope | Spec bloat; future pressure becomes implicit promise | Keep future pressure in a clearly-marked non-normative section |
 | Rewriting docs in the main worktree | Loses the ability to review the rewrite as a coherent diff | Use a worktree |
-| Omitting the `Classification:` trailer from the rewrite commit body | `spec-cohesion-reviewer` has no human-authored classification to cross-check against the diff; raises a Blocking Issue | Always include the `Classification:` trailer in the rewrite commit message per Step 6 |
+| Omitting the `Classification:` trailer from the rewrite commit body | `spec-cohesion-reviewer` has no human-authored classification to cross-check against the diff; raises a Blocking Issue | Always include the `Classification:` trailer in the rewrite commit message per Step 5 |
 | Claiming a Pure-implementation classification when the diff touches design-layer surfaces | The classification trailer disagrees with what the diff shows; surfaces an Important issue in validate-rewrite | Use Mixed when in doubt; the cost of over-classifying is one extra doc edit |
 
 ## Acceptance criteria

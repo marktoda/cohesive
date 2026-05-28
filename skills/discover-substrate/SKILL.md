@@ -125,6 +125,8 @@ Based on what you found and what the user asked for, recommend exactly one next 
 
 The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substrate-discovery-report.md`. That template carries the field definitions and a "Which sections each consumer reads" map; this section reproduces the chat-rendered shape. The chat render is substance, not bookkeeping (per `${CLAUDE_PLUGIN_ROOT}/references/output-voice.md` rule 2): every Missing memory item is a concrete defect (a named implicit rule, a specific unmatricized branch, a comment-as-rule with file:line), never a finding-ID family reference back to a prior review.
 
+**Empty-substrate verdict rendering.** The `**Empty-substrate verdict: yes**` line in the template renders only when Step 7's verdict applies; omit the line entirely when the verdict is "no." The bold-line form is the literal string `review-codebase` Phase 1.5 and `brainstorm-design` Phase 1 grep for — do not change it.
+
 ```md
 # Substrate Discovery — <scope>
 
@@ -132,7 +134,7 @@ The canonical shape lives at `${CLAUDE_PLUGIN_ROOT}/references/templates/substra
 
 ### Empty-substrate verdict
 
-**Empty-substrate verdict: yes**  <!-- only when applicable per Step 7; consumed structurally by review-codebase Phase 1.5 and brainstorm-design Phase 1. The bold-line form is the literal string downstream skills grep for; do not change it. Omit the line entirely when the verdict is "no". -->
+**Empty-substrate verdict: yes**
 
 ### Target change surface
 - Subsystem: <name or "(repo-wide)">

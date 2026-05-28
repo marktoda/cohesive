@@ -54,6 +54,7 @@ The question is verdict-led: the agent reads signals in the user's request and p
 
 - Option 1 → `extend` route → chain: `rewrite-specs` → `implement-cohesively` (extend mode)
 - Option 2 → `design` route (forward-looking and brainstorm-shaped) or `rewrite-only` route (a direction was already named by the user) — unchanged from pre-L2 behavior
+- User cancels the form, picks neither, or types free-form ("neither — I'm just exploring") → halt the dispatch and ask one prose follow-up: "Would you like to think through this without committing to a route yet — would `cohesive:discover-substrate` or `cohesive:audit-substrate` be more useful?" Do NOT silently fall back to the Option-2 pre-fill; the cancel is a deliberate signal the user wants to step back.
 
 The gate is asked once per session per substrate-shaped request. If the user re-asks for the same change later, do not re-ask (the choice is sticky for the request shape).
 
@@ -137,26 +138,20 @@ ${CLAUDE_PLUGIN_ROOT}/references/templates/<template>.md. I can fill it out with
 
 ## Dispatch prompt contract
 
-The router-driven case requires explicit prereq-state passing — without it, subskills ask the canonical clarifying question on top of an already-routed turn. The table below is the per-route content the dispatch prompt must include.
+The router-driven case requires explicit prereq-state passing — without it, subskills ask the canonical clarifying question on top of an already-routed turn. Most routes need no prereq state because their subskill dispatches `cohesive:discover-substrate` internally; only the four routes that consume prior-stage artifacts need explicit state:
 
-| Route | Prereq state to pass | Chosen-direction / artifact state to pass |
-|---|---|---|
-| `design` | n/a (discover-substrate is dispatched internally by `brainstorm-design` per its Hard constraint #1) | n/a until step 3; then "approved direction: <option name + summary>"; branch name passed to step 4 once `rewrite-specs` has produced it |
-| `extend` | n/a (discover-substrate is dispatched internally by `implement-cohesively` extend mode at Step 0, scoped to the change surface) | "Change surface: <one or two sentences naming what to extend, e.g., 'add HOME to SurfaceRole'>"; branch name passed to step 2 once `rewrite-specs` has produced it |
-| `review (codebase)` | n/a (discover-substrate is dispatched internally by `review-codebase` Phase 1) | n/a |
-| `review (diff)` | n/a (discover-substrate is dispatched internally by `review-diff` Step 2, scoped to changed files) | n/a |
-| `audit (substrate)` | n/a (discover-substrate is dispatched internally by `audit-substrate` Step 1) | n/a |
-| `rewrite-only` | n/a | "Approved direction: <option name + summary>" (or, if user declined, route to `design` first); branch name passed to step 2 once `rewrite-specs` has produced it |
-| `implement` | "Validate-rewrite returned **Approved**; review at <path>." | "Branch: design/<slug>." The validation review file carries the **Rewrite-tip:** SHA (captured at Approved time); implement-cohesively parses it from there. Validation review path and branch name are both required. |
-| `init` | n/a (init has no prereq; refuses if substrate exists per its Hard constraint #1) | n/a — optional `--brief` flag is the only argument |
-| `artifact` | n/a | "Artifact requested: <invariant / matrix / gotcha>" |
+| Route | State the router must pass in the dispatch prompt |
+|---|---|
+| `design` | n/a at dispatch; once `rewrite-specs` is reached as step 4, pass `approved direction: <option + summary>` and the branch name |
+| `extend` | `Change surface: <one or two sentences naming what to extend, e.g., 'add HOME to SurfaceRole'>`; pass the branch name to step 2 once `rewrite-specs` has produced it |
+| `rewrite-only` | `Approved direction: <option name + summary>` (or route to `design` first); pass the branch name to step 2 once `rewrite-specs` has produced it |
+| `implement` | `Validate-rewrite returned **Approved**; review at <path>.` plus `Branch: design/<slug>.` The validation review file carries the `**Rewrite-tip:**` SHA (captured at Approved time); implement-cohesively parses it from there. Both required. |
 
-Consumers:
+All other routes (`review (codebase)`, `review (diff)`, `audit (substrate)`, `init`, `artifact`) take no router-passed state — their subskills handle discovery and prereqs internally.
 
-- **Internal-discovery consumers** (subskills that dispatch `cohesive:discover-substrate` themselves as Step 0 / Phase 1.0 of their Process): `brainstorm-design`, `audit-substrate`, `review-codebase`, `review-diff`, `implement-cohesively` (extend mode only, scoped to the change surface). The router passes no discovery prereq; each consumer skill owns the dispatch internally. The `Optional override` clause in each consumer's Hard constraint #1 lets the router (or a prior session step) supply a pre-existing discovery report path to skip re-running discovery; absent that, the consumer dispatches discovery itself.
-- **Chosen-direction / branch-name consumers**: `rewrite-specs` (chosen direction or change surface), `validate-rewrite` (branch name only — no prereq state; this is the documented exception), `implement-cohesively` standard mode (validation review path + branch name; both required), `implement-cohesively` extend mode (change surface + branch name; both required), V1 artifact skills.
+**Internal-discovery consumers.** These skills dispatch `cohesive:discover-substrate` themselves as Step 0 / Phase 1.0 of their Process: `brainstorm-design`, `audit-substrate`, `review-codebase`, `review-diff`, and `implement-cohesively` (extend mode only, scoped to the change surface). The router passes no discovery prereq; each consumer owns the dispatch. An `Optional override` clause in each consumer's Hard constraint #1 lets the dispatch prompt name a pre-existing discovery report path to skip re-running.
 
-Direct (non-router) invocation: the subskill asks its canonical question (about change surface or scope, not about discovery state — discovery is always internal now). The contract is router-side only.
+**Direct (non-router) invocation.** The subskill asks its canonical question (about change surface or scope, not about discovery state — discovery is always internal). The state contract above is router-side only.
 
 ## Required behavior
 
@@ -212,14 +207,6 @@ The canonical announcement template:
 ```
 <one-sentence outcome from the per-route table in §"Required behavior" #1>
 ```
-
-Concrete examples:
-
-- design route: `I'll explore design tradeoffs and recommend a direction.`
-- extend route: `I'll extend the existing concept and verify all sibling sites are updated.`
-- review (codebase) route: `I'll review the architecture for cohesion.`
-- rewrite-only route: `I'll lock the chosen direction into specs and pressure-test the architecture.`
-- implement route: `I'll build the locked design and verify the code matches it.`
 
 Then the router invokes the first subskill. Each subskill produces its own output and recommends the next. The user can stop at any gate boundary.
 
