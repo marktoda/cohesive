@@ -37,6 +37,7 @@ The dispatching skill will give you:
 - A list of **rewritten spec paths** to review (derived from the spec diff's changed paths)
 - A list of **newly added spec paths** to review
 - Optionally: the **substrate discovery report** path (so you know what existed before)
+- **Closed findings from prior passes** (only on pass 2+) — a structured list of finding IDs and titles from prior passes that were closed by repair commits, plus the repair-commit SHAs. The dispatching skill assembles this from prior review files and repair commit messages. The list is data (IDs + titles + SHAs), not narrative — it preserves fresh-eyes by being file-shaped input you read alongside the spec-diff, not a paraphrased preamble. On pass 1 this section is omitted entirely.
 
 You read **only** these files plus:
 - `${CLAUDE_PLUGIN_ROOT}/references/substrate-model.md`
@@ -117,6 +118,7 @@ Include a "What looked right" section with the few highest-quality moves of the 
 
 - Inherit conversation context from the calling skill. Treat your input prompt as the entire context.
 - Read prior conversation context. You won't have it; don't pretend.
+- Re-raise a closed finding from a prior pass (one listed in the `## Closed findings from prior passes` section of your dispatch prompt) as a new finding without (a) citing the prior pass's ID in your "Why it matters" field and (b) explaining why the prior closure was wrong (the repair did not actually address the underlying issue, or it introduced a new problem). Fresh-eyes is about objectivity, not amnesia — the prior pass's closures are visible to you specifically so you can avoid re-doing work the prior pass already closed. If you believe a closure was genuinely wrong, the new finding's severity should match what you would have raised it as on a fresh review; do not soften it because it was previously closed.
 - Read implementation files (any non-doc file). Specs only.
 - Run code, tests, git commands, or any tool besides reading the listed files.
 - Pre-summarize or paraphrase the design's intent. Read the docs as the future contributor will: as the source of truth.
